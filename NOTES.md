@@ -135,3 +135,28 @@
   createRequire 与顶层 `process.env` 在 workerd 产物中的行为。
 - Cloudflare Pages 实际部署:按要求未做;可移植性见上节审计,部署前需验证
   createRequire 与顶层 `process.env` 在 workerd 产物中的行为。
+
+## Cloudflare Pages 部署(2026-10-22,edge 移植)
+
+为上 Pages(Workers/workerd)做的移植,排盘数学与 UI 未动:
+
+- 6 个 API 路由:`runtime = "nodejs"` → `"edge"`,删除 `maxDuration = 60`(Pages 不支持)。
+- `packages/engine/src/index.ts`:删掉顶层 `import { createRequire } from "node:module"`;
+  新增 `scripts/gen-versions.mjs`(构建时读已安装依赖版本号,写入
+  `src/versions.generated.ts`),`depVersion()` 改为查表,缺失 → "unknown"。
+  engine 的 build 脚本改为 `node scripts/gen-versions.mjs && tsc -p tsconfig.json`。
+- `apps/web/lib/env.ts`:删掉顶层 `node:fs`/`node:path` import;`ensureEnv()` 改为
+  async,内部用 `import(/* webpackIgnore: true */ "node:fs")` 懒加载,
+  Workers 下静默 no-op(key 走 CF 环境变量 / BYOK)。4 个 AI 路由改为 `await ensureEnv()`。
+- 全仓库 grep:无其它 import 时的 node: API(`provider.ts` 顶层的
+  `process.env.*_BASE_URL` 在构建时求值,保留)。
+- 新增 `@cloudflare/next-on-pages@1.13.12`(apps/web devDependency;新版要求
+  next>=14.3,故 pin 1.13.12 + `--legacy-peer-deps` 绕过 wrangler 的 peerOptional 冲突)。
+- 根 `package.json` 新增 `cf:pages` 脚本:构建三个包 → `cd apps/web && npx @cloudflare/next-on-pages`。
+- 本地 `wrangler pages dev` 实测 workerd:首页 200、`/api/chart` 正常 200(含
+  engine 版本号 2.5.8/1.7.7)、2023-02-30 → 400、未知 provider → 400 JSON。
+
+Pages 项目 `numerology`(https://numerology-7v4.pages.dev),GitHub
+hectorchanht/numerology,production_branch main,
+build_command=`npm install && npm run cf:pages`,
+destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_VERSION=20。
