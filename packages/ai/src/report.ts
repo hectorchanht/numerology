@@ -16,6 +16,7 @@ import {
   chatStream,
   type Usage,
   type ProviderOptions,
+  type AiLocale,
 } from "./client.js";
 
 export interface ReportResult {
@@ -31,6 +32,8 @@ export interface ReportOptions {
   ai?: ProviderOptions;
   /** 解读视角:纯八字 / 纯紫微 / 合参(默认合参)。仅分段流式接口生效。 */
   lens?: ReportLens;
+  /** AI 输出语言(默认 zht 繁体)。 */
+  locale?: AiLocale;
 }
 
 /** 生成命盘解读报告(非流式)。需要当前 provider 的 API key。 */
@@ -42,7 +45,7 @@ export async function generateReport(
   const { text, usage } = await chatComplete({
     kind: "report",
     maxTokens: opts.maxTokens ?? MAX_TOKENS.report,
-    system: buildCachedSystem(chart, opts.fortune),
+    system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"),
     messages: [{ role: "user", content: buildReportUserPrompt(caveats) }],
   }, opts.ai);
   return { markdown: text, usage };
@@ -54,7 +57,7 @@ export function streamReport(chart: ChartResult, opts: ReportOptions = {}) {
   return chatStream({
     kind: "report",
     maxTokens: opts.maxTokens ?? MAX_TOKENS.report,
-    system: buildCachedSystem(chart, opts.fortune),
+    system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"),
     messages: [{ role: "user", content: buildReportUserPrompt(caveats) }],
   }, opts.ai);
 }
@@ -68,7 +71,7 @@ export async function generateFortuneReport(
   const { text, usage } = await chatComplete({
     kind: "report",
     maxTokens: opts.maxTokens ?? MAX_TOKENS.report,
-    system: buildCachedSystem(chart, opts.fortune),
+    system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"),
     messages: [{ role: "user", content: buildFortuneReportPrompt(caveats) }],
   }, opts.ai);
   return { markdown: text, usage };
@@ -80,7 +83,7 @@ export function streamFortuneReport(chart: ChartResult, opts: ReportOptions = {}
   return chatStream({
     kind: "report",
     maxTokens: opts.maxTokens ?? MAX_TOKENS.report,
-    system: buildCachedSystem(chart, opts.fortune),
+    system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"),
     messages: [{ role: "user", content: buildFortuneReportPrompt(caveats) }],
   }, opts.ai);
 }
@@ -101,7 +104,7 @@ export function streamReportSection(chart: ChartResult, sectionKey: string, opts
   return chatStream({
     kind: "report",
     maxTokens: opts.maxTokens ?? SECTION_MAX_TOKENS,
-    system: buildCachedSystem(chart, opts.fortune),
+    system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"),
     messages: [{ role: "user", content: buildReportSectionPrompt(caveats, seg, opts.lens ?? "both") }],
   }, opts.ai);
 }
@@ -114,7 +117,7 @@ export function streamFortuneSection(chart: ChartResult, sectionKey: string, opt
   return chatStream({
     kind: "report",
     maxTokens: opts.maxTokens ?? SECTION_MAX_TOKENS,
-    system: buildCachedSystem(chart, opts.fortune),
+    system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"),
     messages: [{ role: "user", content: buildFortuneSectionPrompt(caveats, seg, opts.lens ?? "both") }],
   }, opts.ai);
 }

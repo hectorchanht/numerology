@@ -5,6 +5,7 @@ import {
   chatStream,
   type Usage,
   type ProviderOptions,
+  type AiLocale,
 } from "./client.js";
 
 export interface ChatTurn {
@@ -23,6 +24,8 @@ export interface ChatOptions {
   maxTokens?: number;
   /** BYOK:用户自带 provider/key */
   ai?: ProviderOptions;
+  /** AI 输出语言(默认 zht 繁体)。 */
+  locale?: AiLocale;
 }
 
 /**
@@ -52,7 +55,7 @@ export async function answerFollowUp(
   const { text, usage } = await chatComplete({
     kind: "chat",
     maxTokens: opts.maxTokens ?? CHAT_MAX_TOKENS,
-    system: [...buildCachedSystem(chart, opts.fortune), { text: CHAT_DIRECTIVE }],
+    system: [...buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"), { text: CHAT_DIRECTIVE }],
     messages: [...history, { role: "user", content: question }],
   }, opts.ai);
   return { text, usage };
@@ -68,7 +71,7 @@ export function streamFollowUp(
   return chatStream({
     kind: "chat",
     maxTokens: opts.maxTokens ?? CHAT_MAX_TOKENS,
-    system: [...buildCachedSystem(chart, opts.fortune), { text: CHAT_DIRECTIVE }],
+    system: [...buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"), { text: CHAT_DIRECTIVE }],
     messages: [...history, { role: "user", content: question }],
   }, opts.ai);
 }

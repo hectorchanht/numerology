@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { BirthInput } from "@numerology/engine";
 import type { BirthFormValue, Calendar } from "@/lib/formTypes";
+import { useLocale } from "@/lib/i18n";
 import { LocationPicker } from "@/components/LocationPicker";
 
 interface Props {
@@ -14,13 +15,14 @@ interface Props {
 
 /** 必填字段 */
 const FIELDS = [
-  { key: "year", label: "年", min: 1900, max: 2100 },
-  { key: "month", label: "月", min: 1, max: 12 },
-  { key: "day", label: "日", min: 1, max: 31 },
-  { key: "hour", label: "时(0-23)", min: 0, max: 23 },
+  { key: "year", labelKey: "form.year" as const, min: 1900, max: 2100 },
+  { key: "month", labelKey: "form.month" as const, min: 1, max: 12 },
+  { key: "day", labelKey: "form.day" as const, min: 1, max: 31 },
+  { key: "hour", labelKey: "form.hour" as const, min: 0, max: 23 },
 ] as const;
 
 export function BirthForm({ loading, onSubmit, defaults }: Props) {
+  const { t } = useLocale();
   const str = (n: number | undefined): string => (n === undefined ? "" : String(n));
   const [v, setV] = useState<Record<string, string>>({
     year: str(defaults?.year), month: str(defaults?.month), day: str(defaults?.day),
@@ -41,7 +43,7 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
     for (const f of FIELDS) {
       const n = Number(v[f.key]);
       if (v[f.key] === "" || !Number.isInteger(n) || n < f.min || n > f.max) {
-        setError(`请填写有效的「${f.label}」`);
+        setError(t("form.invalidField", { label: t(f.labelKey) }));
         return;
       }
       nums[f.key] = n;
@@ -50,7 +52,7 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
     if (v.minute !== "") {
       const m = Number(v.minute);
       if (!Number.isInteger(m) || m < 0 || m > 59) {
-        setError("「分」请填 0-59,或留空");
+        setError(t("form.minuteHint"));
         return;
       }
       minute = m;
@@ -65,25 +67,25 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
     onSubmit(out);
   };
 
-  const dateHint = calendar === "lunar" ? "(农历)" : "(公历)";
+  const yearLabel = calendar === "lunar" ? t("form.yearLunar") : t("form.yearSolar");
 
   return (
     <form className="card" onSubmit={submit}>
-      <h2 className="section-title">输入出生信息</h2>
+      <h2 className="section-title">{t("form.title")}</h2>
       <div className="cal-toggle">
-        <button type="button" className={calendar === "solar" ? "active" : ""} onClick={() => setCalendar("solar")}>公历(阳历)</button>
-        <button type="button" className={calendar === "lunar" ? "active" : ""} onClick={() => setCalendar("lunar")}>农历(阴历)</button>
+        <button type="button" className={calendar === "solar" ? "active" : ""} onClick={() => setCalendar("solar")}>{t("form.solar")}</button>
+        <button type="button" className={calendar === "lunar" ? "active" : ""} onClick={() => setCalendar("lunar")}>{t("form.lunar")}</button>
         {calendar === "lunar" ? (
           <label className="leap-check">
             <input type="checkbox" checked={isLeapMonth} onChange={(e) => setIsLeapMonth(e.target.checked)} />
-            闰月
+            {t("form.leap")}
           </label>
         ) : null}
       </div>
       <div className="form-grid">
         {FIELDS.map((f) => (
           <div className="field" key={f.key}>
-            <label htmlFor={f.key}>{f.key === "year" ? `年${dateHint}` : f.label}</label>
+            <label htmlFor={f.key}>{f.key === "year" ? yearLabel : t(f.labelKey)}</label>
             <input
               id={f.key} type="number" inputMode="numeric"
               min={f.key === "year" ? f.min : undefined} max={f.key === "year" ? f.max : undefined}
@@ -93,7 +95,7 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
           </div>
         ))}
         <div className="field">
-          <label htmlFor="minute">分（可留空）</label>
+          <label htmlFor="minute">{t("form.minute")}</label>
           <input
             id="minute" type="number" inputMode="numeric" min={0} max={59}
             value={v.minute}
@@ -101,24 +103,24 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
           />
         </div>
         <div className="field">
-          <label htmlFor="gender">性别</label>
+          <label htmlFor="gender">{t("form.gender")}</label>
           <select id="gender" value={gender} onChange={(e) => setGender(e.target.value as "男" | "女")}>
-            <option value="男">男</option>
-            <option value="女">女</option>
+            <option value="男">{t("form.male")}</option>
+            <option value="女">{t("form.female")}</option>
           </select>
         </div>
         <div className="field" style={{ gridColumn: "1 / -1" }}>
-          <label>出生地(真太阳时校正,省→市)</label>
+          <label>{t("form.birthplace")}</label>
           <LocationPicker value={longitude} onChange={setLongitude} />
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginTop: "1.1rem" }}>
         <button className="btn" type="submit" disabled={loading}>
-          {loading ? "排盘中…" : "排盘"}
+          {loading ? t("form.submitting") : t("form.submit")}
         </button>
         {error ? <span className="notice">{error}</span> : (
           <span className="muted">
-            {calendar === "lunar" ? "农历会自动转阳历起盘;时辰按时钟时间填。" : "性别决定大运顺逆与紫微部分布局,请如实填写。"}
+            {calendar === "lunar" ? t("form.hintLunar") : t("form.hintSolar")}
           </span>
         )}
       </div>

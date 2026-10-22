@@ -7,6 +7,7 @@ import type { BirthInput } from "@numerology/engine";
 import { streamPost } from "@/lib/streamClient";
 import { printReport } from "@/lib/exportPdf";
 import { loadAi } from "@/lib/aiSettings";
+import { useLocale, type Locale } from "@/lib/i18n";
 
 /** 分段定义:key 对应引擎 REPORT_SEGMENTS / FORTUNE_SEGMENTS,label 用于占位标题。 */
 export interface ReportSeg {
@@ -16,10 +17,10 @@ export interface ReportSeg {
 
 /** 解读视角:纯八字 / 纯紫微 / 合参。 */
 type Lens = "bazi" | "ziwei" | "both";
-const LENSES: { key: Lens; label: string; tag: string }[] = [
-  { key: "bazi", label: "按八字", tag: "八字" },
-  { key: "ziwei", label: "按紫微", tag: "紫微" },
-  { key: "both", label: "合参", tag: "合参" },
+const LENSES: { key: Lens; labelKey: "report.lensBazi" | "report.lensZiwei" | "report.lensBoth"; tagKey: "report.lensBazi" | "report.lensZiwei" | "report.lensBoth" }[] = [
+  { key: "bazi", labelKey: "report.lensBazi", tagKey: "report.lensBazi" },
+  { key: "ziwei", labelKey: "report.lensZiwei", tagKey: "report.lensZiwei" },
+  { key: "both", labelKey: "report.lensBoth", tagKey: "report.lensBoth" },
 ];
 
 interface Props {
@@ -36,6 +37,7 @@ type State = "idle" | "streaming" | "done" | "error";
 
 /** 通用流式报告卡:选视角(八字/紫微/合参)→ 调指定 endpoint → 逐字渲染 Markdown。支持分段并行。 */
 export function StreamedReport({ input, endpoint, title, description, segments }: Props) {
+  const { t, locale } = useLocale();
   const [text, setText] = useState("");
   const [state, setState] = useState<State>("idle");
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
@@ -44,7 +46,7 @@ export function StreamedReport({ input, endpoint, title, description, segments }
   const startedFor = useRef<string>("");
   const proseRef = useRef<HTMLDivElement>(null);
 
-  const lensTag = LENSES.find((l) => l.key === lens)?.tag ?? "合参";
+  const lensTag = t(LENSES.find((l) => l.key === lens)?.tagKey ?? "report.lensBoth");
 
   const exportPdf = () => {
     const html = proseRef.current?.innerHTML;
@@ -66,20 +68,21 @@ export function StreamedReport({ input, endpoint, title, description, segments }
   const combine = (segs: readonly ReportSeg[], slots: Slot[]): string =>
     segs
       .map((seg, i) => {
-        const sl = slots[i];
+        const sl = slots[i]!;
         if (sl.text.trim()) return sl.text;
-        if (sl.status === "error") return `## ${seg.label}\n\n_(本节生成失败:${sl.err})_`;
-        if (sl.status === "done") return `## ${seg.label}\n\n_(当前模型未给出本节内容)_`;
-        return `## ${seg.label}\n\n_(生成中…)_`;
+        if (sl.status === "error") return `## ${seg.label}\n\n${t("report.segFail", { err: sl.err })}`;
+        if (sl.status === "done") return `## ${seg.label}\n\n${t("report.segEmpty")}`;
+        return `## ${seg.label}\n\n${t("report.segWorking")}`;
       })
       .join("\n\n");
 
-  const generateSegmented = async (segs: readonly ReportSeg[], useLens: Lens) => {
+  const postBody = (extra: Record<string, unknown>, loc: Locale) => ({ input, ai: loadAi(), locale: loc, ...extra });
+
+  const generateSegmented = async (segs: readonly ReportSeg[], useLens: Lens, loc: Locale) => {
     setError("");
     setText("");
     setState("streaming");
     startedFor.current = key;
-    const ai = loadAi();
     const slots: Slot[] = segs.map(() => ({ text: "", status: "streaming", err: "" }));
     setProgress({ done: 0, total: segs.length });
     setText(combine(segs, slots));
@@ -88,7 +91,7 @@ export function StreamedReport({ input, endpoint, title, description, segments }
 
     await Promise.all(
       segs.map((seg, i) =>
-        streamPost(endpoint, { input, ai, section: seg.key, lens: useLens }, (full) => {
+        streamPost(endpoint, postBody({ section: seg.key, lens: useLens }, loc), (full) => {
           slots[i] = { ...slots[i], text: full };
           setText(combine(segs, slots));
         })
@@ -96,7 +99,7 @@ export function StreamedReport({ input, endpoint, title, description, segments }
             slots[i] = { ...slots[i], status: "done" };
           })
           .catch((e: unknown) => {
-            slots[i] = { ...slots[i], status: "error", err: e instanceof Error ? e.message : "失败" };
+            slots[i] = { ...slots[i], status: "error", err: e instanceof Error ? e.message : t("report.segFailShort") };
           })
           .finally(() => {
             bump();
@@ -108,23 +111,23 @@ export function StreamedReport({ input, endpoint, title, description, segments }
     setState("done");
   };
 
-  const generateSingle = async (useLens: Lens) => {
+  const generateSingle = async (useLens: Lens, loc: Locale) => {
     setText("");
     setError("");
     setState("streaming");
     startedFor.current = key;
     try {
-      await streamPost(endpoint, { input, ai: loadAi(), lens: useLens }, (full) => setText(full));
+      await streamPost(endpoint, postBody({ lens: useLens }, loc), (full) => setText(full));
       setState("done");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "生成失败");
+      setError(e instanceof Error ? e.message : t("report.genFail"));
       setState("error");
     }
   };
 
   const generate = (useLens: Lens) => {
     setLens(useLens);
-    return segments && segments.length ? generateSegmented(segments, useLens) : generateSingle(useLens);
+    return segments && segments.length ? generateSegmented(segments, useLens, locale) : generateSingle(useLens, locale);
   };
 
   return (
@@ -138,12 +141,12 @@ export function StreamedReport({ input, endpoint, title, description, segments }
         <>
           <p className="muted" style={{ marginTop: 0 }}>{description}</p>
           <p className="muted" style={{ marginTop: "0.4rem" }}>
-            选一种视角生成:<strong>八字</strong>纯按八字法、<strong>紫微</strong>纯按紫微法、<strong>合参</strong>两者对照。
+            {t("report.pickLens")}<strong>{t("report.lensBazi")}</strong>{t("report.hintBazi")}、<strong>{t("report.lensZiwei")}</strong>{t("report.hintZiwei")}、<strong>{t("report.lensBoth")}</strong>{t("report.hintBoth")}。
           </p>
           <div className="lens-row">
             {LENSES.map((l) => (
               <button key={l.key} className={`btn lens-btn is-${l.key}`} onClick={() => generate(l.key)}>
-                {l.label}
+                {t(l.labelKey)}
               </button>
             ))}
           </div>
@@ -152,30 +155,30 @@ export function StreamedReport({ input, endpoint, title, description, segments }
 
       {state === "streaming" && progress ? (
         <p className="muted" style={{ marginTop: 0 }}>
-          分段并行生成 · 已完成 <strong>{progress.done}/{progress.total}</strong> 节,各节就位即显…
+          {t("report.progress", { done: progress.done, total: progress.total })}
         </p>
       ) : null}
 
-      {error ? <p className="notice">{error}(请确认服务端已按 .env.example 配置好 AI provider 与对应 API key)</p> : null}
+      {error ? <p className="notice">{error}{t("report.providerHint")}</p> : null}
 
       {text ? (
         <div ref={proseRef} className={`prose ${state === "streaming" ? "cursor" : ""}`}>
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
         </div>
       ) : state === "streaming" ? (
-        <p className="muted">正在生成(详实优先,需稍候)…</p>
+        <p className="muted">{t("report.generating")}</p>
       ) : null}
 
       {state === "done" || state === "error" ? (
         <div style={{ marginTop: "1rem", display: "flex", gap: "0.6rem", flexWrap: "wrap", alignItems: "center" }}>
-          <span className="muted" style={{ marginRight: "0.2rem" }}>换个视角重生成:</span>
+          <span className="muted" style={{ marginRight: "0.2rem" }}>{t("report.regen")}</span>
           {LENSES.map((l) => (
             <button key={l.key} className={`btn ghost ${l.key === lens ? "lens-active" : ""}`} onClick={() => generate(l.key)}>
-              {l.label}
+              {t(l.labelKey)}
             </button>
           ))}
           {state === "done" ? (
-            <button className="btn ghost" onClick={exportPdf}>导出 PDF</button>
+            <button className="btn ghost" onClick={exportPdf}>{t("report.exportPdf")}</button>
           ) : null}
         </div>
       ) : null}

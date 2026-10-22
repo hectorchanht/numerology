@@ -13,17 +13,18 @@ export const dynamic = "force-dynamic";
 export async function POST(req: Request): Promise<Response> {
   try {
     await ensureEnv();
-    const body = (await req.json()) as { input?: unknown; ai?: unknown; section?: unknown; lens?: unknown };
+    const body = (await req.json()) as { input?: unknown; ai?: unknown; section?: unknown; lens?: unknown; locale?: unknown };
     const input = parseBirthInput(body.input);
     const chart = castChart(input);
     const fortune = analyzeFortune(input, { yearsBack: 5, yearsAhead: 8 });
     const ai = parseAi(body);
     const section = typeof body.section === "string" && body.section.trim() ? body.section.trim() : undefined;
     const lens = body.lens === "bazi" || body.lens === "ziwei" ? body.lens : "both";
+    const locale = body.locale === "zhs" || body.locale === "en" ? body.locale : "zht";
     // section 存在 → 只生成该节(分段模式,每节 <60s,绕开 Vercel 函数上限);缺省 → 整篇(CLI 兼容)。
     const stream = section
-      ? streamReportSection(chart, section, { fortune, ai, lens })
-      : streamReport(chart, { fortune, ai });
+      ? streamReportSection(chart, section, { fortune, ai, lens, locale })
+      : streamReport(chart, { fortune, ai, locale });
     return await streamToPrimedResponse(stream);
   } catch (err) {
     return errorResponse(err, { fallback: "报告生成失败", stage: "ai" });

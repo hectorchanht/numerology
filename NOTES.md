@@ -1,5 +1,22 @@
 # Numerology 硬化重建 — 说明
 
+## 多语言(zht 默认 / zhs / en,2026-10-22)
+
+- 新增 `apps/web/lib/i18n.ts`:Locale 类型 `"zht"|"zhs"|"en"`,177 key 的 STRINGS 三地字典,
+  `useLocale()`(外部 store + useSyncExternalStore,全应用共享,localStorage `numerology-locale` 持久化,
+  默认 `"zht"`),`fmt()` 占位符填充,`LocaleSwitch`(繁/简/EN,复用 `.mode-switch` 样式,置于 masthead)。
+  zht 为香港书面繁体(非机械转换);zhs 沿用原简体文案;en 自然英文。
+- 全部 9 个组件 + page.tsx + layout.tsx(`<html lang="zh-Hant">`,metadata 繁体)改用 `t()`。
+  干支/星曜/宫位/地名等专名三地保持原样;性别 option 的 value 仍为 男/女(引擎要求),仅 label 本地化。
+- AI 输出语言:请求体新增可选 `locale` 字段(4 个 AI 路由解析,默认 zht),
+  经 `ReportOptions`/`ChatOptions`/hourinfer opts 传入;`localeDirective()` 追加为 system 末块
+  (不碰命盘事实块,Anthropic prompt cache 前缀不受影响)。
+  前端 StreamedReport/ChatPanel/TimeInferPanel 的 POST body 均带当前 locale。
+- 测试:web 新增 `test/i18n.test.mjs`(6 项:默认 zht、三地 key 集合一致、非空、关键繁体文案、fmt、node 下 setLocale 不抛错);
+  ai 新增 `test/locale.test.mjs`(3 项:指令三地各异、system 末块为语言指令、命盘事实块不受语言影响)。
+  全量 66/66 通过;`next build` 与 `npm run cf:pages` 均成功。
+- 未改:排盘数学、API 形状(仅新增可选 locale 字段)、样式、无新 provider、无付费墙。
+
 自建副本(源自 MIT 授权的上游仓库,保留原 README 中的 MIT 声明)。
 目标:修掉已知的 8 个 bug + 增强免费 AI provider,本地构建/验证,不部署。
 

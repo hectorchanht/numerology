@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { BirthInput, ChartResult } from "@numerology/engine";
 import type { BirthFormValue } from "@/lib/formTypes";
+import { useLocale, LocaleSwitch } from "@/lib/i18n";
 import { BirthForm } from "@/components/BirthForm";
 import { ZiweiBoard } from "@/components/ZiweiBoard";
 import { BaziTable } from "@/components/BaziTable";
@@ -14,32 +15,33 @@ import { SettingsPanel } from "@/components/SettingsPanel";
 
 type Mode = "known" | "infer";
 
-// 分段并行:key 对应引擎 REPORT_SEGMENTS / FORTUNE_SEGMENTS,各节 <60s 绕开 Vercel 函数上限。
-const REPORT_SEGS = [
-  { key: "personality", label: "性格特质" },
-  { key: "career", label: "事业方向" },
-  { key: "wealth", label: "财富特点" },
-  { key: "relationship", label: "感情婚姻" },
-  { key: "health", label: "健康提示" },
-  { key: "luck", label: "大运流年概览" },
-  { key: "advice", label: "总体建议 · 开运参考" },
-] as const;
-
-const FORTUNE_SEGS = [
-  { key: "overview", label: "一、当前总览" },
-  { key: "dayun", label: "二、大运逐步精讲" },
-  { key: "review", label: "三、回看校准" },
-  { key: "future", label: "四、未来流年走向" },
-  { key: "rhythm", label: "五、节奏与转折" },
-  { key: "action", label: "六、行动建议" },
-] as const;
-
 export default function Home() {
+  const { t } = useLocale();
   const [mode, setMode] = useState<Mode>("known");
   const [input, setInput] = useState<BirthInput | null>(null);
   const [chart, setChart] = useState<ChartResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // 分段并行:key 对应引擎 REPORT_SEGMENTS / FORTUNE_SEGMENTS,各节 <60s 绕开 Vercel 函数上限。
+  const REPORT_SEGS = [
+    { key: "personality", label: t("seg.personality") },
+    { key: "career", label: t("seg.career") },
+    { key: "wealth", label: t("seg.wealth") },
+    { key: "relationship", label: t("seg.relationship") },
+    { key: "health", label: t("seg.health") },
+    { key: "luck", label: t("seg.luck") },
+    { key: "advice", label: t("seg.advice") },
+  ] as const;
+
+  const FORTUNE_SEGS = [
+    { key: "overview", label: t("seg.overview") },
+    { key: "dayun", label: t("seg.dayun") },
+    { key: "review", label: t("seg.review") },
+    { key: "future", label: t("seg.future") },
+    { key: "rhythm", label: t("seg.rhythm") },
+    { key: "action", label: t("seg.action") },
+  ] as const;
 
   const onSubmit = async (birth: BirthFormValue) => {
     setLoading(true);
@@ -51,12 +53,12 @@ export default function Home() {
         body: JSON.stringify(birth),
       });
       const data = (await res.json()) as { chart?: ChartResult; error?: string };
-      if (!res.ok || !data.chart) throw new Error(data.error ?? "排盘失败");
+      if (!res.ok || !data.chart) throw new Error(data.error ?? t("chart.errorFallback"));
       setChart(data.chart);
       // 用服务端解析后的阳历输入(农历已转换),供后续报告/对话复用
       setInput(data.chart.input);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "排盘失败");
+      setError(e instanceof Error ? e.message : t("chart.errorFallback"));
     } finally {
       setLoading(false);
     }
@@ -65,17 +67,18 @@ export default function Home() {
   return (
     <div className="shell">
       <header className="masthead">
-        <div className="seal">命</div>
-        <h1>命 理</h1>
-        <div className="sub">八 字 · 紫 微 · 合 参</div>
+        <div className="seal">{t("app.seal")}</div>
+        <h1>{t("app.title")}</h1>
+        <div className="sub">{t("app.subtitle")}</div>
+        <LocaleSwitch />
       </header>
 
       <div className="mode-switch">
         <button className={mode === "known" ? "active" : ""} onClick={() => setMode("known")}>
-          我知道出生时辰
+          {t("mode.known")}
         </button>
         <button className={mode === "infer" ? "active" : ""} onClick={() => setMode("infer")}>
-          不知道时辰 · AI 帮我推断
+          {t("mode.infer")}
         </button>
       </div>
 
@@ -97,18 +100,18 @@ export default function Home() {
           <div className="flow-systems">
             <div className="sys sys-a">
               <span className="sys-tag">八字</span>
-              <span className="sys-sub">四柱 · 先天干支</span>
+              <span className="sys-sub">{t("flow.baziSub")}</span>
             </div>
             <div className="flow-x" aria-hidden>⇄</div>
             <div className="sys sys-b">
               <span className="sys-tag">紫微</span>
-              <span className="sys-sub">星盘 · 十二宫</span>
+              <span className="sys-sub">{t("flow.ziweiSub")}</span>
             </div>
-            <div className="flow-moment">同 一 出 生 时 刻 · 双 盘 合 参</div>
+            <div className="flow-moment">{t("flow.moment")}</div>
           </div>
 
           <div className="card" style={{ marginTop: "var(--space)" }}>
-            <h2 className="section-title"><span className="sys-chip is-b">紫微</span>斗数命盘 · 中宫纳四柱</h2>
+            <h2 className="section-title"><span className="sys-chip is-b">紫微</span>{t("chart.ziweiTitle")}</h2>
             <ZiweiBoard
               ziwei={chart.ziwei}
               center={<BaziTable bazi={chart.bazi} ziwei={chart.ziwei} />}
@@ -119,11 +122,11 @@ export default function Home() {
               {String(chart.input.minute ?? 0).padStart(2, "0")} {chart.input.gender} ·{" "}
               {chart.bazi.lunarDate} ·{" "}
               {chart.meta.trueSolarTimeApplied
-                ? `已按经度 ${chart.meta.correction?.longitude}° 做真太阳时校正(偏移 ${chart.meta.correction?.offsetMinutes} 分)`
-                : "未做真太阳时校正"}
+                ? t("chart.corrected", { lon: chart.meta.correction?.longitude ?? "", off: chart.meta.correction?.offsetMinutes ?? "" })
+                : t("chart.notCorrected")}
             </p>
             <p className="muted">
-              每宫底部:大限岁数 · 长生十二神 · 博士十二神 · 将前/岁前十二神;命宫朱底、身宫描金。
+              {t("chart.palaceNote")}
             </p>
           </div>
 
@@ -141,23 +144,23 @@ export default function Home() {
           <div className="synthesis">
             <div className="synthesis-head">
               <span className="dot" />
-              <h2>命理解读 · 八字 / 紫微 / 合参</h2>
-              <span className="who">可纯八字、纯紫微,或两者对照</span>
+              <h2>{t("chart.readingTitle")}</h2>
+              <span className="who">{t("chart.readingSub")}</span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "var(--space)" }}>
             <StreamedReport
               input={input}
               endpoint="/api/report"
-              title="命盘格局解读"
-              description="刻画性格 / 事业 / 财富 / 感情 / 健康(先天底色)。可选「八字」纯按十神格局调候、「紫微」纯按命宫三方四正星曜四化、或「合参」两者对照。分节并行生成,逐节就位。"
+              title={t("card.chartTitle")}
+              description={t("card.chartDesc")}
               buttonLabel="生成格局解读"
               segments={REPORT_SEGS}
             />
             <StreamedReport
               input={input}
               endpoint="/api/fortune"
-              title="大运流年深析"
-              description="专题分析「运」的走向(命理精华):逐步大运 + 逐年流年的节奏与建议。可选「八字」(大运流年十神/引动用神)、「紫微」(大限流年四化飞宫)、或「合参」对照。分节并行生成,详实优先。"
+              title={t("card.fortuneTitle")}
+              description={t("card.fortuneDesc")}
               buttonLabel="生成大运流年深析"
               segments={FORTUNE_SEGS}
             />
@@ -168,8 +171,8 @@ export default function Home() {
       ) : null}
 
       <p className="disclaimer">
-        本工具为传统文化与自我反思用途,所有结论均为倾向性参考,非宿命预测,决策权始终在你自己手中。<br />
-        涉及健康请以专业医疗意见为准;涉及财务请自行评估,不构成投资建议。
+        {t("app.disclaimer1")}<br />
+        {t("app.disclaimer2")}
       </p>
     </div>
   );

@@ -5,8 +5,9 @@ import {
   type SystemBlock,
   type Usage,
   type ProviderOptions,
+  type AiLocale,
 } from "./client.js";
-import { HOUR_INFER_PERSONA } from "./prompts.js";
+import { HOUR_INFER_PERSONA, localeDirective } from "./prompts.js";
 import type { ChatTurn } from "./chat.js";
 
 /** 把 12 时辰候选压成紧凑对照表喂给模型。 */
@@ -21,11 +22,12 @@ function candidatesTable(cands: HourCandidate[]): string {
     .join("\n");
 }
 
-/** 时辰推断的 system 块(人设 + 12 候选对照表);第二块标记 cache(仅 Anthropic 生效)。 */
-export function buildHourInferSystem(cands: HourCandidate[]): SystemBlock[] {
+/** 时辰推断的 system 块(人设 + 12 候选对照表 + 输出语言);第二块标记 cache(仅 Anthropic 生效)。 */
+export function buildHourInferSystem(cands: HourCandidate[], locale: AiLocale = "zht"): SystemBlock[] {
   return [
     { text: HOUR_INFER_PERSONA },
     { text: `## 该日 12 时辰候选命盘(用于比对反推)\n\n${candidatesTable(cands)}`, cache: true },
+    { text: localeDirective(locale) },
   ];
 }
 
@@ -41,13 +43,13 @@ export function streamHourInference(
   cands: HourCandidate[],
   history: HourInferTurn[],
   message: string,
-  opts: { maxTokens?: number; ai?: ProviderOptions } = {},
+  opts: { maxTokens?: number; ai?: ProviderOptions; locale?: AiLocale } = {},
 ) {
   const userMsg = message.trim() || HOUR_INFER_OPENING;
   return chatStream({
     kind: "chat",
     maxTokens: opts.maxTokens ?? HOUR_INFER_MAX_TOKENS,
-    system: buildHourInferSystem(cands),
+    system: buildHourInferSystem(cands, opts.locale ?? "zht"),
     messages: [...history, { role: "user", content: userMsg }],
   }, opts.ai);
 }
@@ -57,13 +59,13 @@ export async function inferHour(
   cands: HourCandidate[],
   history: HourInferTurn[],
   message: string,
-  opts: { maxTokens?: number } = {},
+  opts: { maxTokens?: number; locale?: AiLocale } = {},
 ): Promise<{ text: string; usage: Usage }> {
   const userMsg = message.trim() || HOUR_INFER_OPENING;
   const { text, usage } = await chatComplete({
     kind: "chat",
     maxTokens: opts.maxTokens ?? HOUR_INFER_MAX_TOKENS,
-    system: buildHourInferSystem(cands),
+    system: buildHourInferSystem(cands, opts.locale ?? "zht"),
     messages: [...history, { role: "user", content: userMsg }],
   });
   return { text, usage };

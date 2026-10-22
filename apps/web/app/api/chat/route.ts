@@ -18,15 +18,17 @@ export async function POST(req: Request): Promise<Response> {
       history?: ChatTurn[];
       question?: unknown;
       ai?: unknown;
+      locale?: unknown;
     };
     const input = parseBirthInput(body.input);
     const question = typeof body.question === "string" ? body.question.trim() : "";
     if (!question) throw new Error("追问内容不能为空");
     const history = Array.isArray(body.history) ? body.history.slice(-12) : [];
+    const locale = body.locale === "zhs" || body.locale === "en" ? body.locale : "zht";
 
     const chart = castChart(input);
     const fortune = analyzeFortune(input, { yearsBack: 5, yearsAhead: 8 });
-    return await streamToPrimedResponse(streamFollowUp(chart, history, question, { fortune, ai: parseAi(body) }));
+    return await streamToPrimedResponse(streamFollowUp(chart, history, question, { fortune, ai: parseAi(body), locale }));
   } catch (err) {
     return errorResponse(err, { fallback: "对话失败", stage: "ai" });
   }

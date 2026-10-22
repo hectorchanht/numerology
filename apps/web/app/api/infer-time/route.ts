@@ -18,12 +18,14 @@ export async function POST(req: Request): Promise<Response> {
       history?: ChatTurn[];
       message?: unknown;
       ai?: unknown;
+      locale?: unknown;
     };
     const input = parseHourInferInput(body.input);
     const message = typeof body.message === "string" ? body.message : "";
     const history = Array.isArray(body.history) ? body.history.slice(-16) : [];
     const candidates = castHourCandidates(input);
-    return await streamToPrimedResponse(streamHourInference(candidates, history, message, { ai: parseAi(body) }));
+    const locale = body.locale === "zhs" || body.locale === "en" ? body.locale : "zht";
+    return await streamToPrimedResponse(streamHourInference(candidates, history, message, { ai: parseAi(body), locale }));
   } catch (err) {
     return errorResponse(err, { fallback: "时辰推断失败", stage: "ai" });
   }

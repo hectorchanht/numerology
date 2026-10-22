@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ZiweiChart, ZiweiPalace, ZiweiStar } from "@numerology/engine";
+import { useLocale, type TKey } from "@/lib/i18n";
 
 /** 地支 → 传统紫微盘 4×4 网格坐标 [row, col]。 */
 const GRID: Record<string, [number, number]> = {
@@ -23,6 +24,12 @@ function sanFangBranches(branch: string): { self: string; opposite: string; trin
   };
 }
 
+const BADGE_KEYS: Record<"self" | "opposite" | "trine", TKey> = {
+  self: "zw.ben",
+  opposite: "zw.dui",
+  trine: "zw.sanhe",
+};
+
 function StarSpan({ star, kind }: { star: ZiweiStar; kind: "major" | "minor" }) {
   return (
     <span className={`star ${kind}`}>
@@ -40,6 +47,7 @@ function Palace({
   highlight: "self" | "opposite" | "trine" | null;
   onSelect: (branch: string) => void;
 }) {
+  const { t } = useLocale();
   const [row, col] = GRID[p.earthlyBranch] ?? [1, 1];
   const cls = [
     "palace",
@@ -72,15 +80,14 @@ function Palace({
         <span>{p.changsheng12}·{p.boshi12}</span>
         <span className="faint">{p.jiangqian12}·{p.suiqian12}</span>
       </div>
-      {p.isBodyPalace ? <span className="tag">身</span> : null}
-      {highlight === "self" ? <span className="sfsz-badge">本宫</span> : null}
-      {highlight === "opposite" ? <span className="sfsz-badge">对宫</span> : null}
-      {highlight === "trine" ? <span className="sfsz-badge">三合</span> : null}
+      {p.isBodyPalace ? <span className="tag">{t("zw.body")}</span> : null}
+      {highlight ? <span className="sfsz-badge">{t(BADGE_KEYS[highlight])}</span> : null}
     </div>
   );
 }
 
 export function ZiweiBoard({ ziwei, center }: { ziwei: ZiweiChart; center: React.ReactNode }) {
+  const { t } = useLocale();
   const [selected, setSelected] = useState<string>(ziwei.soulPalaceBranch);
   const sf = sanFangBranches(selected);
   const highlightOf = (branch: string): "self" | "opposite" | "trine" | null => {
@@ -104,8 +111,8 @@ export function ZiweiBoard({ ziwei, center }: { ziwei: ZiweiChart; center: React
         <div className="board-center">{center}</div>
       </div>
       <p className="muted sfsz-hint">
-        点击任意宫查看其<strong>三方四正</strong>(本宫朱框 · 对宫 · 两三合宫高亮)。
-        当前:<strong style={{ color: "var(--cinnabar)" }}>{selName}</strong> 的三方四正 = {selName}（本）+ {relNames}。
+        {t("zw.hintA")}<strong>{t("zw.hintB")}</strong>{t("zw.hintC")}
+        <strong style={{ color: "var(--cinnabar)" }}>{selName}</strong>{t("zw.hintD")}{selName}{t("zw.hintE")} + {relNames}。
       </p>
     </>
   );

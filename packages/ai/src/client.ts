@@ -1,7 +1,9 @@
 import type { ChartResult, FortuneAnalysis } from "@numerology/engine";
 import { buildContextPack } from "./context.js";
-import { SYSTEM_PERSONA } from "./prompts.js";
+import { SYSTEM_PERSONA, localeDirective, type AiLocale } from "./prompts.js";
 import type { SystemBlock } from "./provider.js";
+
+export type { AiLocale };
 
 // 统一解读层入口(多 provider:GLM/Gemini/Groq/Anthropic/custom),从 provider 透出。
 export {
@@ -27,13 +29,19 @@ export const MAX_TOKENS = {
 } as const;
 
 /**
- * "人设 + 命盘事实"组装成 system 块,第二块标记 cache(仅 Anthropic 生效)。
+ * "人设 + 命盘事实 + 输出语言"组装成 system 块,第二块标记 cache(仅 Anthropic 生效)。
  * 报告与对话共用 → 保证两者基于同一命盘事实;在 Anthropic 上还命中 prompt caching。
+ * 语言指令单独成第三块,不影响前两块的缓存前缀。
  */
-export function buildCachedSystem(chart: ChartResult, fortune?: FortuneAnalysis): SystemBlock[] {
+export function buildCachedSystem(
+  chart: ChartResult,
+  fortune?: FortuneAnalysis,
+  locale: AiLocale = "zht",
+): SystemBlock[] {
   const { markdown } = buildContextPack(chart, fortune);
   return [
     { text: SYSTEM_PERSONA },
     { text: markdown, cache: true },
+    { text: localeDirective(locale) },
   ];
 }

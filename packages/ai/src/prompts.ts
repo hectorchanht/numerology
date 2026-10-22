@@ -1,3 +1,17 @@
+/** AI 输出语言(与界面语言开关对应)。默认繁体(zht)。 */
+export type AiLocale = "zht" | "zhs" | "en";
+
+/**
+ * 输出语言指令 —— 追加到 system 末尾,不碰命盘事实块(干支/星曜名三地皆同)。
+ * 放在最后一条 system block,Anthropic 的 prompt cache 前缀(人设 + 命盘)不受影响。
+ */
+export function localeDirective(locale: AiLocale): string {
+  if (locale === "zhs") return "【输出语言】请全程使用简体中文撰写,包括标题、术语解释与标点习惯。";
+  if (locale === "en")
+    return "[Output language] Write the ENTIRE response in English, including headings, terminology explanations, and punctuation conventions. Keep proper nouns (stem/branch/star/palace names) in their original Chinese characters with an English gloss on first use.";
+  return "【輸出語言】請全程使用繁體中文(香港用語)撰寫,包括標題、術語解釋與標點習慣。";
+}
+
 /** 解读师人设:真实准确为先、直话直说,不模棱两可。 */
 export const SYSTEM_PERSONA = `你是一位兼通【八字四柱】与【紫微斗数】的命理解读师。
 
