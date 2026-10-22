@@ -28,7 +28,6 @@ interface Props {
   endpoint: string;
   title: string;
   description: string;
-  buttonLabel: string;
   /** 传入则启用「分段并行」:各节并发请求、按序就位,绕开 Vercel 60s 上限。不传则整篇一次生成。 */
   segments?: readonly ReportSeg[];
 }

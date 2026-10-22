@@ -153,7 +153,6 @@ export default function Home() {
               endpoint="/api/report"
               title={t("card.chartTitle")}
               description={t("card.chartDesc")}
-              buttonLabel="生成格局解读"
               segments={REPORT_SEGS}
             />
             <StreamedReport
@@ -161,7 +160,6 @@ export default function Home() {
               endpoint="/api/fortune"
               title={t("card.fortuneTitle")}
               description={t("card.fortuneDesc")}
-              buttonLabel="生成大运流年深析"
               segments={FORTUNE_SEGS}
             />
             <ChatPanel input={input} />
