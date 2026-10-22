@@ -160,3 +160,17 @@ Pages 项目 `numerology`(https://numerology-7v4.pages.dev),GitHub
 hectorchanht/numerology,production_branch main,
 build_command=`npm install && npm run cf:pages`,
 destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_VERSION=20。
+
+## 部署实测(2026-10-22,Cloudflare Pages)
+
+- Pages 项目 `numerology`,生产 URL **https://numerology-7v4.pages.dev**,
+  GitHub hectorchanht/numerology,production_branch=main,
+  build=`npm install && npm run cf:pages`,输出=`apps/web/.vercel/output/static`,
+  env: `AI_PROVIDER=pollinations`、`NODE_VERSION=20`。
+- 首次生产部署一次成功(queued→initialize→clone→build→deploy 全绿)。
+- 线上实测:
+  - 首页 200,标题「命理 · 八字紫微合参」。
+  - `POST /api/chart` 正常出生 → 200,bazi(日主辛)+ziwei(12 宫)+fortune,engine 版本号正常注入。
+  - `POST /api/chart` 2023-02-30 → **400** `非法出生信息: 日 30(2023年2月只有 28 天)`。
+  - `POST /api/report` 未知 provider → **400** JSON,立即返回。
+  - `POST /api/report` section=personality(默认 pollinations)→ **200** 流式中文报告,无 500/截断。
