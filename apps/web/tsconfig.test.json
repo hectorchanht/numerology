@@ -47,6 +47,7 @@
     "lib/tldr.ts",
     "lib/dragScroll.ts",
     "lib/fortuneBlocks.ts",
-    "lib/script.ts"
+    "lib/script.ts",
+    "lib/locations.ts"
   ]
 }

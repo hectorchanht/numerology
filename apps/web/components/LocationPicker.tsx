@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PROVINCES } from "@/lib/locations";
+import { REGIONS } from "@/lib/locations";
 import { useLocale } from "@/lib/i18n";
 import { Icon } from "@/components/Icon";
 
@@ -11,39 +11,72 @@ interface Props {
   onChange: (longitude: string) => void;
 }
 
-/** 省 → 市 二级联动选择器(兩行 grouped list),选中后回传该市经度。 */
+/** 手動輸入經度:唔喺城市表入面嘅出生地用呢個兜底,全球通用。 */
+const MANUAL = "__manual";
+
+/** 地區(中國省 / 世界國家,按大洲分組) → 城市 二級選擇,另可手動輸入經度。 */
 export function LocationPicker({ value, onChange }: Props) {
   const { t } = useLocale();
-  const [province, setProvince] = useState("");
-  const cities = PROVINCES.find((p) => p.province === province)?.cities ?? [];
+  const [regionIdx, setRegionIdx] = useState("");
+  const region =
+    regionIdx !== "" && regionIdx !== MANUAL ? (REGIONS[Number(regionIdx)] ?? null) : null;
+  const groups: string[] = [];
+  for (const r of REGIONS) if (!groups.includes(r.group)) groups.push(r.group);
 
   return (
     <>
       <label className="row">
         <Icon name="pin" className="ic" />
-        <span className="lbl">{t("loc.provinceAria")}</span>
+        <span className="lbl">{t("loc.regionAria")}</span>
         <select
-          aria-label={t("loc.provinceAria")}
-          value={province}
-          onChange={(e) => { setProvince(e.target.value); onChange(""); }}
+          aria-label={t("loc.regionAria")}
+          value={regionIdx}
+          onChange={(e) => { setRegionIdx(e.target.value); onChange(""); }}
         >
-          <option value="">{t("loc.noProvince")}</option>
-          {PROVINCES.map((p) => <option key={p.province} value={p.province}>{p.province}</option>)}
+          <option value="">{t("loc.noRegion")}</option>
+          <option value={MANUAL}>{t("loc.manualEntry")}</option>
+          {groups.map((g) => (
+            <optgroup key={g} label={g}>
+              {REGIONS.map((r, i) =>
+                r.group === g ? (
+                  <option key={r.name} value={String(i)}>{r.name}</option>
+                ) : null,
+              )}
+            </optgroup>
+          ))}
         </select>
       </label>
-      <label className="row">
-        <Icon name="pin" className="ic dim" />
-        <span className="lbl">{t("loc.cityAria")}</span>
-        <select
-          aria-label={t("loc.cityAria")}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          disabled={!province}
-        >
-          <option value="">{province ? t("loc.pickCity") : "—"}</option>
-          {cities.map((c) => <option key={c.name} value={c.longitude}>{c.name}</option>)}
-        </select>
-      </label>
+      {regionIdx === MANUAL ? (
+        <label className="row">
+          <Icon name="pin" className="ic dim" />
+          <span className="lbl">{t("loc.longitudeAria")}</span>
+          <input
+            type="number"
+            aria-label={t("loc.longitudeAria")}
+            value={value}
+            min={-180}
+            max={180}
+            step={0.01}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </label>
+      ) : (
+        <label className="row">
+          <Icon name="pin" className="ic dim" />
+          <span className="lbl">{t("loc.cityAria")}</span>
+          <select
+            aria-label={t("loc.cityAria")}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            disabled={!region}
+          >
+            <option value="">{region ? t("loc.pickCity") : "—"}</option>
+            {(region?.cities ?? []).map((c) => (
+              <option key={c.name} value={c.longitude}>{c.name}</option>
+            ))}
+          </select>
+        </label>
+      )}
     </>
   );
 }
