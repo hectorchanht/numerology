@@ -444,6 +444,25 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
 验证:140/140 测试通过(engine 41/ai 42/knowledge 5/web 52);`next build` +
 `npm run cf:pages` 均成功。
 
+### 小标题数字兜底(2026-10-22 深夜,live 实证驱动)
+`mistral-small` 即使给了逐行照抄的【小标题清单】仍输出 `### 癸未運（–歲／–年）`
+(X-Cache:MISS 的全新生成;且禁例的占位符形状会被模型照抄)——纯 prompt 手段不可靠。
+改为服务端确定性后处理:`fixFortuneHeadings()`(`prompts.ts`,纯函数)+
+`HeadingFixStream`(`report.ts`,行缓冲 TextStream 包装,作用于
+`streamFortuneSection`/`streamFortuneReport`;`generateFortuneReport` 对全文应用),
+凡匹配 `### 干支運（` / `### YYYY年（` 形状的行一律替换为引擎计算的标准成品行。
+prompt 侧保留清单(移至 prompt 末尾)并删除了会起反作用的占位符形状禁例。
+live 验证:7 个 `###` 标题全部带真实数字,全文零占位符。
+另:`HeadingFixStream` 在缓存 tee 之前生效,故 KV 存的也是修复后文本。
+回归测试:`fortune-prompt.test.mjs` 新增 `fixFortuneHeadings` 3 项
+(占位修复/已对行不动/zhs-en)。
+最终验证:176/176(ai 50/engine 52/knowledge 15/web 59),`next build` +
+`cf:pages` 成功,部署 `b6c57ac2`(commit `f7f9dc2`)live。
+残留(model 上限非 bug):正文仍略显公式化(mistral-small 偶尔丢大限干支、
+偏爱"引动了用神,命局得到补益"句式);数字/标题已兜底,正文质量即模型上限,
+换更强默认模型可再提升——仅标记,不行动。另:模型曾照抄示例 verdict/类比,
+已加"类比自己造,不要照抄"规则。
+
 ## 易經學院 Phase 1(2026-10-23,用戶已批 build 順序)
 
 用戶決策:「兩樣都要,分階段做」— Phase 1 = 占卦工具 + 64卦庫;Phase 2 = 課程體系。
@@ -508,3 +527,62 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
 - AI 解卦(接 Workers AI,注意預算)、六爻納甲裝卦(kentang2017/ichingshifa MIT 作算法規格)、
   課程體系(陰陽五行八卦 → 64卦精講 → 問卦解卦實戰;白話解讀自寫)、
   海報當前大運改精確起運歲數、GSC 提交新路由。
+
+## 易經學院 Phase 2(2026-10-23,用戶批 "you can add phase 2")
+
+### 1. 課程體系(/yijing/academy,新路由)
+- `app/yijing/academy/lessons.ts`:四課原創白話(zht)——①陰陽五行八卦基礎
+  (陰陽四特性/五行生剋/八卦卦象卦性)、②如何讀懂一卦(上下卦/卦辭/爻辭爻位/
+  大象,乾坤實例,鏈入 /yijing/gua)、③點問卦(一事一占/問題具體/不義不占/
+  不瀆卦,三錢法步驟)、④點解卦(本變互錯綜權重/朱熹動爻斷法/乾之姤實例
+  walkthrough)。古典經文引文為公有領域,未引用現代注本;zhs/en 暫回落 zht。
+- 每課 4–5 題單選自我檢測(`Quiz.tsx`,client-side),localStorage
+  `yijing-academy-progress` 記分;首頁進度條 + 完成 ✓。
+- 頁面:`academy/page.tsx`(課程首頁)、`academy/[lesson]/page.tsx`(服務端外殼 +
+  generateStaticParams) + `LessonView.tsx`(客戶端正文)。
+- 術語高亮:正文暫為純文本,待 `@/lib/highlightTerms` 合併到 main 後接入
+  (已留 TODO)。
+
+### 2. 六爻納甲(/yijing/liuyao,新路由 + 引擎)
+- `packages/engine/src/liuyao.ts`(純函數零依賴):`paigua(lines,日干,日支,月支)`
+  → 納甲干支(納甲歌內外卦表)、京房八宮定宮/世應/卦型(八純/一世..五世/
+  遊魂/歸魂,程序化推導)、六親(宮為我)、六獸(六獸歌)、旬空、月破/日破;
+  `ganzhiForDate` 複用 bazi 節氣曆(中午起盤避子時邊界)。
+  表格按古典規則手寫,未引用 ichingshifa 的不透明 data.pkl。
+- `yijing.ts` 新增導出 `trigramOfBits` 供 liuyao 用。
+- 回歸測試 `test/liuyao.test.mjs`(10 項):64 卦唯一歸宮、乾/坤手算例
+  (納甲六親六獸世應旬空月破日破全對)、姤一世/晉遊魂/大有歸魂世應、
+  qinOf 乾宮古典標準、六獸歌、旬空、立春前後月建切換(2024-02-03 丑/02-05 寅)。
+  註:開發中曾把六親生剋方向寫反,被乾宮標準表抓出並修正(qinOf:爻生我→父母,
+  我生爻→子孫,爻剋我→官鬼,我剋爻→妻財)。
+- 頁面:`/yijing/liuyao`——日期選擇(預設今日,取日辰月建)、搖錢或手動六爻、
+  排盤表(世應/六獸/干支六親/爻形動靜/旬空月破日破標記,傳統由上而下)。
+
+### 3. AI 解卦(POST /api/yijing/interpret,新路由)
+- 強制 `provider: "workers-ai"` + `aiBinding`,與報告路由共用同一 $2/月 KV
+  預算守衛:超支 → `BudgetExceededError` → 乾淨 JSON 429(實測路徑不斷流)。
+- KV 緩存(`aicache:2:` 前綴):鍵 = {hexagram,lines,locale} + prompt 版本
+  (`yijing-interpret/v1`);命中零消耗。maxTokens 900(≤400字解讀)。
+- prompt:本卦卦辭 + 動爻爻辭 + 變卦卦辭(引擎重算,不信任客戶端 hexagram);
+  **不接收用戶問題原文**(問題只存前端,不上傳)。
+- 前端:`app/yijing/AiInterpret.tsx`(按鈕 + 流式顯示 + 429 友好報錯),
+  接入占卦頁結果區,取代舊的 `yijing.aiSoon` 文案。
+
+### 驗證
+- engine 62/62、ai 57/57、knowledge 22/22 通過(含 liuyao 10 項新測試);
+  web 測試因同倉另一 worker 重構中途徑樹損壞未能跑全量(其 `lib/fortuneRepair.ts`
+  等引用了尚未提交的模組),已確認損壞文件皆非本 job 產物。
+- commit `bf5fe1ee`(17 文件)推 main,Pages 部署 `2e4ecc51` → **success**。
+- 線上驗證:`/yijing/academy`、`/yijing/academy/basics`、
+  `/yijing/academy/interpreting`、`/yijing/liuyao` 皆 200 且內容正確;
+  `/sitemap.xml` 列出 6 路由(含新增兩條);
+  `POST /api/yijing/interpret`(乾初九動) → 200,繁體短解讀,X-Cache: MISS,
+  預算守衛路徑正常(未觸發 429,屬預期)。
+- 導航:`YijingNav` SUB_LINKS 加六爻納甲(grid 圖標)/易經學院(bulb 圖標)。
+
+### 備註/後續
+- 另一 worker 曾把本 job 的 `academy/`、`liuyao/` 目錄移至
+  `/tmp/shelved-numerology-academy/`(06:00 前後),已原樣取回並繼續;
+  parent 宜確認其意圖,避免再發生。
+- 學院正文術語高亮待 `@/lib/highlightTerms` 落 main 後接入(一行 TODO)。
+- GSC 提交新路由(/yijing/academy、/yijing/liuyao)仍待辦。
