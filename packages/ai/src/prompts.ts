@@ -111,29 +111,55 @@ ${sections}
  * 解法是把本节每个小标题的**成品行**直接列出来,让模型逐行复制,不做任何格式转换。
  * 干支/星曜名在 en 下也保留汉字(与 localeDirective 的专有名词规则一致)。
  */
-function fortuneHeadingLedger(segKey: string, fortune: FortuneAnalysis, locale: AiLocale): string {
-  const dayunLine = (d: { ganZhi: string; startAge: number; endAge: number; startYear: number; endYear: number }) => {
-    if (locale === "en")
-      return `### ${d.ganZhi} Luck Period (ages ${d.startAge}–${d.endAge} / ${d.startYear}–${d.endYear})`;
-    const yun = locale === "zhs" ? "运" : "運";
-    const sui = locale === "zhs" ? "岁" : "歲";
-    return `### ${d.ganZhi}${yun}（${d.startAge}–${d.endAge}${sui}／${d.startYear}–${d.endYear}年）`;
-  };
-  const yearLine = (y: { year: number; ganZhi: string; age: number }) => {
-    if (locale === "en") return `### ${y.year} (${y.ganZhi}, age ${y.age})`;
-    const sui = locale === "zhs" ? "岁" : "歲";
-    return `### ${y.year}年（${y.ganZhi}，${y.age}${sui}）`;
-  };
-  const f = fortune.bazi;
-  let lines: string[];
-  if (segKey === "dayun") lines = f.daYun.map(dayunLine);
-  else if (segKey === "review") lines = f.liuNian.filter((y) => y.isPast).map(yearLine);
-  else if (segKey === "future") lines = f.liuNian.filter((y) => !y.isPast).map(yearLine);
-  else return "";
-  if (!lines.length) return "";
-  return `【小标题清单·原样照抄】
-本节每个小标题必须从下面逐行**原样照抄,一字不改**(含全角/半角标点与空格),不许改写、不许合并、不许留空:
-${lines.join("\n")}`;
+/** 大运小标题成品行(与【小标题清单】同源,供 prompt 与服务端后处理共用)。 */
+export function dayunHeadingLine(
+  d: { ganZhi: string; startAge: number; endAge: number; startYear: number; endYear: number },
+  locale: AiLocale,
+): string {
+  if (locale === "en")
+    return `### ${d.ganZhi} Luck Period (ages ${d.startAge}–${d.endAge} / ${d.startYear}–${d.endYear})`;
+  const yun = locale === "zhs" ? "运" : "運";
+  const sui = locale === "zhs" ? "岁" : "歲";
+  return `### ${d.ganZhi}${yun}（${d.startAge}–${d.endAge}${sui}／${d.startYear}–${d.endYear}年）`;
+}
+
+/** 流年小标题成品行(与【小标题清单】同源,供 prompt 与服务端后处理共用)。 */
+export function liuNianHeadingLine(y: { year: number; ganZhi: string; age: number }, locale: AiLocale): string {
+  if (locale === "en") return `### ${y.year} (${y.ganZhi}, age ${y.age})`;
+  const sui = locale === "zhs" ? "岁" : "歲";
+  return `### ${y.year}年（${y.ganZhi}，${y.age}${sui}）`;
+}
+
+/**
+ * 确定性后处理:把模型写残的小标题逐行修复为标准成品行。
+ * 背景(2026-10-22 live 实证):弱模型(mistral-small)即使 prompt 里给了逐行照抄的
+ * 清单,仍会输出 `### 癸未運（–歲／–年）` 这类占位符——纯 prompt 手段不可靠,
+ * 必须服务端兜底。只认"### + 干支/年份 + （"的形状,其它行原样不动;已写对的行
+ * 替换为自身(无操作)。
+ */
+export function fixFortuneHeadings(markdown: string, fortune: FortuneAnalysis, locale: AiLocale): string {
+  const dayunByGanzhi = new Map<string, string>();
+  for (const d of fortune.bazi.daYun) dayunByGanzhi.set(d.ganZhi, dayunHeadingLine(d, locale));
+  const yearByYear = new Map<string, string>();
+  for (const y of fortune.bazi.liuNian) yearByYear.set(String(y.year), liuNianHeadingLine(y, locale));
+  return markdown
+    .split("\n")
+    .map((line) => {
+      let m = line.match(/^###\s*([甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥])(?=\s*(?:[運运（(]|Luck Period))/);
+      const gz = m?.[1];
+      if (gz) {
+        const fixed = dayunByGanzhi.get(gz);
+        if (fixed) return fixed;
+      }
+      m = line.match(/^###\s*(\d{4})\s*年?\s*[（(]/);
+      const yr = m?.[1];
+      if (yr) {
+        const fixed = yearByYear.get(yr);
+        if (fixed) return fixed;
+      }
+      return line;
+    })
+    .join("\n");
 }
 
 /**
@@ -141,7 +167,7 @@ ${lines.join("\n")}`;
  */
 const FORTUNE_NUMBERS_RULE = `【数字铁律·小标题原样照抄】
 - 下面【小标题清单】给出了本节每个小标题的**标准成品行**——输出时逐行**原样照抄,一字不改**,不做任何格式转换。
-- ❌ 禁例:「## 戊辰運（- 歲/-）」「### 甲寅運（–歲／–年）」——用 -/–/—/… 占位的写法一律禁止;小标题里出现任何占位符 = 整节作废,必须重写。
+- ❌ 严禁在小标题里用任何占位符号(横线、破折号、省略号、"–歲"这类空架子)代替数字;数字必须和清单里的一模一样。小标题缺数字 = 整节作废,必须重写。
 - 正文中提到某运/某年时,同样带上岁数与年份(如"1995–2004 这步运"),不写"这步运""那一年"这类无数字指代。`;
 
 /**
@@ -164,6 +190,28 @@ function fortuneAntiRepetition(key: string): string {
     default:
       return `【去套话】同一节内不重复句式;每个小节只讲它独有的信息。${mechanism}`;
   }
+}
+
+/**
+ * 小标题清单(原样照抄用)。
+ * 实测教训(2026-10-22 live):只给"格式模板 + 逐字照抄"不够——模型会照着模板的
+ * 形状填占位符,输出 `### 甲寅運（–歲／–年）`(en dash 占位,连禁例都换了符号绕过)。
+ * 解法是把本节每个小标题的**成品行**直接列出来,让模型逐行复制,不做任何格式转换。
+ * 干支/星曜名在 en 下也保留汉字(与 localeDirective 的专有名词规则一致)。
+ * 注意:清单只是"尽力而为"的 prompt 手段,最终兜底靠 fixFortuneHeadings(服务端
+ * 确定性后处理)。
+ */
+function fortuneHeadingLedger(segKey: string, fortune: FortuneAnalysis, locale: AiLocale): string {
+  const f = fortune.bazi;
+  let lines: string[];
+  if (segKey === "dayun") lines = f.daYun.map((d) => dayunHeadingLine(d, locale));
+  else if (segKey === "review") lines = f.liuNian.filter((y) => y.isPast).map((y) => liuNianHeadingLine(y, locale));
+  else if (segKey === "future") lines = f.liuNian.filter((y) => !y.isPast).map((y) => liuNianHeadingLine(y, locale));
+  else return "";
+  if (!lines.length) return "";
+  return `【小标题清单·原样照抄】
+本节每个小标题必须从下面逐行**原样照抄,一字不改**(含全角/半角标点与空格),不许改写、不许合并、不许留空:
+${lines.join("\n")}`;
 }
 
 /**
@@ -223,9 +271,9 @@ export function buildFortuneReportPrompt(caveats: string[], locale: AiLocale = "
 
 要求:八字与紫微务必【全程合参】,每个结论指出依据(哪步运/哪年、什么十神/什么四化飞哪宫);判断要直接、敢断、不和稀泥,但**严格区分"命盘能给的领域与吉凶倾向(可肯定)"和"具体事件(不可编造)"**;年份均按"倾向应期、可能±1年"对待。
 ${FORTUNE_NUMBERS_RULE}
-${ledger}
 【去套话】各步大运/各年只讲独有信息,不重复同一句式;每步大运看**它自己的同期大限**(动态运势里每步的 └ 大限行),不要把当前大限套到每一步;形容词必须带机制(哪个干支/哪颗星→哪个宫→什么效果),写不出就删。
-${FORTUNE_STYLE_RULES}${caveatBlock}`;
+${FORTUNE_STYLE_RULES}
+${ledger}${caveatBlock}`;
 }
 
 /* ────────────────────────────────────────────────────────────────────────
@@ -349,13 +397,13 @@ ${lensDirective(lens)}
 
 ${FORTUNE_NUMBERS_RULE}
 
-${ledger}
-
 ${fortuneAntiRepetition(seg.key)}
 
 ${FORTUNE_STYLE_RULES}
 
 铁律:严格区分"命盘能给的领域与吉凶倾向(可肯定)"与"具体事件(不可编造)";流年以立春分界,年份按"倾向应期、可能±1 年"对待,别说得像精确到天。判断要直接敢断、不和稀泥。
 【篇幅·硬性】本节约 ${SECTION_WORDS} 字、扼要写透;**务必在篇幅内把话说完、自然收尾(以句号结束),宁短勿断,绝不写到一半被切。**
+
+${ledger}
 **输出以「## ${title}」作为小标题开头,只写这一节,不要写其它节。**${caveatBlockOf(caveats)}`;
 }

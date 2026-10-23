@@ -17,7 +17,71 @@ import {
   type Usage,
   type ProviderOptions,
   type AiLocale,
+  type TextStream,
 } from "./client.js";
+import { fixFortuneHeadings } from "./prompts.js";
+
+/**
+ * 行级小标题修复流(TextStream 包装)。
+ * 背景:弱模型即使 prompt 给了逐行照抄的清单,仍会输出 `### 癸未運（–歲／–年）`
+ * 这类占位符(2026-10-22 live 实证)——纯 prompt 手段不可靠,服务端必须兜底。
+ * 按行缓冲转发(小标题必为完整单行),其它内容逐行原样通过;流式体验不变。
+ */
+class HeadingFixStream implements TextStream {
+  private textListeners: Array<(d: string) => void> = [];
+  private errorListeners: Array<(e: unknown) => void> = [];
+  private buf = "";
+
+  constructor(
+    private readonly inner: TextStream,
+    private readonly fixLine: (line: string) => string,
+  ) {
+    // 构造时即订阅 inner:inner 是懒启动(首个 finalMessage() 才真正请求),
+    // 提前订阅不触发请求,只注册监听。
+    inner.on("text", (delta: string) => this.onDelta(delta));
+    inner.on("error", (err: unknown) => this.errorListeners.forEach((l) => l(err)));
+  }
+
+  private onDelta(delta: string): void {
+    this.buf += delta;
+    let idx: number;
+    while ((idx = this.buf.indexOf("\n")) >= 0) {
+      const line = this.buf.slice(0, idx);
+      this.buf = this.buf.slice(idx + 1);
+      const fixed = this.fixLine(line);
+      this.textListeners.forEach((l) => l(fixed + "\n"));
+    }
+  }
+
+  on(event: "text", listener: (d: string) => void): unknown;
+  on(event: "error", listener: (e: unknown) => void): unknown;
+  on(event: "text" | "error", listener: (arg: never) => void): unknown {
+    if (event === "text") this.textListeners.push(listener as (d: string) => void);
+    else this.errorListeners.push(listener as (e: unknown) => void);
+    return undefined;
+  }
+
+  async finalMessage(): Promise<unknown> {
+    const msg = await this.inner.finalMessage();
+    if (this.buf) {
+      const fixed = this.fixLine(this.buf);
+      this.buf = "";
+      this.textListeners.forEach((l) => l(fixed));
+    }
+    return msg;
+  }
+
+  abort(): void {
+    this.inner.abort();
+  }
+}
+
+/** 给大运流年流套上小标题修复;无 fortune 数据时原样返回。 */
+function withFortuneHeadingFix(stream: TextStream, fortune: FortuneAnalysis | undefined, locale: AiLocale): TextStream {
+  if (!fortune) return stream;
+  // fixFortuneHeadings 按整段切分行;这里逐行调用等价(行与行之间无跨行状态)。
+  return new HeadingFixStream(stream, (line) => fixFortuneHeadings(line, fortune, locale));
+}
 
 export interface ReportResult {
   markdown: string;
@@ -74,18 +138,21 @@ export async function generateFortuneReport(
     system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"),
     messages: [{ role: "user", content: buildFortuneReportPrompt(caveats, opts.locale ?? "zht", opts.fortune) }],
   }, opts.ai);
-  return { markdown: text, usage };
+  const markdown = opts.fortune ? fixFortuneHeadings(text, opts.fortune, opts.locale ?? "zht") : text;
+  return { markdown, usage };
 }
 
 /** 《大运流年深析》(流式)。 */
 export function streamFortuneReport(chart: ChartResult, opts: ReportOptions = {}) {
   const { caveats } = buildContextPack(chart, opts.fortune);
-  return chatStream({
+  const locale = opts.locale ?? "zht";
+  const stream = chatStream({
     kind: "report",
     maxTokens: opts.maxTokens ?? MAX_TOKENS.report,
-    system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"),
-    messages: [{ role: "user", content: buildFortuneReportPrompt(caveats, opts.locale ?? "zht", opts.fortune) }],
+    system: buildCachedSystem(chart, opts.fortune, locale),
+    messages: [{ role: "user", content: buildFortuneReportPrompt(caveats, locale, opts.fortune) }],
   }, opts.ai);
+  return withFortuneHeadingFix(stream, opts.fortune, locale);
 }
 
 /**
@@ -114,10 +181,12 @@ export function streamFortuneSection(chart: ChartResult, sectionKey: string, opt
   const seg = FORTUNE_SEGMENTS.find((s) => s.key === sectionKey);
   if (!seg) throw new Error(`未知大运流年章节:${sectionKey}`);
   const { caveats } = buildContextPack(chart, opts.fortune);
-  return chatStream({
+  const locale = opts.locale ?? "zht";
+  const stream = chatStream({
     kind: "report",
     maxTokens: opts.maxTokens ?? SECTION_MAX_TOKENS,
-    system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"),
-    messages: [{ role: "user", content: buildFortuneSectionPrompt(caveats, seg, opts.lens ?? "both", opts.locale ?? "zht", opts.fortune) }],
+    system: buildCachedSystem(chart, opts.fortune, locale),
+    messages: [{ role: "user", content: buildFortuneSectionPrompt(caveats, seg, opts.lens ?? "both", locale, opts.fortune) }],
   }, opts.ai);
+  return withFortuneHeadingFix(stream, opts.fortune, locale);
 }

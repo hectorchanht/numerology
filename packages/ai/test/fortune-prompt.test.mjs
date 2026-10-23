@@ -4,6 +4,7 @@ import {
   FORTUNE_SEGMENTS,
   buildFortuneSectionPrompt,
   buildFortuneReportPrompt,
+  fixFortuneHeadings,
 } from "../dist/index.js";
 
 const seg = (key) => FORTUNE_SEGMENTS.find((s) => s.key === key);
@@ -24,19 +25,19 @@ const fortuneFixture = {
   },
 };
 
-test("分段 prompt 含数字铁律与禁例(含 en dash 占位禁例)", () => {
+test("分段 prompt 含数字铁律(禁占位符,不再给占位符形状示例)", () => {
   for (const s of FORTUNE_SEGMENTS) {
     const p = buildFortuneSectionPrompt([], s, "both", "zht");
     assert.ok(p.includes("原样照抄"), `${s.key} 缺少数字铁律`);
-    assert.ok(p.includes("戊辰運（- 歲/-）"), `${s.key} 缺少连字符禁例`);
-    assert.ok(p.includes("甲寅運（–歲／–年）"), `${s.key} 缺少 en dash 占位禁例`);
+    assert.ok(p.includes("严禁在小标题里用任何占位符号"), `${s.key} 缺少占位符禁令`);
+    assert.ok(!p.includes("甲寅運（–歲／–年）"), `${s.key} 不应再给出占位符形状示例(模型会照抄形状)`);
   }
 });
 
 test("整篇 prompt 含数字铁律", () => {
   const p = buildFortuneReportPrompt([], "zht");
   assert.ok(p.includes("原样照抄"), "整篇 prompt 缺少数字铁律");
-  assert.ok(p.includes("甲寅運（–歲／–年）"), "整篇 prompt 缺少 en dash 占位禁例");
+  assert.ok(p.includes("严禁在小标题里用任何占位符号"), "整篇 prompt 缺少占位符禁令");
 });
 
 test("小标题清单:dayun/review/future 按节渲染成品行(zht)", () => {
@@ -78,6 +79,45 @@ test("无 fortune 参数时不渲染清单(向后兼容)", () => {
   const p = buildFortuneSectionPrompt([], seg("dayun"), "both", "zht");
   assert.ok(!p.includes("### 甲寅運（2–11歲"), "无 fortune 时不应有清单成品行");
   assert.ok(p.includes("原样照抄"), "数字铁律仍在");
+});
+
+test("fixFortuneHeadings:占位符小标题被修复为成品行", () => {
+  const bad = [
+    "## 二、大運逐步精講",
+    "",
+    "### 甲寅運（–歲／–年）",
+    "",
+    "正文第一段。",
+    "### 癸丑運（- 歲/-）",
+    "",
+    "正文第二段。",
+  ].join("\n");
+  const fixed = fixFortuneHeadings(bad, fortuneFixture, "zht");
+  assert.ok(fixed.includes("### 甲寅運（2–11歲／1995–2004年）"), "en dash 占位应被修复");
+  assert.ok(fixed.includes("### 癸丑運（12–21歲／2005–2014年）"), "连字符占位应被修复");
+  assert.ok(fixed.includes("## 二、大運逐步精講"), "节标题(## )不应被碰");
+  assert.ok(fixed.includes("正文第一段。"), "正文不应被碰");
+  assert.ok(!fixed.includes("–歲／–年"), "修复后不应残留占位符");
+});
+
+test("fixFortuneHeadings:已写对的行保持不变,未知干支/年份不动", () => {
+  const good = "### 甲寅運（2–11歲／1995–2004年）\n### 丙寅運（1–2歲）\n### 1999年（己卯，1歲）\n普通正文。";
+  const fixed = fixFortuneHeadings(good, fortuneFixture, "zht");
+  assert.ok(fixed.includes("### 甲寅運（2–11歲／1995–2004年）"), "已写对的行不变");
+  assert.ok(fixed.includes("### 丙寅運（1–2歲）"), "清单里没有的干支不动");
+  assert.ok(fixed.includes("### 1999年（己卯，1歲）"), "清单里没有的年份不动");
+  assert.ok(fixed.includes("普通正文。"), "正文不动");
+});
+
+test("fixFortuneHeadings:流年占位符也被修复(zhs/en)", () => {
+  const bad = "### 2021年（–，–歲）";
+  const zhs = fixFortuneHeadings(bad, fortuneFixture, "zhs");
+  assert.ok(zhs.includes("### 2021年（辛丑，28岁）"), "zhs 流年应被修复");
+  const enBad = "### 2026 (—, age —)";
+  const en = fixFortuneHeadings(enBad, fortuneFixture, "en");
+  assert.ok(en.includes("### 2026 (丙午, age 33)"), "en 流年应被修复");
+  const enDayun = fixFortuneHeadings("### 甲寅 Luck Period (ages – / –)", fortuneFixture, "en");
+  assert.ok(enDayun.includes("### 甲寅 Luck Period (ages 2–11 / 1995–2004)"), "en 大运应被修复");
 });
 
 test("dayun 节:同期大限 + 3–4 句 + 禁重复句式", () => {
