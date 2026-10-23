@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { REGIONS } from "@/lib/locations";
-import { useLocale } from "@/lib/i18n";
+import { useLocale, useScript } from "@/lib/i18n";
 import { Icon } from "@/components/Icon";
 
 interface Props {
@@ -17,6 +17,7 @@ const MANUAL = "__manual";
 /** 地區(中國省 / 世界國家,按大洲分組) → 城市 二級選擇,另可手動輸入經度。 */
 export function LocationPicker({ value, onChange }: Props) {
   const { t } = useLocale();
+  const { z } = useScript();
   const [regionIdx, setRegionIdx] = useState("");
   const region =
     regionIdx !== "" && regionIdx !== MANUAL ? (REGIONS[Number(regionIdx)] ?? null) : null;
@@ -36,10 +37,10 @@ export function LocationPicker({ value, onChange }: Props) {
           <option value="">{t("loc.noRegion")}</option>
           <option value={MANUAL}>{t("loc.manualEntry")}</option>
           {groups.map((g) => (
-            <optgroup key={g} label={g}>
+            <optgroup key={g} label={z(g)}>
               {REGIONS.map((r, i) =>
                 r.group === g ? (
-                  <option key={r.name} value={String(i)}>{r.name}</option>
+                  <option key={r.name} value={String(i)}>{z(r.name)}</option>
                 ) : null,
               )}
             </optgroup>
@@ -72,7 +73,7 @@ export function LocationPicker({ value, onChange }: Props) {
           >
             <option value="">{region ? t("loc.pickCity") : "—"}</option>
             {(region?.cities ?? []).map((c) => (
-              <option key={c.name} value={c.longitude}>{c.name}</option>
+              <option key={c.name} value={c.longitude}>{z(c.name)}</option>
             ))}
           </select>
         </label>
