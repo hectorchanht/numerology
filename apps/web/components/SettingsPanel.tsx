@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { type AiSettings, DEFAULT_AI, loadAi, saveAi } from "@/lib/aiSettings";
 import { useLocale, LocaleSwitch, type TKey } from "@/lib/i18n";
 import { go } from "@/lib/nav";
@@ -11,6 +11,8 @@ import {
   FILTER_LABEL_KEYS,
   COST_LABEL_KEYS,
   filterProviders,
+  filterModels,
+  staticModelEntries,
   type ProviderFilter,
 } from "@/lib/providerMeta";
 
@@ -58,10 +60,22 @@ export function SettingsPanel() {
     setValue(loadAi());
   }, []);
 
+  // 顶部 filter 同时是模型 filter:免费/付费作用于模型下拉。
+  const visibleModels = useMemo(() => filterModels(models, filter), [models, filter]);
+
+  // 当前选中的 model 若被 filter 滤掉(或已不在列表中) → 自动切到第一个可见。
+  useEffect(() => {
+    if (value.provider === "custom" || visibleModels.length === 0) return;
+    if (value.model && visibleModels.some((m) => m.id === value.model)) return;
+    const first = visibleModels[0]!.id;
+    if (value.model !== first) set({ model: first });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleModels, value.provider]);
+
   // 模型列表:缓存(24h) → /api/models 动态拉取 → 静态备选。
   useEffect(() => {
     const provider = value.provider;
-    const statics = (STATIC_MODELS[provider] ?? []).map((id) => ({ id }));
+    const statics = staticModelEntries(STATIC_MODELS[provider] ?? []);
     const cached = readModelsCache(provider);
     if (cached && cached.models.length > 0) {
       setModels(cached.models);
@@ -102,7 +116,7 @@ export function SettingsPanel() {
   }
 
   function selectProvider(p: string) {
-    const first = (STATIC_MODELS[p] ?? [])[0] ?? "";
+    const first = filterModels(staticModelEntries(STATIC_MODELS[p] ?? []), filter)[0]?.id ?? "";
     set({ provider: p, model: first });
   }
 
@@ -224,7 +238,7 @@ export function SettingsPanel() {
               />
             </label>
           </>
-        ) : models.length > 0 ? (
+        ) : visibleModels.length > 0 ? (
           <label className="row plain stack" htmlFor="model2">
             <span className="lbl">
               {t("settings.model")}
@@ -232,10 +246,10 @@ export function SettingsPanel() {
             </span>
             <select
               id="model2"
-              value={value.model || models[0]!.id}
+              value={value.model || visibleModels[0]!.id}
               onChange={(e) => set({ model: e.target.value })}
             >
-              {models.map((m) => (
+              {visibleModels.map((m) => (
                 <option key={m.id} value={m.id}>
                   {modelLabel(m)}
                 </option>

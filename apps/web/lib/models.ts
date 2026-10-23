@@ -39,6 +39,11 @@ const STATIC_MODELS: Record<string, string[]> = {
 
 type FetchLike = (url: string, init?: RequestInit) => Promise<Response>;
 
+/** 静态 id 列表转模型项(`:free` 后缀 → free:true,供前端模型 filter 用)。 */
+function toEntries(ids: string[]): ModelEntry[] {
+  return ids.map((id) => (id.endsWith(":free") ? { id, free: true } : { id }));
+}
+
 /**
  * 拉取某 provider 的模型列表。纯函数(fetch 可注入,便于测试)。
  * - workers-ai:binding 无 list 接口,返回构建时核验表(verified-static)。
@@ -63,12 +68,12 @@ export async function fetchProviderModels(
   }
 
   if (name === "anthropic" || name === "custom") {
-    return { provider: name, source: "static", models: (STATIC_MODELS[name] ?? []).map((id) => ({ id })) };
+    return { provider: name, source: "static", models: toEntries(STATIC_MODELS[name] ?? []) };
   }
 
   const baseURL = (opts.baseUrl?.trim() || MODELS_BASE_URL[name] || "").replace(/\/+$/, "");
   if (!baseURL) {
-    return { provider: name, source: "static", models: (STATIC_MODELS[name] ?? []).map((id) => ({ id })) };
+    return { provider: name, source: "static", models: toEntries(STATIC_MODELS[name] ?? []) };
   }
 
   const headers: Record<string, string> = {};
@@ -84,7 +89,7 @@ export async function fetchProviderModels(
       provider: name,
       source: "static",
       needsKey: true,
-      models: (STATIC_MODELS[name] ?? []).map((id) => ({ id })),
+      models: toEntries(STATIC_MODELS[name] ?? []),
     };
   }
   if (!res.ok) {

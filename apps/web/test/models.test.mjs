@@ -95,3 +95,11 @@ test("models:PROVIDER_META 分组与 ai 包一致(workers-ai 首位)", () => {
 test("models:staticModelsFor 未知 provider 返回空数组", () => {
   assert.deepEqual(staticModelsFor("nope"), []);
 });
+
+test("models:静态回落的 :free 模型带 free:true", async () => {
+  const fetchImpl = stubFetch(async () => jsonResponse(401, { error: "nope" }));
+  const r = await fetchProviderModels("openrouter", { fetchImpl });
+  assert.equal(r.source, "static");
+  assert.ok(r.models.length > 0);
+  assert.ok(r.models.every((m) => m.free === true), "openrouter 静态表应全为 :free");
+});

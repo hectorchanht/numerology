@@ -5,6 +5,8 @@ import {
   FILTER_LABEL_KEYS,
   COST_LABEL_KEYS,
   filterProviders,
+  filterModels,
+  staticModelEntries,
 } from "../test-dist/providerMeta.js";
 import { STRINGS, LOCALES } from "../test-dist/i18n.js";
 
@@ -70,4 +72,63 @@ test("providerMeta:pollinations optionalKey, 其余 nokey 无 key 字段", () =>
   assert.equal(pol.optionalKey, true);
   const wai = PROVIDER_META.find((p) => p.name === "workers-ai");
   assert.equal(wai.optionalKey ?? false, false);
+});
+
+// —— filter 同时是模型 filter ——
+test("filterModels:free 只留 free:true", () => {
+  const ms = [{ id: "a:free", free: true }, { id: "b" }, { id: "c", free: false }];
+  assert.deepEqual(
+    filterModels(ms, "free").map((m) => m.id),
+    ["a:free"],
+  );
+});
+
+test("filterModels:free 无 free 信息时不过滤(避免清空下拉)", () => {
+  const ms = [{ id: "x" }, { id: "y" }];
+  assert.deepEqual(
+    filterModels(ms, "free").map((m) => m.id),
+    ["x", "y"],
+  );
+});
+
+test("filterModels:free 结果为空时回落全列表", () => {
+  const ms = [{ id: "p", free: false }];
+  assert.deepEqual(
+    filterModels(ms, "free").map((m) => m.id),
+    ["p"],
+  );
+});
+
+test("filterModels:paid 踢掉 free:true,未知视为候选", () => {
+  const ms = [{ id: "a:free", free: true }, { id: "b" }, { id: "c", free: false }];
+  assert.deepEqual(
+    filterModels(ms, "paid").map((m) => m.id),
+    ["b", "c"],
+  );
+});
+
+test("filterModels:paid 无 free 信息时全留", () => {
+  const ms = [{ id: "x" }, { id: "y" }];
+  assert.deepEqual(
+    filterModels(ms, "paid").map((m) => m.id),
+    ["x", "y"],
+  );
+});
+
+test("filterModels:all/nokey 不过滤模型", () => {
+  const ms = [{ id: "a", free: true }, { id: "b" }];
+  assert.equal(filterModels(ms, "all"), ms);
+  assert.equal(filterModels(ms, "nokey"), ms);
+});
+
+test("filterModels:空列表保持空", () => {
+  assert.deepEqual(filterModels([], "free"), []);
+  assert.deepEqual(filterModels([], "paid"), []);
+});
+
+test("staticModelEntries::free 后缀标 free:true", () => {
+  assert.deepEqual(staticModelEntries(["google/gemma-4-31b-it:free", "glm-4-flash"]), [
+    { id: "google/gemma-4-31b-it:free", free: true },
+    { id: "glm-4-flash" },
+  ]);
 });

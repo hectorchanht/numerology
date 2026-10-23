@@ -64,6 +64,34 @@ export function filterProviders(filter: ProviderFilter): ProviderMeta[] {
   }
 }
 
+/** 带 free 标记的模型(与 SettingsPanel 的 ModelOption / models.ts 的 ModelEntry 同形)。 */
+export interface FreeFlaggedModel {
+  id: string;
+  free?: boolean;
+}
+
+/**
+ * 模型级 filter:顶部的 全部/免 key/免費/付費 同时作用于模型下拉。
+ * 免費/付費是模型层级属性(OpenRouter 一个 provider 内同时有 :free 和付费模型),
+ * 只 filter provider tabs 会漏掉(见截图:filter=免費却选中了付费 model)。
+ * - free: 只留 free===true;若列表没有任何 free 信息(静态表无标记)则回落为不过滤,
+ *   避免把下拉清空。
+ * - paid: 踢掉 free===true(未知视为候选);无信息时自然全留。
+ * - all/nokey: 不过滤模型(免 key 已在 provider 层过滤)。
+ * 结果为空时回落为全列表,保证下拉永远有可选项。
+ */
+export function filterModels<T extends FreeFlaggedModel>(models: T[], filter: ProviderFilter): T[] {
+  if (filter !== "free" && filter !== "paid") return models;
+  const filtered =
+    filter === "free" ? models.filter((m) => m.free === true) : models.filter((m) => m.free !== true);
+  return filtered.length > 0 ? filtered : models;
+}
+
+/** 静态 id 列表转带 free 标记的模型项(`:free` 后缀 → free:true)。 */
+export function staticModelEntries(ids: string[]): FreeFlaggedModel[] {
+  return ids.map((id) => (id.endsWith(":free") ? { id, free: true } : { id }));
+}
+
 /** 静态模型备选(动态拉取失败/未缓存时的回落;workers-ai 用核验表,见 models.ts)。 */
 export const STATIC_MODELS: Record<string, string[]> = {
   "workers-ai": [
