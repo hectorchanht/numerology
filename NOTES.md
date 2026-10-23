@@ -586,3 +586,42 @@ live 验证:7 个 `###` 标题全部带真实数字,全文零占位符。
   parent 宜確認其意圖,避免再發生。
 - 學院正文術語高亮待 `@/lib/highlightTerms` 落 main 後接入(一行 TODO)。
 - GSC 提交新路由(/yijing/academy、/yijing/liuyao)仍待辦。
+
+## Fortune 標題確定性修復 v2 + 術語釋義系統 (2026-10-23, commit 2127b6b7)
+
+### A. `- 歲` 標題形狀無關修復 + 紫微大限:無
+- 模型改寫新形狀 `- 歲（-）：己巳運`,舊 `^###` 正則抓不到。
+  `fixFortuneHeadings` 重寫為有狀態 `makeFortuneLineFixer`:
+  干支+運錨定(行首 md 前綴後 / 短行行尾 / 佔位符行內),佔位符痕跡判定,
+  正文順帶提及干支運的行不誤傷。
+- 流年: `年（辛丑年）` / `年 丙午（歲）` 等無年份形狀 → `YYYY年（干支，N歲）`。
+- 紫微大限:同一遍修復 `紫微大限：無/没有/未提供` 或干支錯配 →
+  `紫微大限：<干支>（行<宮>）`(按步同期大限;總覽節用當前大限)。
+- `context.ts`: 同期大限移到大運條目同一行【同期大限…】(模型忽略 └ 子行)。
+- 前端: 新增 `/api/fortune/data`(無 AI 調用,返回 analyzeFortune JSON);
+  `lib/fortuneRepair.ts` 客戶端鏡像修復;`StreamedReport` 新增 `repairText` prop,
+  渲染時修復(含 KV/歷史舊文本)。
+- 測試: ai 7 項 v2 形狀 + web 4 項客戶端修復。
+
+### B. 術語釋義 tap-to-define (everywhere)
+- `packages/knowledge/src/mingli-glossary.ts`: 66 術語
+  (十神×10、十二宮、十四主星、四化、大運/流年/大限/命宮/身宮/
+  三方四正/空宮/借星…),zht/zhs/en 一行釋義,自撰定義。
+- `apps/web/lib/highlightTerms.tsx`: 共享工具
+  (allGlossary 合併 YIJING_GLOSSARY、findTermMatches 單遍預編譯正則、
+  Term 點擊釋義彈窗 [outside-click + Escape 關閉,跳過 code/pre/a/
+  button/input/textarea/select]、withTermHighlights、markdownTermComponents)。
+- 接入面: 命盤報告 + 大運流年深析 (StreamedReport) + 命盤對話 (ChatPanel)
+  + /yijing 占卦結果 + /yijing/gua 卦庫。
+- 測試: 術語高亮、markdown 結構完整、無嵌套高亮。
+
+### C. 導航審計
+- 6 路由(/、/poster、/yijing、/yijing/gua、/yijing/academy、/yijing/liuyao)
+  全部可達(TabBar + YijingNav + SideNav),無孤兒頁面。
+
+### 驗證
+- ai 57/57、knowledge 22/22、engine 62/62、web 83/83 全過;
+  `next build` + `npm run cf:pages` 均成功。
+- commit `2127b6b7`(18 文件)推 main,Pages 部署 `326b3669` → **success**。
+- 線上驗證: 6 路由皆 200;`POST /api/fortune/data` → 200,回傳確定性 fortune JSON;
+  術語(正官等)已在 live bundle 內。
