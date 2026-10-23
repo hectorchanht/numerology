@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@dawn-studio/pronounce": "*",
-    "@dawn-studio/zh-convert": "^0.2.0",
+    "@dawn-studio/zh-convert": "^0.2.2",
     "@floating-ui/react": "^0.27.20",
     "@numerology/ai": "*",
     "@numerology/engine": "*",
