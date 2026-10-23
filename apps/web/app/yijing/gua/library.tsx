@@ -68,11 +68,20 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
                 display: "inline-flex",
                 verticalAlign: "middle",
                 marginLeft: "0.5rem",
+                gap: "0.35rem",
               }}
             >
               <PronounceButton
                 text={`${zT(hex.name)}。${zT(hex.judgment)}`}
                 locale={loc}
+                langs={["zh-HK"]}
+                defaultLang="zh-HK"
+              />
+              <PronounceButton
+                text={`${zT(hex.name)}。${zT(hex.judgment)}`}
+                locale={loc}
+                langs={["zh-CN"]}
+                defaultLang="zh-CN"
               />
             </span>
             <span className="muted" style={{ fontSize: "0.85rem", marginLeft: "0.6rem" }}>
