@@ -304,3 +304,92 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
   Pages 部署 `0dba3f80` 成功。線上驗證:
   `POST /api/report`(locale=zht,section=personality)→ 200,`## 性格特質`;
   (locale=en)→ 200,`## Personality Traits`(英文正文)。
+
+## 分 provider 记 key + 自定义人设 + AI 缓存 + 本机历史(2026-10-23)
+
+用户一次提了四个需求,同一批实现:
+
+### A. 分 provider 记 key(`apps/web/lib/aiSettings.ts`)
+- `AiSettings.apiKey: string` → `keys: Record<string, string>`(provider 名 → key)。
+- 迁移(`migrateAiSettings`,纯函数可测试):旧版单 `apiKey` 非空且 `keys` 为空 →
+  归到当时选中的 provider 名下;保存时丢弃旧字段。
+- `currentKey(s)`:只取当前 provider 名下的 key,没填 → `""`,绝不拿别的 provider
+  的 key 顶替(之前的需求:"if no key inputted, it should be empty input")。
+- `aiRequestParts()`:组装请求体 `{ ai:{provider,apiKey?,model?,baseURL?}, systemPrompt? }`;
+  key 取当前 provider 的;为空则省略。StreamedReport/ChatPanel/TimeInferPanel 改用它。
+- SettingsPanel 的 key 输入框绑定 `value.keys[value.provider] ?? ""`;切 tab 自动切换显示。
+- `/api/models` 的 `X-AI-Key` 头同样取当前 provider 的 key。
+
+### B. 自定义 AI 人设(`customSystemPrompt`)
+- SettingsPanel 新增 textarea(「自訂 AI 人設 / 系統提示」)+「重設為預設」按钮;
+  存 `AiSettings.systemPrompt`,空 = 默认。三语 keys:`settings.personaLabel/Ph/Reset`。
+- `packages/ai/src/provider.ts`:`ProviderOptions.customSystemPrompt?`;
+  `applyCustomPrompt()`(已导出供测试)追加为 system **末块**(locale 语言指令之后),
+  `chatComplete`/`chatStream` 三分支(anthropic/openai/workers-ai)全部接入。
+- `apps/web/lib/aiOpts.ts`:`parseAi` 取请求体**顶层** `systemPrompt` 字段
+  (与 `locale` 同级——它是每次请求的用户覆盖项,保持 `ai` 的 BYOK 形状稳定);
+  `resolveServerAi` 的存在性检查补上该字段。
+- 前端三个 AI 组件每次请求都带上(为空则省略)。
+
+### C. AI 响应服务端缓存(省 $2 预算)
+- 复用已绑定的 `AI_BUDGET_KV`,键前缀 `aicache:`(与 `ai-budget:` 区分),**无新增基建**。
+- 键 = sha256(JSON{provider,model,locale,lens,section,inputHash,promptHash})
+  (`apps/web/lib/aiCache.ts` 的 `aiCacheKey`);`inputHash` = 出生输入规范化哈希
+  (排盘是输入的确定性函数);`promptHash` 覆盖自定义人设(改人设 → 键不同,不串味)。
+- 接入点:`/api/report` 与 `/api/fortune`(分段 + 整篇两模式)。
+  命中 → 直接返回 KV 文本(`X-Cache: HIT`);未命中 → `teeTextStream` 包装累积全文,
+  `streamToPrimedResponse` 后打 `X-Cache: MISS`,再经 `waitUntil` 在流**成功完成**
+  且正文非空后写入(TTL 90 天)。出错/截断/空一律不写。
+- `chat` / `infer-time` 不缓存(对话型,历史相关,命中率极低)。
+- `getWaitUntil()` 新增于 `apps/web/lib/aiBinding.ts`(非 CF 环境返回 null → 不写缓存,
+  本地开发不受影响)。
+
+### D. 本机历史记录(用户选了「本機儲存」)
+- `apps/web/lib/history.ts`:IndexedDB(`numerology`/`readings`) promise 封装,
+  **无新增 npm 依赖**;记录 `{id,input,locale,chart,sections}`(section key =
+  `report:<k>`/`fortune:<k>`),`upsertReading`(保留旧章节)/`saveSection`/
+  `listReadings`/`deleteReading`/`clearReadings`;纯函数(`mergeSectionInto`,
+  `summarizeInput`,`readingId`)可测试。
+- `page.tsx`:排盘成功后 upsert(保留已有章节);`StreamedReport` 新增
+  `onSectionDone(segKey, markdown, lens)`(成功且有正文才回调)与
+  `restoredSections`(sectionKey → markdown,按当前语言重拼 `##` 标题)。
+- `HistoryPanel`(新组件,放 SettingsPanel 下方):「歷史記錄(n)」开关,
+  列表项 `YYYY-MM-DD HH:mm` + 出生摘要(`1990-06-15 14:00 男`) + 章节数;
+  点击即恢复命盘 + 已生成章节(**零 API 调用**);单条删除 / 全部清除(confirm);
+  附一行私隐说明「記錄只保存在此裝置,不會上傳」。三语 keys:`history.*`。
+
+### 附带
+- `apps/web/next.config.mjs`:加 `experimental.extensionAlias {".js":[".ts",".tsx",".js",".jsx"]}`,
+  使源码可用 `./x.js` 风格引用 `./x.ts`(与 packages/* 一致;node ESM 与测试亦需显式扩展名)。
+  之前 `next build` 曾因此报 `Can't resolve './hash.js'`。
+- `apps/web/tsconfig.test.json`:include 补上 `hash.ts`/`aiSettings.ts`/`aiCache.ts`/
+  `history.ts`/`aiOpts.ts`(注意:`aiOpts` 的测试未在 node 跑——它经 `aiBinding`
+  传递依赖 `@cloudflare/next-on-pages`,plain node import 会炸;其 systemPrompt
+  解析走线上实测覆盖)。
+
+### 验证
+- `npm test --workspaces`:120/120 通过(ai 34/engine 36/knowledge 5/web 45;
+  新增 18 项:迁移×3、currentKey、缓存键×3、tee、prepareCachedStream HIT/MISS、
+  历史纯逻辑×4、applyCustomPrompt×2)。
+- `next build` ✓ + `npm run cf:pages` ✓。
+- commit `70e6cef` 已推 main,待 Pages 部署成功后做线上验证(见下)。
+
+### 线上验证(2026-10-23,部署成功后,全部通过)
+- ✅ `POST /api/report`(section=personality,同一输入)连调两次 →
+  第一次 `X-Cache: MISS`(26s,2879B),第二次 `X-Cache: HIT`(1.6s,2879B),
+  正文逐字节一致。
+- ✅ `POST /api/report`(section=career,
+  `systemPrompt:"開頭第一句必須是『測試成功』"`)→ `X-Cache: MISS`
+  (人设不同 → 键不同,正确),输出以「測試成功」开头(自定义人设生效)。
+- ✅ `POST /api/chart` → 200,八字日主辛、紫微 12 宫,不受影响。
+
+### 缓存事故复盘(2026-10-23,已修复)
+首次上线后线上实测发现:缓存命中的正文每个字符翻倍
+(2858B → 5714B,`## 性格特質` → `## 性格格特特質質`)。
+根因:`teeTextStream` 旧实现为 wrapper 上的**每个** text 监听器都在 inner 上
+另挂一个累积监听器;而 `streamToPrimedResponse` 恰好挂两个(预热 + 正式),
+故第二块起被累积两次。
+修复:inner 上只挂一个监听器并扇出到所有 wrapper 监听器,每块恰好累积一次;
+缓存键前缀 bump 为 `aicache:2:` 使旧坏缓存整体失效。
+回归测试:`teeTextStream:wrapper 上挂两个监听器(预热+正式)也不重复累积`。
+教训:tee/装饰器包装流时,累积逻辑必须与监听器数量解耦。
