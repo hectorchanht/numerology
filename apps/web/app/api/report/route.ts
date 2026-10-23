@@ -16,9 +16,9 @@ export const dynamic = "force-dynamic";
 
 /**
  * prompt 版本:改 prompt 即換緩存鍵,不串味。
- * v2 = 2026-10-23「結論先行,證據收納」輸出契約(段首定性、段尾【依据】塊收納)。
+ * v3 = 2026-10-23 research-backed:精简去重人设 + exemplar 风格示范 + plan-then-write + self-check。
  */
-const PROMPT_VERSION = "report/v2";
+const PROMPT_VERSION = "report/v3";
 
 /** 流式生成命盘解读报告(动静结合)。首 token 前失败 → JSON 错误(502),而非截断流。 */
 export async function POST(req: Request): Promise<Response> {

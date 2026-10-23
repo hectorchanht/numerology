@@ -14,8 +14,8 @@ import { getServerAiBindings, getWaitUntil } from "@/lib/aiBinding";
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
-/** prompt 版本:改動追問 prompt 即換緩存鍵,不串味。 */
-const CHAT_PROMPT_VERSION = "chat/v1";
+/** prompt 版本:改動追問 prompt 即換緩存鍵,不串味。v2 = 2026-10-23 精简去重人设。 */
+const CHAT_PROMPT_VERSION = "chat/v2";
 
 /**
  * 流式对话追问(复用同一命盘 + 动态运势的缓存上下文)。

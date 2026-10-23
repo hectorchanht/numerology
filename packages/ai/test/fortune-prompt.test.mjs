@@ -126,13 +126,13 @@ test("dayun 节:三段式(定性/分析/依据系统生成) + 同期大限", () 
   assert.ok(p.includes("\u3010\u5b9a\u6027\u3011"), "dayun 应要求【定性】标记");
   assert.ok(p.includes("\u3010\u5206\u6790\u3011"), "dayun 应要求【分析】标记");
   assert.ok(p.includes("2–3 \u53e5"), "分析应限制 2–3 句");
-  assert.ok(p.includes("\u4e25\u7981"), "dayun 应有严禁重复句式的纪律");
+  assert.ok(p.includes("互不重叠"), "dayun 应要求各段角度互不重叠(v3 正面表述)");
 });
 
-test("dayun 节:点名禁止 live 观测到的机械行为", () => {
+test("dayun 节:正文不做机械罗列(v3 正面表述)", () => {
   const p = buildFortuneSectionPrompt([], seg("dayun"), "both", "zht");
-  assert.ok(p.includes("机械复述"), "应禁支藏十神的机械合刑冲复述");
-  assert.ok(p.includes("逐个报一遍"), "应禁禄权科忌飞宫逐个播报");
+  assert.ok(p.includes("只点对结论有实质影响的一两个组合"), "支藏十神只点关键组合");
+  assert.ok(p.includes("不逐个播报"), "四化飞宫不逐个播报");
   assert.ok(p.includes("系统图表呈现"), "十神/四化由系统图表呈现,正文不罗列");
   assert.ok(p.includes("同期大限"), "同期大限看各步自己的,不套用当前大限");
 });

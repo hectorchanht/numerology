@@ -342,6 +342,37 @@ class OpenAITextStream implements TextStream {
 
 // ── Workers AI(binding)适配 ───────────────────────────────────────────────
 
+/**
+ * 解码参数 baseline(2026-10-23 research-backed):
+ * temperature 0.7 / top_p 0.9 / repetition_penalty 1.1。
+ * 研究结论:低 temperature 反而是重复 loop 的元凶(小模型更脆弱);aggressive penalty
+ * 叠加会让输出更 erratic。env 可覆盖,方便一次只改一个变量做 A/B:
+ * AI_TEMPERATURE / AI_TOP_P / AI_REPETITION_PENALTY。
+ */
+function numEnv(key: string, def: number): number {
+  const v = Number(process.env[key]);
+  return Number.isFinite(v) ? v : def;
+}
+export const DECODE_DEFAULTS = { temperature: 0.7, top_p: 0.9, repetition_penalty: 1.1 } as const;
+export function workersAiDecodeParams(): {
+  temperature: number;
+  top_p: number;
+  repetition_penalty: number;
+} {
+  return {
+    temperature: numEnv("AI_TEMPERATURE", DECODE_DEFAULTS.temperature),
+    top_p: numEnv("AI_TOP_P", DECODE_DEFAULTS.top_p),
+    repetition_penalty: numEnv("AI_REPETITION_PENALTY", DECODE_DEFAULTS.repetition_penalty),
+  };
+}
+/** OpenAI 兼容 / Anthropic 路径:只用通用参数(penalty 各家语义不一,不碰)。 */
+function baseDecodeParams(): { temperature: number; top_p: number } {
+  return {
+    temperature: numEnv("AI_TEMPERATURE", DECODE_DEFAULTS.temperature),
+    top_p: numEnv("AI_TOP_P", DECODE_DEFAULTS.top_p),
+  };
+}
+
 /** env.AI binding 的最小接口(实际为 Cloudflare 的 Ai binding)。 */
 interface AiBindingLike {
   run(model: string, input: Record<string, unknown>): Promise<unknown>;
@@ -427,6 +458,7 @@ class WorkersAITextStream implements TextStream {
         messages: fullMessages,
         max_tokens: maxTokens,
         stream: true,
+        ...workersAiDecodeParams(),
       })) as ReadableStream<Uint8Array>;
       await this.pump(stream);
       await recordUsage(kv, this.neurons);
@@ -498,6 +530,7 @@ export async function chatComplete(
     const res = (await ai.run(model, {
       messages: toWorkersAiMessages(system, req.messages),
       max_tokens: req.maxTokens,
+      ...workersAiDecodeParams(),
     })) as { response?: unknown; usage?: WorkersAiSseUsage };
     const text = typeof res.response === "string" ? res.response : "";
     const neurons = typeof res.usage?.neurons === "number" ? res.usage.neurons : 0;
@@ -518,6 +551,7 @@ export async function chatComplete(
     const res = await makeAnthropic(apiKey).messages.create({
       model: modelFor(def, req.kind, opts),
       max_tokens: req.maxTokens,
+      ...baseDecodeParams(),
       system: toAnthropicSystem(system),
       messages: req.messages.map((m) => ({ role: m.role, content: m.content })),
     });
@@ -530,6 +564,7 @@ export async function chatComplete(
   const res = await makeOpenAI(apiKey, def.baseURL).chat.completions.create({
     model: modelFor(def, req.kind, opts),
     max_tokens: req.maxTokens,
+    ...baseDecodeParams(),
     messages: toOpenAIMessages(system, req.messages),
   });
   return {
@@ -560,6 +595,7 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
     return makeAnthropic(apiKey).messages.stream({
       model: modelFor(def, req.kind, opts),
       max_tokens: req.maxTokens,
+      ...baseDecodeParams(),
       system: toAnthropicSystem(system),
       messages: req.messages.map((m) => ({ role: m.role, content: m.content })),
     }) as unknown as TextStream;
@@ -568,7 +604,10 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
   const model = modelFor(def, req.kind, opts);
   const messages = toOpenAIMessages(system, req.messages);
   return new OpenAITextStream((signal) =>
-    client.chat.completions.create({ model, max_tokens: req.maxTokens, stream: true, messages }, { signal }),
+    client.chat.completions.create(
+      { model, max_tokens: req.maxTokens, stream: true, ...baseDecodeParams(), messages },
+      { signal },
+    ),
   );
 }
 

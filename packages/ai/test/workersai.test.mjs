@@ -115,3 +115,42 @@ assert.equal(r.text, "好");
 assert.equal(r.usage.neurons, 0.8);
 assert.equal(Number(await kv.get(budgetMonthKey())), 0.8);
 });
+
+// —— v3:decode params 随请求传给 Workers AI ——
+test("workers-ai:chatComplete 传入 decode baseline(temp 0.7/top_p 0.9/rep 1.1)", async () => {
+const captured = {};
+const binding = { run: async (model, input) => { captured.input = input; return { response: "好", usage: { neurons: 0.1}};}};
+const kv = memKv();
+const { chatComplete: cc} = await import("../dist/client.js");
+await cc(
+{ kind: "report", system: SYSTEM, messages: MSGS, maxTokens: 100},
+{ provider: "workers-ai", aiBinding: { ai: binding, kv}},
+);
+assert.equal(captured.input.temperature, 0.7);
+assert.equal(captured.input.top_p, 0.9);
+assert.equal(captured.input.repetition_penalty, 1.1);
+assert.equal(captured.input.stream, undefined);
+});
+
+test("workers-ai:stream 传入 decode params,env 可覆盖", async () => {
+const captured = {};
+const binding = fakeBinding(captured, [{ response: "好"}]);
+const kv = memKv();
+process.env.AI_TEMPERATURE = "0.85";
+try {
+const stream = chatStream(
+{ kind: "chat", system: SYSTEM, messages: MSGS, maxTokens: 100},
+{ provider: "workers-ai", aiBinding: { ai: binding, kv}},
+);
+let text = "";
+stream.on("text", (d) => { text += d;});
+await stream.finalMessage();
+assert.equal(text, "好");
+assert.equal(captured.input.temperature, 0.85);
+assert.equal(captured.input.top_p, 0.9);
+assert.equal(captured.input.repetition_penalty, 1.1);
+assert.equal(captured.input.stream, true);
+} finally {
+delete process.env.AI_TEMPERATURE;
+}
+});
