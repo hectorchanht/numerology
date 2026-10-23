@@ -116,7 +116,7 @@ function renderFortune(f: FortuneAnalysis): string {
       return (
         `  - ${d.ganZhi}(${d.startAge}-${d.endAge}岁/${d.startYear}-${d.endYear}) ` +
         `天干${d.ganShiShen}、支藏${d.hideShiShen.map((h) => h.gan + h.shiShen).join("")} ${u(d.suppliesUseGod)}${cur(d.isCurrent)}` +
-        `\n    └ 大限${dec.heavenlyStem}${dec.earthlyBranch}(行${dec.palaceName}):${sihua(dec.sihua)}`
+        `【同期大限${dec.heavenlyStem}${dec.earthlyBranch}(行${dec.palaceName}):${sihua(dec.sihua)}】`
       );
     })
     .join("\n");
@@ -138,7 +138,7 @@ ${daYun}
 ### 八字流年(含已过年份,供回看验证)
   ${liuNian}
 
-### 紫微大限四化(当前大限,仅用于"当前总览";各步大运的同期大限见上面每步的 └ 大限行,两者不要混用)
+### 紫微大限四化(当前大限,仅用于"当前总览";各步大运的同期大限见上面每步行末【同期大限…】,两者不要混用)
   - 大限 ${f.ziwei.decadal.heavenlyStem}${f.ziwei.decadal.earthlyBranch}(行${f.ziwei.decadal.palaceName}):${sihua(f.ziwei.decadal.sihua)}
 
 ### 紫微流年四化(飞入本命宫,化忌冲宫尤需留意)

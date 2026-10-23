@@ -131,34 +131,160 @@ export function liuNianHeadingLine(y: { year: number; ganZhi: string; age: numbe
 }
 
 /**
- * 确定性后处理:把模型写残的小标题逐行修复为标准成品行。
+ * 确定性后处理 v2:把模型写残的小标题逐行修复为标准成品行,形状无关。
  * 背景(2026-10-22 live 实证):弱模型(mistral-small)即使 prompt 里给了逐行照抄的
  * 清单,仍会输出 `### 癸未運（–歲／–年）` 这类占位符——纯 prompt 手段不可靠,
- * 必须服务端兜底。只认"### + 干支/年份 + （"的形状,其它行原样不动;已写对的行
- * 替换为自身(无操作)。
+ * 必须服务端兜底。2026-10-23 新形状:`- 歲（-）：己巳運`(破折号前缀 + 占位 + 冒号 +
+ * 干支運结尾),故 v2 不再限定 `###` 前缀,改为"干支+運锚定 + 标题感"判定。
+ *
+ * 判定某行是"<干支>運"小标题:干支+運出现在行首(md 前缀后)或短行行尾,或行内有
+ * 占位符痕迹;且行内没有该步正确的起始年份数字(有正确年份 = 已写对,不动)。
+ * 正文里顺带提到"這步己巳運…"的行(干支運在行中、后有正文、无占位符)不会被误伤。
  */
-export function fixFortuneHeadings(markdown: string, fortune: FortuneAnalysis, locale: AiLocale): string {
-  const dayunByGanzhi = new Map<string, string>();
-  for (const d of fortune.bazi.daYun) dayunByGanzhi.set(d.ganZhi, dayunHeadingLine(d, locale));
+const GZ_RE = "[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]";
+/** 占位符痕迹:短横/破折号配歲、空括号、ages 占位等 */
+const PLACEHOLDER_RE = /[-–—]\s*[歲岁]|[歲岁][（(]\s*[-–—]\s*[)）]|[(（]\s*[-–—]\s*[)）]\s*[：:]|ages?\s*[-–—(\[]/i;
+
+interface StepDecadal {
+  ganzhi: string;
+  palace: string;
+}
+
+/** 从行首(md 前缀后)或行尾(短行)抓"<干支>運";行内占位符形状也抓(限短行)。 */
+function dayunGanzhiInLine(line: string): string | null {
+  const t = line.trim();
+  let m = t.match(new RegExp(`^[\\s#>*\\-–—\\d.)\\]\\*]{0,12}(${GZ_RE})(?:[運运]|\\s+Luck Period)`));
+  if (m) return m[1]!;
+  if (t.length <= 36) {
+    m = t.match(new RegExp(`(${GZ_RE})(?:[運运]|\\s+Luck Period)\\s*$`));
+    if (m) return m[1]!;
+  }
+  if (PLACEHOLDER_RE.test(t) && t.length <= 64) {
+    m = t.match(new RegExp(`(${GZ_RE})(?:[運运]|\\s+Luck Period)`));
+    if (m) return m[1]!;
+  }
+  return null;
+}
+
+/** 有状态的行级修复器:小标题形状无关修复 + 紫微大限"無"/错配修复。 */
+export function makeFortuneLineFixer(
+  fortune: FortuneAnalysis,
+  locale: AiLocale,
+): (line: string) => string {
+  const dayun = new Map<string, { heading: string; startYear: number; decadal: StepDecadal | null }>();
+  for (const d of fortune.bazi.daYun) {
+    const dec = (d as { ziweiDecadal?: { heavenlyStem?: string; earthlyBranch?: string; palaceName?: string } }).ziweiDecadal;
+    dayun.set(d.ganZhi, {
+      heading: dayunHeadingLine(d, locale),
+      startYear: d.startYear,
+      decadal:
+        dec && dec.heavenlyStem && dec.earthlyBranch
+          ? { ganzhi: dec.heavenlyStem + dec.earthlyBranch, palace: dec.palaceName ?? "" }
+          : null,
+    });
+  }
   const yearByYear = new Map<string, string>();
-  for (const y of fortune.bazi.liuNian) yearByYear.set(String(y.year), liuNianHeadingLine(y, locale));
+  const liuNianByYear = new Map<string, { ganZhi: string; age: number }>();
+  for (const y of fortune.bazi.liuNian) {
+    yearByYear.set(String(y.year), liuNianHeadingLine(y, locale));
+    liuNianByYear.set(String(y.year), { ganZhi: y.ganZhi, age: y.age });
+  }
+  const yearByGanzhi = new Map<string, string>();
+  for (const y of fortune.bazi.liuNian) {
+    if (!yearByGanzhi.has(y.ganZhi)) yearByGanzhi.set(y.ganZhi, liuNianHeadingLine(y, locale));
+  }
+  // 每年所属大运步的同期大限(回看/未来节里"紫微大限:無"用它修复,而非当前大限)
+  const decadalByYear = new Map<number, StepDecadal>();
+  for (const y of fortune.bazi.liuNian) {
+    const d = fortune.bazi.daYun.find((s) => s.startYear <= y.year && y.year <= s.endYear);
+    const dec = (d as { ziweiDecadal?: { heavenlyStem?: string; earthlyBranch?: string; palaceName?: string } } | undefined)?.ziweiDecadal;
+    if (dec && dec.heavenlyStem && dec.earthlyBranch) {
+      decadalByYear.set(y.year, { ganzhi: dec.heavenlyStem + dec.earthlyBranch, palace: dec.palaceName ?? "" });
+    }
+  }
+  // 总览节等:紫微大限:無 → 当前大限;进入某步大运后切换为该步同期大限。
+  const cur = fortune.ziwei?.decadal;
+  let current: StepDecadal | null =
+    cur && cur.heavenlyStem && cur.earthlyBranch
+      ? { ganzhi: cur.heavenlyStem + cur.earthlyBranch, palace: cur.palaceName ?? "" }
+      : null;
+  /** 是否已见过大运/流年小标题:首个 ##(总览标题)不重置,之后的 ## 才暂停大限修复 */
+  let seenStep = false;
+
+  const decadalNoneRe = /紫微大限\s*[：:]\s*(?:無|无|没有|未提供|暂无|[—–\-])\s*(?=$|[。，,；;、\s])/;
+  const decadalMismatchRe = new RegExp(`紫微大限\\s*[：:]\\s*(${GZ_RE})(?![運运])`);
+  const gzRe = new RegExp(`(${GZ_RE})`);
+
+  return (line: string): string => {
+    // 1) 大运小标题
+    const gz = dayunGanzhiInLine(line);
+    if (gz) {
+      const step = dayun.get(gz);
+      if (step) {
+        if (step.decadal) current = step.decadal;
+        seenStep = true;
+        if (!line.includes(String(step.startYear))) return step.heading;
+        return line;
+      }
+    }
+    // 2) 流年小标题(不含運)
+    const t = line.trim();
+    if (!/[運运]/.test(t)) {
+      const yrm = t.match(/(\d{4})/);
+      const gm = t.match(gzRe);
+      if (yrm) {
+        const fixed = yearByYear.get(yrm[1]!);
+        const entry = liuNianByYear.get(yrm[1]!);
+        const alreadyRight =
+          !!entry &&
+          t.includes(yrm[1]!) &&
+          (!gm || t.includes(gm[1]!)) &&
+          t.includes(String(entry.age)) &&
+          (!gm || gm[1] === entry.ganZhi);
+        if (fixed && !alreadyRight && (PLACEHOLDER_RE.test(t) || /^#{1,4}\s/.test(t))) {
+          current = decadalByYear.get(Number(yrm[1]!)) ?? null;
+          seenStep = true;
+          return fixed;
+        }
+        if (fixed && alreadyRight) {
+          // 已写对的流年标题:仍切换到该年所属大限,供后文"紫微大限:無"修复用
+          current = decadalByYear.get(Number(yrm[1]!)) ?? current;
+          seenStep = true;
+        }
+      } else if (gm && (/年/.test(t) || /age/i.test(t))) {
+        // 无年份数字:年（辛丑年） / 年 丙午（歲）
+        const fixed = yearByGanzhi.get(gm[1]!);
+        if (fixed && (t.length <= 28 || /^#{1,4}\s/.test(t))) {
+          const yr = [...liuNianByYear.entries()].find(([, e]) => e.ganZhi === gm[1]!)?.[0];
+          current = (yr !== undefined ? decadalByYear.get(Number(yr)) : undefined) ?? null;
+          seenStep = true;
+          return fixed;
+        }
+      }
+    }
+    // 3) 大章节标题(## ):首个(总览)不重置,之后暂停大限修复(由小标题重新驱动)
+    if (/^##(?!#)/.test(t)) {
+      if (seenStep) current = null;
+    }
+    // 4) 紫微大限:無 / 干支错配 → 确定性替换(保守:短行才做错配替换)
+    if (current) {
+      if (decadalNoneRe.test(line)) {
+        return line.replace(decadalNoneRe, `紫微大限：${current.ganzhi}（行${current.palace}）`);
+      }
+      const mm = line.match(decadalMismatchRe);
+      if (mm && mm[1] !== current.ganzhi && t.length <= 64) {
+        return line.replace(mm[0], `紫微大限：${current.ganzhi}（行${current.palace}）`);
+      }
+    }
+    return line;
+  };
+}
+
+export function fixFortuneHeadings(markdown: string, fortune: FortuneAnalysis, locale: AiLocale): string {
+  const fixLine = makeFortuneLineFixer(fortune, locale);
   return markdown
     .split("\n")
-    .map((line) => {
-      let m = line.match(/^###\s*([甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥])(?=\s*(?:[運运（(]|Luck Period))/);
-      const gz = m?.[1];
-      if (gz) {
-        const fixed = dayunByGanzhi.get(gz);
-        if (fixed) return fixed;
-      }
-      m = line.match(/^###\s*(\d{4})\s*年?\s*[（(]/);
-      const yr = m?.[1];
-      if (yr) {
-        const fixed = yearByYear.get(yr);
-        if (fixed) return fixed;
-      }
-      return line;
-    })
+    .map(fixLine)
     .join("\n");
 }
 

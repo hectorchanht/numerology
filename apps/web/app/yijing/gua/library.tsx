@@ -15,6 +15,7 @@ import {
 import { useLocale } from "@/lib/i18n";
 import { yjT, type YijingLocale as YL } from "@/lib/yijingStrings";
 import { Gloss } from "@/components/Gloss";
+import { withTermHighlights } from "@/lib/highlightTerms";
 
 const TABS = ["coreMeaning", "career", "love", "wealth", "health", "advice"] as const;
 const TAB_IDS: Record<(typeof TABS)[number], string> = {
@@ -76,7 +77,7 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
         <Gloss term="卦辭" locale={loc} />
       </h3>
       <p style={{ fontFamily: "var(--serif)", fontSize: "1.05rem", marginTop: 0 }}>
-        {hex.judgment}
+        {withTermHighlights(hex.judgment)}
       </p>
 
       <h3 className="section-title">
@@ -104,7 +105,7 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
               >
                 {yaoName(hex, pos)}
               </span>
-              <span style={{ fontSize: "0.92rem" }}>{text}</span>
+              <span style={{ fontSize: "0.92rem" }}>{withTermHighlights(text)}</span>
             </div>
           );
         })}
@@ -123,7 +124,7 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
           fontSize: "0.92rem",
         }}
       >
-        {hex.image}
+        {withTermHighlights(hex.image)}
       </blockquote>
 
       <h3 className="section-title" style={{ marginTop: "1.4rem" }}>
@@ -142,7 +143,7 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
           </button>
         ))}
       </div>
-      <p style={{ fontSize: "0.94rem", lineHeight: 1.8 }}>{interp[tab]}</p>
+      <p style={{ fontSize: "0.94rem", lineHeight: 1.8 }}>{withTermHighlights(interp[tab])}</p>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { streamPost } from "@/lib/streamClient";
 import { aiRequestParts } from "@/lib/aiSettings";
 import { useLocale } from "@/lib/i18n";
 import { Icon } from "@/components/Icon";
+import { markdownTermComponents } from "@/lib/highlightTerms";
 
 interface Turn { role: "user" | "assistant"; content: string }
 
@@ -62,7 +63,7 @@ export function ChatPanel({ input }: { input: BirthInput }) {
             <div key={i} className={`bubble ${t2.role}`}>
               {t2.role === "assistant" ? (
                 <div className={`prose ${busy && i === log.length - 1 ? "is-streaming" : ""}`}>
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownTermComponents}>
                     {t2.content || t("chat.thinking")}
                   </ReactMarkdown>
                 </div>

@@ -173,3 +173,93 @@ test("表达风格规则:一句话定性 + 禁废话开场 + 断语纪律", () =
   assert.ok(full.includes("一句话定性"), "整篇 prompt 也应有风格规则");
   assert.ok(full.includes("绝不编造古籍断语"), "整篇 prompt 也应有断语纪律");
 });
+
+/* ── v2 形状无关修复(2026-10-23):新观测形状 + 紫微大限:無 ── */
+
+/** 带同期大限的夹具 */
+const fortuneDecadalFixture = {
+  referenceYear: 2026,
+  bazi: {
+    daYun: [
+      {
+        ganZhi: "甲寅", startAge: 2, endAge: 11, startYear: 1995, endYear: 2004,
+        ziweiDecadal: { heavenlyStem: "丙", earthlyBranch: "辰", palaceName: "官禄" },
+      },
+      {
+        ganZhi: "癸丑", startAge: 12, endAge: 21, startYear: 2005, endYear: 2014,
+        ziweiDecadal: { heavenlyStem: "丁", earthlyBranch: "巳", palaceName: "田宅" },
+      },
+    ],
+    liuNian: [
+      { year: 2021, age: 28, ganZhi: "辛丑", isPast: true, isReference: false },
+      { year: 2026, age: 33, ganZhi: "丙午", isPast: false, isReference: true },
+    ],
+  },
+  ziwei: {
+    decadal: { heavenlyStem: "戊", earthlyBranch: "午", palaceName: "福德" },
+  },
+};
+
+test("v2:新形状「- 歲（-）：己巳運」被修复", () => {
+  const f = {
+    ...fortuneDecadalFixture,
+    bazi: {
+      ...fortuneDecadalFixture.bazi,
+      daYun: [
+        { ganZhi: "己巳", startAge: 2, endAge: 11, startYear: 1995, endYear: 2004,
+          ziweiDecadal: { heavenlyStem: "丙", earthlyBranch: "辰", palaceName: "官禄" } },
+      ],
+    },
+  };
+  const fixed = fixFortuneHeadings("- 歲（-）：己巳運", f, "zht");
+  assert.ok(fixed.includes("### 己巳運（2–11歲／1995–2004年）"), `应被修复,实际:${fixed}`);
+});
+
+test("v2:正文里顺带提到干支運的行不被误伤", () => {
+  const body = "這步甲寅運整體而言還不錯，事業上有貴人。";
+  const fixed = fixFortuneHeadings(body, fortuneFixture, "zht");
+  assert.equal(fixed, body, "正文不应被改写成标题");
+});
+
+test("v2:流年无年份形状「年（辛丑年）」「年 丙午（歲）」被修复", () => {
+  const fixed = fixFortuneHeadings("年（辛丑年）\n年 丙午（歲）", fortuneFixture, "zht");
+  assert.ok(fixed.includes("### 2021年（辛丑，28歲）"), "辛丑年应被修复");
+  assert.ok(fixed.includes("### 2026年（丙午，33歲）"), "丙午应被修复");
+});
+
+test("v2:紫微大限：無 被替换为该步同期大限", () => {
+  const md = [
+    "### 甲寅運（2–11歲／1995–2004年）",
+    "八字大運：甲寅運，天干比肩。紫微大限：無。分析：這段時期…",
+    "### 癸丑運（12–21歲／2005–2014年）",
+    "紫微大限：無",
+  ].join("\n");
+  const fixed = fixFortuneHeadings(md, fortuneDecadalFixture, "zht");
+  assert.ok(fixed.includes("紫微大限：丙辰（行官禄）"), "甲寅步的無应被替换为丙辰");
+  assert.ok(fixed.includes("紫微大限：丁巳（行田宅）"), "癸丑步的無应被替换为丁巳");
+  assert.ok(!fixed.includes("紫微大限：無"), "不应残留無");
+});
+
+test("v2:紫微大限干支错配被纠正,写对的不动", () => {
+  const md = [
+    "### 甲寅運（2–11歲／1995–2004年）",
+    "紫微大限：戊午（行福德）", // 错:套用了当前大限
+  ].join("\n");
+  const fixed = fixFortuneHeadings(md, fortuneDecadalFixture, "zht");
+  assert.ok(fixed.includes("紫微大限：丙辰（行官禄）"), "错配的戊午应被纠正为丙辰");
+  const good = "### 甲寅運（2–11歲／1995–2004年）\n紫微大限：丙辰（行官禄），化禄入命。";
+  assert.equal(fixFortuneHeadings(good, fortuneDecadalFixture, "zht"), good, "写对的不动");
+});
+
+test("v2:总览节的紫微大限：無 用当前大限修复", () => {
+  const md = "## 一、當前總覽\n紫微大限：無，需结合大运看。";
+  const fixed = fixFortuneHeadings(md, fortuneDecadalFixture, "zht");
+  assert.ok(fixed.includes("紫微大限：戊午（行福德）"), "总览节用当前大限");
+});
+
+test("v2:无 ziweiDecadal 数据时不抛错、不乱改", () => {
+  const md = "### 甲寅運（–歲／–年）\n紫微大限：無。";
+  const fixed = fixFortuneHeadings(md, fortuneFixture, "zht");
+  assert.ok(fixed.includes("### 甲寅運（2–11歲／1995–2004年）"), "标题仍被修复");
+  assert.ok(fixed.includes("紫微大限：無"), "无数据时無保持原样");
+});

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import type { BirthInput, ChartResult } from "@numerology/engine";
+import type { BirthInput, ChartResult, FortuneAnalysis } from "@numerology/engine";
 import type { BirthFormValue } from "@/lib/formTypes";
 import { useLocale } from "@/lib/i18n";
 import { go, goBack, useNav, type Screen } from "@/lib/nav";
@@ -21,6 +21,7 @@ import { FortuneTimeline } from "@/components/FortuneTimeline";
 import { Icon } from "@/components/Icon";
 import { EmptyChart, ScreenNav, Seg } from "@/components/ui";
 import { loadAi } from "@/lib/aiSettings";
+import { repairFortuneMarkdown } from "@/lib/fortuneRepair";
 import { upsertReading, saveSection, getReading, readingId, type Reading } from "@/lib/history";
 
 type Mode = "known" | "infer";
@@ -143,6 +144,32 @@ export default function Home() {
 
   const ready = chart && input ? { chart, input } : null;
   const nowLuck = chart ? currentLuckStep(chart.bazi) : undefined;
+  /** 确定性运势数据(无 AI 调用):渲染前修复小标题数字与紫微大限:無(含旧缓存文本)。 */
+  const [fortuneJson, setFortuneJson] = useState<FortuneAnalysis | null>(null);
+  const inputKey = input ? JSON.stringify(input) : null;
+  useEffect(() => {
+    if (!inputKey) {
+      setFortuneJson(null);
+      return;
+    }
+    let dead = false;
+    fetch("/api/fortune/data", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ input }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!dead) setFortuneJson(d?.fortune ?? null);
+      })
+      .catch(() => {
+        if (!dead) setFortuneJson(null);
+      });
+    return () => {
+      dead = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputKey]);
   // narrow:桌面用窄欄(設定、對話),其餘畫面用全寬多欄。
   const show = (s: Screen, narrow?: boolean) => ({ className: narrow ? "screen narrow" : "screen", hidden: screen !== s });
 
@@ -310,6 +337,7 @@ export default function Home() {
             restoredSections={restored?.fortune ?? null}
             onAsk={() => go("chat")}
             collapsible
+            repairText={fortuneJson ? (md) => repairFortuneMarkdown(md, fortuneJson, locale) : undefined}
           >
             <FortuneTimeline chart={ready.chart} visible={screen === "fortune"} />
             <h2 className="group-title">{t("card.fortuneTitle")}</h2>

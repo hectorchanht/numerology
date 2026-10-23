@@ -11,6 +11,7 @@ import { useLocale } from "@/lib/i18n";
 import { yjT, yjFmt, type YijingLocale } from "@/lib/yijingStrings";
 import { Gloss } from "@/components/Gloss";
 import { AiInterpret } from "./AiInterpret";
+import { withTermHighlights } from "@/lib/highlightTerms";
 
 interface TossedLine {
   value: CoinLine;
@@ -250,7 +251,7 @@ export default function YijingTool() {
                 </div>
                 <p style={{ marginTop: "0.7rem" }}>
                   <Gloss term="卦辭" locale={loc} />:{` `}
-                  <span style={{ fontFamily: "var(--serif)", fontSize: "1.05rem" }}>{ben.judgment}</span>
+                  <span style={{ fontFamily: "var(--serif)", fontSize: "1.05rem" }}>{withTermHighlights(ben.judgment)}</span>
                 </p>
               </div>
             </div>
@@ -273,7 +274,7 @@ export default function YijingTool() {
                     <div style={{ fontFamily: "var(--serif)", color: "var(--cinnabar)", marginBottom: "0.2rem" }}>
                       {yaoName(ben, p)}
                     </div>
-                    <div style={{ fontSize: "0.92rem" }}>{ben.lines[p - 1]}</div>
+                    <div style={{ fontSize: "0.92rem" }}>{withTermHighlights(ben.lines[p - 1] ?? "")}</div>
                   </div>
                 ))}
               </div>
@@ -292,7 +293,7 @@ export default function YijingTool() {
                       <Gloss term="變卦" locale={loc} /> · {bian.name}
                     </h3>
                     <p style={{ margin: 0, fontSize: "0.92rem" }}>
-                      <Gloss term="卦辭" locale={loc} />: {bian.judgment}
+                      <Gloss term="卦辭" locale={loc} />: {withTermHighlights(bian.judgment)}
                     </p>
                   </div>
                 )}
@@ -303,7 +304,7 @@ export default function YijingTool() {
                       <Gloss term="互卦" locale={loc} /> · {hu.name}
                     </h3>
                     <p style={{ margin: 0, fontSize: "0.92rem" }}>
-                      <Gloss term="卦辭" locale={loc} />: {hu.judgment}
+                      <Gloss term="卦辭" locale={loc} />: {withTermHighlights(hu.judgment)}
                     </p>
                   </div>
                 )}

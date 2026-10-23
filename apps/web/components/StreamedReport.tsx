@@ -9,6 +9,7 @@ import { printReport } from "@/lib/exportPdf";
 import { aiRequestParts } from "@/lib/aiSettings";
 import { useLocale, HTML_LANG, type Locale, type TKey } from "@/lib/i18n";
 import { stripLeadingHeading } from "@/lib/sectionIcons";
+import { markdownTermComponents } from "@/lib/highlightTerms";
 import { Icon, SECTION_ICON } from "@/components/Icon";
 import { Seg, ScreenNav } from "@/components/ui";
 
@@ -45,6 +46,11 @@ interface Props {
   onBack?: () => void;
   /** 插喺導航同視角控件之間的內容(例如大運時間線)。 */
   children?: React.ReactNode;
+  /**
+   * 渲染前對正文做確定性修復(大運流年用:小标题数字、紫微大限:無)。
+   * 渲染時應用,故 KV/歷史記錄裡的舊佔位文本也會被修復,不改存檔原文。
+   */
+  repairText?: (md: string) => string;
 }
 
 interface Slot {
@@ -56,7 +62,7 @@ interface Slot {
 /** 通用流式报告:选视角 → 各节并行调 endpoint → 每节一张卡,逐字渲染 Markdown。 */
 export function StreamedReport({
   input, endpoint, title, description, segments, onSectionDone, restoredSections,
-  collapsible, onAsk, onBack, children,
+  collapsible, onAsk, onBack, children, repairText,
 }: Props) {
   const { t, locale } = useLocale();
   const [slots, setSlots] = useState<Slot[] | null>(null);
@@ -277,7 +283,9 @@ export function StreamedReport({
                     <div className="sec-b" id={`${idBase}-${seg.key}-b`} hidden={!isOpen}>
                       {has ? (
                         <div className={`prose${s.status === "streaming" ? " is-streaming" : ""}`}>
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{stripLeadingHeading(s.text)}</ReactMarkdown>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownTermComponents}>
+                            {repairText ? repairText(stripLeadingHeading(s.text)) : stripLeadingHeading(s.text)}
+                          </ReactMarkdown>
                         </div>
                       ) : s.status === "streaming" ? (
                         <div aria-label={t("report.stateQueued")}>

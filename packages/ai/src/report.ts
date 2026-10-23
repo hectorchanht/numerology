@@ -19,7 +19,7 @@ import {
   type AiLocale,
   type TextStream,
 } from "./client.js";
-import { fixFortuneHeadings } from "./prompts.js";
+import { fixFortuneHeadings, makeFortuneLineFixer } from "./prompts.js";
 
 /**
  * 行级小标题修复流(TextStream 包装)。
@@ -79,8 +79,8 @@ class HeadingFixStream implements TextStream {
 /** 给大运流年流套上小标题修复;无 fortune 数据时原样返回。 */
 function withFortuneHeadingFix(stream: TextStream, fortune: FortuneAnalysis | undefined, locale: AiLocale): TextStream {
   if (!fortune) return stream;
-  // fixFortuneHeadings 按整段切分行;这里逐行调用等价(行与行之间无跨行状态)。
-  return new HeadingFixStream(stream, (line) => fixFortuneHeadings(line, fortune, locale));
+  // 有状态修复器:小标题形状无关修复 + 紫微大限"無"/错配修复,按行顺序喂。
+  return new HeadingFixStream(stream, makeFortuneLineFixer(fortune, locale));
 }
 
 export interface ReportResult {
