@@ -1,4 +1,4 @@
-import { chatStream, type ProviderOptions } from "@numerology/ai";
+import { chatStream, activeProviderName } from "@numerology/ai";
 import { castYijing } from "@numerology/engine";
 import { getHexagram, yaoName } from "@numerology/knowledge";
 import { ensureEnv } from "@/lib/env";
@@ -9,6 +9,7 @@ import { prepareCachedStream, type KvLike } from "@/lib/aiCache";
 import { scriptLocker } from "@/lib/script";
 import { sha256hex } from "@/lib/hash";
 import { getServerAiBindings, getWaitUntil } from "@/lib/aiBinding";
+import { resolveServerAi } from "@/lib/aiOpts";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -51,8 +52,10 @@ function buildUserText(hexNum: number, lines: number[], locale: string, question
 
 /**
  * POST /api/yijing/interpret — AI 解卦(短解讀)。
- * 強制走 Workers AI binding,與報告路由共用同一個 $2/月 KV 預算守衛
+ * 用戶可選 provider(經 AI 設定頁;請求體 `ai` 由 aiRequestParts() 帶上);
+ * 冇帶就默認 Workers AI binding,與報告路由共用同一個 $2/月 KV 預算守衛
  * (超支 → 乾淨 JSON 429,不燒錢);命中 KV 緩存則零消耗。
+ * 用戶自帶 key 的 provider 走自己的賬,不受 $2 守衛限制。
  * question 選填:用戶喺前端 toggle「AI 解卦時參考此問題」(default 開)
  * 先會送上嚟;唔送就通用解讀。有問題入緩存鍵,唔同問題唔串味。
  */
@@ -89,22 +92,20 @@ export async function POST(req: Request): Promise<Response> {
     const cast = castYijing(lines as [number, number, number, number, number, number]);
     const realHex = getHexagram(cast.hexagram)!;
 
-    const ai: ProviderOptions = {
-      provider: "workers-ai",
-      aiBinding: getServerAiBindings() ?? undefined,
-    };
+    // 用戶 AI 設定(BYOK):冇帶 → 默認 Workers AI(同以前一樣)
+    const ai = resolveServerAi(body);
     const kv = (getServerAiBindings()?.kv ?? null) as KvLike | null;
     const userText = buildUserText(realHex.number, lines as number[], locale, question);
     const cached = await prepareCachedStream(
       kv,
       {
-        provider: "workers-ai",
-        model: "",
+        provider: activeProviderName(ai),
+        model: ai?.model?.trim() ?? "",
         locale,
         lens: "",
         section: "yijing-interpret",
         inputHash: await sha256hex(JSON.stringify({ h: realHex.number, l: lines, q: question ?? "" })),
-        promptHash: await sha256hex(PROMPT_VERSION),
+        promptHash: await sha256hex(`${PROMPT_VERSION}|${(ai?.customSystemPrompt ?? "").trim()}`),
       },
       () =>
         chatStream(

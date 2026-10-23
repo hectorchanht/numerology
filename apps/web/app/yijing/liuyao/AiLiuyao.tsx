@@ -5,11 +5,13 @@ import type { YaoValue } from "@numerology/engine";
 import { streamPost } from "@/lib/streamClient";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { AiModelNote } from "@/components/AiModelNote";
+import { aiRequestParts } from "@/lib/aiSettings";
 
 /**
- * 六爻納甲 AI 解讀按鈕:走 /api/yijing/liuyao-interpret
- * (Workers AI,共用 $2/月預算守衛 + KV 緩存;不送用戶問題,純按納甲盤解讀)。
- * 預算耗盡 → 後端回乾淨 429,這裡顯示原文,不崩。
+ * 六爻納甲 AI 解讀按鈕:走 /api/yijing/liuyao-interpret。
+ * 用戶 AI 設定(經 AI 設定頁揀嘅 provider/model/key/人設)由 aiRequestParts() 帶上;
+ * 冇改過設定就默認 Workers AI(共用 $2/月預算守衛 + KV 緩存)。
+ * 不送用戶問題,純按納甲盤解讀。預算耗盡 → 後端回乾淨 429,這裡顯示原文,不崩。
  */
 export function AiLiuyao({
   lines,
@@ -29,7 +31,7 @@ export function AiLiuyao({
     setText("");
     setErr("");
     try {
-      await streamPost("/api/yijing/liuyao-interpret", { lines, date, locale }, (full) =>
+      await streamPost("/api/yijing/liuyao-interpret", { lines, date, locale, ...aiRequestParts() }, (full) =>
         setText(full),
       );
       setState("done");

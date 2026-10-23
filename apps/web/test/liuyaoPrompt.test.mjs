@@ -29,7 +29,8 @@ test("liuyaoPrompt:system 要求 400 字內兩段、先給結論", () => {
   const s = liuyaoSystemPrompt();
   assert.ok(s.includes("400字以內"));
   assert.ok(s.includes("第一段第一句先給結論"));
-  assert.ok(s.includes("世應") && s.includes("動爻") && s.includes("日辰月建"));
+  assert.ok(s.includes("世為己") && s.includes("動爻為事之機") && s.includes("日辰月建定旺衰"));
+  assert.ok(s.includes("旬空、月破、日破者無力"));
 });
 
 test("liuyaoPrompt:user 文本含本卦/變卦/納甲/動爻/日月", () => {

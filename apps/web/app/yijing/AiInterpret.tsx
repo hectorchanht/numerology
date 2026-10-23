@@ -5,9 +5,12 @@ import type { CoinLine } from "@numerology/engine";
 import { streamPost } from "@/lib/streamClient";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { AiModelNote } from "@/components/AiModelNote";
+import { aiRequestParts } from "@/lib/aiSettings";
 
 /**
- * AI 解卦按鈕:走 /api/yijing/interpret(Workers AI,共用 $2/月預算守衛 + KV 緩存)。
+ * AI 解卦按鈕:走 /api/yijing/interpret。
+ * 用戶 AI 設定(經 AI 設定頁揀嘅 provider/model/key/人設)由 aiRequestParts() 帶上;
+ * 冇改過設定就默認 Workers AI(共用 $2/月預算守衛 + KV 緩存)。
  * 預算耗盡 → 後端回乾淨 429,這裡顯示原文,不崩。
  */
 export function AiInterpret({
@@ -33,7 +36,7 @@ export function AiInterpret({
     try {
       await streamPost(
         "/api/yijing/interpret",
-        { hexagram, lines, locale, question },
+        { hexagram, lines, locale, question, ...aiRequestParts() },
         (full) => setText(full),
       );
       setState("done");

@@ -1,4 +1,4 @@
-import { chatStream, type ProviderOptions } from "@numerology/ai";
+import { chatStream, activeProviderName } from "@numerology/ai";
 import { paigua, ganzhiForDate, castYijing, type YaoValue } from "@numerology/engine";
 import { getHexagram } from "@numerology/knowledge";
 import { ensureEnv } from "@/lib/env";
@@ -9,18 +9,21 @@ import { prepareCachedStream, type KvLike } from "@/lib/aiCache";
 import { scriptLocker } from "@/lib/script";
 import { sha256hex } from "@/lib/hash";
 import { getServerAiBindings, getWaitUntil } from "@/lib/aiBinding";
+import { resolveServerAi } from "@/lib/aiOpts";
 import { buildLiuyaoUserText, liuyaoSystemPrompt } from "@/lib/liuyaoPrompt";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
-/** prompt 版本:改 prompt 即換緩存鍵,不串味。 */
-const PROMPT_VERSION = "liuyao-interpret/v1";
+/** prompt 版本:改 prompt 即換緩存鍵,不串味。v2:加斷卦要點 primer。 */
+const PROMPT_VERSION = "liuyao-interpret/v2";
 
 /**
  * POST /api/yijing/liuyao-interpret — 六爻納甲 AI 解讀。
- * 強制走 Workers AI binding,與其他 AI 路由共用同一個 $2/月 KV 預算守衛
+ * 用戶可選 provider(經 AI 設定頁;請求體 `ai` 由 aiRequestParts() 帶上);
+ * 冇帶就默認 Workers AI binding,與其他 AI 路由共用同一個 $2/月 KV 預算守衛
  * (超支 → 乾淨 JSON 429,不燒錢);命中 KV 緩存則零消耗。
+ * 用戶自帶 key 的 provider 走自己的賬,不受 $2 守衛限制。
  * 不收用戶問題:純按納甲盤解讀(privacy:不送任何個人資料,連日期都只用來取日辰月建)。
  */
 export async function POST(req: Request): Promise<Response> {
@@ -56,10 +59,8 @@ export async function POST(req: Request): Promise<Response> {
     if (!ben) throw new Error("非法請求: 找不到本卦");
     const bian = cast.changed ? getHexagram(cast.changed) : undefined;
 
-    const ai: ProviderOptions = {
-      provider: "workers-ai",
-      aiBinding: getServerAiBindings() ?? undefined,
-    };
+    // 用戶 AI 設定(BYOK):冇帶 → 默認 Workers AI(同以前一樣)
+    const ai = resolveServerAi(body);
     const kv = (getServerAiBindings()?.kv ?? null) as KvLike | null;
     const userText = buildLiuyaoUserText({
       benName: `${ben.symbol} ${ben.name}`,
@@ -71,13 +72,13 @@ export async function POST(req: Request): Promise<Response> {
     const cached = await prepareCachedStream(
       kv,
       {
-        provider: "workers-ai",
-        model: "",
+        provider: activeProviderName(ai),
+        model: ai?.model?.trim() ?? "",
         locale,
         lens: "",
         section: "liuyao-interpret",
         inputHash: await sha256hex(JSON.stringify({ h: ben.number, l: lines, d: dateStr })),
-        promptHash: await sha256hex(PROMPT_VERSION),
+        promptHash: await sha256hex(`${PROMPT_VERSION}|${(ai?.customSystemPrompt ?? "").trim()}`),
       },
       () =>
         chatStream(
