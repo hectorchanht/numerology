@@ -5,14 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "cd ../.. && npm run build -w @numerology/knowledge -w @numerology/engine -w @numerology/ai && cd apps/web && next build",
+    "build": "cd ../.. && npm run build -w @numerology/knowledge -w @numerology/engine -w @numerology/ai -w @dawn-studio/pronounce && cd apps/web && next build",
     "start": "next start -p 3000",
     "pretest": "tsc -p tsconfig.test.json",
     "test": "node --test \"test/*.test.mjs\""
   },
   "dependencies": {
+    "@dawn-studio/pronounce": "*",
     "@numerology/ai": "*",
     "@numerology/engine": "*",
+    "framer-motion": "^14.6.0",
     "next": "14.2.35",
     "react": "18.3.1",
     "react-dom": "18.3.1",

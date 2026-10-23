@@ -11,7 +11,7 @@
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "tsc --build",
-    "cf:pages": "npm run build -w @numerology/knowledge -w @numerology/engine -w @numerology/ai && cd apps/web && npx @cloudflare/next-on-pages"
+    "cf:pages": "npm run build -w @numerology/knowledge -w @numerology/engine -w @numerology/ai -w @dawn-studio/pronounce && cd apps/web && npx @cloudflare/next-on-pages"
   },
   "engines": {
     "node": ">=18.17"

@@ -19,6 +19,7 @@ import {
 // 相對引用(非 @/):node --test 經 test-dist 執行時 @/ 無法解析,
 // Next 端經 extensionAlias 同樣解到 ./i18n.ts,同一模組。
 import { useLocale } from "./i18n.js";
+import { PronounceButton } from "@dawn-studio/pronounce";
 
 /* ── 合併術語表 ─────────────────────────────────────────────── */
 
@@ -170,13 +171,24 @@ export function Term({ term }: { term: string }) {
           "span",
           {
             style: {
-              display: "block",
-              fontFamily: "var(--serif)",
-              color: "var(--cinnabar)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "0.5rem",
               marginBottom: "0.25rem",
             },
           },
-          def.term,
+          createElement(
+            "span",
+            {
+              style: {
+                fontFamily: "var(--serif)",
+                color: "var(--cinnabar)",
+              },
+            },
+            def.term,
+          ),
+          createElement(PronounceButton, { text: def.term, locale }),
         ),
         def[locale] ?? def.zht,
       ),

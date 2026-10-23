@@ -1,0 +1,29 @@
+{
+  "description": "Tiny reusable Cantonese/Mandarin pronunciation button: Web Speech API TTS (zero cost, on-device) + Framer Motion physics micro-interactions.",
+  "devDependencies": {
+    "@types/react": "18.3.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "main": "./dist/index.js",
+  "name": "@dawn-studio/pronounce",
+  "peerDependencies": {
+    "framer-motion": ">=11",
+    "react": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test test/smoke.test.mjs"
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "version": "0.1.0"
+}
