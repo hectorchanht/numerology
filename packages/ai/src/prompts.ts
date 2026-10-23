@@ -1,6 +1,8 @@
 /** AI 输出语言(与界面语言开关对应)。默认繁体(zht)。 */
 export type AiLocale = "zht" | "zhs" | "en";
 
+import type { FortuneAnalysis } from "@numerology/engine";
+
 /**
  * 输出语言指令 —— 追加到 system 末尾,不碰命盘事实块(干支/星曜名三地皆同)。
  * 放在最后一条 system block,Anthropic 的 prompt cache 前缀(人设 + 命盘)不受影响。
@@ -103,28 +105,60 @@ ${sections}
 }
 
 /**
- * 数字铁律:【动态运势】里每个大运/流年都自带确切数字,输出必须逐字照抄。
- * 背景:模型曾输出"戊辰運（- 歲/-）""年（辛丑年）"这类空位,根因是 prompt
- * 从未明确要求写数字。逐字照抄是唯一解法;数字绝不自己推算。
+ * 小标题清单(原样照抄用)。
+ * 实测教训(2026-10-22 live):只给"格式模板 + 逐字照抄"不够——模型会照着模板的
+ * 形状填占位符,输出 `### 甲寅運（–歲／–年）`(en dash 占位,连禁例都换了符号绕过)。
+ * 解法是把本节每个小标题的**成品行**直接列出来,让模型逐行复制,不做任何格式转换。
+ * 干支/星曜名在 en 下也保留汉字(与 localeDirective 的专有名词规则一致)。
  */
-const FORTUNE_NUMBERS_RULE = `【数字铁律·逐字照抄】
-- 每步大运的小标题格式:「干支運（X–Y歲／YYYY–YYYY年）」,如「## 戊辰運（2–11歲／1995–2004年）」。❌ 禁例:「## 戊辰運（- 歲/-）」。
-- 每个流年的小标题格式:「YYYY年（干支，Z歲）」,如「## 2021年（辛丑，28歲）」。❌ 禁例:「## 年（辛丑年）」。
+function fortuneHeadingLedger(segKey: string, fortune: FortuneAnalysis, locale: AiLocale): string {
+  const dayunLine = (d: { ganZhi: string; startAge: number; endAge: number; startYear: number; endYear: number }) => {
+    if (locale === "en")
+      return `### ${d.ganZhi} Luck Period (ages ${d.startAge}–${d.endAge} / ${d.startYear}–${d.endYear})`;
+    const yun = locale === "zhs" ? "运" : "運";
+    const sui = locale === "zhs" ? "岁" : "歲";
+    return `### ${d.ganZhi}${yun}（${d.startAge}–${d.endAge}${sui}／${d.startYear}–${d.endYear}年）`;
+  };
+  const yearLine = (y: { year: number; ganZhi: string; age: number }) => {
+    if (locale === "en") return `### ${y.year} (${y.ganZhi}, age ${y.age})`;
+    const sui = locale === "zhs" ? "岁" : "歲";
+    return `### ${y.year}年（${y.ganZhi}，${y.age}${sui}）`;
+  };
+  const f = fortune.bazi;
+  let lines: string[];
+  if (segKey === "dayun") lines = f.daYun.map(dayunLine);
+  else if (segKey === "review") lines = f.liuNian.filter((y) => y.isPast).map(yearLine);
+  else if (segKey === "future") lines = f.liuNian.filter((y) => !y.isPast).map(yearLine);
+  else return "";
+  if (!lines.length) return "";
+  return `【小标题清单·原样照抄】
+本节每个小标题必须从下面逐行**原样照抄,一字不改**(含全角/半角标点与空格),不许改写、不许合并、不许留空:
+${lines.join("\n")}`;
+}
+
+/**
+ * 数字铁律。数字绝不自己推算;小标题从【小标题清单】照抄是唯一解法。
+ */
+const FORTUNE_NUMBERS_RULE = `【数字铁律·小标题原样照抄】
+- 下面【小标题清单】给出了本节每个小标题的**标准成品行**——输出时逐行**原样照抄,一字不改**,不做任何格式转换。
+- ❌ 禁例:「## 戊辰運（- 歲/-）」「### 甲寅運（–歲／–年）」——用 -/–/—/… 占位的写法一律禁止;小标题里出现任何占位符 = 整节作废,必须重写。
 - 正文中提到某运/某年时,同样带上岁数与年份(如"1995–2004 这步运"),不写"这步运""那一年"这类无数字指代。`;
 
 /**
  * 去套话纪律(按节定制)。模型会镜像 prompt 的啰嗦,故指令本身必须短;
  * 具体机制要求:写"补益/受困"必须同时写出机制(哪个干支/哪颗星→哪个宫→什么效果),
  * 否则删掉这句。
+ * 2026-10-22 live 复盘:模型会把上下文当填空模板——逐字翻译每行数据、每步固定句式。
+ * 故纪律必须点名禁止这几种机械行为。
  */
 function fortuneAntiRepetition(key: string): string {
   const mechanism = `形容词必须有信息量:每个"补益/受困/顺利"判断必须写出机制(哪个天干/哪颗星、作用在哪个宫、产生什么效果),写不出机制就删掉这句,不要留空话。`;
   switch (key) {
     case "dayun":
-      return `【本节纪律】每步大运最多 3–4 句,只锚定**这一步独有**的东西:它的十神组合、它的**同期大限**(见每步的 └ 大限行,各步不同、不要套用当前大限)、它与命局的刑冲合会。**严禁**把同一套句式套到每一步(如"忌星飛入夫妻宮,感情方面可能有波動"连写 N 次)——某步没有独特信息就一句话带过,不硬凑。${mechanism}`;
+      return `【本节纪律】每步大运 3–4 句,只写**这一步独有**的判断。**严禁**:(1)把支藏十神逐个列出再机械复述"A与B相合、C与D相刑"——只点对本运有实质影响的一两个组合;(2)把禄权科忌飞宫逐个报一遍("禄星飞入X宫,权星飞入Y宫…")——只解读真正起作用的(通常是忌和禄),不重要的不提;(3)固定句式"天干X,支藏…,大限…,主题是…"——各步换切入点(有的先讲大限、有的先讲十神、有的先讲与命局的冲合);(4)定性句在"顺利/平稳/挑战/机遇"里轮换——必须说出这步独一无二的特征;(5)段落以 –/— 开头当项目符号。上下文是原料不是提纲:不要把每行数据翻译成一句话。同期大限看各步自己的 └ 大限行,不要套用当前大限。${mechanism}`;
     case "review":
     case "future":
-      return `【本节纪律】每年 2–3 句,只讲**这一年独有**的切入点(该年十神 + 该年四化的组合效果)。**严禁**"分析/主题/机会/风险"四段式填表模板。${mechanism}`;
+      return `【本节纪律】每年 2–3 句,只讲**这一年独有**的切入点。**严禁**"分析/主题/机会/风险"四段式填表,也严禁把上下文数据逐行翻译成句子——上下文是原料不是提纲,只拣对判断有用的写。${mechanism}`;
     case "rhythm":
       return `【本节纪律】**只列转折点清单**:换运/换限年份、最强发力期、最需谨慎期,每项一句话给理由。**严禁**把前面讲过的内容再解释一遍——这里是目录,不是重播。`;
     default:
@@ -142,14 +176,17 @@ function fortuneAntiRepetition(key: string): string {
  */
 const FORTUNE_STYLE_RULES = `【表达风格】
 - 每步大运/每年开头先给**一句话定性**(如"这步运是先抑后扬的翻身运"),再展开依据;不要"可能是X也可能是Y"。
-- 术语第一次出现就用日常类比翻译成人话(如"伤官就像心里那股不服管的劲"),每节一两个类比足矣。
+- 术语第一次出现就用日常类比翻译成人话(如"伤官就像心里那股不服管的劲"——这是例子,类比自己造,不要照抄),每节一两个类比足矣。
 - ❌ 禁止的废话开场:「值得注意的是」「总体而言」「整体上是XX的」「需要多加注意」——要么删掉,要么换成有信息量的说法(如「有个反常的地方:……」)。
 - 【断语纪律】绝不编造古籍断语原文来装权威:引用断语只能用命盘事实里**明确出现**的原话;想借传统说法时,必须写成"传统有此一说"(表明是传闻口径、非本盘实证),不许写成"古书云:……"式伪引文。`;
 
 /** 组装《大运流年深析》的用户指令——八字 × 紫微合参,逐步逐年,不限篇幅。locale 决定章节标题的语言。 */
-export function buildFortuneReportPrompt(caveats: string[], locale: AiLocale = "zht"): string {
+export function buildFortuneReportPrompt(caveats: string[], locale: AiLocale = "zht", fortune?: FortuneAnalysis): string {
   const caveatBlock = caveats.length
     ? `\n\n【必须遵守的注意事项(在相关结论处自然带出)】\n` + caveats.map((c) => "- " + c).join("\n")
+    : "";
+  const ledger = fortune
+    ? ["dayun", "review", "future"].map((k) => fortuneHeadingLedger(k, fortune, locale)).filter(Boolean).join("\n\n")
     : "";
   return `请基于上方命盘事实(尤其【动态运势】数据),输出一份专门、深入的《大运流年深析》,用 Markdown。这是对"运"的专题分析——运在一生中占主导,务必详实。核心方法是【八字与紫微全程合参】:每一处都同时从两套体系看,印证或分歧都讲明。
 
@@ -186,6 +223,7 @@ export function buildFortuneReportPrompt(caveats: string[], locale: AiLocale = "
 
 要求:八字与紫微务必【全程合参】,每个结论指出依据(哪步运/哪年、什么十神/什么四化飞哪宫);判断要直接、敢断、不和稀泥,但**严格区分"命盘能给的领域与吉凶倾向(可肯定)"和"具体事件(不可编造)"**;年份均按"倾向应期、可能±1年"对待。
 ${FORTUNE_NUMBERS_RULE}
+${ledger}
 【去套话】各步大运/各年只讲独有信息,不重复同一句式;每步大运看**它自己的同期大限**(动态运势里每步的 └ 大限行),不要把当前大限套到每一步;形容词必须带机制(哪个干支/哪颗星→哪个宫→什么效果),写不出就删。
 ${FORTUNE_STYLE_RULES}${caveatBlock}`;
 }
@@ -297,18 +335,21 @@ ${lensDirective(lens)}
 }
 
 /** 单节《大运流年深析》指令(分段模式)。lens 决定纯八字/纯紫微/合参;locale 决定小标题语言。 */
-export function buildFortuneSectionPrompt(caveats: string[], seg: ReportSegment, lens: ReportLens = "both", locale: AiLocale = "zht"): string {
+export function buildFortuneSectionPrompt(caveats: string[], seg: ReportSegment, lens: ReportLens = "both", locale: AiLocale = "zht", fortune?: FortuneAnalysis): string {
   const title = segmentTitle(seg.key, locale);
   const basis =
     lens === "bazi" ? "(哪步大运/哪年、什么十神、是否引动喜用神)" :
     lens === "ziwei" ? "(哪步大限/哪年、什么四化飞入哪宫)" :
     "(哪步运/哪年、什么十神/什么四化飞哪宫)";
+  const ledger = fortune ? fortuneHeadingLedger(seg.key, fortune, locale) : "";
   return `请基于上方命盘事实(尤其【动态运势】数据),**只**写《大运流年深析》中的这一节:「${title}」。每个结论挂依据${basis}。
 本节要点:${seg.instruction}
 
 ${lensDirective(lens)}
 
 ${FORTUNE_NUMBERS_RULE}
+
+${ledger}
 
 ${fortuneAntiRepetition(seg.key)}
 
