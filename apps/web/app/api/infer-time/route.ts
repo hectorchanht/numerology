@@ -6,6 +6,7 @@ import { streamToPrimedResponse } from "@/lib/stream";
 import { primeTimeoutMs } from "@/lib/primeTimeout";
 import { errorResponse } from "@/lib/http";
 import { resolveServerAi } from "@/lib/aiOpts";
+import { lockTextStream, scriptLocker } from "@/lib/script";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -27,7 +28,8 @@ export async function POST(req: Request): Promise<Response> {
     const candidates = castHourCandidates(input);
     const locale = body.locale === "zhs" || body.locale === "en" ? body.locale : "zht";
     const ai = resolveServerAi(body);
-    return await streamToPrimedResponse(streamHourInference(candidates, history, message, { ai, locale }), primeTimeoutMs(ai));
+    const stream = lockTextStream(streamHourInference(candidates, history, message, { ai, locale }), await scriptLocker(locale));
+    return await streamToPrimedResponse(stream, primeTimeoutMs(ai));
   } catch (err) {
     return errorResponse(err, { fallback: "时辰推断失败", stage: "ai" });
   }

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { BirthInput, ChartResult, FortuneAnalysis } from "@numerology/engine";
 import type { BirthFormValue } from "@/lib/formTypes";
-import { useLocale } from "@/lib/i18n";
+import { useLocale, useScript } from "@/lib/i18n";
 import { go, goBack, useNav, type Screen } from "@/lib/nav";
 import { setChatAvailable } from "@/lib/chatJump";
 import { currentLuckStep } from "@/lib/ganzhi";
@@ -49,6 +49,7 @@ function sectionsOf(r: Reading): Restored {
 
 export default function Home() {
   const { t, locale } = useLocale();
+  const { z } = useScript();
   const { screen } = useNav();
   const [mode, setMode] = useState<Mode>("known");
   const [sys, setSys] = useState<Sys>("bazi");
@@ -254,7 +255,7 @@ export default function Home() {
                     {String(ready.chart.input.minute ?? 0).padStart(2, "0")} · {ready.chart.input.gender}
                   </div>
                   <div className="meta">
-                    {ready.chart.bazi.lunarDate} ·{" "}
+                    {z(ready.chart.bazi.lunarDate)} ·{" "}
                     {ready.chart.meta.trueSolarTimeApplied
                       ? t("chart.corrected", { lon: ready.chart.meta.correction?.longitude ?? "", off: ready.chart.meta.correction?.offsetMinutes ?? "" })
                       : t("chart.notCorrected")}

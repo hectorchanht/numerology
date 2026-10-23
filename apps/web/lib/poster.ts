@@ -1,47 +1,17 @@
 import type { BirthInput } from "@numerology/engine";
 import { yjT, yjFmt, type YijingLocale } from "./yijingStrings.js";
+import { lockScript } from "./script.js";
 
 /**
  * 命盤海報(/poster)的純邏輯層(無 DOM、可測試):
- * 1. 術語跟語言:引擎 / iztro 一律輸出簡體(七杀、命宫…),呢度按 locale 轉返。
+ * 1. 術語跟語言:引擎 / iztro 一律輸出簡體(七杀、命宫…),呢度經 lockScript 按 locale 轉返。
  * 2. 海報資料模型:畫面同導出 PNG 共用同一份 model,保證兩邊字眼一致。
  * 3. Canvas 版面:layoutPoster 只計座標、出繪圖指令;paintPoster 先至落 ctx。
  * 生辰私隱:導出用 includeBirth:false,model 根本冇生辰字串,畫布無從洩漏。
  */
 
 /* ———————————————————— 1. 術語本地化 ———————————————————— */
-
-/**
- * 海報用到嘅簡→繁字表(只覆蓋引擎輸出嘅領域字:十神、十二宮、十四主星、農曆月名、歲)。
- * 唔用通用簡繁轉換庫:領域字有限,手寫表零依賴、可逐字測試。
- */
-const S2T: Record<string, string> = {
-  杀: "殺", 财: "財", 伤: "傷", 机: "機", 阳: "陽", 阴: "陰", 岁: "歲", 宫: "宮",
-  禄: "祿", 仆: "僕", 迁: "遷", 贪: "貪", 门: "門", 贞: "貞", 军: "軍", 权: "權",
-  腊: "臘", 闰: "閏", 运: "運", 时: "時", 历: "曆", 农: "農",
-};
-const T2S: Record<string, string> = Object.fromEntries(Object.entries(S2T).map(([s, t]) => [t, s]));
-// 曆/历:簡體「农历」嘅历對應繁體「曆」,反向表補返「歷」→历
-T2S["歷"] = "历";
-
-/** 已知簡體獨有字(測試用:zht 輸出唔應該出現)。 */
-export const SIMPLIFIED_ONLY: readonly string[] = Object.keys(S2T);
-
-function mapChars(s: string, table: Record<string, string>): string {
-  let out = "";
-  for (const ch of s) out += table[ch] ?? ch;
-  return out;
-}
-
-/** 簡 → 繁(海報領域字)。 */
-export function toZht(s: string): string {
-  return mapChars(s, S2T);
-}
-
-/** 繁 → 簡(海報領域字;引擎本身出簡體,呢個主要防舊記錄存咗繁體)。 */
-export function toZhs(s: string): string {
-  return mapChars(s, T2S);
-}
+// 簡⇄繁一律經 lib/script.ts(@dawn-studio/zh-convert);調用方要先 warmScriptFor,冷時原樣返回。
 
 /** 十神 + 十二宮英文名(跟 knowledge 包 MINGLI_GLOSSARY 嘅英文釋義用字一致)。key 用繁體。 */
 const TERM_EN: Record<string, string> = {
@@ -59,10 +29,8 @@ const TERM_EN: Record<string, string> = {
  */
 export function posterTerm(s: string, loc: YijingLocale): string {
   if (!s) return s;
-  if (loc === "zhs") return toZhs(s);
-  const t = toZht(s);
-  if (loc === "en") return TERM_EN[t] ?? t;
-  return t;
+  const t = lockScript(s, loc);
+  return loc === "en" ? TERM_EN[t] ?? t : t;
 }
 
 /**
@@ -70,7 +38,7 @@ export function posterTerm(s: string, loc: YijingLocale): string {
  * (干支字本身簡繁同形,轉換係 no-op。)
  */
 export function posterName(s: string, loc: YijingLocale): string {
-  return loc === "zhs" ? toZhs(s) : toZht(s);
+  return lockScript(s, loc);
 }
 
 /** 生成日期按當前語言格式化(唔用瀏覽器系統語言,避免 zht 頁出簡體/英文日期)。 */

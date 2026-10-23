@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useLocale } from "@/lib/i18n";
+import { useLocale, useScript } from "@/lib/i18n";
 import { listReadings, type Reading } from "@/lib/history";
 import { currentLuckStep } from "@/lib/ganzhi";
 import { go } from "@/lib/nav";
@@ -40,6 +40,8 @@ function useThemeTick(): number {
 
 export default function ChartPoster() {
   const { locale } = useLocale();
+  // z 喺簡繁字典熱咗之後換新 identity → model / 預畫 PNG 重建一次,之後點擊導出零等待
+  const { z } = useScript();
   const loc = locale as YijingLocale;
   const [reading, setReading] = useState<Reading | null | undefined>(undefined);
   const paperRef = useRef<HTMLDivElement>(null);
@@ -71,7 +73,7 @@ export default function ChartPoster() {
   }, [reading]);
 
   /** 屏幕版:含生辰,方便用戶核對係咪啱嗰個盤。 */
-  const screen = useMemo(() => (src ? buildPosterModel(src, loc, { includeBirth: true }) : null), [src, loc]);
+  const screen = useMemo(() => (src ? buildPosterModel(src, loc, { includeBirth: true }) : null), [src, loc, z]);
 
   /** 導出版:includeBirth:false → model 內根本冇生辰,PNG 唔會洩漏。 */
   const renderPng = useCallback((): Promise<Blob> | null => {
@@ -79,7 +81,7 @@ export default function ChartPoster() {
     const p = renderPosterPng(buildPosterModel(src, loc, { includeBirth: false }), paperRef.current);
     p.catch(() => {}); // 錯誤留俾點擊時處理
     return p;
-  }, [src, loc]);
+  }, [src, loc, z]);
 
   useEffect(() => {
     setFailed(false);

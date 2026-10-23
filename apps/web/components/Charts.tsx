@@ -1,7 +1,7 @@
 "use client";
 
 import type { ChartResult } from "@numerology/engine";
-import { useLocale, type TKey } from "@/lib/i18n";
+import { useLocale, useScript, type TKey } from "@/lib/i18n";
 import {
   WUXING, wuxingCount, wuxingHiddenCount, ganWuXing, currentLuckStep, useGodSignal, yearGanZhi,
   type UseGodSignal,
@@ -62,6 +62,7 @@ export function WuxingChart({ chart }: { chart: ChartResult }) {
 /** 命盤摘要卡:日主/月令、調候用神、五行旺缺、紫微命宮、五行局、當前大運——一眼睇晒。 */
 export function ChartSummary({ chart }: { chart: ChartResult }) {
   const { t } = useLocale();
+  const { z } = useScript();
   const { bazi, ziwei } = chart;
   const ps = PILLAR_KEYS.map((k) => bazi.fourPillars[k]);
   const vis = wuxingCount(ps);
@@ -70,14 +71,14 @@ export function ChartSummary({ chart }: { chart: ChartResult }) {
   const strongest = WUXING.filter((k) => vis[k] === top);
   const missing = WUXING.filter((k) => vis[k] + hid[k] === 0);
   const soul = ziwei.palaces.find((p) => p.isSoulPalace);
-  const soulStars = soul?.majorStars.map((s) => s.name).join("、") || t("zw.noMajor");
+  const soulStars = z(soul?.majorStars.map((s) => s.name).join("、")) || t("zw.noMajor");
   const now = currentLuckStep(bazi);
 
   const tiles: { k: TKey; v: string; sub?: string; accent?: boolean }[] = [
-    { k: "baziT.kvDayMaster", v: `${bazi.dayMaster} · ${bazi.dayWuXing}`, sub: `${t("baziT.yueling")} ${bazi.monthBranch}`, accent: true },
+    { k: "baziT.kvDayMaster", v: z(`${bazi.dayMaster} · ${bazi.dayWuXing}`), sub: `${t("baziT.yueling")} ${bazi.monthBranch}`, accent: true },
     {
       k: "viz.useGod",
-      v: bazi.tiaohou.useGods.join("、"),
+      v: z(bazi.tiaohou.useGods.join("、")),
       sub: bazi.tiaohou.reviewed ? t("viz.useGodSub") : t("baziT.pending"),
     },
     {
@@ -86,7 +87,7 @@ export function ChartSummary({ chart }: { chart: ChartResult }) {
       sub: missing.length ? t("viz.wxMissing", { el: missing.join("") }) : t("viz.wxAll"),
     },
     { k: "viz.soulStars", v: soulStars, sub: t("zw.soulBody", { a: ziwei.soulPalaceBranch, b: ziwei.bodyPalaceBranch }) },
-    { k: "viz.fiveClass", v: ziwei.fiveElementsClass, sub: `${t("baziT.kvSoulLord")} ${ziwei.soul} · ${t("baziT.kvBodyLord")} ${ziwei.body}` },
+    { k: "viz.fiveClass", v: z(ziwei.fiveElementsClass), sub: `${t("baziT.kvSoulLord")} ${z(ziwei.soul)} · ${t("baziT.kvBodyLord")} ${z(ziwei.body)}` },
     {
       k: "viz.nowLuck",
       v: now ? now.ganZhi : "—",

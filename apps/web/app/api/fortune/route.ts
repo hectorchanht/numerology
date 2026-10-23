@@ -7,6 +7,7 @@ import { primeTimeoutMs } from "@/lib/primeTimeout";
 import { errorResponse } from "@/lib/http";
 import { resolveServerAi } from "@/lib/aiOpts";
 import { prepareCachedStream, type KvLike } from "@/lib/aiCache";
+import { scriptLocker } from "@/lib/script";
 import { stableInputHash, sha256hex } from "@/lib/hash";
 import { getServerAiBindings, getWaitUntil } from "@/lib/aiBinding";
 
@@ -42,6 +43,7 @@ export async function POST(req: Request): Promise<Response> {
         section
           ? streamFortuneSection(chart, section, { fortune, ai, lens, locale })
           : streamFortuneReport(chart, { fortune, ai, locale }),
+      await scriptLocker(locale),
     );
     if ("hit" in cached) return cached.hit;
     // section 存在 → 只生成该节(分段模式,每节 <60s);缺省 → 整篇(CLI 兼容)。

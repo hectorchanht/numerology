@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ACADEMY_LESSONS, loadProgress, type AcademyProgress } from "./lessons";
-import { useLocale } from "@/lib/i18n";
+import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { withTermHighlights } from "@/lib/highlightTerms";
 
 /** 課程首頁:四課列表 + localStorage 進度。 */
 export default function AcademyIndexPage() {
   const { locale } = useLocale();
+  const { zT } = useScript();
   const loc = locale as YijingLocale;
   const [progress, setProgress] = useState<AcademyProgress>({});
 
@@ -137,9 +138,9 @@ export default function AcademyIndexPage() {
                 >
                   <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>{l.title}</div>
+                      <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>{zT(l.title)}</div>
                       <div className="muted" style={{ marginTop: "0.25rem" }}>
-                        {l.sub} · {yjT("academy.minutes", loc).replace("{n}", String(l.minutes))}
+                        {zT(l.sub)} · {yjT("academy.minutes", loc).replace("{n}", String(l.minutes))}
                         {p?.done &&
                           ` · ${yjT("academy.best", loc).replace("{s}", String(p.best)).replace("{t}", String(p.total))}`}
                       </div>

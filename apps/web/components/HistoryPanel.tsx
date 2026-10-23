@@ -9,7 +9,7 @@ import {
   summarizeInput,
   type Reading,
 } from "@/lib/history";
-import { useLocale } from "@/lib/i18n";
+import { useLocale, useScript } from "@/lib/i18n";
 import { Icon } from "@/components/Icon";
 
 function fmtTime(ts: number): string {
@@ -28,6 +28,7 @@ function countSections(r: Reading, prefix: "report:" | "fortune:"): number {
  */
 export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void }) {
   const { t } = useLocale();
+  const { z } = useScript();
   const [items, setItems] = useState<Reading[]>([]);
   const [q, setQ] = useState("");
 
@@ -87,7 +88,7 @@ export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void })
                     <span className="avatar" aria-hidden="true">{r.input.gender}</span>
                     <span className="lbl">
                       {summarizeInput(r.input)}
-                      <span className="sub">{r.chart?.bazi?.lunarDate}</span>
+                      <span className="sub">{z(r.chart?.bazi?.lunarDate)}</span>
                       {rep || fot ? (
                         <span className="badges">
                           {rep ? <span className="tag">{t("history.reportBadge", { n: rep })}</span> : null}

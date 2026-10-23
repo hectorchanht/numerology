@@ -1,5 +1,6 @@
 import type { TextStream } from "@numerology/ai";
 import { sha256hex } from "./hash.js";
+import { lockTextStream } from "./script.js";
 
 /**
  * AI 响应服务端缓存(省 Workers AI 预算)。
@@ -67,16 +68,21 @@ export interface CachedStream {
  * 缓存编排:先查 KV,命中直接返回 Response(`X-Cache: HIT`);未命中则创建
  * tee 包装的流,调用方走完 streamToPrimedResponse 后调 `armPersistence()`
  * 注册后台写入(`X-Cache: MISS`)。
+ *
+ * `lock`(scriptLocker 出嚟,可选):字形鎖。MISS → 先鎖字再 tee,所以直播同寫入
+ * 緩存嘅都係已轉換正文;HIT → 再鎖一次(冪等,順手修正舊緩存),純 CPU 零 AI 調用。
  */
 export async function prepareCachedStream(
   kv: KvLike | null,
   parts: AiCacheKeyParts,
   makeStream: () => TextStream,
+  lock: ((s: string) => string) | null = null,
 ): Promise<{ hit: Response } | { miss: CachedStream }> {
   const key = await aiCacheKey(parts);
   if (kv) {
     try {
-      const hit = await kv.get(key);
+      const raw = await kv.get(key);
+      const hit = raw && lock ? lock(raw) : raw;
       if (hit) {
         return {
           hit: new Response(hit, {
@@ -92,7 +98,7 @@ export async function prepareCachedStream(
       /* 读失败按 miss 处理 */
     }
   }
-  const { stream, acc } = teeTextStream(makeStream());
+  const { stream, acc } = teeTextStream(lockTextStream(makeStream(), lock));
   return {
     miss: {
       stream,

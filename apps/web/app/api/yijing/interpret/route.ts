@@ -6,6 +6,7 @@ import { streamToPrimedResponse } from "@/lib/stream";
 import { primeTimeoutMs } from "@/lib/primeTimeout";
 import { errorResponse } from "@/lib/http";
 import { prepareCachedStream, type KvLike } from "@/lib/aiCache";
+import { scriptLocker } from "@/lib/script";
 import { sha256hex } from "@/lib/hash";
 import { getServerAiBindings, getWaitUntil } from "@/lib/aiBinding";
 
@@ -102,6 +103,8 @@ export async function POST(req: Request): Promise<Response> {
           },
           ai,
         ),
+      // SYS 固定要求繁體 → zhs 頁面靠字形鎖轉返簡體
+      await scriptLocker(locale),
     );
     if ("hit" in cached) return cached.hit;
     const resp = await streamToPrimedResponse(cached.miss.stream, primeTimeoutMs(ai));

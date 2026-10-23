@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { castMeihua, type MeihuaResult } from "@numerology/engine";
 import { getHexagram, TRIGRAM_INFO, yaoName } from "@numerology/knowledge";
-import { useLocale } from "@/lib/i18n";
+import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { AiInterpret } from "../AiInterpret";
 import { Term, withTermHighlights } from "@/lib/highlightTerms";
@@ -71,6 +71,8 @@ function toLocalInputValue(d: Date): string {
 
 export default function MeihuaPage() {
   const { locale } = useLocale();
+  // 梅花引擎 / 卦爻辭係繁體正本 → zT(只喺 zhs 轉)
+  const { zT } = useScript();
   const loc = locale as YijingLocale;
   const [dt, setDt] = useState(() => toLocalInputValue(new Date()));
   const [castKey, setCastKey] = useState(0);
@@ -168,10 +170,10 @@ export default function MeihuaPage() {
             <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>
               {yjT("meihua.verdict", loc)} ·{" "}
               <span style={{ color: VERDICT_TONE[result.verdict.level] }}>
-                {result.verdict.level}
+                {zT(result.verdict.level)}
               </span>
             </h3>
-            <p style={{ margin: "0 0 0.4rem" }}>{result.verdict.oneLiner}</p>
+            <p style={{ margin: "0 0 0.4rem" }}>{zT(result.verdict.oneLiner)}</p>
             <p className="muted" style={{ margin: 0 }}>
               <QuoteRef entry={TIYONG_QUOTE} />
             </p>
@@ -184,19 +186,19 @@ export default function MeihuaPage() {
               <div style={{ display: "flex", alignItems: "baseline", gap: "0.7rem", flexWrap: "wrap" }}>
                 <span style={{ fontSize: "2.6rem", lineHeight: 1 }}>{ben.symbol}</span>
                 <span style={{ fontFamily: "var(--serif)", fontSize: "1.5rem" }}>
-                  <Term term="本卦" /> · {ben.name}
+                  <Term term="本卦" /> · {zT(ben.name)}
                 </span>
                 <span className="muted">#{ben.number}</span>
               </div>
               <p style={{ marginTop: "0.4rem" }}>
                 <span className="badge badge-warn">
-                  {yjT("meihua.moving", loc)}: {yaoName(ben, result.movingLine)}
+                  {yjT("meihua.moving", loc)}: {zT(yaoName(ben, result.movingLine))}
                 </span>
               </p>
               <p style={{ marginTop: "0.7rem" }}>
                 <Term term="卦辭" />:{" "}
                 <span style={{ fontFamily: "var(--serif)", fontSize: "1.05rem" }}>
-                  {withTermHighlights(ben.judgment)}
+                  {withTermHighlights(ben.judgment, zT)}
                 </span>
               </p>
             </div>
@@ -208,10 +210,10 @@ export default function MeihuaPage() {
                 <div className="card" style={{ marginTop: 0 }}>
                   <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>
                     <span style={{ fontSize: "1.8rem", marginRight: "0.5rem" }}>{bian.symbol}</span>
-                    <Term term="變卦" /> · {bian.name}
+                    <Term term="變卦" /> · {zT(bian.name)}
                   </h3>
                   <p style={{ margin: 0, fontSize: "0.92rem" }}>
-                    <Term term="卦辭" />: {withTermHighlights(bian.judgment)}
+                    <Term term="卦辭" />: {withTermHighlights(bian.judgment, zT)}
                   </p>
                 </div>
               )}
@@ -219,10 +221,10 @@ export default function MeihuaPage() {
                 <div className="card" style={{ marginTop: 0 }}>
                   <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>
                     <span style={{ fontSize: "1.8rem", marginRight: "0.5rem" }}>{hu.symbol}</span>
-                    <Term term="互卦" /> · {hu.name}
+                    <Term term="互卦" /> · {zT(hu.name)}
                   </h3>
                   <p style={{ margin: 0, fontSize: "0.92rem" }}>
-                    <Term term="卦辭" />: {withTermHighlights(hu.judgment)}
+                    <Term term="卦辭" />: {withTermHighlights(hu.judgment, zT)}
                   </p>
                 </div>
               )}

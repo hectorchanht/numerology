@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ChartResult } from "@numerology/engine";
-import { useLocale } from "@/lib/i18n";
+import { useLocale, useScript } from "@/lib/i18n";
 import { currentLuckStep, luckSteps, stepYears, useGodSignal, yearGanZhi } from "@/lib/ganzhi";
 import { SignalLegend, SignalMeter, YearBars } from "@/components/Charts";
 
 /** 大運時間線(橫向捲動,當前大運高亮)+ 所選大運的逐年流年。純排盤數據,唔叫 AI。 */
 export function FortuneTimeline({ chart, visible }: { chart: ChartResult; visible: boolean }) {
   const { t } = useLocale();
+  const { z } = useScript();
   const steps = luckSteps(chart.bazi);
   const useGods = chart.bazi.tiaohou.useGods;
   const thisYear = new Date().getFullYear();
@@ -74,7 +75,7 @@ export function FortuneTimeline({ chart, visible }: { chart: ChartResult; visibl
       </div>
       <SignalLegend />
       <p className="note">
-        {t("fortune.startLuck")}:{chart.bazi.startLuck.description} · {t("viz.sigNote", { ug: useGods.join("、") })}
+        {t("fortune.startLuck")}:{z(chart.bazi.startLuck.description)} · {t("viz.sigNote", { ug: useGods.join("、") })}
       </p>
 
       <h2 className="group-title">{t("fortune.years", { gz: step.ganZhi })}</h2>

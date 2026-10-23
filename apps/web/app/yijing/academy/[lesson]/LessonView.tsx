@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ACADEMY_LESSONS, ACADEMY_QUOTE_REFS, getLesson } from "../lessons";
 import { Quiz } from "../Quiz";
-import { useLocale } from "@/lib/i18n";
+import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { withTermHighlights } from "@/lib/highlightTerms";
 import { withQuoteRefs } from "@/lib/quoteRef";
@@ -12,6 +12,8 @@ import { withQuoteRefs } from "@/lib/quoteRef";
 /** 單課頁(客戶端):正文 + 自我檢測。 */
 export function LessonView({ lessonId }: { lessonId: string }) {
   const { locale } = useLocale();
+  // 課文係繁體正本 → zT(只喺 zhs 轉;en 暫無英文課文,維持繁體)
+  const { zT } = useScript();
   const loc = locale as YijingLocale;
   const lesson = getLesson(lessonId);
   const [refresh, setRefresh] = useState(0);
@@ -35,17 +37,17 @@ export function LessonView({ lessonId }: { lessonId: string }) {
         <div className="sub">
           {yjT("academy.lessonNo", loc).replace("{n}", String(lesson.index))}
         </div>
-        <h1 style={{ letterSpacing: "0.2em" }}>{lesson.title}</h1>
-        <div className="sub">{lesson.sub}</div>
+        <h1 style={{ letterSpacing: "0.2em" }}>{zT(lesson.title)}</h1>
+        <div className="sub">{zT(lesson.sub)}</div>
       </div>
 
       <div className="card" key={refresh}>
         {lesson.sections.map((s, si) => (
           <section key={si} style={{ marginBottom: si < lesson.sections.length - 1 ? "1.4rem" : 0 }}>
-            <h2 className="section-title">{s.heading}</h2>
+            <h2 className="section-title">{zT(s.heading)}</h2>
             {s.body.map((p, pi) => (
               <p key={pi} style={{ lineHeight: 1.9, marginBottom: "0.8rem" }}>
-                {withTermHighlights(withQuoteRefs(p, ACADEMY_QUOTE_REFS))}
+                {withTermHighlights(withQuoteRefs(p, ACADEMY_QUOTE_REFS), zT)}
               </p>
             ))}
           </section>
@@ -56,15 +58,15 @@ export function LessonView({ lessonId }: { lessonId: string }) {
 
       {lesson.sources && lesson.sources.length > 0 && (
         <div className="card" style={{ marginTop: "1.2rem" }}>
-          <h2 className="section-title">延伸出處</h2>
+          <h2 className="section-title">{yjT("academy.sources", loc)}</h2>
           <p className="muted" style={{ fontSize: "0.85rem", marginBottom: "0.6rem" }}>
-            以下為公有領域原文,課文引文皆可於此稽考:
+            {yjT("academy.sourcesNote", loc)}
           </p>
           <ul style={{ paddingLeft: "1.2rem", margin: 0 }}>
             {lesson.sources.map((s, i) => (
               <li key={i} style={{ marginBottom: "0.4rem" }}>
                 <a href={s.url} target="_blank" rel="noopener noreferrer">
-                  {s.label}
+                  {zT(s.label)}
                 </a>
               </li>
             ))}
@@ -83,14 +85,14 @@ export function LessonView({ lessonId }: { lessonId: string }) {
       >
         {prev ? (
           <Link className="btn ghost" href={`/yijing/academy/${prev.id}`}>
-            ← {prev.title}
+            ← {zT(prev.title)}
           </Link>
         ) : (
           <span />
         )}
         {next ? (
           <Link className="btn" href={`/yijing/academy/${next.id}`}>
-            {next.title} →
+            {zT(next.title)} →
           </Link>
         ) : (
           <Link className="btn" href="/yijing">

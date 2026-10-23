@@ -16,7 +16,7 @@ import {
 } from "@numerology/knowledge";
 // 相對引用(非 @/):node --test 經 test-dist 執行時 @/ 無法解析,
 // Next 端經 extensionAlias 同樣解到 ./i18n.ts,同一模組。
-import { useLocale } from "./i18n.js";
+import { useLocale, useScript } from "./i18n.js";
 import { PronounceButton } from "@dawn-studio/pronounce";
 import { FloatingCard, useFloatPopup } from "./floatPopup.js";
 import { QUOTEREF_SKIP_PROP, QuoteRef } from "./quoteRef.js";
@@ -102,11 +102,13 @@ export function findTermMatches(text: string, terms?: GlossaryTerm[]): TermMatch
  */
 export function Term({ term }: { term: string }) {
   const { locale } = useLocale();
+  // 術語表 key 係繁體(用嚟查);顯示跟 locale 字形
+  const { zT } = useScript();
   const anchorRef = useRef<HTMLSpanElement | null>(null);
   const { open, setOpen, floatingRef, floatingStyles } = useFloatPopup(anchorRef);
   const def = lookupTerm(term);
 
-  if (!def) return createElement("span", null, term);
+  if (!def) return createElement("span", null, zT(term));
 
   return createElement(
     "span",
@@ -127,7 +129,7 @@ export function Term({ term }: { term: string }) {
           cursor: "help",
         },
       },
-      term,
+      zT(term),
     ),
     open &&
       createElement(FloatingCard, {
@@ -154,7 +156,7 @@ export function Term({ term }: { term: string }) {
                   color: "var(--cinnabar)",
                 },
               },
-              def.term,
+              zT(def.term),
             ),
             createElement(PronounceButton, { text: def.term, locale }),
           ),
@@ -177,17 +179,17 @@ const SKIP_TAGS = new Set([
   "select",
 ]);
 
-function highlightString(text: string): ReactNode {
+function highlightString(text: string, display: (s: string) => string): ReactNode {
   const matches = findTermMatches(text);
-  if (matches.length === 0) return text;
+  if (matches.length === 0) return display(text);
   const parts: ReactNode[] = [];
   let cursor = 0;
   matches.forEach((m, i) => {
-    if (m.start > cursor) parts.push(text.slice(cursor, m.start));
+    if (m.start > cursor) parts.push(display(text.slice(cursor, m.start)));
     parts.push(createElement(Term, { term: m.term, key: `t${i}@${m.start}` }));
     cursor = m.end;
   });
-  if (cursor < text.length) parts.push(text.slice(cursor));
+  if (cursor < text.length) parts.push(display(text.slice(cursor)));
   return parts;
 }
 
@@ -195,10 +197,12 @@ function highlightString(text: string): ReactNode {
  * 走訪 React children:字串按術語命中切分並以 <Term> 包裹;
  * 遞迴進入元素,但 code/pre/a/button/input/textarea/select 子樹整棵跳過。
  * 保留原有 React key。
+ * display(可選,知識庫繁體正本用 useScript().zT):術語以外嘅字跟 locale 轉字形——
+ * 先用原文(繁體)配對術語,再轉顯示,咁 zhs 都配得中。
  */
-export function withTermHighlights(children: ReactNode): ReactNode {
+export function withTermHighlights(children: ReactNode, display: (s: string) => string = (s) => s): ReactNode {
   return Children.map(children, (child) => {
-    if (typeof child === "string") return highlightString(child);
+    if (typeof child === "string") return highlightString(child, display);
     if (isValidElement(child)) {
       // 古籍引文參照(QuoteRef)整棵跳過:引文內部不套術語釋義,避免彈窗套彈窗。
       // 以元素類型判定(QuoteRef 元素本身的 props 只有 entry,標記在渲染輸出內)。
@@ -211,7 +215,7 @@ export function withTermHighlights(children: ReactNode): ReactNode {
       if (grand === undefined || grand === null) return child;
       // cloneElement 保留原 key(不覆寫)。
       return cloneElement(child as ReactElement, {
-        children: withTermHighlights(grand),
+        children: withTermHighlights(grand, display),
       } as Partial<unknown>);
     }
     return child;

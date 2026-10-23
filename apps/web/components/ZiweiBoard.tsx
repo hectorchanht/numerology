@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ZiweiChart, ZiweiPalace, ZiweiStar } from "@numerology/engine";
-import { useLocale, type TKey } from "@/lib/i18n";
+import { useLocale, useScript, type TKey } from "@/lib/i18n";
 
 /** 地支 → 传统紫微盘 4×4 网格坐标 [row, col]。 */
 const GRID: Record<string, [number, number]> = {
@@ -33,11 +33,13 @@ const BADGE_KEYS: Record<Highlight, TKey> = {
 };
 
 function StarSpan({ star, kind }: { star: ZiweiStar; kind: "major" | "minor" }) {
+  const { z } = useScript();
   return (
     <span className={`star ${kind}`}>
-      {star.name}
-      {star.brightness ? <span className="bri">{star.brightness}</span> : null}
-      {star.mutagen ? <span className={`hua ${star.mutagen}`}>{star.mutagen}</span> : null}
+      {z(star.name)}
+      {star.brightness ? <span className="bri">{z(star.brightness)}</span> : null}
+      {/* className 保留引擎原字(CSS 用 .hua.忌),只轉顯示字 */}
+      {star.mutagen ? <span className={`hua ${star.mutagen}`}>{z(star.mutagen)}</span> : null}
     </span>
   );
 }
@@ -50,6 +52,7 @@ function Palace({
   onSelect: (branch: string) => void;
 }) {
   const { t } = useLocale();
+  const { z } = useScript();
   const [row, col] = GRID[p.earthlyBranch] ?? [1, 1];
   const cls = [
     "palace",
@@ -64,7 +67,7 @@ function Palace({
       style={{ gridRow: row, gridColumn: col }}
       onClick={() => onSelect(p.earthlyBranch)}
       aria-pressed={highlight === "self"}
-      aria-label={`${p.name} ${p.heavenlyStem}${p.earthlyBranch}`}
+      aria-label={`${z(p.name)} ${p.heavenlyStem}${p.earthlyBranch}`}
     >
       <span className="stars">
         {p.majorStars.length
@@ -73,7 +76,7 @@ function Palace({
         {p.minorStars.map((s) => <StarSpan key={s.name} star={s} kind="minor" />)}
       </span>
       <span className="pn">
-        <b>{p.name}</b>
+        <b>{z(p.name)}</b>
         <span className="dr">{p.decadal.range[0]}–{p.decadal.range[1]}</span>
       </span>
       {p.isBodyPalace ? <span className="tag">{t("zw.body")}</span> : null}
@@ -85,6 +88,7 @@ function Palace({
 /** 紫微 4×4 宮盤:撳宮位高亮三方四正,下方列出該宮全部星曜與十二神。 */
 export function ZiweiBoard({ ziwei, center }: { ziwei: ZiweiChart; center?: React.ReactNode }) {
   const { t } = useLocale();
+  const { z } = useScript();
   const [selected, setSelected] = useState<string>(ziwei.soulPalaceBranch);
   const sf = sanFangBranches(selected);
   const highlightOf = (branch: string): Highlight | null => {
@@ -94,9 +98,9 @@ export function ZiweiBoard({ ziwei, center }: { ziwei: ZiweiChart; center?: Reac
     return null;
   };
   const sel = ziwei.palaces.find((p) => p.earthlyBranch === selected);
-  const selName = sel?.name ?? "";
+  const selName = z(sel?.name);
   const relNames = [sf.opposite, ...sf.trine]
-    .map((b) => ziwei.palaces.find((p) => p.earthlyBranch === b)?.name)
+    .map((b) => z(ziwei.palaces.find((p) => p.earthlyBranch === b)?.name))
     .filter(Boolean)
     .join("、");
 
@@ -109,13 +113,13 @@ export function ZiweiBoard({ ziwei, center }: { ziwei: ZiweiChart; center?: Reac
         <div className="board-center">
           {center ?? (
             <>
-              <div className="big">{ziwei.fiveElementsClass}</div>
+              <div className="big">{z(ziwei.fiveElementsClass)}</div>
               <div className="sm">
-                {t("baziT.kvSoulLord")} {ziwei.soul} · {t("baziT.kvBodyLord")} {ziwei.body}
+                {t("baziT.kvSoulLord")} {z(ziwei.soul)} · {t("baziT.kvBodyLord")} {z(ziwei.body)}
                 <br />
                 {t("zw.soulBody", { a: ziwei.soulPalaceBranch, b: ziwei.bodyPalaceBranch })}
                 <br />
-                {ziwei.chineseDate}
+                {z(ziwei.chineseDate)}
               </div>
             </>
           )}
@@ -129,7 +133,7 @@ export function ZiweiBoard({ ziwei, center }: { ziwei: ZiweiChart; center?: Reac
       {sel ? (
         <div className="list palace-detail">
           <div className="row plain">
-            <span className="lbl"><b>{sel.name}</b></span>
+            <span className="lbl"><b>{selName}</b></span>
             <span className="val">{sel.heavenlyStem}{sel.earthlyBranch}{sel.isBodyPalace ? ` · ${t("zw.body")}` : ""}</span>
           </div>
           <div className="row plain">
@@ -147,7 +151,7 @@ export function ZiweiBoard({ ziwei, center }: { ziwei: ZiweiChart; center?: Reac
           {sel.adjectiveStars.length ? (
             <div className="row plain">
               <span className="lbl">{t("zw.adj")}</span>
-              <span className="val wrap">{sel.adjectiveStars.map((s) => s.name).join(" ")}</span>
+              <span className="val wrap">{z(sel.adjectiveStars.map((s) => s.name).join(" "))}</span>
             </div>
           ) : null}
           <div className="row plain">
@@ -158,7 +162,7 @@ export function ZiweiBoard({ ziwei, center }: { ziwei: ZiweiChart; center?: Reac
           </div>
           <div className="row plain">
             <span className="lbl">{t("zw.gods")}</span>
-            <span className="val wrap">{sel.changsheng12} · {sel.boshi12} · {sel.jiangqian12} · {sel.suiqian12}</span>
+            <span className="val wrap">{z(`${sel.changsheng12} · ${sel.boshi12} · ${sel.jiangqian12} · ${sel.suiqian12}`)}</span>
           </div>
         </div>
       ) : null}

@@ -1,11 +1,17 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  toZht, toZhs, posterTerm, posterName, buildPosterModel, posterTexts, posterFilename,
+  posterTerm, posterName, buildPosterModel, posterTexts, posterFilename,
   layoutPoster, paintPoster, wrapText, fitSize, POSTER_COLOR_VARS,
 } from "../test-dist/poster.js";
+import { lockScript, warmScriptFor } from "../test-dist/script.js";
 import { castChart } from "@numerology/engine";
 import { currentLuckStep } from "../test-dist/ganzhi.js";
+
+
+// 預熱字典(所有 lockScript 測試都需要)
+await warmScriptFor("zh-Hant");
+await warmScriptFor("zh-Hans");
 
 // 獨立於實現字表嘅簡體獨有字清單(海報曾經洩漏 + 十神/宮/主星/農曆會出現嘅字)
 const SIMPLIFIED = [..."杀财机阳岁宫伤禄仆迁贪门贞军阴腊闰运时历农权"];
@@ -29,15 +35,6 @@ const SRC = {
 };
 
 // —— 術語轉換 ——
-test("poster:toZht 修正截圖嘅簡體洩漏", () => {
-  assert.equal(toZht("七杀"), "七殺");
-  assert.equal(toZht("劫财"), "劫財");
-  assert.equal(toZht("天机"), "天機");
-  assert.equal(toZht("太阳"), "太陽");
-  assert.equal(toZht("32–41 岁"), "32–41 歲");
-  assert.equal(toZht("命宫"), "命宮");
-  assert.equal(toZhs("七殺 劫財 天機 太陽 命宮"), "七杀 劫财 天机 太阳 命宫");
-});
 
 test("poster:posterTerm 十神/宮名跟語言;en 有英譯", () => {
   assert.equal(posterTerm("七杀", "zht"), "七殺");
