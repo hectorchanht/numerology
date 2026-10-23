@@ -4,7 +4,7 @@ import { parseBirthInput } from "@/lib/birth";
 import { ensureEnv } from "@/lib/env";
 import { streamToPrimedResponse } from "@/lib/stream";
 import { errorResponse } from "@/lib/http";
-import { parseAi } from "@/lib/aiOpts";
+import { resolveServerAi } from "@/lib/aiOpts";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -17,7 +17,7 @@ export async function POST(req: Request): Promise<Response> {
     const input = parseBirthInput(body.input);
     const chart = castChart(input);
     const fortune = analyzeFortune(input, { yearsBack: 5, yearsAhead: 8 });
-    const ai = parseAi(body);
+    const ai = resolveServerAi(body);
     const section = typeof body.section === "string" && body.section.trim() ? body.section.trim() : undefined;
     const lens = body.lens === "bazi" || body.lens === "ziwei" ? body.lens : "both";
     const locale = body.locale === "zhs" || body.locale === "en" ? body.locale : "zht";

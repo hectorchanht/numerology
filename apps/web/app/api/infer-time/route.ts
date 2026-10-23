@@ -4,7 +4,7 @@ import { parseHourInferInput } from "@/lib/birth";
 import { ensureEnv } from "@/lib/env";
 import { streamToPrimedResponse } from "@/lib/stream";
 import { errorResponse } from "@/lib/http";
-import { parseAi } from "@/lib/aiOpts";
+import { resolveServerAi } from "@/lib/aiOpts";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -25,7 +25,7 @@ export async function POST(req: Request): Promise<Response> {
     const history = Array.isArray(body.history) ? body.history.slice(-16) : [];
     const candidates = castHourCandidates(input);
     const locale = body.locale === "zhs" || body.locale === "en" ? body.locale : "zht";
-    return await streamToPrimedResponse(streamHourInference(candidates, history, message, { ai: parseAi(body), locale }));
+    return await streamToPrimedResponse(streamHourInference(candidates, history, message, { ai: resolveServerAi(body), locale }));
   } catch (err) {
     return errorResponse(err, { fallback: "时辰推断失败", stage: "ai" });
   }

@@ -5,7 +5,7 @@ export interface AiSettings {
   baseURL: string;
 }
 
-export const DEFAULT_AI: AiSettings = { provider: "pollinations", apiKey: "", model: "", baseURL: "" };
+export const DEFAULT_AI: AiSettings = { provider: "workers-ai", apiKey: "", model: "", baseURL: "" };
 
 const LS_KEY = "mingli.ai.v1";
 

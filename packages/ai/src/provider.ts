@@ -1,13 +1,22 @@
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
+import {
+  BudgetExceededError,
+  checkBudget,
+  recordUsage,
+  type BudgetKV,
+} from "./budget.js";
+import { WORKERS_AI_DEFAULT_MODEL } from "./workersAiModels.js";
 
 /**
  * 多 provider 解读层:排盘永远本地确定性计算、不花钱;只有 AI 解读/对话走这里。
- * 通过 AI_PROVIDER 环境变量切换。默认 pollinations(免费、免 key、开箱即用),
+ * 通过 AI_PROVIDER 环境变量切换。默认 workers-ai(Cloudflare Workers AI binding,
+ * 免 key,跑在 Cloudflare 自家网络,每月 $2 硬预算守卫),pollinations 作免 key 备选;
  * 也可用 openrouter(聚合 API,免费 :free 模型,需 key) / glm / gemini / groq / anthropic /
  * ollama(本地) / custom(任意 OpenAI 兼容端点)。
  *
- * 设计:除 Anthropic 外都走 OpenAI 兼容协议(同一段代码),靠 baseURL + 模型名区分。
+ * 设计:除 Anthropic / workers-ai 外都走 OpenAI 兼容协议(同一段代码),
+ * 靠 baseURL + 模型名区分。
  */
 
 /** system 由若干文本块组成;cache:true 的块在 Anthropic 上打 prompt cache,其它 provider 忽略。 */
@@ -26,6 +35,8 @@ export interface Usage {
   outputTokens: number;
   cacheCreationTokens: number;
   cacheReadTokens: number;
+  /** Workers AI 直接上报的 neurons(预算记账用,其它 provider 无)。 */
+  neurons?: number;
 }
 
 export type ModelKind = "report" | "chat";
@@ -44,10 +55,15 @@ export interface ProviderOptions {
   apiKey?: string;
   model?: string;
   baseURL?: string;
+  /**
+   * Workers AI 的服务端 binding(仅服务端注入,绝不来自客户端请求体,
+   * 也绝不序列化给客户端):{ ai: env.AI, kv: env.AI_BUDGET_KV }。
+   */
+  aiBinding?: { ai?: unknown; kv?: unknown };
 }
 
 interface ProviderDef {
-  kind: "anthropic" | "openai";
+  kind: "anthropic" | "openai" | "workers-ai";
   label: string;
   /** 依次尝试的环境变量名,第一个有值的作为 API key */
   keys: string[];
@@ -62,6 +78,14 @@ interface ProviderDef {
 }
 
 const PROVIDERS: Record<string, ProviderDef> = {
+  "workers-ai": {
+    kind: "workers-ai",
+    label: "Cloudflare Workers AI(本站直连·免 key·月 $2 上限)",
+    keys: [],
+    models: { report: WORKERS_AI_DEFAULT_MODEL, chat: WORKERS_AI_DEFAULT_MODEL },
+    free: true,
+    noKey: true,
+  },
   pollinations: {
     kind: "openai",
     label: "Pollinations(免费·免 key·开箱即用)",
@@ -128,8 +152,10 @@ const PROVIDERS: Record<string, ProviderDef> = {
   },
 };
 
-// 默认免 key 在线模型,开箱即用(别人 clone 即可跑;想要更好中文质量再切 glm 等)。
-const DEFAULT_PROVIDER = "pollinations";
+// 默认走 Cloudflare Workers AI binding(免 key,跑在 CF 自家网络,
+// 不受 Pollinations 免费 tier 在边缘网络的飘忽影响;每月 $2 硬预算守卫)。
+// binding 缺失(本地开发)时 provider 层会给出明确报错,届时切其它 provider 即可。
+const DEFAULT_PROVIDER = "workers-ai";
 
 /** 当前生效的 provider 名(小写)。opts 可按请求覆盖(BYOK)。 */
 export function activeProviderName(opts?: ProviderOptions): string {
@@ -300,6 +326,149 @@ class OpenAITextStream implements TextStream {
   }
 }
 
+// ── Workers AI(binding)适配 ───────────────────────────────────────────────
+
+/** env.AI binding 的最小接口(实际为 Cloudflare 的 Ai binding)。 */
+interface AiBindingLike {
+  run(model: string, input: Record<string, unknown>): Promise<unknown>;
+}
+
+/** 从 ProviderOptions 取出服务端注入的 binding;缺失则给明确报错(绝不静默)。 */
+function workersAiRuntime(opts?: ProviderOptions): { ai: AiBindingLike; kv: BudgetKV } {
+  const ai = opts?.aiBinding?.ai as AiBindingLike | undefined;
+  if (!ai || typeof ai.run !== "function") {
+    throw new Error(
+      "Workers AI binding 未配置:请在 Cloudflare Pages 的 Settings > Bindings 中添加 " +
+        "AI binding(变量名 AI)。本地开发可用 `wrangler pages dev`,或在 AI 设置中切换其它 provider",
+    );
+  }
+  const kv = opts?.aiBinding?.kv as BudgetKV | undefined;
+  if (!kv || typeof kv.get !== "function" || typeof kv.put !== "function") {
+    throw new Error(
+      "AI_BUDGET_KV 未配置:预算守卫要求 KV binding(变量名 AI_BUDGET_KV)," +
+        "请在 Cloudflare Pages 的 Settings > Bindings 中添加",
+    );
+  }
+  return { ai, kv };
+}
+
+interface WorkersAiSseUsage {
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  total_tokens?: number;
+  neurons?: number;
+}
+
+/**
+ * 把 Workers AI binding 的 SSE 流(`data: {"response":"..."}` … `data: [DONE]`)
+ * 包成统一的 TextStream。懒启动:首次 finalMessage() 才真正请求,
+ * 预算检查放在 run() 首行——首 token 前超支会直接抛 BudgetExceededError,
+ * 经 streamToPrimedResponse 预热后表现为干净的 JSON 429,而非截断流。
+ */
+class WorkersAITextStream implements TextStream {
+  private textListeners: ((d: string) => void)[] = [];
+  private errorListeners: ((e: unknown) => void)[] = [];
+  private fullText = "";
+  private neurons = 0;
+  private done: Promise<{ text: string; neurons: number }> | null = null;
+
+  constructor(
+    private readonly args: {
+      binding: AiBindingLike;
+      kv: BudgetKV;
+      model: string;
+      systemText: string;
+      messages: ChatMessage[];
+      maxTokens: number;
+    },
+  ) {}
+
+  on(event: "text" | "error", listener: (arg: never) => void): this {
+    if (event === "text") this.textListeners.push(listener as (d: string) => void);
+    else this.errorListeners.push(listener as (e: unknown) => void);
+    return this;
+  }
+
+  private emitText(delta: string): void {
+    this.fullText += delta;
+    for (const l of this.textListeners) l(delta);
+  }
+
+  private emitError(err: unknown): void {
+    for (const l of this.errorListeners) l(err);
+  }
+
+  finalMessage(): Promise<{ text: string; neurons: number }> {
+    if (!this.done) this.done = this.run();
+    return this.done;
+  }
+
+  private async run(): Promise<{ text: string; neurons: number }> {
+    const { binding, kv, model, systemText, messages, maxTokens } = this.args;
+    try {
+      // 预算前置检查:超支直接抛,预热层会转成 JSON 429。
+      await checkBudget(kv);
+      const fullMessages =
+        systemText.trim().length > 0
+          ? [{ role: "system", content: systemText }, ...messages]
+          : messages;
+      const stream = (await binding.run(model, {
+        messages: fullMessages,
+        max_tokens: maxTokens,
+        stream: true,
+      })) as ReadableStream<Uint8Array>;
+      await this.pump(stream);
+      await recordUsage(kv, this.neurons);
+      return { text: this.fullText, neurons: this.neurons };
+    } catch (err) {
+      this.emitError(err);
+      throw err;
+    }
+  }
+
+  /** 消费 SSE 流:拼 response 文本,取最后一个带 usage 的事件的 neurons(即总量)。 */
+  private async pump(stream: ReadableStream<Uint8Array>): Promise<void> {
+    const reader = stream.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      let idx: number;
+      while ((idx = buf.indexOf("\n\n")) >= 0) {
+        const block = buf.slice(0, idx);
+        buf = buf.slice(idx + 2);
+        this.handleBlock(block);
+      }
+    }
+    const tail = buf.trim();
+    if (tail) this.handleBlock(tail);
+  }
+
+  private handleBlock(block: string): void {
+    for (const line of block.split("\n")) {
+      const t = line.trim();
+      if (!t.startsWith("data:")) continue;
+      const payload = t.slice(5).trim();
+      if (!payload || payload === "[DONE]") continue;
+      let obj: { response?: unknown; usage?: WorkersAiSseUsage };
+      try {
+        obj = JSON.parse(payload) as { response?: unknown; usage?: WorkersAiSseUsage };
+      } catch {
+        continue; // 极少数情况下的残缺块,跳过(文本已在前块发出)
+      }
+      if (typeof obj.response === "string" && obj.response) this.emitText(obj.response);
+      const n = obj.usage?.neurons;
+      if (typeof n === "number" && Number.isFinite(n) && n >= 0) this.neurons = n;
+    }
+  }
+
+  abort(): void {
+    // binding 流无外部 abort 语义;调用方(预热/取消)不再消费即等价终止。
+  }
+}
+
 // ── 对外统一入口 ──────────────────────────────────────────────────────────
 
 /** 非流式补全。opts 可传 BYOK(用户自带 provider/key)。 */
@@ -309,6 +478,28 @@ export async function chatComplete(
 ): Promise<{ text: string; usage: Usage }> {
   const name = activeProviderName(opts);
   const def = resolveDef(name, opts);
+  if (def.kind === "workers-ai") {
+    const { ai, kv } = workersAiRuntime(opts);
+    const model = modelFor(def, req.kind, opts);
+    await checkBudget(kv);
+    const res = (await ai.run(model, {
+      messages: toWorkersAiMessages(req.system, req.messages),
+      max_tokens: req.maxTokens,
+    })) as { response?: unknown; usage?: WorkersAiSseUsage };
+    const text = typeof res.response === "string" ? res.response : "";
+    const neurons = typeof res.usage?.neurons === "number" ? res.usage.neurons : 0;
+    await recordUsage(kv, neurons);
+    return {
+      text,
+      usage: {
+        inputTokens: res.usage?.prompt_tokens ?? 0,
+        outputTokens: res.usage?.completion_tokens ?? 0,
+        cacheCreationTokens: 0,
+        cacheReadTokens: 0,
+        neurons,
+      },
+    };
+  }
   const apiKey = apiKeyFor(def, opts);
   if (def.kind === "anthropic") {
     const res = await makeAnthropic(apiKey).messages.create({
@@ -338,6 +529,18 @@ export async function chatComplete(
 export function chatStream(req: CompletionRequest, opts?: ProviderOptions): TextStream {
   const name = activeProviderName(opts);
   const def = resolveDef(name, opts);
+  if (def.kind === "workers-ai") {
+    const { ai, kv } = workersAiRuntime(opts);
+    const systemText = req.system.map((b) => b.text).join("\n\n");
+    return new WorkersAITextStream({
+      binding: ai,
+      kv,
+      model: modelFor(def, req.kind, opts),
+      systemText,
+      messages: req.messages,
+      maxTokens: req.maxTokens,
+    });
+  }
   const apiKey = apiKeyFor(def, opts);
   if (def.kind === "anthropic") {
     return makeAnthropic(apiKey).messages.stream({
@@ -353,4 +556,55 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
   return new OpenAITextStream((signal) =>
     client.chat.completions.create({ model, max_tokens: req.maxTokens, stream: true, messages }, { signal }),
   );
+}
+
+/** Workers AI 的消息形态:system 单独成块(与 OpenAI 兼容层把 system 拼进文本不同)。 */
+function toWorkersAiMessages(
+  system: SystemBlock[],
+  messages: ChatMessage[],
+): { role: string; content: string }[] {
+  const systemText = system.map((b) => b.text).join("\n\n");
+  return [
+    ...(systemText.trim() ? [{ role: "system", content: systemText }] : []),
+    ...messages.map((m) => ({ role: m.role, content: m.content })),
+  ];
+}
+
+/** 给 /api/models 用的 provider 元信息(分组/是否需 key/申请地址),workers-ai 排首位。 */
+export type ProviderGroup = "nokey" | "freekey" | "paid";
+
+export interface ProviderMeta {
+  name: string;
+  labelKey: string;
+  group: ProviderGroup;
+  needsKey: boolean;
+  signup?: string;
+}
+
+export function listProviders(): ProviderMeta[] {
+  return [
+    { name: "workers-ai", labelKey: "settings.prov.workersai", group: "nokey", needsKey: false },
+    { name: "pollinations", labelKey: "settings.prov.pollinations", group: "nokey", needsKey: false, signup: "https://pollinations.ai/" },
+    { name: "glm", labelKey: "settings.prov.glm", group: "freekey", needsKey: true, signup: "https://open.bigmodel.cn/" },
+    { name: "gemini", labelKey: "settings.prov.gemini", group: "freekey", needsKey: true, signup: "https://aistudio.google.com/apikey" },
+    { name: "groq", labelKey: "settings.prov.groq", group: "freekey", needsKey: true, signup: "https://console.groq.com/keys" },
+    { name: "openrouter", labelKey: "settings.prov.openrouter", group: "freekey", needsKey: true, signup: "https://openrouter.ai/keys" },
+    { name: "anthropic", labelKey: "settings.prov.anthropic", group: "paid", needsKey: true, signup: "https://console.anthropic.com/" },
+    { name: "custom", labelKey: "settings.prov.custom", group: "paid", needsKey: true },
+  ];
+}
+
+/** 给 /api/models 用的 baseURL 查询(anthropic/custom 无标准 /models 端点 → undefined)。 */
+export function providerBaseUrl(name: string): string | undefined {
+  const def = PROVIDERS[name];
+  if (!def || def.kind !== "openai") return undefined;
+  return def.baseURL;
+}
+
+/** 该 provider 的 /models 是否需要 key(按注册表判断)。 */
+export function providerNeedsKey(name: string): boolean {
+  if (name === "custom") return true;
+  const def = PROVIDERS[name];
+  if (!def) return true;
+  return !def.noKey;
 }

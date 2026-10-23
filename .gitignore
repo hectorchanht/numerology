@@ -20,3 +20,7 @@ _legacy/
 # 个人命盘导出件(pdf/html),勿入库
 /*.pdf
 /*.html
+
+.wrangler/
+test-dist/
+.vercel/

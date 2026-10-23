@@ -45,6 +45,23 @@ test("http:AI 上游错误 → 502 且信息清晰", () => {
   assert.equal(classifyError(new Error("mystery"), "input").status, 400);
 });
 
+test("http:预算耗尽 → 429 且去掉内部标记", () => {
+  const err = new Error("AI_BUDGET_EXCEEDED:本月 Workers AI 用量已達上限($2),請下個月再試");
+  const c = classifyError(err, "ai");
+  assert.equal(c.status, 429);
+  assert.ok(!c.message.includes("AI_BUDGET_EXCEEDED"), "内部标记不应暴露给用户");
+  assert.ok(c.message.includes("用量已達上限"));
+  // 普通 429 限流仍走 502
+  const rl = Object.assign(new Error("Rate limit reached"), { status: 429 });
+  assert.equal(classifyError(rl, "ai").status, 502);
+});
+
+test("http:binding 未配置 → 502 但保留原消息", () => {
+  const c = classifyError(new Error("Workers AI binding 未配置:请在 Cloudflare Pages 添加 AI binding"), "ai");
+  assert.equal(c.status, 502);
+  assert.ok(c.message.includes("binding 未配置"));
+});
+
 test("http:errorResponse 返回对应状态码的 JSON", async () => {
   const r = errorResponse(new Error("非法出生信息: 月 13"), { fallback: "x" });
   assert.equal(r.status, 400);

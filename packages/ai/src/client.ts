@@ -5,18 +5,23 @@ import type { SystemBlock } from "./provider.js";
 
 export type { AiLocale };
 
-// 统一解读层入口(多 provider:GLM/Gemini/Groq/Anthropic/custom),从 provider 透出。
+// 统一解读层入口(多 provider:workers-ai/Pollinations/GLM/Gemini/Groq/OpenRouter/Anthropic/custom),从 provider 透出。
 export {
   chatComplete,
   chatStream,
   activeProviderName,
   providerSummary,
+  listProviders,
+  providerBaseUrl,
+  providerNeedsKey,
   type Usage,
   type TextStream,
   type SystemBlock,
   type ChatMessage,
   type ModelKind,
   type ProviderOptions,
+  type ProviderGroup,
+  type ProviderMeta,
 } from "./provider.js";
 
 /**

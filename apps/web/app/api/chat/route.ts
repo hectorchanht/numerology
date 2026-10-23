@@ -4,7 +4,7 @@ import { parseBirthInput } from "@/lib/birth";
 import { ensureEnv } from "@/lib/env";
 import { streamToPrimedResponse } from "@/lib/stream";
 import { errorResponse } from "@/lib/http";
-import { parseAi } from "@/lib/aiOpts";
+import { resolveServerAi } from "@/lib/aiOpts";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -28,7 +28,7 @@ export async function POST(req: Request): Promise<Response> {
 
     const chart = castChart(input);
     const fortune = analyzeFortune(input, { yearsBack: 5, yearsAhead: 8 });
-    return await streamToPrimedResponse(streamFollowUp(chart, history, question, { fortune, ai: parseAi(body), locale }));
+    return await streamToPrimedResponse(streamFollowUp(chart, history, question, { fortune, ai: resolveServerAi(body), locale }));
   } catch (err) {
     return errorResponse(err, { fallback: "对话失败", stage: "ai" });
   }

@@ -3,34 +3,86 @@
 import { useEffect, useState } from "react";
 import { type AiSettings, DEFAULT_AI, loadAi, saveAi } from "@/lib/aiSettings";
 import { useLocale, type TKey } from "@/lib/i18n";
+import { PROVIDER_META, STATIC_MODELS, GROUP_LABEL_KEYS, type ProviderGroup } from "@/lib/providerMeta";
 
-/** provider → 模型 id 列表;显示名走 i18n(settings.m.*)。 */
-const MODELS: Record<string, string[]> = {
-  glm: ["glm-4-flash", "glm-4-flashx", "glm-4-air", "glm-4-plus", "glm-4-long"],
-  gemini: ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-pro"],
-  groq: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it", "deepseek-r1-distill-llama-70b"],
-  openrouter: ["google/gemma-4-31b-it:free", "google/gemma-4-26b-a4b-it:free", "nvidia/nemotron-3.5-lightning:free"],
-  anthropic: ["claude-sonnet-4-6", "claude-opus-4-8", "claude-haiku-4-5-20251001"],
-};
+interface ModelOption {
+  id: string;
+  free?: boolean;
+}
 
-const PROVIDERS: { v: string; labelKey: TKey; needsKey: boolean; signup?: string }[] = [
-  { v: "pollinations", labelKey: "settings.prov.pollinations", needsKey: false },
-  { v: "glm", labelKey: "settings.prov.glm", needsKey: true, signup: "https://open.bigmodel.cn/" },
-  { v: "gemini", labelKey: "settings.prov.gemini", needsKey: true, signup: "https://aistudio.google.com/apikey" },
-  { v: "groq", labelKey: "settings.prov.groq", needsKey: true, signup: "https://console.groq.com/keys" },
-  { v: "openrouter", labelKey: "settings.prov.openrouter", needsKey: true, signup: "https://openrouter.ai/keys" },
-  { v: "anthropic", labelKey: "settings.prov.anthropic", needsKey: true, signup: "https://console.anthropic.com/" },
-  { v: "custom", labelKey: "settings.prov.custom", needsKey: true },
-];
+const MODELS_CACHE_PREFIX = "numerology-models-";
+const MODELS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+function readModelsCache(provider: string): { models: ModelOption[]; source: string } | null {
+  try {
+    const raw = window.localStorage.getItem(MODELS_CACHE_PREFIX + provider);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { at: number; models: ModelOption[]; source: string };
+    if (Date.now() - parsed.at > MODELS_CACHE_TTL_MS) return null;
+    return { models: parsed.models, source: parsed.source };
+  } catch {
+    return null;
+  }
+}
+
+function writeModelsCache(provider: string, models: ModelOption[], source: string): void {
+  try {
+    window.localStorage.setItem(
+      MODELS_CACHE_PREFIX + provider,
+      JSON.stringify({ at: Date.now(), models, source }),
+    );
+  } catch {
+    /* ignore */
+  }
+}
+
+const GROUP_ORDER: ProviderGroup[] = ["nokey", "freekey", "paid"];
 
 export function SettingsPanel() {
   const { t } = useLocale();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState<AiSettings>(DEFAULT_AI);
+  const [models, setModels] = useState<ModelOption[]>([]);
+  const [modelsSource, setModelsSource] = useState<string>("static");
 
   useEffect(() => {
     setValue(loadAi());
   }, []);
+
+  // 模型列表:缓存(24h) → /api/models 动态拉取 → 静态备选。
+  useEffect(() => {
+    const provider = value.provider;
+    const statics = (STATIC_MODELS[provider] ?? []).map((id) => ({ id }));
+    const cached = readModelsCache(provider);
+    if (cached && cached.models.length > 0) {
+      setModels(cached.models);
+      setModelsSource(cached.source);
+      return;
+    }
+    setModels(statics);
+    setModelsSource("static");
+    let cancelled = false;
+    (async () => {
+      try {
+        const headers: Record<string, string> = {};
+        if (value.apiKey.trim()) headers["X-AI-Key"] = value.apiKey.trim();
+        const res = await fetch(`/api/models?provider=${encodeURIComponent(provider)}`, { headers });
+        if (!res.ok) return;
+        const data = (await res.json()) as { models?: ModelOption[]; source?: string };
+        if (cancelled || !Array.isArray(data.models) || data.models.length === 0) return;
+        setModels(data.models);
+        const src = data.source === "live" ? "live" : data.source === "verified-static" ? "verified-static" : "static";
+        setModelsSource(src);
+        writeModelsCache(provider, data.models, src);
+      } catch {
+        /* 保持静态备选 */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value.provider]);
 
   function set(patch: Partial<AiSettings>) {
     const next = { ...value, ...patch };
@@ -38,8 +90,19 @@ export function SettingsPanel() {
     saveAi(next);
   }
 
-  const meta = PROVIDERS.find((p) => p.v === value.provider) ?? PROVIDERS[0]!;
-  const modelLabel = (id: string): string => t(`settings.m.${id}` as TKey);
+  const meta = PROVIDER_META.find((p) => p.name === value.provider) ?? PROVIDER_META[0]!;
+  const modelLabel = (m: ModelOption): string => {
+    const key = `settings.m.${m.id}` as TKey;
+    const hit = t(key);
+    const base = hit === key ? m.id : hit;
+    return m.free ? `${base} (${t("settings.freeTag")})` : base;
+  };
+  const sourceLabel =
+    modelsSource === "live"
+      ? t("settings.models.live")
+      : modelsSource === "verified-static"
+        ? t("settings.models.verified")
+        : t("settings.models.static");
 
   return (
     <div className="settings">
@@ -59,15 +122,26 @@ export function SettingsPanel() {
             value={value.provider}
             onChange={(e) => {
               const p = e.target.value;
-              set({ provider: p, model: MODELS[p]?.[0] ?? "" });
+              const first = (STATIC_MODELS[p] ?? [])[0] ?? "";
+              set({ provider: p, model: first });
             }}
           >
-            {PROVIDERS.map((p) => (
-              <option key={p.v} value={p.v}>
-                {t(p.labelKey)}
-              </option>
+            {GROUP_ORDER.map((g) => (
+              <optgroup key={g} label={t(GROUP_LABEL_KEYS[g])}>
+                {PROVIDER_META.filter((p) => p.group === g).map((p) => (
+                  <option key={p.name} value={p.name}>
+                    {t(p.labelKey)}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
+
+          {meta.name === "workers-ai" ? (
+            <p className="settings-note" style={{ marginTop: "0.6rem" }}>
+              {t("settings.budget")}
+            </p>
+          ) : null}
 
           {meta.needsKey ? (
             <>
@@ -109,19 +183,19 @@ export function SettingsPanel() {
                 onChange={(e) => set({ model: e.target.value })}
               />
             </>
-          ) : MODELS[value.provider] ? (
+          ) : models.length > 0 ? (
             <>
               <label className="fld" htmlFor="model2" style={{ marginTop: "0.8rem" }}>
-                {t("settings.model")}
+                {t("settings.model")} · {sourceLabel}
               </label>
               <select
                 id="model2"
                 className="settings-select"
-                value={value.model || MODELS[value.provider]![0]!}
+                value={value.model || models[0]!.id}
                 onChange={(e) => set({ model: e.target.value })}
               >
-                {MODELS[value.provider]!.map((m) => (
-                  <option key={m} value={m}>
+                {models.map((m) => (
+                  <option key={m.id} value={m.id}>
                     {modelLabel(m)}
                   </option>
                 ))}
