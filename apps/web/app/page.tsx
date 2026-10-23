@@ -19,6 +19,7 @@ import { TimeInferPanel } from "@/components/TimeInferPanel";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { HistoryPanel } from "@/components/HistoryPanel";
 import { FortuneTimeline } from "@/components/FortuneTimeline";
+import { ChartSummary, WuxingChart } from "@/components/Charts";
 import { Icon } from "@/components/Icon";
 import { EmptyChart, ScreenNav, Seg } from "@/components/ui";
 import { loadAi } from "@/lib/aiSettings";
@@ -218,6 +219,17 @@ export default function Home() {
             </p>
           </div>
         </div>
+
+        {/* 核心理念 manifesto */}
+        <div className="creed">
+          <h2 className="group-title">{t("creed.title")}</h2>
+          <ol>
+            <li>{t("creed.b1")}</li>
+            <li>{t("creed.b2")}</li>
+            <li>{t("creed.b3")}</li>
+            <li>{t("creed.b4")}</li>
+          </ol>
+        </div>
       </section>
 
       {/* ============ 命盤 ============ */}
@@ -249,6 +261,12 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* 一眼睇晒:摘要卡 + 五行圖(確定性數據,零 AI) */}
+              <h2 className="group-title">{t("viz.summary")}</h2>
+              <ChartSummary chart={ready.chart} />
+              <h2 className="group-title">{t("chart.wuxing")}</h2>
+              <WuxingChart chart={ready.chart} />
+
               <Seg
                 value={sys}
                 onChange={setSys}
@@ -259,7 +277,7 @@ export default function Home() {
               />
 
               <div hidden={sys !== "bazi"}>
-                <BaziTable bazi={ready.chart.bazi} ziwei={ready.chart.ziwei} />
+                <BaziTable bazi={ready.chart.bazi} />
                 <BaziDetail bazi={ready.chart.bazi} />
               </div>
               <div hidden={sys !== "ziwei"}>
