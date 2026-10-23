@@ -19,7 +19,7 @@ export function nextTheme(t: Theme): Theme {
  * 首幀前執行的 inline script(放 <head>):讀 localStorage → 設 data-theme + theme-color,避免閃錯主題。
  * 由上面常數生成,同 React 端保持單一來源。
  */
-export const THEME_INIT_SCRIPT = `try{var t=localStorage.getItem(${JSON.stringify(THEME_KEY)});t=t==="light"?"light":"dark";var r=document.documentElement;r.dataset.theme=t;r.style.colorScheme=t;var c=t==="light"?${JSON.stringify(THEME_COLOR.light)}:${JSON.stringify(THEME_COLOR.dark)};var f=function(){var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=c;};f();document.addEventListener("DOMContentLoaded",f);}catch(e){}`;
+export const THEME_INIT_SCRIPT = `try{var t=localStorage.getItem(${JSON.stringify(THEME_KEY)});t=t==="light"?"light":"dark";var r=document.documentElement;r.dataset.theme=t;r.style.colorScheme=t;var c=t==="light"?${JSON.stringify(THEME_COLOR.light)}:${JSON.stringify(THEME_COLOR.dark)};var f=function(){var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=c;var l=document.querySelector(\"link[rel=icon]\");if(l)l.href=t===\"light\"?\"/favicon-light.png\":\"/favicon.png\";};f();document.addEventListener("DOMContentLoaded",f);}catch(e){}`;
 
 /** 讀當前主題(以 DOM 為準;SSR 回預設)。 */
 export function readTheme(): Theme {
@@ -33,6 +33,7 @@ export function applyTheme(t: Theme): void {
   root.dataset.theme = t;
   root.style.colorScheme = t;
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", THEME_COLOR[t]);
+  document.querySelector('link[rel="icon"]')?.setAttribute("href", t === "light" ? "/favicon-light.png" : "/favicon.png");
   try {
     window.localStorage.setItem(THEME_KEY, t);
   } catch {

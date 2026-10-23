@@ -219,8 +219,10 @@ label.row { cursor: pointer; }
 .toggle.on::after { transform: translateX(20px); }
 
 /* ---------- 起盤 ---------- */
-.hero-mark { width: 56px; height: 56px; border-radius: 16px; background: var(--card); display: grid; place-items: center;
-  font-size: 28px; font-weight: 600; color: var(--accent); margin: 8px 0 18px; }
+/* ---------- 主題 logo:深色用 logo.png,淺色用 logo-light.png(data-theme 首幀前已設,唔會閃) ---------- */
+.nav .logo-light { display: none; }
+[data-theme="light"] .nav .logo-dark { display: none; }
+[data-theme="light"] .nav .logo-light { display: block; }
 .lede + .seg { margin-bottom: 4px; }
 
 /* ---------- 命盤:摘要 ---------- */
