@@ -145,11 +145,15 @@ export default function ChartPoster() {
         </div>
 
         <div className="poster-wrap">
-          {reading === undefined && <p className="muted">…</p>}
+          {reading === undefined && (
+            <p className="muted" style={{ textAlign: "center" }}>
+              …
+            </p>
+          )}
 
           {reading === null && (
-            <div className="card" style={{ textAlign: "center" }}>
-              <p>{yjT("poster.empty", loc)}</p>
+            <div className="card empty">
+              <p className="empty-t">{yjT("poster.empty", loc)}</p>
               <p className="muted">{yjT("poster.emptyHint", loc)}</p>
               <Link href="/" className="btn" onClick={() => go("home")}>
                 {yjT("poster.goHome", loc)}

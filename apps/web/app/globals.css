@@ -667,6 +667,10 @@ textarea.prompt:focus-visible { outline: 2px solid var(--accent); }
   .poster-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px); gap: 0 48px; align-items: start; }
   .poster-layout > .masthead { position: sticky; top: 24px; padding-top: 24px; }
   .poster-layout .poster-wrap { max-width: none; margin: 0; }
+  /* /poster:未有海報(空狀態/載入中)時唔分欄,單欄置中 */
+  .poster-layout:not(:has(.poster-paper)) { display: block; }
+  .poster-layout:not(:has(.poster-paper)) > .masthead { position: static; padding-top: 0; }
+  .poster-layout:not(:has(.poster-paper)) .poster-wrap { max-width: 460px; margin: 40px auto 0; }
 }
 
 @media (min-width: 1280px) {
