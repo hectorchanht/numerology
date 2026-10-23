@@ -44,5 +44,5 @@ test("provider:workers-ai 模型表非空,默认模型在表中", () => {
     assert.match(m.id, /^@cf\//, "模型 id 应为 @cf/ 开头");
     assert.ok(m.contextWindow > 0 && m.priceInPerM > 0 && m.priceOutPerM > 0);
   }
-  assert.equal(WORKERS_AI_DEFAULT_MODEL, "@cf/meta/llama-3.1-8b-instruct-fp8");
+  assert.equal(WORKERS_AI_DEFAULT_MODEL, "@cf/mistralai/mistral-small-3.1-24b-instruct");
 });

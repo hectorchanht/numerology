@@ -15,7 +15,8 @@ test("models:workers-ai 返回 verified-static 核验表", async () => {
   const r = await fetchProviderModels("workers-ai");
   assert.equal(r.source, "verified-static");
   assert.ok(r.models.length >= 1);
-  assert.ok(r.models.some((m) => m.id === "@cf/meta/llama-3.1-8b-instruct-fp8"));
+  assert.ok(r.models.some((m) => m.id === "@cf/mistralai/mistral-small-3.1-24b-instruct"));
+  assert.equal(r.models[0].id, "@cf/mistralai/mistral-small-3.1-24b-instruct");
   assert.ok(r.verifiedAt);
 });
 

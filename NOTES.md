@@ -216,10 +216,13 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
   4 個 AI 路由已切換。binding 缺失(本地開發)→ 502 但保留明確指引(不被兜底文案吞掉)。
 - 流式:SSE(`data: {"response":"..."}` … `data: [DONE]`)解析為統一 TextStream;
   非流式直接取 `response` 字段。
-- 預設模型 **`@cf/meta/llama-3.1-8b-instruct-fp8`**:實測中文補全乾淨(繁體)、無推理外泄、
-  `usage.neurons` 直接可用。備選(同表,皆經 catalog 核驗存在):
-  `@cf/meta/llama-3.2-3b-instruct`(最快最便宜,80K ctx)、
-  `@cf/mistralai/mistral-small-3.1-24b-instruct`(更強,128K ctx)。
+- 預設模型 **`@cf/mistralai/mistral-small-3.1-24b-instruct`**(2026-10-23 起):
+  唯一在「長簡體 prompt + 繁體指令」下穩定輸出繁體的模型。Llama 3.1 8B 實測會被
+  prompt 中的簡體錨定、無視 `localeDirective`(user 消息前置指令也救不回來);
+  Mistral Small 3.1 嚴格遵循指令,輸出乾淨繁體。`usage.neurons` 直接可用。
+  代價:neurons/token 約為 Llama 8B 的 3 倍,$2 預算 ≈ 75 次完整解讀/月(個人用足夠,
+  預算守衛是硬上限)。備選:`@cf/meta/llama-3.1-8b-instruct-fp8`(便宜但繁體不穩)、
+  `@cf/meta/llama-3.2-3b-instruct`(最快最便宜,80K ctx)。
 - **明確排除**:`@cf/zai-org/glm-4.7-flash`、`@cf/qwen/qwen3-30b-a3b-fp8` 等 reasoning 模型——
   實測會把思考過程塞進 `reasoning`/`reasoning_content` 字段而 `content` 為 null,
   不適合直接做解讀。`@cf/deepseek-ai/deepseek-v4-flash-0731` 等標 `require_workers_paid` 的不用。

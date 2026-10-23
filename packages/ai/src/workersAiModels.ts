@@ -25,9 +25,21 @@ export const WORKERS_AI_VERIFIED_AT = "2026-10-22";
 
 export const WORKERS_AI_MODELS: WorkersAiModelInfo[] = [
   {
-    // 默认:实测中文补全干净(繁体)、response 字段直接可用、usage 带 neurons。
+    // 默认(2026-10-23 起):唯一在「长简体 prompt + 繁体指令」下稳定输出繁体的模型。
+    // 实测:Llama 3.1 8B 会被 prompt 中的简体锚定、无视语言指令;Mistral Small 3.1
+    // 严格遵循 localeDirective,输出干净繁体(香港用语),response 字段直接可用,
+    // usage 带 neurons。代价是 neurons/token 约为 Llama 8B 的 3 倍,$2 预算约
+    // 75 次完整解读/月(个人用仍绰绰有余,预算守卫是硬上限)。
+    id: "@cf/mistralai/mistral-small-3.1-24b-instruct",
+    label: "Mistral Small 3.1 24B(預設·繁體穩定)",
+    contextWindow: 128000,
+    priceInPerM: 0.351,
+    priceOutPerM: 0.555,
+  },
+  {
+    // 备选:中文流畅、便宜,但长简体 prompt 下会无视繁体指令出简体。
     id: "@cf/meta/llama-3.1-8b-instruct-fp8",
-    label: "Llama 3.1 8B(預設·中文流暢)",
+    label: "Llama 3.1 8B(便宜·繁體不穩)",
     contextWindow: 32000,
     priceInPerM: 0.152,
     priceOutPerM: 0.287,
@@ -38,13 +50,6 @@ export const WORKERS_AI_MODELS: WorkersAiModelInfo[] = [
     contextWindow: 80000,
     priceInPerM: 0.0509,
     priceOutPerM: 0.335,
-  },
-  {
-    id: "@cf/mistralai/mistral-small-3.1-24b-instruct",
-    label: "Mistral Small 3.1 24B(更強·128K)",
-    contextWindow: 128000,
-    priceInPerM: 0.351,
-    priceOutPerM: 0.555,
   },
 ];
 
