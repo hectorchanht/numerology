@@ -6,7 +6,8 @@ import { useLocale, HTML_LANG, type TKey } from "@/lib/i18n";
 import { go, useNav, type Tab } from "@/lib/nav";
 import { Icon, type IconName } from "@/components/Icon";
 
-const ITEMS: { tab: Tab; icon: IconName; labelKey: TKey }[] = [
+/** 5 個主 tab(底部 tab bar 同桌面側欄共用)。 */
+export const TAB_ITEMS: { tab: Tab; icon: IconName; labelKey: TKey }[] = [
   { tab: "home", icon: "home", labelKey: "tab.home" },
   { tab: "chart", icon: "grid", labelKey: "tab.chart" },
   { tab: "report", icon: "file", labelKey: "tab.report" },
@@ -30,7 +31,7 @@ export function TabBar() {
   return (
     <div className="tabbar">
       <nav aria-label={t("tab.aria")}>
-        {ITEMS.map((it) => {
+        {TAB_ITEMS.map((it) => {
           const on = onHome && tab === it.tab;
           return (
             <button

@@ -58,63 +58,70 @@ export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void })
     ? items.filter((r) => `${summarizeInput(r.input)} ${r.chart?.bazi?.lunarDate ?? ""}`.toLowerCase().includes(needle))
     : items;
 
+  // .split:手機 display:contents(版面不變);桌面左欄搜尋/說明、右欄列表。
   return (
-    <>
-      <label className="search">
-        <Icon name="search" small />
-        <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("history.search")} aria-label={t("history.search")} />
-      </label>
+    <div className="split split-hist">
+      <div className="split-a">
+        <label className="search">
+          <Icon name="search" small />
+          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("history.search")} aria-label={t("history.search")} />
+        </label>
+      </div>
 
-      {items.length === 0 ? (
-        <div className="card empty">
-          <Icon name="history" />
-          <div className="empty-t">{t("history.empty")}</div>
-        </div>
-      ) : shown.length === 0 ? (
-        <p className="note">{t("history.noMatch")}</p>
-      ) : (
-        <div className="list hist">
-          {shown.map((r) => {
-            const rep = countSections(r, "report:");
-            const fot = countSections(r, "fortune:");
-            return (
-              <div className="row hist-row" key={r.id}>
-                <button type="button" className="hist-main" onClick={() => onRestore(r)}>
-                  <span className="avatar" aria-hidden="true">{r.input.gender}</span>
-                  <span className="lbl">
-                    {summarizeInput(r.input)}
-                    <span className="sub">{r.chart?.bazi?.lunarDate}</span>
-                    {rep || fot ? (
-                      <span className="badges">
-                        {rep ? <span className="tag">{t("history.reportBadge", { n: rep })}</span> : null}
-                        {fot ? <span className="tag">{t("history.fortuneBadge", { n: fot })}</span> : null}
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="when">{fmtTime(r.updatedAt)}</span>
-                </button>
-                <button
-                  type="button"
-                  className="icon-btn danger"
-                  onClick={() => handleDelete(r.id)}
-                  aria-label={t("history.delete")}
-                >
-                  <Icon name="trash" small />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <div className="split-main">
+        {items.length === 0 ? (
+          <div className="card empty">
+            <Icon name="history" />
+            <div className="empty-t">{t("history.empty")}</div>
+          </div>
+        ) : shown.length === 0 ? (
+          <p className="note">{t("history.noMatch")}</p>
+        ) : (
+          <div className="list hist">
+            {shown.map((r) => {
+              const rep = countSections(r, "report:");
+              const fot = countSections(r, "fortune:");
+              return (
+                <div className="row hist-row" key={r.id}>
+                  <button type="button" className="hist-main" onClick={() => onRestore(r)}>
+                    <span className="avatar" aria-hidden="true">{r.input.gender}</span>
+                    <span className="lbl">
+                      {summarizeInput(r.input)}
+                      <span className="sub">{r.chart?.bazi?.lunarDate}</span>
+                      {rep || fot ? (
+                        <span className="badges">
+                          {rep ? <span className="tag">{t("history.reportBadge", { n: rep })}</span> : null}
+                          {fot ? <span className="tag">{t("history.fortuneBadge", { n: fot })}</span> : null}
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="when">{fmtTime(r.updatedAt)}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="icon-btn danger"
+                    onClick={() => handleDelete(r.id)}
+                    aria-label={t("history.delete")}
+                  >
+                    <Icon name="trash" small />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
-      <p className="note">{t("history.restoreNote")}</p>
+      <div className="split-b">
+        <p className="note">{t("history.restoreNote")}</p>
 
-      {items.length > 0 ? (
-        <button type="button" className="btn secondary block danger-text" onClick={handleClear}>
-          <Icon name="trash" />
-          {t("history.clear")}
-        </button>
-      ) : null}
-    </>
+        {items.length > 0 ? (
+          <button type="button" className="btn secondary block danger-text" onClick={handleClear}>
+            <Icon name="trash" />
+            {t("history.clear")}
+          </button>
+        ) : null}
+      </div>
+    </div>
   );
 }

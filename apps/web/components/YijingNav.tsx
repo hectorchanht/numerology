@@ -6,7 +6,8 @@ import { useLocale } from "@/lib/i18n";
 import { yjT } from "@/lib/yijingStrings";
 import { Icon, type IconName } from "@/components/Icon";
 
-const LINKS: { href: string; id: string; icon: IconName }[] = [
+/** 子頁連結(子頁頂部導航同桌面側欄共用)。 */
+export const SUB_LINKS: { href: string; id: string; icon: IconName }[] = [
   { href: "/yijing", id: "nav.yijing", icon: "hex" },
   { href: "/yijing/gua", id: "nav.gua", icon: "book" },
   { href: "/poster", id: "nav.poster", icon: "image" },
@@ -23,7 +24,7 @@ export function YijingNav() {
         <Icon name="back" />
       </Link>
       <div className="strip">
-        {LINKS.map((l) => {
+        {SUB_LINKS.map((l) => {
           const active = pathname === l.href;
           return (
             <Link

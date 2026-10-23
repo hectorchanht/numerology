@@ -143,37 +143,47 @@ export default function Home() {
 
   const ready = chart && input ? { chart, input } : null;
   const nowLuck = chart ? currentLuckStep(chart.bazi) : undefined;
-  const show = (s: Screen) => ({ className: "screen", hidden: screen !== s });
+  // narrow:桌面用窄欄(設定、對話),其餘畫面用全寬多欄。
+  const show = (s: Screen, narrow?: boolean) => ({ className: narrow ? "screen narrow" : "screen", hidden: screen !== s });
 
+  // .split / .split-*:手機 display:contents(版面不變),桌面變多欄 grid。
   return (
     <>
       {/* ============ 起盤 ============ */}
       <section {...show("home")} aria-label={t("tab.home")}>
         <ScreenNav eyebrow={t("app.subtitle")} />
-        <h1 className="large">{t("form.title")}</h1>
-        <p className="lede">{t("home.lede")}</p>
+        <div className="split split-home">
+          <div className="split-a">
+            <h1 className="large">{t("form.title")}</h1>
+            <p className="lede">{t("home.lede")}</p>
+          </div>
 
-        <Seg
-          value={mode}
-          onChange={setMode}
-          options={[
-            { value: "known", label: t("mode.knownShort") },
-            { value: "infer", label: t("mode.inferShort") },
-          ]}
-        />
+          <div className="split-main">
+            <Seg
+              value={mode}
+              onChange={setMode}
+              options={[
+                { value: "known", label: t("mode.knownShort") },
+                { value: "infer", label: t("mode.inferShort") },
+              ]}
+            />
 
-        {mode === "infer" ? (
-          <TimeInferPanel onAdopt={(birth) => { setMode("known"); onSubmit(birth); }} />
-        ) : (
-          <BirthForm loading={loading} onSubmit={onSubmit} />
-        )}
+            {mode === "infer" ? (
+              <TimeInferPanel onAdopt={(birth) => { setMode("known"); onSubmit(birth); }} />
+            ) : (
+              <BirthForm loading={loading} onSubmit={onSubmit} />
+            )}
 
-        {error ? <p className="notice" role="alert">{error}</p> : null}
+            {error ? <p className="notice" role="alert">{error}</p> : null}
+          </div>
 
-        <p className="disclaimer">
-          {t("app.disclaimer1")}<br />
-          {t("app.disclaimer2")}
-        </p>
+          <div className="split-b">
+            <p className="disclaimer">
+              {t("app.disclaimer1")}<br />
+              {t("app.disclaimer2")}
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* ============ 命盤 ============ */}
@@ -186,77 +196,81 @@ export default function Home() {
           ) : null}
         </ScreenNav>
         {ready ? (
-          <>
-            <div className="who">
-              <div className="avatar" aria-hidden="true">{ready.input.gender}</div>
-              <div>
-                <div className="name">
-                  {ready.chart.input.year}-{ready.chart.input.month}-{ready.chart.input.day}{" "}
-                  {String(ready.chart.input.hour).padStart(2, "0")}:
-                  {String(ready.chart.input.minute ?? 0).padStart(2, "0")} · {ready.chart.input.gender}
+          <div className="split split-chart">
+            <div className="split-main">
+              <div className="who">
+                <div className="avatar" aria-hidden="true">{ready.input.gender}</div>
+                <div>
+                  <div className="name">
+                    {ready.chart.input.year}-{ready.chart.input.month}-{ready.chart.input.day}{" "}
+                    {String(ready.chart.input.hour).padStart(2, "0")}:
+                    {String(ready.chart.input.minute ?? 0).padStart(2, "0")} · {ready.chart.input.gender}
+                  </div>
+                  <div className="meta">
+                    {ready.chart.bazi.lunarDate} ·{" "}
+                    {ready.chart.meta.trueSolarTimeApplied
+                      ? t("chart.corrected", { lon: ready.chart.meta.correction?.longitude ?? "", off: ready.chart.meta.correction?.offsetMinutes ?? "" })
+                      : t("chart.notCorrected")}
+                  </div>
                 </div>
-                <div className="meta">
-                  {ready.chart.bazi.lunarDate} ·{" "}
-                  {ready.chart.meta.trueSolarTimeApplied
-                    ? t("chart.corrected", { lon: ready.chart.meta.correction?.longitude ?? "", off: ready.chart.meta.correction?.offsetMinutes ?? "" })
-                    : t("chart.notCorrected")}
-                </div>
+              </div>
+
+              <Seg
+                value={sys}
+                onChange={setSys}
+                options={[
+                  { value: "bazi", label: t("chart.segBazi") },
+                  { value: "ziwei", label: t("chart.segZiwei") },
+                ]}
+              />
+
+              <div hidden={sys !== "bazi"}>
+                <BaziTable bazi={ready.chart.bazi} ziwei={ready.chart.ziwei} />
+                <BaziDetail bazi={ready.chart.bazi} />
+              </div>
+              <div hidden={sys !== "ziwei"}>
+                <h2 className="group-title">{t("chart.palacesTitle")}</h2>
+                <ZiweiBoard key={JSON.stringify(ready.input)} ziwei={ready.chart.ziwei} />
+                <p className="note">{t("chart.palaceNote")}</p>
               </div>
             </div>
 
-            <Seg
-              value={sys}
-              onChange={setSys}
-              options={[
-                { value: "bazi", label: t("chart.segBazi") },
-                { value: "ziwei", label: t("chart.segZiwei") },
-              ]}
-            />
+            <div className="split-a">
+              <h2 className="group-title">{t("chart.readings")}</h2>
+              <div className="list">
+                <button type="button" className="row" onClick={() => go("report")}>
+                  <Icon name="file" className="ic" />
+                  <span className="lbl">{t("card.chartTitle")}<span className="sub">{t("chart.reportSub")}</span></span>
+                  <Icon name="chev" small className="chev" />
+                </button>
+                <button type="button" className="row" onClick={() => go("fortune")}>
+                  <Icon name="trend" className="ic" />
+                  <span className="lbl">
+                    {t("card.fortuneTitle")}
+                    <span className="sub">{nowLuck ? t("chart.fortuneSub", { gz: nowLuck.ganZhi }) : t("chart.fortuneSubNone")}</span>
+                  </span>
+                  <Icon name="chev" small className="chev" />
+                </button>
+                <button type="button" className="row" onClick={() => go("chat")}>
+                  <Icon name="msg" className="ic" />
+                  <span className="lbl">{t("chat.title")}<span className="sub">{t("chat.sub")}</span></span>
+                  <Icon name="chev" small className="chev" />
+                </button>
+              </div>
 
-            <div hidden={sys !== "bazi"}>
-              <BaziTable bazi={ready.chart.bazi} ziwei={ready.chart.ziwei} />
-              <BaziDetail bazi={ready.chart.bazi} />
+              <h2 className="group-title">{t("chart.tools")}</h2>
+              <div className="tools">
+                <Link href="/yijing" className="tool">
+                  <Icon name="hex" />
+                  <div><div className="t">{yjT("nav.yijing", locale)}</div><div className="d">{t("chart.yijingSub")}</div></div>
+                </Link>
+                <Link href="/poster" className="tool">
+                  <Icon name="image" />
+                  <div><div className="t">{yjT("nav.poster", locale)}</div><div className="d">{t("chart.posterSub")}</div></div>
+                </Link>
+              </div>
             </div>
-            <div hidden={sys !== "ziwei"}>
-              <h2 className="group-title">{t("chart.palacesTitle")}</h2>
-              <ZiweiBoard key={JSON.stringify(ready.input)} ziwei={ready.chart.ziwei} />
-              <p className="note">{t("chart.palaceNote")}</p>
-            </div>
-
-            <h2 className="group-title">{t("chart.readings")}</h2>
-            <div className="list">
-              <button type="button" className="row" onClick={() => go("report")}>
-                <Icon name="file" className="ic" />
-                <span className="lbl">{t("card.chartTitle")}<span className="sub">{t("chart.reportSub")}</span></span>
-                <Icon name="chev" small className="chev" />
-              </button>
-              <button type="button" className="row" onClick={() => go("fortune")}>
-                <Icon name="trend" className="ic" />
-                <span className="lbl">
-                  {t("card.fortuneTitle")}
-                  <span className="sub">{nowLuck ? t("chart.fortuneSub", { gz: nowLuck.ganZhi }) : t("chart.fortuneSubNone")}</span>
-                </span>
-                <Icon name="chev" small className="chev" />
-              </button>
-              <button type="button" className="row" onClick={() => go("chat")}>
-                <Icon name="msg" className="ic" />
-                <span className="lbl">{t("chat.title")}<span className="sub">{t("chat.sub")}</span></span>
-                <Icon name="chev" small className="chev" />
-              </button>
-            </div>
-
-            <h2 className="group-title">{t("chart.tools")}</h2>
-            <div className="tools">
-              <Link href="/yijing" className="tool">
-                <Icon name="hex" />
-                <div><div className="t">{yjT("nav.yijing", locale)}</div><div className="d">{t("chart.yijingSub")}</div></div>
-              </Link>
-              <Link href="/poster" className="tool">
-                <Icon name="image" />
-                <div><div className="t">{yjT("nav.poster", locale)}</div><div className="d">{t("chart.posterSub")}</div></div>
-              </Link>
-            </div>
-          </>
+          </div>
         ) : (
           <EmptyChart />
         )}
@@ -320,14 +334,14 @@ export default function Home() {
       </section>
 
       {/* ============ 設定(齒輪) ============ */}
-      <section {...show("settings")} aria-label={t("nav.settings")}>
+      <section {...show("settings", true)} aria-label={t("nav.settings")}>
         <ScreenNav eyebrow={t("nav.settings")} onBack={goBack} gear={false} />
         <SettingsPanel />
         <p className="disclaimer">{t("app.disclaimer1")}</p>
       </section>
 
       {/* ============ 命盤對話 ============ */}
-      <section {...show("chat")} aria-label={t("chat.title")}>
+      <section {...show("chat", true)} aria-label={t("chat.title")}>
         <ScreenNav eyebrow={t("tab.chart")} onBack={goBack} gear={false} />
         {ready ? <ChatPanel key={JSON.stringify(ready.input)} input={ready.input} /> : <EmptyChart />}
       </section>
