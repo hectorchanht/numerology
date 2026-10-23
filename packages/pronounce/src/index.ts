@@ -9,3 +9,4 @@ export {
   PronounceButton,
   type PronounceLocale,
 } from "./PronounceButton.js";
+export { speechText } from "./speechText.js";

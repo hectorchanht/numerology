@@ -4,6 +4,7 @@ import {
   useSpeech,
   splitSpeechSentences,
   PronounceButton,
+  speechText,
 } from "../dist/index.js";
 
 test("exports useSpeech hook", () => {
@@ -41,4 +42,17 @@ test("splitSpeechSentences:超長無標點硬切", () => {
 
 test("splitSpeechSentences:換行亦切分", () => {
   assert.deepEqual(splitSpeechSentences("第一行\n第二行"), ["第一行", "第二行"]);
+});
+
+test("speechText:strip markdown 保留文字", () => {
+  assert.equal(speechText("## 標題\n**粗體**同*斜體*"), "標題\n粗體同斜體");
+  assert.equal(speechText("[連結](https://x.com)同`code`"), "連結同code");
+  assert.equal(speechText("```js\nconst a = 1;\n```\n留低呢句"), "留低呢句");
+  assert.equal(speechText("- 第一項\n- 第二項"), "第一項\n第二項");
+  assert.equal(speechText("> 引用\n普通"), "引用\n普通");
+});
+
+test("speechText:空/純文字 pass-through", () => {
+  assert.equal(speechText("   "), "");
+  assert.equal(speechText("你好世界"), "你好世界");
 });
