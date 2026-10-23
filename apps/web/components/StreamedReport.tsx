@@ -15,7 +15,7 @@ import { parseEvidenceBlock } from "@/lib/fortuneBlocks";
 import { Icon, SECTION_ICON } from "@/components/Icon";
 import { AiModelNote } from "@/components/AiModelNote";
 import { Seg, ScreenNav } from "@/components/ui";
-import { PronounceButton } from "@dawn-studio/pronounce";
+import { DualPronounce } from "@/lib/DualPronounce";
 import { speechText } from "@/lib/speechText";
 
 /** 分段定义:key 对应引擎 REPORT_SEGMENTS / FORTUNE_SEGMENTS,label 用作章節卡標題。 */
@@ -388,8 +388,8 @@ export function StreamedReport({
                         <span className="sec-h" style={{ flex: 1, minWidth: 0 }}>{head}</span>
                       )}
                       {readText ? (
-                        <span style={{ flex: "none" }} title={t("select.readSection")}>
-                          <PronounceButton text={readText} locale={locale} mode="all" />
+                        <span style={{ flex: "none", display: "inline-flex" }} title={t("select.readSection")}>
+                          <DualPronounce text={readText} locale={locale} mode="all" />
                         </span>
                       ) : null}
                     </h3>

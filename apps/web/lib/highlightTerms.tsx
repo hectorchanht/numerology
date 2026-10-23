@@ -17,7 +17,7 @@ import {
 // 相對引用(非 @/):node --test 經 test-dist 執行時 @/ 無法解析,
 // Next 端經 extensionAlias 同樣解到 ./i18n.ts,同一模組。
 import { useLocale, useScript } from "./i18n.js";
-import { PronounceButton } from "@dawn-studio/pronounce";
+import { DualPronounce } from "./DualPronounce.js";
 import { FloatingCard, useFloatPopup } from "./floatPopup.js";
 import { QUOTEREF_SKIP_PROP, QuoteRef } from "./quoteRef.js";
 
@@ -158,7 +158,7 @@ export function Term({ term }: { term: string }) {
               },
               zT(def.term),
             ),
-            createElement(PronounceButton, { text: def.term, locale }),
+            createElement(DualPronounce, { text: def.term, locale }),
           ),
           createElement("span", { key: "body" }, def[locale] ?? def.zht),
         ],

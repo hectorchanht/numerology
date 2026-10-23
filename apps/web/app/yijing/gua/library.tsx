@@ -13,7 +13,7 @@ import {
   type YijingLocale,
 } from "@numerology/knowledge";
 import { useLocale, useScript } from "@/lib/i18n";
-import { PronounceButton } from "@dawn-studio/pronounce";
+import { DualPronounce } from "@/lib/DualPronounce";
 import { yjT, type YijingLocale as YL } from "@/lib/yijingStrings";
 import { Term, withTermHighlights } from "@/lib/highlightTerms";
 import { useQueryParam, useSetQueryParams, useDetailCloser } from "@/lib/useQueryParams";
@@ -68,21 +68,9 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
                 display: "inline-flex",
                 verticalAlign: "middle",
                 marginLeft: "0.5rem",
-                gap: "0.35rem",
               }}
             >
-              <PronounceButton
-                text={`${zT(hex.name)}。${zT(hex.judgment)}`}
-                locale={loc}
-                langs={["zh-HK"]}
-                defaultLang="zh-HK"
-              />
-              <PronounceButton
-                text={`${zT(hex.name)}。${zT(hex.judgment)}`}
-                locale={loc}
-                langs={["zh-CN"]}
-                defaultLang="zh-CN"
-              />
+              <DualPronounce text={`${zT(hex.name)}。${zT(hex.judgment)}`} locale={loc} />
             </span>
             <span className="muted" style={{ fontSize: "0.85rem", marginLeft: "0.6rem" }}>
               #{hex.number} · {hex.pinyin} · {hex.nameEn}

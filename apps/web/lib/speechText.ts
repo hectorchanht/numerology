@@ -22,3 +22,29 @@ export function speechText(md: string): string {
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
+
+/**
+ * 易經多音字 TTS 糾音:語音引擎遇到多音字多數讀常用音,同易經讀音唔同,
+ * 代入同音常用字等佢讀啱。讀音全部對過 Wiktionary / 漢典:
+ * 乾 qián/kin4(非 gān/gon1) 屯 zhūn/zeon1(非 tún/tyun4) 否 pǐ/pei2(非 fǒu/fau2)
+ * 賁 bì/bei3(非 bēn/ban1) 解 xiè/haai6(非 jiě/gaai2;《周易正義》解卦有兩音,呢度跟站內拼音 Xiè)
+ * 畜 xù/cuk1(小畜/大畜,非 chù/cuk3)
+ */
+const YIJING_SPEECH_FIX: Record<string, { cmn: string; yue: string }> = {
+  "乾": { cmn: "錢", yue: "堅" },
+  "屯": { cmn: "諄", yue: "樽" },
+  "否": { cmn: "匹", yue: "痞" },
+  "賁": { cmn: "幣", yue: "臂" },
+  "解": { cmn: "謝", yue: "亥" },
+  "畜": { cmn: "蓄", yue: "速" },
+};
+
+/** 易經文本 TTS 前糾音:按語言代入同音字。非中文文本唔受影響。 */
+export function fixYijingSpeech(text: string, lang: "zh-HK" | "zh-CN"): string {
+  const key = lang === "zh-HK" ? "yue" : "cmn";
+  let out = text;
+  for (const [ch, sub] of Object.entries(YIJING_SPEECH_FIX)) {
+    if (out.includes(ch)) out = out.split(ch).join(sub[key]);
+  }
+  return out;
+}
