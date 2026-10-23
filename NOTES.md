@@ -198,6 +198,13 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
 共享 IP 被限流 429),edge 外直連則正常。改為預設走 Cloudflare Workers AI binding。
 
 ### Workers AI 接入
+- **繁中指令前置(2026-10-23 補)**:實測 Llama 3.1 8B 對 system 末尾的 `localeDirective`
+  遵循不穩(仍出簡體)——中文訓練語料以簡體為主。但把同一指令放在 user 消息開頭
+  即穩定輸出繁體(REST 實測驗證)。故 workers-ai 路徑在 `provider.ts` 的
+  `promoteLocaleDirective()` 中把語言指令塊同時前置到第一條 user 消息(system 塊保留,
+  雙保險)。此為 workers-ai 專屬,不動其他 provider 的 system 末塊設計(Anthropic
+  prompt-cache 前綴考量)。線上驗證後確認 zht 輸出繁體才算關閉此項。
+
 - `packages/ai/src/provider.ts`:新增 `kind: "workers-ai"`,經 `env.AI` binding 調用,
   無需 API key。`ProviderOptions.aiBinding`(僅服務端注入,絕不來自請求體/序列化給客戶端)。
 - API 路由經 `@cloudflare/next-on-pages` 的 `getRequestContext()` 取 `env.AI` /

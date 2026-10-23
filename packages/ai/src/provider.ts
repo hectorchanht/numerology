@@ -377,7 +377,7 @@ class WorkersAITextStream implements TextStream {
       binding: AiBindingLike;
       kv: BudgetKV;
       model: string;
-      systemText: string;
+      system: SystemBlock[];
       messages: ChatMessage[];
       maxTokens: number;
     },
@@ -404,14 +404,11 @@ class WorkersAITextStream implements TextStream {
   }
 
   private async run(): Promise<{ text: string; neurons: number }> {
-    const { binding, kv, model, systemText, messages, maxTokens } = this.args;
+    const { binding, kv, model, system, messages, maxTokens } = this.args;
     try {
       // 预算前置检查:超支直接抛,预热层会转成 JSON 429。
       await checkBudget(kv);
-      const fullMessages =
-        systemText.trim().length > 0
-          ? [{ role: "system", content: systemText }, ...messages]
-          : messages;
+      const fullMessages = toWorkersAiMessages(system, messages);
       const stream = (await binding.run(model, {
         messages: fullMessages,
         max_tokens: maxTokens,
@@ -531,12 +528,11 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
   const def = resolveDef(name, opts);
   if (def.kind === "workers-ai") {
     const { ai, kv } = workersAiRuntime(opts);
-    const systemText = req.system.map((b) => b.text).join("\n\n");
     return new WorkersAITextStream({
       binding: ai,
       kv,
       model: modelFor(def, req.kind, opts),
-      systemText,
+      system: req.system,
       messages: req.messages,
       maxTokens: req.maxTokens,
     });
@@ -558,16 +554,33 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
   );
 }
 
+/**
+ * 语言指令提升:实测 Llama 3.1 8B 对 system 末尾的语言指令遵循不稳(仍出简体),
+ * 但放在 user 消息开头则稳定输出繁体。故 workers-ai 路径下,把语言指令块
+ * 同时前置到第一条 user 消息(原 system 块保留,双保险)。
+ */
+const LOCALE_DIRECTIVE_RE = /輸出語言|输出语言|Output language/;
+
+function promoteLocaleDirective(
+  system: SystemBlock[],
+  messages: ChatMessage[],
+): { systemText: string; messages: { role: string; content: string }[] } {
+  const dirBlock = system.find((b) => LOCALE_DIRECTIVE_RE.test(b.text));
+  const systemText = system.map((b) => b.text).join("\n\n");
+  const mapped = messages.map((m, i) => ({
+    role: m.role,
+    content: i === 0 && dirBlock ? `${dirBlock.text}\n\n${m.content}` : m.content,
+  }));
+  return { systemText, messages: mapped };
+}
+
 /** Workers AI 的消息形态:system 单独成块(与 OpenAI 兼容层把 system 拼进文本不同)。 */
 function toWorkersAiMessages(
   system: SystemBlock[],
   messages: ChatMessage[],
 ): { role: string; content: string }[] {
-  const systemText = system.map((b) => b.text).join("\n\n");
-  return [
-    ...(systemText.trim() ? [{ role: "system", content: systemText }] : []),
-    ...messages.map((m) => ({ role: m.role, content: m.content })),
-  ];
+  const { systemText, messages: msgs } = promoteLocaleDirective(system, messages);
+  return [...(systemText.trim() ? [{ role: "system", content: systemText }] : []), ...msgs];
 }
 
 /** 给 /api/models 用的 provider 元信息(分组/是否需 key/申请地址),workers-ai 排首位。 */
