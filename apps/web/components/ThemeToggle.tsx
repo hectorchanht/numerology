@@ -15,14 +15,14 @@ function subscribe(fn: () => void): () => void {
 }
 
 /** 頂部導航的主題切換鍵:dark 顯示太陽(撳 → 淺色),light 顯示月亮(撳 → 深色)。 */
-export function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
   const { t } = useLocale();
   const theme = useSyncExternalStore(subscribe, readTheme, () => DEFAULT_THEME);
   const toLight = theme === "dark";
   return (
     <button
       type="button"
-      className="icon-btn"
+      className={className ? `icon-btn ${className}` : "icon-btn"}
       onClick={() => {
         applyTheme(nextTheme(theme));
         listeners.forEach((fn) => fn());

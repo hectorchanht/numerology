@@ -150,166 +150,171 @@ export default function YijingTool() {
         <div className="sub">{yjT("yijing.sub", loc)}</div>
       </div>
 
-      <div className="card">
-        <div className="field">
-          <label htmlFor="yj-q">{yjT("yijing.question.label", loc)}</label>
-          <input
-            id="yj-q"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder={yjT("yijing.question.ph", loc)}
-          />
-        </div>
-        <p className="muted" style={{ marginTop: "0.7rem", marginBottom: 0 }}>
-          <Gloss term="問卦" locale={loc} /> · {yjT("yijing.askHonest", loc)}
-        </p>
-      </div>
-
-      <div className="card">
-        <h2 className="section-title">
-          {yjFmt(yjT("yijing.toss", loc), { n: Math.min(lines.length + 1, 6) })}
-        </h2>
-        <div className="strip" style={{ marginBottom: "1rem" }}>
-          <button className="btn" onClick={tossOne} disabled={rolling || done}>
-            {yjFmt(yjT("yijing.toss", loc), { n: Math.min(lines.length + 1, 6) })}
-          </button>
-          <button className="btn ghost" onClick={tossAll} disabled={rolling || done}>
-            {yjT("yijing.auto", loc)}
-          </button>
-          {(done || lines.length > 0) && (
-            <button className="btn ghost" onClick={reset}>
-              {yjT("yijing.reset", loc)}
-            </button>
-          )}
-        </div>
-
-        {rolling && lines.length < 6 && (
-          <div className="yj-coins" aria-hidden style={{ marginBottom: "0.8rem" }}>
-            {[0, 1, 2].map((i) => (
-              <span key={i} className="yj-coin flipping" style={{ animationDelay: `${i * 0.08}s` }}>
-                {i % 2 ? yjT("yijing.coin.tails", loc) : yjT("yijing.coin.heads", loc)}
-              </span>
-            ))}
+      {/* .yj-layout:手機 display:contents;桌面左欄問卦/起卦、右欄卦象結果 */}
+      <div className="yj-layout">
+        <div className="yj-col">
+          <div className="card">
+            <div className="field">
+              <label htmlFor="yj-q">{yjT("yijing.question.label", loc)}</label>
+              <input
+                id="yj-q"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                placeholder={yjT("yijing.question.ph", loc)}
+              />
+            </div>
+            <p className="muted" style={{ marginTop: "0.7rem", marginBottom: 0 }}>
+              <Gloss term="問卦" locale={loc} /> · {yjT("yijing.askHonest", loc)}
+            </p>
           </div>
-        )}
 
-        <div>
-          {[...lines].reverse().map((l, ri) => {
-            const pos = lines.length - ri; // 1..6 由下而上
-            return (
-              <div className="yj-line-row" key={pos}>
-                <span className="muted" style={{ minWidth: "2.6em" }}>
-                  {pos === 1 || pos === 6
-                    ? pos === 1
-                      ? "初"
-                      : "上"
-                    : String(pos)}
-                </span>
-                <span className="yj-coins">
-                  {l.coins.map((c, i) => (
-                    <span key={i} className="yj-coin pop" style={{ width: "26px", height: "26px", fontSize: "0.8rem" }}>
-                      {c ? yjT("yijing.coin.heads", loc) : yjT("yijing.coin.tails", loc)}
-                    </span>
-                  ))}
-                </span>
-                <span className="yj-glyph">{LINE_GLYPH[l.value]}</span>
-                <span style={{ color: "var(--ink-soft)" }}>{yjT(LINE_LABEL[l.value], loc)}</span>
-                {(l.value === 6 || l.value === 9) && (
-                  <span className="badge badge-warn">
-                    <Gloss term="動爻" locale={loc} />
+          <div className="card">
+            <h2 className="section-title">
+              {yjFmt(yjT("yijing.toss", loc), { n: Math.min(lines.length + 1, 6) })}
+            </h2>
+            <div className="strip" style={{ marginBottom: "1rem" }}>
+              <button className="btn" onClick={tossOne} disabled={rolling || done}>
+                {yjFmt(yjT("yijing.toss", loc), { n: Math.min(lines.length + 1, 6) })}
+              </button>
+              <button className="btn ghost" onClick={tossAll} disabled={rolling || done}>
+                {yjT("yijing.auto", loc)}
+              </button>
+              {(done || lines.length > 0) && (
+                <button className="btn ghost" onClick={reset}>
+                  {yjT("yijing.reset", loc)}
+                </button>
+              )}
+            </div>
+
+            {rolling && lines.length < 6 && (
+              <div className="yj-coins" aria-hidden style={{ marginBottom: "0.8rem" }}>
+                {[0, 1, 2].map((i) => (
+                  <span key={i} className="yj-coin flipping" style={{ animationDelay: `${i * 0.08}s` }}>
+                    {i % 2 ? yjT("yijing.coin.tails", loc) : yjT("yijing.coin.heads", loc)}
                   </span>
+                ))}
+              </div>
+            )}
+
+            <div>
+              {[...lines].reverse().map((l, ri) => {
+                const pos = lines.length - ri; // 1..6 由下而上
+                return (
+                  <div className="yj-line-row" key={pos}>
+                    <span className="muted" style={{ minWidth: "2.6em" }}>
+                      {pos === 1 || pos === 6
+                        ? pos === 1
+                          ? "初"
+                          : "上"
+                        : String(pos)}
+                    </span>
+                    <span className="yj-coins">
+                      {l.coins.map((c, i) => (
+                        <span key={i} className="yj-coin pop" style={{ width: "26px", height: "26px", fontSize: "0.8rem" }}>
+                          {c ? yjT("yijing.coin.heads", loc) : yjT("yijing.coin.tails", loc)}
+                        </span>
+                      ))}
+                    </span>
+                    <span className="yj-glyph">{LINE_GLYPH[l.value]}</span>
+                    <span style={{ color: "var(--ink-soft)" }}>{yjT(LINE_LABEL[l.value], loc)}</span>
+                    {(l.value === 6 || l.value === 9) && (
+                      <span className="badge badge-warn">
+                        <Gloss term="動爻" locale={loc} />
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+              {lines.length === 0 && !rolling && (
+                <p className="muted">{yjT("yijing.sub", loc)}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {cast && ben && (
+          <div className="card yj-result">
+            <h2 className="section-title">{yjT("yijing.result", loc)}</h2>
+            <div style={{ display: "flex", gap: "1.2rem", alignItems: "flex-start", flexWrap: "wrap" }}>
+              <HexFigure bits={ben.bits} moving={movingFlags} />
+              <div style={{ flex: "1 1 220px" }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "0.7rem", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: "2.6rem", lineHeight: 1 }}>{ben.symbol}</span>
+                  <span style={{ fontFamily: "var(--serif)", fontSize: "1.5rem" }}>
+                    <Gloss term="本卦" locale={loc} /> · {ben.name}
+                  </span>
+                  <span className="muted">
+                    {ben.pinyin} · {ben.nameEn} · #{ben.number}
+                  </span>
+                </div>
+                <p style={{ marginTop: "0.7rem" }}>
+                  <Gloss term="卦辭" locale={loc} />:{` `}
+                  <span style={{ fontFamily: "var(--serif)", fontSize: "1.05rem" }}>{ben.judgment}</span>
+                </p>
+              </div>
+            </div>
+
+            {cast.changing.length > 0 ? (
+              <div style={{ marginTop: "1.2rem" }}>
+                <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
+                  <Gloss term="動爻" locale={loc} />
+                </h3>
+                {cast.changing.map((p) => (
+                  <div
+                    key={p}
+                    style={{
+                      borderRadius: "12px",
+                      padding: "0.6rem 0.8rem",
+                      marginBottom: "0.5rem",
+                      background: "var(--accent-soft)",
+                    }}
+                  >
+                    <div style={{ fontFamily: "var(--serif)", color: "var(--cinnabar)", marginBottom: "0.2rem" }}>
+                      {yaoName(ben, p)}
+                    </div>
+                    <div style={{ fontSize: "0.92rem" }}>{ben.lines[p - 1]}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="muted" style={{ marginTop: "1rem" }}>
+                {yjT("yijing.noChange", loc)}
+              </p>
+            )}
+
+            {(bian || hu) && (
+              <div className="grid-2" style={{ marginTop: "1.2rem" }}>
+                {bian && (
+                  <div className="card" style={{ marginTop: 0 }}>
+                    <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>
+                      <span style={{ fontSize: "1.8rem", marginRight: "0.5rem" }}>{bian.symbol}</span>
+                      <Gloss term="變卦" locale={loc} /> · {bian.name}
+                    </h3>
+                    <p style={{ margin: 0, fontSize: "0.92rem" }}>
+                      <Gloss term="卦辭" locale={loc} />: {bian.judgment}
+                    </p>
+                  </div>
+                )}
+                {hu && (
+                  <div className="card" style={{ marginTop: 0 }}>
+                    <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>
+                      <span style={{ fontSize: "1.8rem", marginRight: "0.5rem" }}>{hu.symbol}</span>
+                      <Gloss term="互卦" locale={loc} /> · {hu.name}
+                    </h3>
+                    <p style={{ margin: 0, fontSize: "0.92rem" }}>
+                      <Gloss term="卦辭" locale={loc} />: {hu.judgment}
+                    </p>
+                  </div>
                 )}
               </div>
-            );
-          })}
-          {lines.length === 0 && !rolling && (
-            <p className="muted">{yjT("yijing.sub", loc)}</p>
-          )}
-        </div>
-      </div>
+            )}
 
-      {cast && ben && (
-        <div className="card">
-          <h2 className="section-title">{yjT("yijing.result", loc)}</h2>
-          <div style={{ display: "flex", gap: "1.2rem", alignItems: "flex-start", flexWrap: "wrap" }}>
-            <HexFigure bits={ben.bits} moving={movingFlags} />
-            <div style={{ flex: "1 1 220px" }}>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "0.7rem", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "2.6rem", lineHeight: 1 }}>{ben.symbol}</span>
-                <span style={{ fontFamily: "var(--serif)", fontSize: "1.5rem" }}>
-                  <Gloss term="本卦" locale={loc} /> · {ben.name}
-                </span>
-                <span className="muted">
-                  {ben.pinyin} · {ben.nameEn} · #{ben.number}
-                </span>
-              </div>
-              <p style={{ marginTop: "0.7rem" }}>
-                <Gloss term="卦辭" locale={loc} />:{` `}
-                <span style={{ fontFamily: "var(--serif)", fontSize: "1.05rem" }}>{ben.judgment}</span>
-              </p>
-            </div>
-          </div>
-
-          {cast.changing.length > 0 ? (
-            <div style={{ marginTop: "1.2rem" }}>
-              <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
-                <Gloss term="動爻" locale={loc} />
-              </h3>
-              {cast.changing.map((p) => (
-                <div
-                  key={p}
-                  style={{
-                    borderRadius: "12px",
-                    padding: "0.6rem 0.8rem",
-                    marginBottom: "0.5rem",
-                    background: "var(--accent-soft)",
-                  }}
-                >
-                  <div style={{ fontFamily: "var(--serif)", color: "var(--cinnabar)", marginBottom: "0.2rem" }}>
-                    {yaoName(ben, p)}
-                  </div>
-                  <div style={{ fontSize: "0.92rem" }}>{ben.lines[p - 1]}</div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="muted" style={{ marginTop: "1rem" }}>
-              {yjT("yijing.noChange", loc)}
+            <p className="muted" style={{ marginTop: "1.2rem", marginBottom: 0 }}>
+              {yjT("yijing.aiSoon", loc)}
             </p>
-          )}
-
-          {(bian || hu) && (
-            <div className="grid-2" style={{ marginTop: "1.2rem" }}>
-              {bian && (
-                <div className="card" style={{ marginTop: 0 }}>
-                  <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>
-                    <span style={{ fontSize: "1.8rem", marginRight: "0.5rem" }}>{bian.symbol}</span>
-                    <Gloss term="變卦" locale={loc} /> · {bian.name}
-                  </h3>
-                  <p style={{ margin: 0, fontSize: "0.92rem" }}>
-                    <Gloss term="卦辭" locale={loc} />: {bian.judgment}
-                  </p>
-                </div>
-              )}
-              {hu && (
-                <div className="card" style={{ marginTop: 0 }}>
-                  <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>
-                    <span style={{ fontSize: "1.8rem", marginRight: "0.5rem" }}>{hu.symbol}</span>
-                    <Gloss term="互卦" locale={loc} /> · {hu.name}
-                  </h3>
-                  <p style={{ margin: 0, fontSize: "0.92rem" }}>
-                    <Gloss term="卦辭" locale={loc} />: {hu.judgment}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          <p className="muted" style={{ marginTop: "1.2rem", marginBottom: 0 }}>
-            {yjT("yijing.aiSoon", loc)}
-          </p>
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </>
   );
 }

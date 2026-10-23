@@ -216,80 +216,83 @@ export function StreamedReport({
             {shownLens ? <span className="tag accent">{lensLabel(shownLens)}</span> : null}
           </div>
 
-          <div className="strip sticky-strip">
-            {segments.map((seg, i) => {
-              const s = slots[i];
-              return (
-                <button
-                  key={seg.key}
-                  type="button"
-                  className={`chip${active === seg.key ? " on" : ""}`}
-                  onClick={() => jump(seg.key)}
-                >
-                  {s?.status === "streaming" ? <span className="dot" aria-hidden="true" /> : null}
-                  {seg.label}
-                </button>
-              );
-            })}
-          </div>
+          {/* 手機:頂部 sticky 章節 strip;桌面:左側 sticky 目錄 + 右側正文(.report-body grid) */}
+          <div className="report-body">
+            <div className="strip sticky-strip">
+              {segments.map((seg, i) => {
+                const s = slots[i];
+                return (
+                  <button
+                    key={seg.key}
+                    type="button"
+                    className={`chip${active === seg.key ? " on" : ""}`}
+                    onClick={() => jump(seg.key)}
+                  >
+                    {s?.status === "streaming" ? <span className="dot" aria-hidden="true" /> : null}
+                    {seg.label}
+                  </button>
+                );
+              })}
+            </div>
 
-          <div ref={secRef}>
-            {segments.map((seg, i) => {
-              const s: Slot = slots[i] ?? { text: "", status: "streaming", err: "" };
-              const has = s.text.trim() !== "";
-              const state =
-                s.status === "done" ? "stateDone"
-                  : s.status === "error" ? "segFailShort"
-                    : has ? "stateStreaming" : "stateQueued";
-              const cls = [
-                "sec",
-                s.status === "streaming" ? (has ? "streaming" : "pending") : "",
-                s.status === "error" ? "failed" : "",
-              ].filter(Boolean).join(" ");
-              const isOpen = !collapsible || open.has(seg.key);
-              const head = (
-                <>
-                  <Icon name={SECTION_ICON[seg.key] ?? "spark"} />
-                  <span className="sec-title">{seg.label}</span>
-                  <span className="sec-state">{t(`report.${state}` as TKey)}</span>
-                </>
-              );
-              return (
-                <article className={cls} id={`${idBase}-${seg.key}`} key={seg.key}>
-                  {collapsible ? (
-                    <h3 className="sec-hd">
-                      <button
-                        type="button"
-                        className="sec-h"
-                        aria-expanded={isOpen}
-                        aria-controls={`${idBase}-${seg.key}-b`}
-                        onClick={() => toggle(seg.key)}
-                      >
-                        {head}
-                        <Icon name="chevDown" small className={`caret-ic${isOpen ? " up" : ""}`} />
-                      </button>
-                    </h3>
-                  ) : (
-                    <h3 className="sec-hd"><span className="sec-h">{head}</span></h3>
-                  )}
-                  <div className="sec-b" id={`${idBase}-${seg.key}-b`} hidden={!isOpen}>
-                    {has ? (
-                      <div className={`prose${s.status === "streaming" ? " is-streaming" : ""}`}>
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{stripLeadingHeading(s.text)}</ReactMarkdown>
-                      </div>
-                    ) : s.status === "streaming" ? (
-                      <div aria-label={t("report.stateQueued")}>
-                        <div className="skel" /><div className="skel w80" /><div className="skel w60" />
-                      </div>
-                    ) : s.status === "error" ? (
-                      <p className="notice">{t("report.segFail", { err: s.err })}</p>
+            <div ref={secRef} className="report-secs">
+              {segments.map((seg, i) => {
+                const s: Slot = slots[i] ?? { text: "", status: "streaming", err: "" };
+                const has = s.text.trim() !== "";
+                const state =
+                  s.status === "done" ? "stateDone"
+                    : s.status === "error" ? "segFailShort"
+                      : has ? "stateStreaming" : "stateQueued";
+                const cls = [
+                  "sec",
+                  s.status === "streaming" ? (has ? "streaming" : "pending") : "",
+                  s.status === "error" ? "failed" : "",
+                ].filter(Boolean).join(" ");
+                const isOpen = !collapsible || open.has(seg.key);
+                const head = (
+                  <>
+                    <Icon name={SECTION_ICON[seg.key] ?? "spark"} />
+                    <span className="sec-title">{seg.label}</span>
+                    <span className="sec-state">{t(`report.${state}` as TKey)}</span>
+                  </>
+                );
+                return (
+                  <article className={cls} id={`${idBase}-${seg.key}`} key={seg.key}>
+                    {collapsible ? (
+                      <h3 className="sec-hd">
+                        <button
+                          type="button"
+                          className="sec-h"
+                          aria-expanded={isOpen}
+                          aria-controls={`${idBase}-${seg.key}-b`}
+                          onClick={() => toggle(seg.key)}
+                        >
+                          {head}
+                          <Icon name="chevDown" small className={`caret-ic${isOpen ? " up" : ""}`} />
+                        </button>
+                      </h3>
                     ) : (
-                      <p className="note">{t("report.segEmpty")}</p>
+                      <h3 className="sec-hd"><span className="sec-h">{head}</span></h3>
                     )}
-                  </div>
-                </article>
-              );
-            })}
+                    <div className="sec-b" id={`${idBase}-${seg.key}-b`} hidden={!isOpen}>
+                      {has ? (
+                        <div className={`prose${s.status === "streaming" ? " is-streaming" : ""}`}>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{stripLeadingHeading(s.text)}</ReactMarkdown>
+                        </div>
+                      ) : s.status === "streaming" ? (
+                        <div aria-label={t("report.stateQueued")}>
+                          <div className="skel" /><div className="skel w80" /><div className="skel w60" />
+                        </div>
+                      ) : s.status === "error" ? (
+                        <p className="notice">{t("report.segFail", { err: s.err })}</p>
+                      ) : (
+                        <p className="note">{t("report.segEmpty")}</p>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           </div>
 
           {anyError ? <p className="note">{t("report.providerHint")}</p> : null}

@@ -62,7 +62,7 @@ export function ToggleRow({
   );
 }
 
-/** 頂部導航列:左邊 logo(或返回鍵)+ eyebrow,右邊 icon 按鈕;最右 [主題][齒輪 = 設定]。 */
+/** 頂部導航列:左邊 logo(或返回鍵)+ eyebrow,右邊 icon 按鈕;最右 [主題][齒輪 = 設定](桌面移去側欄)。 */
 export function ScreenNav({
   eyebrow,
   onBack,
@@ -90,9 +90,10 @@ export function ScreenNav({
       <span className="eyebrow">{eyebrow}</span>
       <span className="nav-actions">
         {children}
-        <ThemeToggle />
+        {/* nav-global:桌面由側欄提供,喺度隱藏 */}
+        <ThemeToggle className="nav-global" />
         {gear ? (
-          <button type="button" className="icon-btn" onClick={() => go("settings")} aria-label={t("nav.settings")}>
+          <button type="button" className="icon-btn nav-global" onClick={() => go("settings")} aria-label={t("nav.settings")}>
             <Icon name="gear" />
           </button>
         ) : null}

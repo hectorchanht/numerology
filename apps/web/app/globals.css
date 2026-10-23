@@ -1,4 +1,6 @@
-/* 命理 · Apple-minimal dark,mobile-first(390px),桌面置中 max 430px。
+/* 命理 · Apple-minimal dark,mobile-first(390px)。
+ * 手機 <768px:單欄 max 430px + 底部 tab bar(唔好郁);平板 768–1023:闊欄 720px;
+ * 桌面 ≥1024:左側欄 + 多欄內容(見檔尾 media queries)。
  * 近單色 + 唯一暖金 accent;無裝飾漸變;系統字型(無外部字型 / CDN)。 */
 :root {
   color-scheme: dark;
@@ -106,6 +108,9 @@ svg.i.sm { width: 18px; height: 18px; }
 
 /* ---------- Shell ---------- */
 .app { max-width: 430px; margin: 0 auto; min-height: 100vh; position: relative; }
+/* 響應式 layout wrapper:手機透明(display:contents → 版面同未包之前一樣),平板/桌面先變 grid。 */
+.split, .split > *, .form-cols, .form-col, .report-body, .yj-layout, .yj-col, .poster-layout { display: contents; }
+.side { display: none; }
 .screen, .shell { padding: calc(var(--safe-t) + 12px) var(--pad) calc(var(--tab-h) + var(--safe-b) + 32px); }
 .screen { animation: fade 0.22s ease-out; }
 @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
@@ -223,7 +228,7 @@ label.row { cursor: pointer; }
 .nav .logo-light { display: none; }
 [data-theme="light"] .nav .logo-dark { display: none; }
 [data-theme="light"] .nav .logo-light { display: block; }
-.lede + .seg { margin-bottom: 4px; }
+.lede + .seg, .split-home .split-main > .seg:first-child { margin-bottom: 4px; }
 
 /* ---------- 命盤:摘要 ---------- */
 .who { display: flex; align-items: center; gap: 14px; margin: 8px 0 20px; }
@@ -451,8 +456,129 @@ textarea.prompt:focus-visible { outline: 2px solid var(--accent); }
 .tabbar button.on { color: var(--accent); }
 .tabbar svg.i { width: 24px; height: 24px; }
 
-/* Desktop:保持手機欄,加安靜邊框 */
+/* 大手機 / 細平板(600–1023):保持單欄,加安靜邊框 */
 @media (min-width: 600px) {
   body { background: var(--desk-bg); }
   .app { background: var(--bg); border-left: 0.5px solid var(--card); border-right: 0.5px solid var(--card); }
+}
+
+/* ---------- ≥768:平板起,兩欄小組件 ---------- */
+@media (min-width: 768px) {
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+}
+
+/* ---------- 平板(768–1023):闊欄 + 底部 tab bar;表格兩組並排 ---------- */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  :root { --pad: 28px; }
+  .app { max-width: 720px; }
+  .tabbar nav { max-width: 720px; }
+  .form-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 16px; align-items: start; }
+  .form-col { display: block; }
+}
+
+/* ---------- 桌面(≥1024):左側欄取代底部 tab bar,內容多欄 ---------- */
+@media (min-width: 1024px) {
+  :root { --pad: 32px; --side-w: 240px; }
+  body { background: var(--bg); }
+  .app { max-width: none; margin: 0 0 0 var(--side-w); border: 0; }
+  .tabbar, .subnav { display: none; }
+  /* 側欄已有 logo / 主題 / 設定,頂部導航唔再重複 */
+  [data-theme] .nav .logo, .nav .nav-global { display: none; }
+
+  .screen, .shell { max-width: 1200px; margin: 0 auto; padding: calc(var(--safe-t) + 28px) var(--pad) 64px; }
+  .screen.narrow { max-width: 760px; }
+  h1.large, .masthead h1 { font-size: 40px; }
+  .chat-input { bottom: 16px; }
+
+  /* 側欄 */
+  .side { display: flex; flex-direction: column; gap: 8px; position: fixed; top: 0; bottom: 0; left: 0; z-index: 40;
+    width: var(--side-w); padding: calc(var(--safe-t) + 20px) 12px 16px; overflow-y: auto;
+    background: var(--tabbar-bg); border-right: 0.5px solid var(--sep);
+    -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); }
+  .side-brand { display: flex; align-items: center; gap: 10px; padding: 4px 12px 16px; }
+  .side-brand > div { min-width: 0; }
+  .side-brand .logo { width: 32px; height: 32px; border-radius: 8px; flex: none; display: block; }
+  .side-brand .logo-light { display: none; }
+  [data-theme="light"] .side-brand .logo-dark { display: none; }
+  [data-theme="light"] .side-brand .logo-light { display: block; }
+  .side-title { font-size: 17px; font-weight: 700; letter-spacing: 0.04em; }
+  .side-sub { font-size: 11px; color: var(--label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .side-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .side-item { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 0 12px; border-radius: 10px;
+    color: var(--label); font-size: 15px; text-align: left; text-decoration: none; }
+  .side-item .i { color: var(--label-2); }
+  .side-item.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .side-item.on .i { color: var(--accent); }
+  .side-sep { height: 0.5px; background: var(--sep); margin: 10px 12px; }
+  .side-foot { display: flex; align-items: center; gap: 4px; padding-top: 8px; border-top: 0.5px solid var(--sep); }
+  .side-foot .side-item { flex: 1; width: auto; }
+
+  /* 通用多欄:.split-a / .split-b 側欄,.split-main 主欄 */
+  .split { display: grid; gap: 0 40px; align-items: start; }
+  .split > * { display: block; min-width: 0; }
+  .split-a { grid-area: a; }
+  .split-b { grid-area: b; }
+  .split-main { grid-area: main; }
+  .split .strip:not(.sticky-strip) { margin: 0; padding: 2px 0; }
+
+  /* 起盤:左介紹 + 免責,右表格 */
+  .split-home { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-rows: auto 1fr; grid-template-areas: "a main" "b main"; }
+  .split-home .split-a { padding-top: 16px; }
+  .split-home .lede { font-size: 17px; }
+  .split-home .disclaimer { text-align: left; padding: 8px 0 0; }
+
+  /* 命盤:左盤面,右解讀入口 + 工具(sticky) */
+  .split-chart { grid-template-columns: minmax(0, 1fr) 280px; grid-template-areas: "main a"; }
+  .split-chart .split-a { position: sticky; top: 24px; }
+  .split-chart .split-a > .group-title:first-child { margin-top: 8px; }
+  .pillar .gz { font-size: 34px; }
+  .ziwei-board { grid-template-rows: repeat(4, minmax(100px, auto)); }
+  .palace { min-height: 100px; padding: 8px 7px; }
+
+  /* 報告 / 大運:左 sticky 目錄,右章節 */
+  .report-controls { flex-direction: row; align-items: center; }
+  .report-controls > .seg { flex: 1; max-width: 440px; }
+  .report-controls > .btn.block { width: auto; padding: 0 28px; }
+  .report-body { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 0 40px; align-items: start; }
+  .report-body > .sticky-strip { position: sticky; top: 24px; flex-direction: column; gap: 2px; overflow: visible;
+    margin: 12px 0 0; padding: 0; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; scroll-snap-type: none; }
+  .report-body > .sticky-strip .chip { background: none; border-radius: 10px; padding: 0 12px; white-space: normal; text-align: left; }
+  .report-body > .sticky-strip .chip.on { background: var(--accent-soft); color: var(--accent); }
+  .report-secs { max-width: 820px; }
+  .report-body ~ .note, .report-body ~ .btn-row { margin-left: 240px; max-width: 560px; }
+
+  /* 大運時間線:一行鋪滿闊度(仍係單行,唔換行);流年兩欄 */
+  .strip.dayun { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(84px, 1fr); margin: 0; padding: 2px 0; }
+  .dayun .dy { width: auto; }
+  .list.ly { display: grid; grid-template-columns: 1fr 1fr; }
+  .ly .row.plain + .row.plain::before { display: none; }
+  .ly .row:nth-child(n + 3) { border-top: 0.5px solid var(--sep); }
+  .ly .row:nth-child(even) { border-left: 0.5px solid var(--sep); }
+
+  /* 歷史:左搜尋 + 說明,右列表 */
+  .split-hist { grid-template-columns: 300px minmax(0, 1fr); grid-template-rows: auto 1fr; grid-template-areas: "a main" "b main"; }
+  .split-hist .search { margin-top: 0; }
+  .split-hist .split-main > .note:first-child, .split-hist .split-main > .card.empty:first-child { margin-top: 0; }
+
+  /* /yijing:有卦象時左起卦、右結果;未起卦時單欄 */
+  .yj-layout:not(:has(> .yj-result)) > .yj-col { display: block; max-width: 680px; }
+  .yj-layout:has(> .yj-result) { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 0 32px; align-items: start; }
+  .yj-layout:has(> .yj-result) > .yj-col { display: block; position: sticky; top: 16px; }
+
+  /* /poster:左標題、右海報 */
+  .poster-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px); gap: 0 48px; align-items: start; }
+  .poster-layout > .masthead { position: sticky; top: 24px; padding-top: 24px; }
+  .poster-layout .poster-wrap { max-width: none; margin: 0; }
+}
+
+@media (min-width: 1280px) {
+  :root { --pad: 48px; --side-w: 260px; }
+  .split-chart { grid-template-columns: minmax(0, 1fr) 320px; }
+  .split { gap: 0 56px; }
+}
+
+/* 桌面 hover(滑鼠先有,觸控唔會黐住) */
+@media (min-width: 1024px) and (hover: hover) {
+  .side-item:hover:not(.on), .report-body > .sticky-strip .chip:hover:not(.on) { background: var(--fill); }
+  button.row:hover, a.row:hover, .hist-main:hover, .tool:hover { background: var(--card-2); }
 }

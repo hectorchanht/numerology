@@ -76,66 +76,73 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
 
   return (
     <form onSubmit={submit} noValidate>
-      <h2 className="group-title">{t("form.groupTime")}</h2>
-      <div className="list">
-        <div className="row">
-          <Icon name="cal" className="ic" />
-          <span className="lbl">{t("form.calendar")}</span>
-          <Seg
-            compact
-            label={t("form.calendar")}
-            value={calendar}
-            onChange={setCalendar}
-            options={[
-              { value: "solar", label: t("form.solarShort") },
-              { value: "lunar", label: t("form.lunarShort") },
-            ]}
-          />
+      {/* .form-cols:手機 display:contents;平板兩組並排 */}
+      <div className="form-cols">
+        <div className="form-col">
+          <h2 className="group-title">{t("form.groupTime")}</h2>
+          <div className="list">
+            <div className="row">
+              <Icon name="cal" className="ic" />
+              <span className="lbl">{t("form.calendar")}</span>
+              <Seg
+                compact
+                label={t("form.calendar")}
+                value={calendar}
+                onChange={setCalendar}
+                options={[
+                  { value: "solar", label: t("form.solarShort") },
+                  { value: "lunar", label: t("form.lunarShort") },
+                ]}
+              />
+            </div>
+            {calendar === "lunar" ? (
+              <ToggleRow icon="cal" label={t("form.leap")} checked={isLeapMonth} onChange={setIsLeapMonth} />
+            ) : null}
+            {FIELDS.map((f) => (
+              <label className="row" key={f.key} htmlFor={f.key}>
+                <Icon name={f.icon} className="ic" />
+                <span className="lbl">{f.key === "year" ? yearLabel : t(f.labelKey)}</span>
+                <input
+                  id={f.key} type="number" inputMode="numeric"
+                  min={f.min} max={f.max}
+                  value={v[f.key]}
+                  onChange={(e) => setV((s) => ({ ...s, [f.key]: e.target.value }))}
+                />
+              </label>
+            ))}
+            <label className="row" htmlFor="minute">
+              <Icon name="clock" className="ic dim" />
+              <span className="lbl">{t("form.minute")}</span>
+              <input
+                id="minute" type="number" inputMode="numeric" min={0} max={59}
+                value={v.minute}
+                onChange={(e) => setV((s) => ({ ...s, minute: e.target.value }))}
+              />
+            </label>
+          </div>
         </div>
-        {calendar === "lunar" ? (
-          <ToggleRow icon="cal" label={t("form.leap")} checked={isLeapMonth} onChange={setIsLeapMonth} />
-        ) : null}
-        {FIELDS.map((f) => (
-          <label className="row" key={f.key} htmlFor={f.key}>
-            <Icon name={f.icon} className="ic" />
-            <span className="lbl">{f.key === "year" ? yearLabel : t(f.labelKey)}</span>
-            <input
-              id={f.key} type="number" inputMode="numeric"
-              min={f.min} max={f.max}
-              value={v[f.key]}
-              onChange={(e) => setV((s) => ({ ...s, [f.key]: e.target.value }))}
-            />
-          </label>
-        ))}
-        <label className="row" htmlFor="minute">
-          <Icon name="clock" className="ic dim" />
-          <span className="lbl">{t("form.minute")}</span>
-          <input
-            id="minute" type="number" inputMode="numeric" min={0} max={59}
-            value={v.minute}
-            onChange={(e) => setV((s) => ({ ...s, minute: e.target.value }))}
-          />
-        </label>
-      </div>
 
-      <h2 className="group-title">{t("form.groupPerson")}</h2>
-      <div className="list">
-        <div className="row">
-          <Icon name="user" className="ic" />
-          <span className="lbl">{t("form.gender")}</span>
-          <Seg
-            compact
-            label={t("form.gender")}
-            value={gender}
-            onChange={setGender}
-            options={[
-              { value: "男", label: t("form.male") },
-              { value: "女", label: t("form.female") },
-            ]}
-          />
+        <div className="form-col">
+          <h2 className="group-title">{t("form.groupPerson")}</h2>
+          <div className="list">
+            <div className="row">
+              <Icon name="user" className="ic" />
+              <span className="lbl">{t("form.gender")}</span>
+              <Seg
+                compact
+                label={t("form.gender")}
+                value={gender}
+                onChange={setGender}
+                options={[
+                  { value: "男", label: t("form.male") },
+                  { value: "女", label: t("form.female") },
+                ]}
+              />
+            </div>
+            <LocationPicker value={longitude} onChange={setLongitude} />
+            <ToggleRow icon="sun" label={t("form.trueSolar")} sub={solarSub} checked={trueSolar} onChange={setTrueSolar} />
+          </div>
         </div>
-        <LocationPicker value={longitude} onChange={setLongitude} />
-        <ToggleRow icon="sun" label={t("form.trueSolar")} sub={solarSub} checked={trueSolar} onChange={setTrueSolar} />
       </div>
 
       {error ? <p className="notice" role="alert">{error}</p> : null}
