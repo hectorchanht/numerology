@@ -771,8 +771,47 @@ live 验证:7 个 `###` 标题全部带真实数字,全文零占位符。
 
 ### 驗證
 - 282/282 測試通過(ai 60/engine 70/knowledge 28/pronounce 7/web 117;
-  web 含新增 quote-ref 測試)。
+  web 含新增 quote-ref 測試);zhanli 測試 6/6(單獨跑,knowledge 的 `node --test`
+  無 glob 不會自動拾起 test/*.test.mjs,沿用既有行為)。
 - `next build` + `npm run cf:pages` 成功(中途一次失敗係並行 worker 寫文件中途
-  被構建掃到,重跑即過);commit 推 main;Pages 部署 → success。
-- 線上驗證:`/yijing/meihua` 200(以 2025-01-01 12:00 起卦核對四數/卦名/體用斷);
-  `/yijing/cases` 200(六例列表+詳情+原文+應驗);`/sitemap.xml` 含新路由。
+  被構建掃到,重跑即過)。
+- commit `c874d89b`(17 文件)推 main;Pages 部署 `32362d93` → **build failure**:
+  推了 `zhanli.ts` 卻漏了 `src/index.ts` 的導出(該行是並行 worker 在 tree diff
+  之後才加的,故未進入推送集)——教訓:新文件若需 index 轉導出,推送集必須
+  包含 index。修復 push `f5c44e74`(index.ts + zhanli.test.mjs)→ 部署成功;
+  並行 worker 同時推了相同修復(`26ff2296`),兩者皆 success,無衝突。
+- 最終生產部署 `21be4725`(manifesto worker)success,含本任務全部內容。
+- 線上驗證(2026-10-23,部署成功後):`/yijing/meihua` → 200(標題「梅花易數」);
+  引擎直驗 `castMeihua(2025,1,1,12)` → 年5(辰)月12日2時7(午)/上離下兌=
+  睽#38/動2/體離用兌/體剋用小吉/變噬嗑#21/互既濟#63,與測試手算一致
+  (頁面為客戶端調用同一函數);`/yijing/cases` → 200(六例標題皆在);
+  `/sitemap.xml` 含 `/yijing/meihua` + `/yijing/cases`。
+
+## 占例庫 v2 完成 + Pages 構建修復 (2026-10-23, subagent 00725edb)
+
+### 背景
+- 前期 (c874d89b) 已推送占例庫 v1: `packages/knowledge/src/zhanli.ts`(5 例) + `apps/web/app/yijing/cases/page.tsx`(用 ZHANLI_CASES) + 文案。但有兩個問題:
+  1. `packages/knowledge/src/index.ts` 未導出 `./zhanli.js` → Pages 構建失敗 (`ZHANLI_CASES is not exported`)
+  2. 缺第六例南蒯 (昭公十二年, 坤之比, 「易不可以占險」)
+
+### 本次工作
+1. **南蒯占新核實**: 從 zh.wikisource.org/zh-hant 昭公頁 (L348) 逐字核實原文, L380 核實結局 (奔齊)。原文作「外彊內溫」「下不共」, 從原文錄之。
+   - 動爻可確指六五: 所引「黃裳元吉」即坤六五爻辭, 且坤(2)→比(8) 僅六五一位不同。其餘五例原文未明言動爻, 一律作「史料未載」。
+2. **修 index.ts**: 補 `export * from "./zhanli.js"`。
+3. **page.tsx**: 確認已是 v2 版本 (用 ZHANLI_CASES, 原文/白話/歷史應驗三段式, QuoteRef + 術語高亮), 僅修 TypeScript 嚴格空值檢查 (`getHexagram` 可能 undefined)。
+4. **文案**: 補 `cases.original/baihua/history/method/ben/bian` 六個 key (三地)。
+
+### 推送
+- Commit `3e50e916`: 4 文件 (index.ts, zhanli.ts, page.tsx, yijingStrings.ts)。推送前對遠端 diff 確認無 sibling 衝突。
+- **教訓**: Pages 部署 `84173e0a` (commit de9635b7) 構建失敗, 原因是 index.ts 缺導出。本次修復後 `26ff2296` (commit 3e50e916) → **success**。
+
+### 驗證
+- 知識包: 28/28 測試通過 (含 6 占例庫驗證: 5-8 例、欄位非空、卦名卦序一致、verdict 合法、引文逐字匹配)。
+- Web: 117/117 測試通過。
+- `npx tsc --noEmit` 乾淨; `npm run cf:pages` 成功 (含 /yijing/cases 預渲染)。
+- 線上: `https://26ff2296.numerology-7v4.pages.dev/yijing/cases` 200, 六例列表 + 歷史應驗 + 查原文鏈接齊備。
+
+### 候選取捨 (供報告)
+- **收錄 6 例**: 陳敬仲 (莊22, 觀之否)、秦伯韓之戰 (僖15, 蠱)、伯姬 (僖15, 歸妹之睽)、穆姜 (襄9, 艮之隨)、崔武子 (襄25, 困之大過)、南蒯 (昭12, 坤之比)。全部出自《左傳》, 原文逐字核實自維基文庫 (公有領域)。
+- **拒收**: 晉獻公伐虢占 (僖公四年無筮卦記錄, 僅卜偃觀時之辭)。
+- **暫緩**: 畢萬筮仕 (閔公元年, 屯之比)——次級來源引文一致但未能取得維基文庫閔公頁一手核實, 按「無一手核實即捨棄」。
