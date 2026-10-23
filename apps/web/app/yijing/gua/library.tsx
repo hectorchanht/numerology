@@ -70,10 +70,14 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
                 marginLeft: "0.5rem",
               }}
             >
-              <DualPronounce text={`${zT(hex.name)}。${zT(hex.judgment)}`} locale={loc} />
+              <DualPronounce
+                text={`${zT(hex.name)}。${zT(hex.judgment)}`}
+                locale={loc}
+                readings={{ "zh-HK": hex.jyutping, "zh-CN": hex.pinyin }}
+              />
             </span>
             <span className="muted" style={{ fontSize: "0.85rem", marginLeft: "0.6rem" }}>
-              #{hex.number} · {hex.pinyin} · {hex.nameEn}
+              #{hex.number} · {hex.nameEn}
             </span>
           </h2>
           <div className="strip" style={{ gap: "0.4rem", alignItems: "center", margin: "0.5rem 0 0", padding: "2px 0" }}>

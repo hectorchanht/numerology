@@ -33,6 +33,27 @@ TRIGRAM_ELEMENT: dict[str, str] = {
     "巽": "木", "坎": "水", "艮": "土", "坤": "土",
 }
 
+# --- 拼音勘誤 + 卦名粵拼(2026-10-23,人工核對:Wiktionary/漢典/zdic) ---
+# 上游 FENGTING2025 pinyin 有三處錯:小畜/大畜 Xù 誤作 Chù,噬嗑 Kè 誤作 Hé。
+PINYIN_FIX = {"小畜": "Xiǎo Xù", "大畜": "Dà Xù", "噬嗑": "Shì Kè"}
+# 易經特殊讀音已按正音覆寫:乾 kin4 / 屯 zeon1 / 否 pei2 / 賁 bei3 / 解 haai6 / 畜 cuk1
+JYUTPING = {
+    "乾": "kin4", "坤": "kwan1", "屯": "zeon1", "蒙": "mung4", "需": "seoi1",
+    "訟": "zung6", "師": "si1", "比": "bei2", "小畜": "siu2 cuk1", "履": "lei5",
+    "泰": "taai3", "否": "pei2", "同人": "tung4 jan4", "大有": "daai6 jau5",
+    "謙": "him1", "豫": "jyu6", "隨": "ceoi4", "蠱": "gu2", "臨": "lam4",
+    "觀": "gun1", "噬嗑": "sai6 haap3", "賁": "bei3", "剝": "mok1", "復": "fuk6",
+    "無妄": "mou4 mong5", "大畜": "daai6 cuk1", "頤": "ji4", "大過": "daai6 gwo3",
+    "坎": "ham2", "離": "lei4", "咸": "haam4", "恆": "hang4", "遯": "deon6",
+    "大壯": "daai6 zong3", "晉": "zeon3", "明夷": "ming4 ji4", "家人": "gaa1 jan4",
+    "睽": "kwai4", "蹇": "gin2", "解": "haai6", "損": "syun2", "益": "jik1",
+    "夬": "gwaai3", "姤": "gau3", "萃": "seoi6", "升": "sing1", "困": "kwan3",
+    "井": "zeng2", "革": "gaak3", "鼎": "ding2", "震": "zan3", "艮": "gan3",
+    "漸": "zim6", "歸妹": "gwai1 mui6", "豐": "fung1", "旅": "leoi5", "巽": "seon3",
+    "兌": "deoi3", "渙": "wun6", "節": "zit3", "中孚": "zung1 fu1",
+    "小過": "siu2 gwo3", "既濟": "gei3 zai3", "未濟": "mei6 zai3",
+}
+
 # --- 正字化:OpenCC 簡轉繁首選映射(Apache-2.0),排除歧義字 ---
 def load_s2t():
     m = {}
@@ -110,6 +131,8 @@ def main() -> None:
         assert up in TRIGRAM_BITS and lo in TRIGRAM_BITS, f"hex {n}: bad trigrams {up}/{lo}"
         # binary lines bottom-up (for 初九/六二… labels): lower trigram bits + upper trigram bits
         bits = list(TRIGRAM_BITS[lo]) + list(TRIGRAM_BITS[up])
+        name = s2t(z["name"], CLASSIC_PHRASES)
+        assert name in JYUTPING, f"hex {n}: no jyutping for {name}"
         interps = {}
         for loc in ("zht", "zhs", "en"):
             secs = parse_sections(d2[loc][n]["html"], loc)
@@ -123,9 +146,10 @@ def main() -> None:
             interps[loc] = (core, secs)
         entries.append({
             "number": n,
-            "name": s2t(z["name"], CLASSIC_PHRASES),
+            "name": name,
             "nameEn": j1[n]["english"],
-            "pinyin": j1[n]["pinyin"],
+            "pinyin": PINYIN_FIX.get(name, j1[n]["pinyin"]),
+            "jyutping": JYUTPING[name],
             "symbol": z["symbol"],
             "upperTrigram": up,
             "lowerTrigram": lo,
@@ -146,6 +170,9 @@ def main() -> None:
     out.append(" *  1. 卦辭/384 爻辭/大象辭 — crane1102/iching-llm (MIT)")
     out.append(" *     backend/iching_texts.py,通行本《周易》公版古籍,無版權問題。")
     out.append(" *  2. 卦名拼音/英文 — FENGTING2025/iching-64-hexagrams-json (MIT)")
+    out.append(" *     拼音三處勘誤(2026-10-23,人工核對漢典):小畜/大畜 Xù、噬嗑 Kè。")
+    out.append(" *  2b. 卦名粵拼 jyutping — 2026-10-23 人工核對(Wiktionary/漢典),")
+    out.append(" *     易經特殊讀音:乾 kin4/屯 zeon1/否 pei2/賁 bei3/解 haai6/畜 cuk1。")
     out.append(" *  3. 上下卦/五行/陰陽 + 現代解讀(事業/感情/財運/健康/建議,繁簡英)")
     out.append(" *     — HeTaobaba123/iching-64-hexagrams-dataset (CC0-1.0,公有領域)。")
     out.append(" *     繁體解讀中的簡體混用字已按內建對照表正字化;解讀為 CC0 種子文本,")
@@ -166,6 +193,7 @@ def main() -> None:
         out.append("  {")
         out.append(f"    number: {e['number']},")
         out.append(f"    name: {ts_str(e['name'])}, nameEn: {ts_str(e['nameEn'])}, pinyin: {ts_str(e['pinyin'])},")
+        out.append(f"    jyutping: {ts_str(e['jyutping'])},")
         out.append(f"    symbol: {ts_str(e['symbol'])},")
         out.append(f"    upperTrigram: {ts_str(e['upperTrigram'])}, lowerTrigram: {ts_str(e['lowerTrigram'])},")
         out.append(f"    element: {ts_str(e['element'])}, yinYang: {ts_str(e['yinYang'])},")

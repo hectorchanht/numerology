@@ -74,6 +74,11 @@ export interface PronounceButtonProps {
   langColors?: Record<string, string>;
   /** 發音設定:語速/音調/音量/指定語音/自訂語音挑選,全部透傳給 useSpeech。 */
   speechOptions?: UseSpeechOptions;
+  /**
+   * 按鈕上方顯示的讀音標註(如漢語拼音/粵拼/羅馬字),不傳則不顯示。
+   * 純展示用,不影響發音;調用方負責提供與當前語言對應的正確讀音。
+   */
+  reading?: string;
 }
 
 export function PronounceButton({
@@ -88,6 +93,7 @@ export function PronounceButton({
   langBadges,
   langColors,
   speechOptions,
+  reading,
 }: PronounceButtonProps) {
   const { speak, speakAll, stop, isPlaying, currentLang } =
     useSpeech(speechOptions);
@@ -219,7 +225,7 @@ export function PronounceButton({
 
   const selectedLabel = labelOf(selectedLang);
 
-  return createElement(
+  const inner = createElement(
     "span",
     {
       style: {
@@ -401,5 +407,36 @@ export function PronounceButton({
         },
         ...langList.map(menuItem),
       ),
+  );
+
+  // reading 有傳:讀音標註疊在按鈕上方(直式小單元);無傳:維持原 32px 單鈕
+  if (!reading) return inner;
+  return createElement(
+    "span",
+    {
+      style: {
+        display: "inline-flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 3,
+        userSelect: "none",
+      },
+    },
+    createElement(
+      "span",
+      {
+        "aria-hidden": true,
+        style: {
+          fontSize: 11,
+          lineHeight: 1.3,
+          fontWeight: 500,
+          letterSpacing: "0.02em",
+          whiteSpace: "nowrap",
+          color: "var(--label-2)",
+        },
+      },
+      reading,
+    ),
+    inner,
   );
 }

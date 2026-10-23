@@ -5,6 +5,9 @@
  *  1. 卦辭/384 爻辭/大象辭 — crane1102/iching-llm (MIT)
  *     backend/iching_texts.py,通行本《周易》公版古籍,無版權問題。
  *  2. 卦名拼音/英文 — FENGTING2025/iching-64-hexagrams-json (MIT)
+ *     拼音三處勘誤(2026-10-23,人工核對漢典):小畜/大畜 Xù、噬嗑 Kè。
+ *  2b. 卦名粵拼 jyutping — 2026-10-23 人工核對(Wiktionary/漢典),
+ *     易經特殊讀音:乾 kin4/屯 zeon1/否 pei2/賁 bei3/解 haai6/畜 cuk1。
  *  3. 上下卦/五行/陰陽 + 現代解讀(事業/感情/財運/健康/建議,繁簡英)
  *     — HeTaobaba123/iching-64-hexagrams-dataset (CC0-1.0,公有領域)。
  *     繁體解讀中的簡體混用字已按內建對照表正字化;解讀為 CC0 種子文本,
@@ -24,6 +27,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 1,
     name: "乾", nameEn: "The Creative", pinyin: "Qián",
+    jyutping: "kin4",
     symbol: "䷀",
     upperTrigram: "乾", lowerTrigram: "乾",
     element: "金", yinYang: "陽",
@@ -66,6 +70,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 2,
     name: "坤", nameEn: "The Receptive", pinyin: "Kūn",
+    jyutping: "kwan1",
     symbol: "䷁",
     upperTrigram: "坤", lowerTrigram: "坤",
     element: "土", yinYang: "陰",
@@ -108,6 +113,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 3,
     name: "屯", nameEn: "Difficulty at the Beginning", pinyin: "Zhūn",
+    jyutping: "zeon1",
     symbol: "䷂",
     upperTrigram: "坎", lowerTrigram: "震",
     element: "水", yinYang: "陽",
@@ -150,6 +156,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 4,
     name: "蒙", nameEn: "Youthful Folly", pinyin: "Méng",
+    jyutping: "mung4",
     symbol: "䷃",
     upperTrigram: "艮", lowerTrigram: "坎",
     element: "土", yinYang: "陽",
@@ -192,6 +199,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 5,
     name: "需", nameEn: "Waiting", pinyin: "Xū",
+    jyutping: "seoi1",
     symbol: "䷄",
     upperTrigram: "坎", lowerTrigram: "乾",
     element: "水", yinYang: "陽",
@@ -234,6 +242,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 6,
     name: "訟", nameEn: "Conflict", pinyin: "Sòng",
+    jyutping: "zung6",
     symbol: "䷅",
     upperTrigram: "乾", lowerTrigram: "坎",
     element: "金", yinYang: "陽",
@@ -276,6 +285,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 7,
     name: "師", nameEn: "The Army", pinyin: "Shī",
+    jyutping: "si1",
     symbol: "䷆",
     upperTrigram: "坤", lowerTrigram: "坎",
     element: "土", yinYang: "陰",
@@ -318,6 +328,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 8,
     name: "比", nameEn: "Holding Together", pinyin: "Bǐ",
+    jyutping: "bei2",
     symbol: "䷇",
     upperTrigram: "坎", lowerTrigram: "坤",
     element: "水", yinYang: "陰",
@@ -359,7 +370,8 @@ export const HEXAGRAMS: Hexagram[] = [
   },
   {
     number: 9,
-    name: "小畜", nameEn: "The Small Taming", pinyin: "Xiǎo Chù",
+    name: "小畜", nameEn: "The Small Taming", pinyin: "Xiǎo Xù",
+    jyutping: "siu2 cuk1",
     symbol: "䷈",
     upperTrigram: "巽", lowerTrigram: "乾",
     element: "木", yinYang: "陽",
@@ -402,6 +414,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 10,
     name: "履", nameEn: "Treading", pinyin: "Lǚ",
+    jyutping: "lei5",
     symbol: "䷉",
     upperTrigram: "乾", lowerTrigram: "兌",
     element: "金", yinYang: "陽",
@@ -444,6 +457,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 11,
     name: "泰", nameEn: "Peace", pinyin: "Tài",
+    jyutping: "taai3",
     symbol: "䷊",
     upperTrigram: "坤", lowerTrigram: "乾",
     element: "土", yinYang: "陰",
@@ -486,6 +500,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 12,
     name: "否", nameEn: "Standstill", pinyin: "Pǐ",
+    jyutping: "pei2",
     symbol: "䷋",
     upperTrigram: "乾", lowerTrigram: "坤",
     element: "金", yinYang: "陽",
@@ -528,6 +543,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 13,
     name: "同人", nameEn: "Fellowship with Men", pinyin: "Tóng Rén",
+    jyutping: "tung4 jan4",
     symbol: "䷌",
     upperTrigram: "乾", lowerTrigram: "離",
     element: "金", yinYang: "陽",
@@ -570,6 +586,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 14,
     name: "大有", nameEn: "Great Possession", pinyin: "Dà Yǒu",
+    jyutping: "daai6 jau5",
     symbol: "䷍",
     upperTrigram: "離", lowerTrigram: "乾",
     element: "火", yinYang: "陽",
@@ -612,6 +629,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 15,
     name: "謙", nameEn: "Modesty", pinyin: "Qiān",
+    jyutping: "him1",
     symbol: "䷎",
     upperTrigram: "坤", lowerTrigram: "艮",
     element: "土", yinYang: "陰",
@@ -654,6 +672,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 16,
     name: "豫", nameEn: "Enthusiasm", pinyin: "Yù",
+    jyutping: "jyu6",
     symbol: "䷏",
     upperTrigram: "震", lowerTrigram: "坤",
     element: "木", yinYang: "陽",
@@ -696,6 +715,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 17,
     name: "隨", nameEn: "Following", pinyin: "Suí",
+    jyutping: "ceoi4",
     symbol: "䷐",
     upperTrigram: "兌", lowerTrigram: "震",
     element: "金", yinYang: "陰",
@@ -738,6 +758,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 18,
     name: "蠱", nameEn: "Work on the Decayed", pinyin: "Gǔ",
+    jyutping: "gu2",
     symbol: "䷑",
     upperTrigram: "艮", lowerTrigram: "巽",
     element: "土", yinYang: "陽",
@@ -780,6 +801,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 19,
     name: "臨", nameEn: "Approach", pinyin: "Lín",
+    jyutping: "lam4",
     symbol: "䷒",
     upperTrigram: "坤", lowerTrigram: "兌",
     element: "土", yinYang: "陰",
@@ -822,6 +844,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 20,
     name: "觀", nameEn: "Contemplation", pinyin: "Guān",
+    jyutping: "gun1",
     symbol: "䷓",
     upperTrigram: "巽", lowerTrigram: "坤",
     element: "木", yinYang: "陰",
@@ -863,7 +886,8 @@ export const HEXAGRAMS: Hexagram[] = [
   },
   {
     number: 21,
-    name: "噬嗑", nameEn: "Biting Through", pinyin: "Shì Hé",
+    name: "噬嗑", nameEn: "Biting Through", pinyin: "Shì Kè",
+    jyutping: "sai6 haap3",
     symbol: "䷔",
     upperTrigram: "離", lowerTrigram: "震",
     element: "火", yinYang: "陽",
@@ -906,6 +930,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 22,
     name: "賁", nameEn: "Grace", pinyin: "Bì",
+    jyutping: "bei3",
     symbol: "䷕",
     upperTrigram: "艮", lowerTrigram: "離",
     element: "土", yinYang: "陽",
@@ -948,6 +973,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 23,
     name: "剝", nameEn: "Splitting Apart", pinyin: "Bō",
+    jyutping: "mok1",
     symbol: "䷖",
     upperTrigram: "艮", lowerTrigram: "坤",
     element: "土", yinYang: "陰",
@@ -990,6 +1016,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 24,
     name: "復", nameEn: "Return", pinyin: "Fù",
+    jyutping: "fuk6",
     symbol: "䷗",
     upperTrigram: "坤", lowerTrigram: "震",
     element: "土", yinYang: "陰",
@@ -1032,6 +1059,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 25,
     name: "無妄", nameEn: "Innocence", pinyin: "Wú Wàng",
+    jyutping: "mou4 mong5",
     symbol: "䷘",
     upperTrigram: "乾", lowerTrigram: "震",
     element: "金", yinYang: "陽",
@@ -1073,7 +1101,8 @@ export const HEXAGRAMS: Hexagram[] = [
   },
   {
     number: 26,
-    name: "大畜", nameEn: "The Great Taming", pinyin: "Dà Chù",
+    name: "大畜", nameEn: "The Great Taming", pinyin: "Dà Xù",
+    jyutping: "daai6 cuk1",
     symbol: "䷙",
     upperTrigram: "艮", lowerTrigram: "乾",
     element: "土", yinYang: "陽",
@@ -1116,6 +1145,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 27,
     name: "頤", nameEn: "Corners of the Mouth (Nourishment)", pinyin: "Yí",
+    jyutping: "ji4",
     symbol: "䷚",
     upperTrigram: "艮", lowerTrigram: "震",
     element: "土", yinYang: "陽",
@@ -1158,6 +1188,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 28,
     name: "大過", nameEn: "Preponderance of the Great", pinyin: "Dà Guò",
+    jyutping: "daai6 gwo3",
     symbol: "䷛",
     upperTrigram: "兌", lowerTrigram: "巽",
     element: "金", yinYang: "陰",
@@ -1200,6 +1231,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 29,
     name: "坎", nameEn: "The Abysmal Water", pinyin: "Kǎn",
+    jyutping: "ham2",
     symbol: "䷜",
     upperTrigram: "坎", lowerTrigram: "坎",
     element: "水", yinYang: "陽",
@@ -1242,6 +1274,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 30,
     name: "離", nameEn: "The Clinging Fire", pinyin: "Lí",
+    jyutping: "lei4",
     symbol: "䷝",
     upperTrigram: "離", lowerTrigram: "離",
     element: "火", yinYang: "陽",
@@ -1284,6 +1317,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 31,
     name: "咸", nameEn: "Influence (Wooing)", pinyin: "Xián",
+    jyutping: "haam4",
     symbol: "䷞",
     upperTrigram: "兌", lowerTrigram: "艮",
     element: "金", yinYang: "陰",
@@ -1326,6 +1360,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 32,
     name: "恆", nameEn: "Duration", pinyin: "Héng",
+    jyutping: "hang4",
     symbol: "䷟",
     upperTrigram: "震", lowerTrigram: "巽",
     element: "木", yinYang: "陽",
@@ -1368,6 +1403,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 33,
     name: "遯", nameEn: "Retreat", pinyin: "Dùn",
+    jyutping: "deon6",
     symbol: "䷠",
     upperTrigram: "乾", lowerTrigram: "艮",
     element: "金", yinYang: "陽",
@@ -1410,6 +1446,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 34,
     name: "大壯", nameEn: "The Great Power", pinyin: "Dà Zhuàng",
+    jyutping: "daai6 zong3",
     symbol: "䷡",
     upperTrigram: "震", lowerTrigram: "乾",
     element: "木", yinYang: "陽",
@@ -1452,6 +1489,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 35,
     name: "晉", nameEn: "Progress", pinyin: "Jìn",
+    jyutping: "zeon3",
     symbol: "䷢",
     upperTrigram: "離", lowerTrigram: "坤",
     element: "火", yinYang: "陰",
@@ -1494,6 +1532,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 36,
     name: "明夷", nameEn: "Darkening of the Light", pinyin: "Míng Yí",
+    jyutping: "ming4 ji4",
     symbol: "䷣",
     upperTrigram: "坤", lowerTrigram: "離",
     element: "土", yinYang: "陰",
@@ -1536,6 +1575,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 37,
     name: "家人", nameEn: "The Family", pinyin: "Jiā Rén",
+    jyutping: "gaa1 jan4",
     symbol: "䷤",
     upperTrigram: "巽", lowerTrigram: "離",
     element: "木", yinYang: "陰",
@@ -1578,6 +1618,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 38,
     name: "睽", nameEn: "Opposition", pinyin: "Kuí",
+    jyutping: "kwai4",
     symbol: "䷥",
     upperTrigram: "離", lowerTrigram: "兌",
     element: "火", yinYang: "陽",
@@ -1620,6 +1661,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 39,
     name: "蹇", nameEn: "Obstruction", pinyin: "Jiǎn",
+    jyutping: "gin2",
     symbol: "䷦",
     upperTrigram: "坎", lowerTrigram: "艮",
     element: "水", yinYang: "陽",
@@ -1662,6 +1704,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 40,
     name: "解", nameEn: "Deliverance", pinyin: "Xiè",
+    jyutping: "haai6",
     symbol: "䷧",
     upperTrigram: "震", lowerTrigram: "坎",
     element: "木", yinYang: "陽",
@@ -1704,6 +1747,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 41,
     name: "損", nameEn: "Decrease", pinyin: "Sǔn",
+    jyutping: "syun2",
     symbol: "䷨",
     upperTrigram: "艮", lowerTrigram: "兌",
     element: "土", yinYang: "陰",
@@ -1746,6 +1790,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 42,
     name: "益", nameEn: "Increase", pinyin: "Yì",
+    jyutping: "jik1",
     symbol: "䷩",
     upperTrigram: "巽", lowerTrigram: "震",
     element: "木", yinYang: "陰",
@@ -1788,6 +1833,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 43,
     name: "夬", nameEn: "Breakthrough", pinyin: "Guài",
+    jyutping: "gwaai3",
     symbol: "䷪",
     upperTrigram: "兌", lowerTrigram: "乾",
     element: "金", yinYang: "陽",
@@ -1830,6 +1876,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 44,
     name: "姤", nameEn: "Coming to Meet", pinyin: "Gòu",
+    jyutping: "gau3",
     symbol: "䷫",
     upperTrigram: "乾", lowerTrigram: "巽",
     element: "金", yinYang: "陰",
@@ -1872,6 +1919,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 45,
     name: "萃", nameEn: "Gathering Together", pinyin: "Cuì",
+    jyutping: "seoi6",
     symbol: "䷬",
     upperTrigram: "兌", lowerTrigram: "坤",
     element: "金", yinYang: "陰",
@@ -1914,6 +1962,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 46,
     name: "升", nameEn: "Pushing Upward", pinyin: "Shēng",
+    jyutping: "sing1",
     symbol: "䷭",
     upperTrigram: "坤", lowerTrigram: "巽",
     element: "土", yinYang: "陰",
@@ -1956,6 +2005,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 47,
     name: "困", nameEn: "Oppression", pinyin: "Kùn",
+    jyutping: "kwan3",
     symbol: "䷮",
     upperTrigram: "兌", lowerTrigram: "坎",
     element: "金", yinYang: "陰",
@@ -1998,6 +2048,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 48,
     name: "井", nameEn: "The Well", pinyin: "Jǐng",
+    jyutping: "zeng2",
     symbol: "䷯",
     upperTrigram: "坎", lowerTrigram: "巽",
     element: "水", yinYang: "陰",
@@ -2040,6 +2091,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 49,
     name: "革", nameEn: "Revolution", pinyin: "Gé",
+    jyutping: "gaak3",
     symbol: "䷰",
     upperTrigram: "兌", lowerTrigram: "離",
     element: "金", yinYang: "陽",
@@ -2082,6 +2134,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 50,
     name: "鼎", nameEn: "The Cauldron", pinyin: "Dǐng",
+    jyutping: "ding2",
     symbol: "䷱",
     upperTrigram: "離", lowerTrigram: "巽",
     element: "火", yinYang: "陽",
@@ -2124,6 +2177,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 51,
     name: "震", nameEn: "The Arousing Thunder", pinyin: "Zhèn",
+    jyutping: "zan3",
     symbol: "䷲",
     upperTrigram: "震", lowerTrigram: "震",
     element: "木", yinYang: "陽",
@@ -2166,6 +2220,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 52,
     name: "艮", nameEn: "Keeping Still Mountain", pinyin: "Gèn",
+    jyutping: "gan3",
     symbol: "䷳",
     upperTrigram: "艮", lowerTrigram: "艮",
     element: "土", yinYang: "陽",
@@ -2208,6 +2263,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 53,
     name: "漸", nameEn: "Development", pinyin: "Jiàn",
+    jyutping: "zim6",
     symbol: "䷴",
     upperTrigram: "巽", lowerTrigram: "艮",
     element: "木", yinYang: "陰",
@@ -2250,6 +2306,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 54,
     name: "歸妹", nameEn: "The Marrying Maiden", pinyin: "Guī Mèi",
+    jyutping: "gwai1 mui6",
     symbol: "䷵",
     upperTrigram: "震", lowerTrigram: "兌",
     element: "木", yinYang: "陽",
@@ -2292,6 +2349,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 55,
     name: "豐", nameEn: "Abundance", pinyin: "Fēng",
+    jyutping: "fung1",
     symbol: "䷶",
     upperTrigram: "震", lowerTrigram: "離",
     element: "木", yinYang: "陽",
@@ -2334,6 +2392,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 56,
     name: "旅", nameEn: "The Wanderer", pinyin: "Lǚ",
+    jyutping: "leoi5",
     symbol: "䷷",
     upperTrigram: "離", lowerTrigram: "艮",
     element: "火", yinYang: "陽",
@@ -2376,6 +2435,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 57,
     name: "巽", nameEn: "The Gentle Wind", pinyin: "Xùn",
+    jyutping: "seon3",
     symbol: "䷸",
     upperTrigram: "巽", lowerTrigram: "巽",
     element: "木", yinYang: "陰",
@@ -2418,6 +2478,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 58,
     name: "兌", nameEn: "The Joyous Lake", pinyin: "Duì",
+    jyutping: "deoi3",
     symbol: "䷹",
     upperTrigram: "兌", lowerTrigram: "兌",
     element: "金", yinYang: "陰",
@@ -2460,6 +2521,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 59,
     name: "渙", nameEn: "Dispersion", pinyin: "Huàn",
+    jyutping: "wun6",
     symbol: "䷺",
     upperTrigram: "巽", lowerTrigram: "坎",
     element: "木", yinYang: "陽",
@@ -2502,6 +2564,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 60,
     name: "節", nameEn: "Limitation", pinyin: "Jié",
+    jyutping: "zit3",
     symbol: "䷻",
     upperTrigram: "坎", lowerTrigram: "兌",
     element: "水", yinYang: "陽",
@@ -2544,6 +2607,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 61,
     name: "中孚", nameEn: "Inner Truth", pinyin: "Zhōng Fú",
+    jyutping: "zung1 fu1",
     symbol: "䷼",
     upperTrigram: "巽", lowerTrigram: "兌",
     element: "木", yinYang: "陰",
@@ -2586,6 +2650,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 62,
     name: "小過", nameEn: "Small Preponderance", pinyin: "Xiǎo Guò",
+    jyutping: "siu2 gwo3",
     symbol: "䷽",
     upperTrigram: "震", lowerTrigram: "艮",
     element: "木", yinYang: "陰",
@@ -2628,6 +2693,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 63,
     name: "既濟", nameEn: "After Completion", pinyin: "Jì Jì",
+    jyutping: "gei3 zai3",
     symbol: "䷾",
     upperTrigram: "坎", lowerTrigram: "離",
     element: "水", yinYang: "陽",
@@ -2670,6 +2736,7 @@ export const HEXAGRAMS: Hexagram[] = [
   {
     number: 64,
     name: "未濟", nameEn: "Before Completion", pinyin: "Wèi Jì",
+    jyutping: "mei6 zai3",
     symbol: "䷿",
     upperTrigram: "離", lowerTrigram: "坎",
     element: "火", yinYang: "陽",

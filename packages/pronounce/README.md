@@ -58,6 +58,7 @@ Props:
 | `langBadges`     | `{ [tag]: string }`                               | 粵/普, else `EN`…    | corner badge text per language                               |
 | `langColors`     | `{ [tag]: string }`                               | blue/green, else blue| theme color per language (button, ripples, menu highlight)   |
 | `speechOptions`  | `UseSpeechOptions`                                | —                    | `rate`, `pitch`, `volume`, `voice` (name/voiceURI), `pickVoice` |
+| `reading`        | `string`                                          | —                    | pronunciation label (pinyin/jyutping/romaji…) shown above the button; caller supplies the correct reading for the active language |
 
 ## Drive speech yourself
 

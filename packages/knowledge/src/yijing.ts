@@ -53,6 +53,8 @@ export interface Hexagram {
   name: string;
   nameEn: string;
   pinyin: string;
+  /** 卦名粵拼(如 "kin4","siu2 cuk1");易經特殊讀音已按正音核對 */
+  jyutping: string;
   /** 卦符,如 ䷀ */
   symbol: string;
   upperTrigram: TrigramName;

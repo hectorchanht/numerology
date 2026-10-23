@@ -116,3 +116,21 @@ test("YIJING_META 標註來源與授權", () => {
   assert.ok(YIJING_META.sources.join(" ").includes("CC0"));
   assert.equal(YIJING_META.reviewed, false);
 });
+
+test("拼音勘誤 + 粵拼齊全(2026-10-23)", () => {
+  const byName = new Map(allHexagrams().map((h) => [h.name, h]));
+  assert.equal(byName.get("小畜").pinyin, "Xiǎo Xù");
+  assert.equal(byName.get("大畜").pinyin, "Dà Xù");
+  assert.equal(byName.get("噬嗑").pinyin, "Shì Kè");
+  for (const h of allHexagrams()) {
+    assert.ok(typeof h.jyutping === "string" && h.jyutping.length > 0, `#${h.number} jyutping 為空`);
+    assert.match(h.jyutping, /^[a-z]+[1-6]( [a-z]+[1-6])*$/, `#${h.number} jyutping 格式錯: ${h.jyutping}`);
+  }
+  // 易經特殊讀音(多音字正音)
+  assert.equal(byName.get("乾").jyutping, "kin4");
+  assert.equal(byName.get("屯").jyutping, "zeon1");
+  assert.equal(byName.get("否").jyutping, "pei2");
+  assert.equal(byName.get("賁").jyutping, "bei3");
+  assert.equal(byName.get("解").jyutping, "haai6");
+  assert.equal(byName.get("小畜").jyutping, "siu2 cuk1");
+});
