@@ -110,6 +110,21 @@ test("teeTextStream:转发 text 给下游并累积全文", async () => {
   assert.equal(acc.text, "hello world");
 });
 
+test("teeTextStream:wrapper 上挂两个监听器(预热+正式)也不重复累积", async () => {
+  // 还原线上事故:streamToPrimedResponse 会先后挂两个 text 监听器,
+  // 旧实现导致缓存正文每个字符出现两次。
+  const inner = fakeStream(["ab", "cd", "ef"]);
+  const { stream, acc } = teeTextStream(inner);
+  const priming = [];
+  const formal = [];
+  stream.on("text", (d) => priming.push(d)); // 预热监听器
+  stream.on("text", (d) => formal.push(d)); // 正式监听器
+  await stream.finalMessage();
+  assert.equal(acc.text, "abcdef");
+  assert.deepEqual(priming, ["ab", "cd", "ef"]);
+  assert.deepEqual(formal, ["ab", "cd", "ef"]);
+});
+
 // —— C. prepareCachedStream:HIT/MISS ——
 test("prepareCachedStream:HIT 直接返回 X-Cache: HIT,不创建流", async () => {
   const kv = {

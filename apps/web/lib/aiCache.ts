@@ -14,7 +14,8 @@ import { sha256hex } from "./hash.js";
  * - 不缓存 chat / infer-time(对话型,历史相关,命中率极低)。
  */
 
-export const AI_CACHE_PREFIX = "aicache:";
+// v1(aicache:) 因 tee 的重复累积 bug 已作废,见下; bump 前缀即整体失效旧缓存。
+export const AI_CACHE_PREFIX = "aicache:2:";
 export const AI_CACHE_TTL_SECONDS = 90 * 24 * 3600; // 90 天
 
 export interface AiCacheKeyParts {
@@ -122,16 +123,26 @@ export async function prepareCachedStream(
 /**
  * 包装 TextStream:所有事件原样转发,同时把 text 块累积进 `acc.text`。
  * 供 streamToPrimedResponse 消费;正文不受影响。
+ *
+ * 关键:无论 wrapper 上挂多少个 text 监听器(如预热 + 正式各挂一个),
+ * inner 上只挂**一个**监听器并扇出——每块恰好累积一次。
+ * (旧实现每个 wrapper 监听器都在 inner 上另挂一个,导致正文被重复累积。)
  */
 export function teeTextStream(inner: TextStream): { stream: TextStream; acc: { text: string } } {
   const acc = { text: "" };
+  const textListeners: Array<(d: string) => void> = [];
+  let attached = false;
   const stream: TextStream = {
     on(event: "text" | "error", listener: (arg: never) => void): unknown {
       if (event === "text") {
-        inner.on("text", (d: string) => {
-          acc.text += d;
-          (listener as (d: string) => void)(d);
-        });
+        if (!attached) {
+          attached = true;
+          inner.on("text", (d: string) => {
+            acc.text += d;
+            for (const l of [...textListeners]) l(d);
+          });
+        }
+        textListeners.push(listener as (d: string) => void);
       } else {
         inner.on("error", listener as (e: unknown) => void);
       }
