@@ -3,7 +3,14 @@
 import { useEffect, useState } from "react";
 import { type AiSettings, DEFAULT_AI, loadAi, saveAi } from "@/lib/aiSettings";
 import { useLocale, type TKey } from "@/lib/i18n";
-import { PROVIDER_META, STATIC_MODELS, GROUP_LABEL_KEYS, type ProviderGroup } from "@/lib/providerMeta";
+import {
+  PROVIDER_META,
+  STATIC_MODELS,
+  FILTER_LABEL_KEYS,
+  COST_LABEL_KEYS,
+  filterProviders,
+  type ProviderFilter,
+} from "@/lib/providerMeta";
 
 interface ModelOption {
   id: string;
@@ -12,6 +19,8 @@ interface ModelOption {
 
 const MODELS_CACHE_PREFIX = "numerology-models-";
 const MODELS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+const FILTER_ORDER: ProviderFilter[] = ["all", "nokey", "free", "paid"];
 
 function readModelsCache(provider: string): { models: ModelOption[]; source: string } | null {
   try {
@@ -36,12 +45,11 @@ function writeModelsCache(provider: string, models: ModelOption[], source: strin
   }
 }
 
-const GROUP_ORDER: ProviderGroup[] = ["nokey", "freekey", "paid"];
-
 export function SettingsPanel() {
   const { t } = useLocale();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState<AiSettings>(DEFAULT_AI);
+  const [filter, setFilter] = useState<ProviderFilter>("all");
   const [models, setModels] = useState<ModelOption[]>([]);
   const [modelsSource, setModelsSource] = useState<string>("static");
 
@@ -90,6 +98,21 @@ export function SettingsPanel() {
     saveAi(next);
   }
 
+  function selectProvider(p: string) {
+    const first = (STATIC_MODELS[p] ?? [])[0] ?? "";
+    set({ provider: p, model: first });
+  }
+
+  function selectFilter(f: ProviderFilter) {
+    setFilter(f);
+    const visible = filterProviders(f);
+    // filter 后当前 provider 不可见 → 自动选中第一个可见的(保持 tab 恒有一选中)。
+    if (!visible.some((p) => p.name === value.provider) && visible.length > 0) {
+      selectProvider(visible[0]!.name);
+    }
+  }
+
+  const visible = filterProviders(filter);
   const meta = PROVIDER_META.find((p) => p.name === value.provider) ?? PROVIDER_META[0]!;
   const modelLabel = (m: ModelOption): string => {
     const key = `settings.m.${m.id}` as TKey;
@@ -107,7 +130,7 @@ export function SettingsPanel() {
   return (
     <div className="settings">
       <button type="button" className="settings-toggle" onClick={() => setOpen((o) => !o)}>
-        {t("settings.toggle")} {t(meta.labelKey).split("(")[0]}
+        {t("settings.toggle")} {t(meta.shortKey)}
         <span className="caret">{open ? "▴" : "▾"}</span>
       </button>
 
@@ -116,37 +139,65 @@ export function SettingsPanel() {
           <label className="fld" htmlFor="prov">
             {t("settings.modelLabel")}
           </label>
-          <select
-            id="prov"
-            className="settings-select"
-            value={value.provider}
-            onChange={(e) => {
-              const p = e.target.value;
-              const first = (STATIC_MODELS[p] ?? [])[0] ?? "";
-              set({ provider: p, model: first });
-            }}
-          >
-            {GROUP_ORDER.map((g) => (
-              <optgroup key={g} label={t(GROUP_LABEL_KEYS[g])}>
-                {PROVIDER_META.filter((p) => p.group === g).map((p) => (
-                  <option key={p.name} value={p.name}>
-                    {t(p.labelKey)}
-                  </option>
-                ))}
-              </optgroup>
+
+          {/* filter chips */}
+          <div className="filter-chips" role="group" aria-label="provider filter">
+            {FILTER_ORDER.map((f) => (
+              <button
+                key={f}
+                type="button"
+                className="filter-chip"
+                aria-pressed={filter === f}
+                onClick={() => selectFilter(f)}
+              >
+                {t(FILTER_LABEL_KEYS[f])}
+              </button>
             ))}
-          </select>
+          </div>
 
-          {meta.name === "workers-ai" ? (
-            <p className="settings-note" style={{ marginTop: "0.6rem" }}>
-              {t("settings.budget")}
-            </p>
-          ) : null}
+          {/* provider tabs:只显示短名 */}
+          <div className="prov-tabs" role="tablist" aria-label="provider">
+            {visible.map((p) => (
+              <button
+                key={p.name}
+                type="button"
+                role="tab"
+                aria-selected={value.provider === p.name}
+                className="prov-tab"
+                onClick={() => selectProvider(p.name)}
+              >
+                {t(p.shortKey)}
+              </button>
+            ))}
+          </div>
 
-          {meta.needsKey ? (
+          {/* 属性面板:选中 provider 的结构化属性 */}
+          <div className="prov-props">
+            <div className="prov-prop">
+              <span className="prov-prop-label">{t("settings.apiKey")}</span>
+              <span className={`badge ${meta.needsKey ? "badge-warn" : "badge-ok"}`}>
+                {meta.needsKey ? t("settings.prop.needKey") : t("settings.prop.noKey")}
+              </span>
+            </div>
+            <div className="prov-prop">
+              <span className="prov-prop-label">{t("settings.prop.cost")}</span>
+              <span className="badge">{t(COST_LABEL_KEYS[meta.cost])}</span>
+            </div>
+            <p className="prov-note">{t(meta.noteKey)}</p>
+          </div>
+
+          {meta.needsKey || meta.optionalKey ? (
             <>
               <label className="fld" htmlFor="key" style={{ marginTop: "0.8rem" }}>
-                {t("settings.apiKey")}{meta.signup ? <> · <a href={meta.signup} target="_blank" rel="noreferrer">{t("settings.apply")}</a></> : null}
+                {t("settings.apiKey")}
+                {meta.signup ? (
+                  <>
+                    {" · "}
+                    <a href={meta.signup} target="_blank" rel="noreferrer">
+                      {t("settings.apply")}
+                    </a>
+                  </>
+                ) : null}
               </label>
               <input
                 id="key"
@@ -204,7 +255,9 @@ export function SettingsPanel() {
           ) : null}
 
           <p className="settings-note">
-            {t("settings.noteA")}<b>{t("settings.noteB")}</b>{t("settings.noteC")}
+            {t("settings.noteA")}
+            <b>{t("settings.noteB")}</b>
+            {t("settings.noteC")}
           </p>
         </div>
       ) : null}

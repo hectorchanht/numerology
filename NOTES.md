@@ -267,3 +267,19 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
   `/api/models` 分組正確、`/api/models?provider=workers-ai` 核驗表正確、
   無 binding 時 report 返回明確指引(502)、`/api/chart` 200。
 - 待線上驗證(部署後):預設 provider 的真實中文報告流、KV 計數器增長。
+
+### 设置面板 provider 选择器改版(2026-10-23,用户要求)
+- **Tabs 取代下拉**:8 个 provider 为横向 tabs,只显示短名(Workers AI/Pollinations/
+  GLM/Gemini/Groq/OpenRouter/Claude/自訂),描述不再塞进选项文字。
+- **Filter chips**(tabs 上方):全部 / 免 key / 免費 / 付費(三语 `settings.filter.*`)。
+  免費 = 免 key ∪ 免费额度(workers-ai、pollinations、glm、gemini、groq、openrouter);
+  付費 = anthropic、custom。切 filter 时若当前 provider 被滤掉,自动选中首个可见
+  (保持恒有一 tab 选中)。
+- **属性面板**(tabs 下方,选中 provider 的结构化展示):API Key(需要/不需要 badge)、
+  費用(免費/免費額度/付費 badge)、一行短注(`settings.note.*`):
+  workers-ai「經本站 Cloudflare 帳號,每月硬上限 $2,超額自動停用」;
+  pollinations「匿名使用會限速、輸出偏短,填 key 更穩」(key 字段对其为选填,后端本就优先用用户 key);
+  openrouter「免費 :free 模型仍需 API key」;glm/gemini/groq「免費額度,填 key 即用」;
+  anthropic「按量付費」;custom「任意 OpenAI 兼容端點」。
+- 动态模型下拉 + 24h 缓存 + 静态回落保持不变;旧的长描述 `settings.prov.*` /
+  `settings.group.*` / `settings.budget` keys 已删除(信息移入属性面板)。

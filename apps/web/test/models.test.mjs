@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { fetchProviderModels, staticModelsFor } from "../test-dist/models.js";
-import { PROVIDER_META, STATIC_MODELS, GROUP_LABEL_KEYS } from "../test-dist/providerMeta.js";
+import { PROVIDER_META, STATIC_MODELS, FILTER_LABEL_KEYS } from "../test-dist/providerMeta.js";
 
 function stubFetch(handler) {
   return async (url, init) => handler(url, init);
@@ -86,7 +86,7 @@ test("models:PROVIDER_META 分组与 ai 包一致(workers-ai 首位)", () => {
   assert.equal(groups["pollinations"], "nokey");
   assert.equal(groups["openrouter"], "freekey");
   assert.equal(groups["custom"], "paid");
-  assert.deepEqual(Object.keys(GROUP_LABEL_KEYS).sort(), ["freekey", "nokey", "paid"]);
+  assert.deepEqual(Object.keys(FILTER_LABEL_KEYS).sort(), ["all", "free", "nokey", "paid"]);
   for (const p of PROVIDER_META) {
     assert.ok((STATIC_MODELS[p.name] ?? []).length > 0 || p.name === "custom", `${p.name} 应有静态备选`);
   }

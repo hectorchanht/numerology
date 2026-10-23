@@ -7,37 +7,69 @@ import type { TKey } from "./i18n.js";
  */
 export type ProviderGroup = "nokey" | "freekey" | "paid";
 
+/** 费用档:free=完全免费, freetier=免费额度, paid=付费。 */
+export type ProviderCost = "free" | "freetier" | "paid";
+
 export interface ProviderMeta {
   name: string;
-  labelKey: TKey;
+  /** tab 短名(仅短名,不塞描述)。 */
+  shortKey: TKey;
+  /** 选中后属性面板里的一行短注。 */
+  noteKey: TKey;
   group: ProviderGroup;
+  cost: ProviderCost;
   needsKey: boolean;
+  /** key 选填(如 Pollinations:匿名可用,填 key 更稳)。 */
+  optionalKey?: boolean;
   signup?: string;
 }
 
-export const GROUP_LABEL_KEYS: Record<ProviderGroup, TKey> = {
-  nokey: "settings.group.nokey",
-  freekey: "settings.group.freekey",
-  paid: "settings.group.paid",
+/** 顶部 filter chips:全部 / 免 key / 免費 / 付費。免費=免 key ∪ 免费额度。 */
+export type ProviderFilter = "all" | "nokey" | "free" | "paid";
+
+export const FILTER_LABEL_KEYS: Record<ProviderFilter, TKey> = {
+  all: "settings.filter.all",
+  nokey: "settings.filter.nokey",
+  free: "settings.filter.free",
+  paid: "settings.filter.paid",
+};
+
+export const COST_LABEL_KEYS: Record<ProviderCost, TKey> = {
+  free: "settings.prop.cost.free",
+  freetier: "settings.prop.cost.freetier",
+  paid: "settings.prop.cost.paid",
 };
 
 export const PROVIDER_META: ProviderMeta[] = [
-  { name: "workers-ai", labelKey: "settings.prov.workersai", group: "nokey", needsKey: false },
-  { name: "pollinations", labelKey: "settings.prov.pollinations", group: "nokey", needsKey: false, signup: "https://pollinations.ai/" },
-  { name: "glm", labelKey: "settings.prov.glm", group: "freekey", needsKey: true, signup: "https://open.bigmodel.cn/" },
-  { name: "gemini", labelKey: "settings.prov.gemini", group: "freekey", needsKey: true, signup: "https://aistudio.google.com/apikey" },
-  { name: "groq", labelKey: "settings.prov.groq", group: "freekey", needsKey: true, signup: "https://console.groq.com/keys" },
-  { name: "openrouter", labelKey: "settings.prov.openrouter", group: "freekey", needsKey: true, signup: "https://openrouter.ai/keys" },
-  { name: "anthropic", labelKey: "settings.prov.anthropic", group: "paid", needsKey: true, signup: "https://console.anthropic.com/" },
-  { name: "custom", labelKey: "settings.prov.custom", group: "paid", needsKey: true },
+  { name: "workers-ai", shortKey: "settings.tab.workersai", noteKey: "settings.note.workersai", group: "nokey", cost: "free", needsKey: false },
+  { name: "pollinations", shortKey: "settings.tab.pollinations", noteKey: "settings.note.pollinations", group: "nokey", cost: "free", needsKey: false, optionalKey: true, signup: "https://pollinations.ai/" },
+  { name: "glm", shortKey: "settings.tab.glm", noteKey: "settings.note.glm", group: "freekey", cost: "freetier", needsKey: true, signup: "https://open.bigmodel.cn/" },
+  { name: "gemini", shortKey: "settings.tab.gemini", noteKey: "settings.note.gemini", group: "freekey", cost: "freetier", needsKey: true, signup: "https://aistudio.google.com/apikey" },
+  { name: "groq", shortKey: "settings.tab.groq", noteKey: "settings.note.groq", group: "freekey", cost: "freetier", needsKey: true, signup: "https://console.groq.com/keys" },
+  { name: "openrouter", shortKey: "settings.tab.openrouter", noteKey: "settings.note.openrouter", group: "freekey", cost: "freetier", needsKey: true, signup: "https://openrouter.ai/keys" },
+  { name: "anthropic", shortKey: "settings.tab.anthropic", noteKey: "settings.note.anthropic", group: "paid", cost: "paid", needsKey: true, signup: "https://console.anthropic.com/" },
+  { name: "custom", shortKey: "settings.tab.custom", noteKey: "settings.note.custom", group: "paid", cost: "paid", needsKey: true },
 ];
+
+export function filterProviders(filter: ProviderFilter): ProviderMeta[] {
+  switch (filter) {
+    case "nokey":
+      return PROVIDER_META.filter((p) => p.group === "nokey");
+    case "free":
+      return PROVIDER_META.filter((p) => p.group !== "paid");
+    case "paid":
+      return PROVIDER_META.filter((p) => p.group === "paid");
+    default:
+      return PROVIDER_META;
+  }
+}
 
 /** 静态模型备选(动态拉取失败/未缓存时的回落;workers-ai 用核验表,见 models.ts)。 */
 export const STATIC_MODELS: Record<string, string[]> = {
   "workers-ai": [
+    "@cf/mistralai/mistral-small-3.1-24b-instruct",
     "@cf/meta/llama-3.1-8b-instruct-fp8",
     "@cf/meta/llama-3.2-3b-instruct",
-    "@cf/mistralai/mistral-small-3.1-24b-instruct",
   ],
   pollinations: ["openai"],
   glm: ["glm-4-flash", "glm-4-flashx", "glm-4-air", "glm-4-plus", "glm-4-long"],

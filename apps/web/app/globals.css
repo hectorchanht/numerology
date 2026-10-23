@@ -272,6 +272,47 @@ a { color: var(--cinnabar); }
 .settings-note b { color: var(--cinnabar); }
 .settings-body a { color: var(--cinnabar); }
 
+/* —— provider tabs + filter chips + 属性面板 —— */
+.filter-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.7rem; }
+.filter-chip {
+  font: inherit; font-size: 0.8rem; color: var(--ink-soft);
+  background: transparent; border: 1px solid var(--line-strong); border-radius: 999px;
+  padding: 0.3rem 0.85rem; cursor: pointer; transition: all 0.15s;
+}
+.filter-chip:hover { border-color: var(--cinnabar-soft); color: var(--ink); }
+.filter-chip[aria-pressed="true"] {
+  background: var(--ink); border-color: var(--ink); color: var(--paper);
+}
+.prov-tabs {
+  display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.25rem;
+  scrollbar-width: thin;
+}
+.prov-tab {
+  flex: 0 0 auto; font: inherit; font-size: 0.88rem; white-space: nowrap;
+  color: var(--ink-soft); background: var(--paper);
+  border: 1px solid var(--line-strong); border-radius: 999px;
+  padding: 0.45rem 1rem; cursor: pointer; transition: all 0.15s;
+}
+.prov-tab:hover { border-color: var(--cinnabar-soft); color: var(--ink); }
+.prov-tab[aria-selected="true"] {
+  background: var(--cinnabar); border-color: var(--cinnabar); color: #fff;
+  font-weight: 600;
+}
+.prov-props {
+  margin: 0.9rem 0 0; padding: 0.8rem 1rem;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+}
+.prov-prop { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem; }
+.prov-prop:last-of-type { margin-bottom: 0; }
+.prov-prop-label { font-size: 0.82rem; color: var(--ink-soft); min-width: 4.2em; }
+.badge {
+  font-size: 0.78rem; line-height: 1.5; padding: 0.1rem 0.65rem; border-radius: 999px;
+  border: 1px solid var(--line-strong); color: var(--ink-soft); background: transparent;
+}
+.badge-ok { color: oklch(45% 0.12 150); border-color: oklch(45% 0.12 150 / 0.45); }
+.badge-warn { color: oklch(52% 0.18 32); border-color: oklch(52% 0.18 32 / 0.45); }
+.prov-note { margin: 0.55rem 0 0; font-size: 0.8rem; line-height: 1.6; color: var(--ink-faint); }
+
 /* ══════════ 汇流:八字 ⇄ 紫微 → 合参解读 ══════════ */
 :root { --sys-a: oklch(50% 0.09 165); } /* 八字 = 翠青;紫微 = 朱砂(--cinnabar) */
 
