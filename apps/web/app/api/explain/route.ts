@@ -4,6 +4,7 @@ import { errorResponse } from "@/lib/http";
 import { getServerAiBindings } from "@/lib/aiBinding";
 import { sha256hex } from "@/lib/hash";
 import { AI_CACHE_TTL_SECONDS, type KvLike } from "@/lib/aiCache";
+import { scriptLocker } from "@/lib/script";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -33,12 +34,14 @@ export async function POST(req: Request): Promise<Response> {
     if (!text || text.length < 2) throw new Error("請選取至少兩個字");
     if (text.length > MAX_TEXT_LEN) throw new Error("選取文字過長,請縮短至 40 字內");
 
+    // 字形鎖:寫緩存前轉;命中亦再鎖一次(冪等,修正舊緩存)。純 CPU,零 AI 調用。
+    const lock = (await scriptLocker(locale)) ?? ((s: string) => s);
     const kv = (getServerAiBindings()?.kv ?? null) as KvLike | null;
     const cacheKey = `explain:1:${await sha256hex(`${PROMPT_VERSION}|${locale}|${text}`)}`;
     if (kv) {
       try {
         const hit = await kv.get(cacheKey);
-        if (hit) return Response.json({ answer: hit, cached: true });
+        if (hit) return Response.json({ answer: lock(hit), cached: true });
       } catch {
         /* 讀失敗按 miss 處理 */
       }
@@ -57,7 +60,7 @@ export async function POST(req: Request): Promise<Response> {
       },
       ai,
     );
-    const out = answer.trim();
+    const out = lock(answer.trim());
     if (kv && out) {
       try {
         await kv.put(cacheKey, out, { expirationTtl: AI_CACHE_TTL_SECONDS });

@@ -12,7 +12,7 @@ import {
   type YijingInterp,
   type YijingLocale,
 } from "@numerology/knowledge";
-import { useLocale } from "@/lib/i18n";
+import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale as YL } from "@/lib/yijingStrings";
 import { Term, withTermHighlights } from "@/lib/highlightTerms";
 
@@ -28,12 +28,13 @@ const TAB_IDS: Record<(typeof TABS)[number], string> = {
 
 function TrigramTag({ name, loc }: { name: keyof typeof TRIGRAM_INFO; loc: YijingLocale }) {
   const info = TRIGRAM_INFO[name];
+  const { zT } = useScript();
   return (
     <span
       className="badge"
       title={`${info.pinyin} · ${info.en} · ${info.nature} · ${info.element}`}
     >
-      {info.symbol} {name}
+      {info.symbol} {zT(name)}
     </span>
   );
 }
@@ -41,6 +42,8 @@ function TrigramTag({ name, loc }: { name: keyof typeof TRIGRAM_INFO; loc: Yijin
 function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => void }) {
   const [tab, setTab] = useState<(typeof TABS)[number]>("coreMeaning");
   const interp: YijingInterp = interpOf(hex, loc as YijingLocale);
+  // 卦爻辭 / 大象係繁體正本 → zT(只喺 zhs 轉);interp 已按 locale 出
+  const { zT } = useScript();
   return (
     <div className="card">
       <button className="btn ghost" onClick={onBack} style={{ marginBottom: "1rem" }}>
@@ -50,7 +53,7 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
         <span style={{ fontSize: "3.4rem", lineHeight: 1 }}>{hex.symbol}</span>
         <div style={{ flex: "1 1 200px", minWidth: 0 }}>
           <h2 style={{ margin: "0 0 0.2rem", fontSize: "1.7rem" }}>
-            {hex.name}
+            {zT(hex.name)}
             <span className="muted" style={{ fontSize: "0.85rem", marginLeft: "0.6rem" }}>
               #{hex.number} · {hex.pinyin} · {hex.nameEn}
             </span>
@@ -63,10 +66,10 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
             <span className="muted">{yjT("gua.lower", loc)}:</span>
             <TrigramTag name={hex.lowerTrigram} loc={loc} />
             <span className="badge">
-              {yjT("gua.element", loc)} {hex.element}
+              {yjT("gua.element", loc)} {zT(hex.element)}
             </span>
             <span className="badge">
-              {yjT("gua.yinyang", loc)} {hex.yinYang}
+              {yjT("gua.yinyang", loc)} {zT(hex.yinYang)}
             </span>
           </div>
         </div>
@@ -76,7 +79,7 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
         <Term term="卦辭" />
       </h3>
       <p style={{ fontFamily: "var(--serif)", fontSize: "1.05rem", marginTop: 0 }}>
-        {withTermHighlights(hex.judgment)}
+        {withTermHighlights(hex.judgment, zT)}
       </p>
 
       <h3 className="section-title">
@@ -102,9 +105,9 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
                   color: "var(--cinnabar)",
                 }}
               >
-                {yaoName(hex, pos)}
+                {zT(yaoName(hex, pos))}
               </span>
-              <span style={{ fontSize: "0.92rem" }}>{withTermHighlights(text)}</span>
+              <span style={{ fontSize: "0.92rem" }}>{withTermHighlights(text, zT)}</span>
             </div>
           );
         })}
@@ -123,7 +126,7 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
           fontSize: "0.92rem",
         }}
       >
-        {withTermHighlights(hex.image)}
+        {withTermHighlights(hex.image, zT)}
       </blockquote>
 
       <h3 className="section-title" style={{ marginTop: "1.4rem" }}>
@@ -149,6 +152,7 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
 
 export default function GuaLibrary() {
   const { locale } = useLocale();
+  const { zT } = useScript();
   const loc = locale as YL;
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<number | null>(null);
@@ -201,7 +205,7 @@ export default function GuaLibrary() {
                   }}
                 >
                   <span style={{ fontSize: "1.9rem", lineHeight: 1.2 }}>{h.symbol}</span>
-                  <span style={{ fontFamily: "var(--serif)", fontSize: "0.92rem" }}>{h.name}</span>
+                  <span style={{ fontFamily: "var(--serif)", fontSize: "0.92rem" }}>{zT(h.name)}</span>
                   <span className="muted" style={{ fontSize: "0.68rem" }}>
                     #{h.number}
                   </span>

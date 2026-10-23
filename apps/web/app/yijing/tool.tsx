@@ -7,7 +7,7 @@ import {
   type CoinLine,
 } from "@numerology/engine";
 import { getHexagram, yaoName } from "@numerology/knowledge";
-import { useLocale } from "@/lib/i18n";
+import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, yjFmt, type YijingLocale } from "@/lib/yijingStrings";
 import { AiInterpret } from "./AiInterpret";
 import { Term, withTermHighlights } from "@/lib/highlightTerms";
@@ -71,6 +71,8 @@ function HexFigure({ bits, moving }: { bits: number[]; moving?: boolean[] }) {
 
 export default function YijingTool() {
   const { locale } = useLocale();
+  // 卦爻辭係繁體正本 → zT(只喺 zhs 轉)
+  const { zT } = useScript();
   const loc = locale as YijingLocale;
   const [question, setQuestion] = useState("");
   const [lines, setLines] = useState<TossedLine[]>([]);
@@ -242,7 +244,7 @@ export default function YijingTool() {
                 <div style={{ display: "flex", alignItems: "baseline", gap: "0.7rem", flexWrap: "wrap" }}>
                   <span style={{ fontSize: "2.6rem", lineHeight: 1 }}>{ben.symbol}</span>
                   <span style={{ fontFamily: "var(--serif)", fontSize: "1.5rem" }}>
-                    <Term term="本卦" /> · {ben.name}
+                    <Term term="本卦" /> · {zT(ben.name)}
                   </span>
                   <span className="muted">
                     {ben.pinyin} · {ben.nameEn} · #{ben.number}
@@ -250,7 +252,7 @@ export default function YijingTool() {
                 </div>
                 <p style={{ marginTop: "0.7rem" }}>
                   <Term term="卦辭" />:{` `}
-                  <span style={{ fontFamily: "var(--serif)", fontSize: "1.05rem" }}>{withTermHighlights(ben.judgment)}</span>
+                  <span style={{ fontFamily: "var(--serif)", fontSize: "1.05rem" }}>{withTermHighlights(ben.judgment, zT)}</span>
                 </p>
               </div>
             </div>
@@ -271,9 +273,9 @@ export default function YijingTool() {
                     }}
                   >
                     <div style={{ fontFamily: "var(--serif)", color: "var(--cinnabar)", marginBottom: "0.2rem" }}>
-                      {yaoName(ben, p)}
+                      {zT(yaoName(ben, p))}
                     </div>
-                    <div style={{ fontSize: "0.92rem" }}>{withTermHighlights(ben.lines[p - 1] ?? "")}</div>
+                    <div style={{ fontSize: "0.92rem" }}>{withTermHighlights(ben.lines[p - 1] ?? "", zT)}</div>
                   </div>
                 ))}
               </div>
@@ -289,10 +291,10 @@ export default function YijingTool() {
                   <div className="card" style={{ marginTop: 0 }}>
                     <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>
                       <span style={{ fontSize: "1.8rem", marginRight: "0.5rem" }}>{bian.symbol}</span>
-                      <Term term="變卦" /> · {bian.name}
+                      <Term term="變卦" /> · {zT(bian.name)}
                     </h3>
                     <p style={{ margin: 0, fontSize: "0.92rem" }}>
-                      <Term term="卦辭" />: {withTermHighlights(bian.judgment)}
+                      <Term term="卦辭" />: {withTermHighlights(bian.judgment, zT)}
                     </p>
                   </div>
                 )}
@@ -300,10 +302,10 @@ export default function YijingTool() {
                   <div className="card" style={{ marginTop: 0 }}>
                     <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>
                       <span style={{ fontSize: "1.8rem", marginRight: "0.5rem" }}>{hu.symbol}</span>
-                      <Term term="互卦" /> · {hu.name}
+                      <Term term="互卦" /> · {zT(hu.name)}
                     </h3>
                     <p style={{ margin: 0, fontSize: "0.92rem" }}>
-                      <Term term="卦辭" />: {withTermHighlights(hu.judgment)}
+                      <Term term="卦辭" />: {withTermHighlights(hu.judgment, zT)}
                     </p>
                   </div>
                 )}

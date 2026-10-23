@@ -7,7 +7,7 @@ import {
   type ZhanliCase,
   type ZhanliQuoteRef,
 } from "@numerology/knowledge";
-import { useLocale } from "@/lib/i18n";
+import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { withQuoteRefs, type QuoteRefEntry } from "@/lib/quoteRef";
 import { withTermHighlights } from "@/lib/highlightTerms";
@@ -68,6 +68,8 @@ function toQuoteRefEntry(q: ZhanliQuoteRef): QuoteRefEntry {
 }
 
 function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBack: () => void }) {
+  // 案例係繁體正本(古籍原文 + 白話)→ zT(只喺 zhs 轉)
+  const { zT } = useScript();
   const d = c.divination;
   const ben = getHexagram(d.hexagramNum);
   const bian = d.changedToNum ? getHexagram(d.changedToNum) : null;
@@ -83,9 +85,9 @@ function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBa
         ← {yjT("cases.title", loc)}
       </button>
 
-      <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{c.title}</h1>
+      <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{zT(c.title)}</h1>
       <div className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-        {yjT("cases.source", loc)}：{c.sourceLabel}
+        {yjT("cases.source", loc)}：{zT(c.sourceLabel)}
         {" · "}
         <a
           href={c.sourceUrl}
@@ -102,11 +104,11 @@ function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBa
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm">
           <span className="text-zinc-500 dark:text-zinc-400">
             {yjT("cases.method", loc)}：
-            <span className="text-zinc-800 dark:text-zinc-200">{d.method}</span>
+            <span className="text-zinc-800 dark:text-zinc-200">{zT(d.method)}</span>
           </span>
           <span className="text-zinc-500 dark:text-zinc-400">
             {yjT("cases.moving", loc)}：
-            <span className="text-zinc-800 dark:text-zinc-200">{d.movingLines}</span>
+            <span className="text-zinc-800 dark:text-zinc-200">{zT(d.movingLines)}</span>
           </span>
           <span className="ml-auto">
             <VerdictBadge verdict={c.outcome.verdict} loc={loc} />
@@ -116,7 +118,7 @@ function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBa
           <div className="flex flex-col items-center gap-2">
             <HexFigure bits={ben.bits} />
             <span className="text-sm font-medium">
-              {d.hexagram} <span className="text-zinc-400">· {yjT("cases.ben", loc)}</span>
+              {zT(d.hexagram)} <span className="text-zinc-400">· {yjT("cases.ben", loc)}</span>
             </span>
           </div>
           {bian && (
@@ -125,7 +127,7 @@ function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBa
               <div className="flex flex-col items-center gap-2">
                 <HexFigure bits={bian.bits} />
                 <span className="text-sm font-medium">
-                  {d.changedTo}{" "}
+                  {zT(d.changedTo)}{" "}
                   <span className="text-zinc-400">· {yjT("cases.bian", loc)}</span>
                 </span>
               </div>
@@ -145,7 +147,7 @@ function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBa
               key={i}
               className="mb-4 font-serif text-[17px] leading-9 text-zinc-900 last:mb-0 dark:text-zinc-100"
             >
-              {para}
+              {zT(para)}
             </p>
           ))}
         </div>
@@ -159,7 +161,7 @@ function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBa
         <div className="space-y-4">
           {c.baihua.map((p, i) => (
             <p key={i} className="leading-8 text-zinc-700 dark:text-zinc-300">
-              {withTermHighlights(withQuoteRefs(p, refs))}
+              {withTermHighlights(withQuoteRefs(p, refs), zT)}
             </p>
           ))}
         </div>
@@ -171,10 +173,10 @@ function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBa
           {yjT("cases.history", loc)} <VerdictBadge verdict={c.outcome.verdict} loc={loc} />
         </h2>
         <p className="font-serif text-[16px] leading-8 text-zinc-800 dark:text-zinc-200">
-          {c.outcome.text}
+          {zT(c.outcome.text)}
         </p>
         <p className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-400">
-          {c.outcome.reason}
+          {zT(c.outcome.reason)}
         </p>
       </section>
     </article>
@@ -183,6 +185,7 @@ function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBa
 
 export default function CasesPage() {
   const { locale } = useLocale();
+  const { zT } = useScript();
   const loc = locale as YijingLocale;
   const [activeId, setActiveId] = useState<string | null>(null);
   const active = activeId ? ZHANLI_CASES.find((c) => c.id === activeId) ?? null : null;
@@ -214,11 +217,11 @@ export default function CasesPage() {
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[16px] font-semibold">
-                        {c.title}
+                        {zT(c.title)}
                       </span>
                       <span className="mt-0.5 block truncate text-xs text-zinc-500 dark:text-zinc-400">
-                        {c.sourceLabel} · {c.divination.hexagram}
-                        {c.divination.changedTo ? `之${c.divination.changedTo}` : ""}
+                        {zT(c.sourceLabel)} · {zT(c.divination.hexagram)}
+                        {c.divination.changedTo ? `之${zT(c.divination.changedTo)}` : ""}
                       </span>
                     </span>
                     <VerdictBadge verdict={c.outcome.verdict} loc={loc} />

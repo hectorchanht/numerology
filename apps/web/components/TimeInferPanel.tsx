@@ -7,7 +7,7 @@ import type { HourCandidate } from "@numerology/engine";
 import type { BirthFormValue, Calendar } from "@/lib/formTypes";
 import { streamPost } from "@/lib/streamClient";
 import { aiRequestParts } from "@/lib/aiSettings";
-import { useLocale } from "@/lib/i18n";
+import { useLocale, useScript } from "@/lib/i18n";
 import { yjT } from "@/lib/yijingStrings";
 import { LocationPicker } from "@/components/LocationPicker";
 import { Icon } from "@/components/Icon";
@@ -23,6 +23,7 @@ const DATE_FIELDS = [
 
 export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) => void }) {
   const { t, locale } = useLocale();
+  const { z } = useScript();
   const [v, setV] = useState<Record<string, string>>({ year: "", month: "", day: "" });
   const [gender, setGender] = useState<"男" | "女">("男");
   const [calendar, setCalendar] = useState<Calendar>("solar");
@@ -204,9 +205,9 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
       <div className="strip">
         {candidates.map((c) => (
           <button key={c.shichen} type="button" className="shichen-btn" onClick={() => adopt(c.hour)} disabled={busy}>
-            <span className="sc-name">{c.shichen}</span>
+            <span className="sc-name">{z(c.shichen)}</span>
             <span className="sc-range">{c.range}</span>
-            <span className="sc-soul">{yjT("poster.soulPalace", locale)} {c.soulBranch}·{c.soulMajorStars.join("") || t("infer.emptyPalace")}</span>
+            <span className="sc-soul">{yjT("poster.soulPalace", locale)} {c.soulBranch}·{z(c.soulMajorStars.join("")) || t("infer.emptyPalace")}</span>
           </button>
         ))}
       </div>

@@ -7,6 +7,7 @@ import { primeTimeoutMs } from "@/lib/primeTimeout";
 import { errorResponse } from "@/lib/http";
 import { resolveServerAi } from "@/lib/aiOpts";
 import { prepareCachedStream, type KvLike } from "@/lib/aiCache";
+import { scriptLocker } from "@/lib/script";
 import { sha256hex } from "@/lib/hash";
 import { getServerAiBindings, getWaitUntil } from "@/lib/aiBinding";
 
@@ -54,6 +55,7 @@ export async function POST(req: Request): Promise<Response> {
         promptHash: await sha256hex(`${CHAT_PROMPT_VERSION}|${customPrompt}`),
       },
       () => streamFollowUp(chart, history, question, { fortune, ai, locale }),
+      await scriptLocker(locale),
     );
     if ("hit" in cached) return cached.hit;
     const resp = await streamToPrimedResponse(cached.miss.stream, primeTimeoutMs(ai));

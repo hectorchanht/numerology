@@ -59,6 +59,8 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "academy.back": S("← 返回學院首頁", "← 返回学院首页", "← Back to Academy"),
   "academy.notFound": S("找不到這一課。", "找不到这一课。", "Lesson not found."),
   "academy.goDivine": S("去占一卦實戰", "去占一卦实战", "Cast a hexagram"),
+  "academy.sources": S("延伸出處", "延伸出处", "Further sources"),
+  "academy.sourcesNote": S("以下為公有領域原文,課文引文皆可於此稽考:", "以下为公有领域原文,课文引文皆可于此稽考:", "Public-domain originals — every quotation in the lesson can be checked here:"),
   "academy.quiz": S("自我檢測", "自我检测", "Self-check"),
   "academy.quizCheck": S("對答案", "对答案", "Check answers"),
   "academy.quizRetry": S("再測一次", "再测一次", "Retry"),

@@ -9,7 +9,7 @@ import {
   type LiuyaoResult,
 } from "@numerology/engine";
 import { getHexagram } from "@numerology/knowledge";
-import { useLocale } from "@/lib/i18n";
+import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { Term } from "@/lib/highlightTerms";
 
@@ -75,6 +75,8 @@ function YaoGlyph({ yang, moving }: { yang: boolean; moving: boolean }) {
 
 export default function LiuyaoTool() {
   const { locale } = useLocale();
+  // 六爻引擎 / 卦名係繁體正本 → zT(只喺 zhs 轉)
+  const { zT } = useScript();
   const loc = locale as YijingLocale;
   const [date, setDate] = useState(todayStr());
   const [mode, setMode] = useState<"coin" | "manual">("coin");
@@ -255,10 +257,10 @@ export default function LiuyaoTool() {
         <div className="card">
           <h2 className="section-title">{yjT("liuyao.result", loc)}</h2>
           <div style={{ marginBottom: "0.8rem", lineHeight: 1.9 }}>
-            <span style={{ fontSize: "1.6rem", marginRight: "0.5rem" }}>{result.hexName}</span>
-            <span className="badge">{result.r.shape}</span>{" "}
+            <span style={{ fontSize: "1.6rem", marginRight: "0.5rem" }}>{zT(result.hexName)}</span>
+            <span className="badge">{zT(result.r.shape)}</span>{" "}
             <span className="muted">
-              <Term term="卦宮" />: {result.r.palace}({result.r.palaceWuxing})
+              <Term term="卦宮" />: {zT(result.r.palace)}({zT(result.r.palaceWuxing)})
             </span>
           </div>
           <p style={{ margin: "0 0 1rem" }}>
@@ -281,19 +283,19 @@ export default function LiuyaoTool() {
               >
                 {y.shiYing ? (
                   <span className="badge" style={{ minWidth: "2.2em", textAlign: "center" }}>
-                    {y.shiYing}
+                    {zT(y.shiYing)}
                   </span>
                 ) : (
                   <span style={{ minWidth: "2.2em" }} />
                 )}
                 <span style={{ minWidth: "3em", color: "var(--ink-soft)", fontSize: "0.85rem" }}>
-                  {loc === "en" ? BEAST_EN[y.beast] : y.beast}
+                  {loc === "en" ? BEAST_EN[y.beast] : zT(y.beast)}
                 </span>
                 <span style={{ fontFamily: "var(--serif)", fontSize: "1.05rem", minWidth: "3.4em" }}>
                   {y.ganzhi}
                 </span>
                 <span style={{ color: "var(--cinnabar)", minWidth: "3em" }}>
-                  {loc === "en" ? QIN_EN[y.qin] : y.qin}
+                  {loc === "en" ? QIN_EN[y.qin] : zT(y.qin)}
                 </span>
                 <YaoGlyph yang={y.yinYang === "陽"} moving={y.moving} />
                 <span className="muted" style={{ fontSize: "0.8rem" }}>

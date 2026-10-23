@@ -1,6 +1,7 @@
 "use client";
 
-import { createElement, useSyncExternalStore } from "react";
+import { createElement, useCallback, useEffect, useSyncExternalStore } from "react";
+import { LOCALE_SCRIPT, isScriptWarm, lockScript, subscribeScript, warmScriptFor } from "./script.js";
 
 /** 支持的界面语言:繁体(香港用语,默认)/简体/英文。 */
 export type Locale = "zht" | "zhs" | "en";
@@ -1121,9 +1122,13 @@ function readStored(): Locale {
 let current: Locale = readStored();
 const listeners = new Set<() => void>();
 
+// App 啟動即預熱當前語言嘅簡繁字典(每個 runtime 一次),首屏盡量唔閃。
+if (typeof window !== "undefined") void warmScriptFor(LOCALE_SCRIPT[current]);
+
 export function setLocale(l: Locale): void {
   if (l === current) return;
   current = l;
+  void warmScriptFor(LOCALE_SCRIPT[l]);
   try {
     window.localStorage.setItem(LS_KEY, l);
   } catch {
@@ -1151,6 +1156,35 @@ export function useLocale(): {
     setLocale,
     t: (key, vars) => fmt(STRINGS[locale][key] ?? key, vars),
   };
+}
+
+/**
+ * 顯示層字形鎖:引擎 / 知識庫輸出嘅中文(十神、宮名、星曜、納音、神煞、農曆…)
+ * 喺渲染時經 z() 跟 locale 轉(zht 繁、zhs 簡、en 頁面上嘅中文用繁)。
+ * - z:來源係簡體(引擎 / iztro 輸出)。
+ * - zT:來源係繁體正本(知識庫卦爻辭、術語表 key)——只喺 zhs 先轉,繁體頁原樣保留古籍用字。
+ * 字典未熱 → 原樣返回;熱咗觸發一次重渲染(hydration 時用 server snapshot=false,唔會 mismatch)。
+ */
+export function useScript(): {
+  locale: Locale;
+  z: (s: string | null | undefined) => string;
+  zT: (s: string | null | undefined) => string;
+} {
+  const { locale } = useLocale();
+  const target = LOCALE_SCRIPT[locale];
+  const ready = useSyncExternalStore(subscribeScript, () => isScriptWarm(target), () => false);
+  useEffect(() => {
+    void warmScriptFor(target);
+  }, [target]);
+  const z = useCallback(
+    (s: string | null | undefined): string => (s ? (ready ? lockScript(s, locale) : s) : ""),
+    [ready, locale],
+  );
+  const zT = useCallback(
+    (s: string | null | undefined): string => (s ? (ready ? lockScript(s, locale, "zh-Hant") : s) : ""),
+    [ready, locale],
+  );
+  return { locale, z, zT };
 }
 
 const SWITCH_LABELS: Record<Locale, string> = { zht: "繁", zhs: "简", en: "EN" };
