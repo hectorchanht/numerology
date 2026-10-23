@@ -109,7 +109,7 @@ svg.i.sm { width: 18px; height: 18px; }
 /* ---------- Shell ---------- */
 .app { max-width: 430px; margin: 0 auto; min-height: 100vh; position: relative; }
 /* 響應式 layout wrapper:手機透明(display:contents → 版面同未包之前一樣),平板/桌面先變 grid。 */
-.split, .split > *, .form-cols, .form-col, .report-body, .yj-layout, .yj-col, .poster-layout { display: contents; }
+.split, .split > *, .form-cols, .form-col, .report-body, .yj-layout, .yj-col { display: contents; }
 .side { display: none; }
 .screen, .shell { padding: calc(var(--safe-t) + 12px) var(--pad) calc(var(--tab-h) + var(--safe-b) + 32px); }
 .screen { animation: fade 0.22s ease-out; }
@@ -663,14 +663,7 @@ textarea.prompt:focus-visible { outline: 2px solid var(--accent); }
   .yj-layout:has(> .yj-result) { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 0 32px; align-items: start; }
   .yj-layout:has(> .yj-result) > .yj-col { display: block; position: sticky; top: 16px; }
 
-  /* /poster:左標題、右海報 */
-  .poster-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px); gap: 0 48px; align-items: start; }
-  .poster-layout > .masthead { position: sticky; top: 24px; padding-top: 24px; }
-  .poster-layout .poster-wrap { max-width: none; margin: 0; }
-  /* /poster:未有海報(空狀態/載入中)時唔分欄,單欄置中 */
-  .poster-layout:not(:has(.poster-paper)) { display: block; }
-  .poster-layout:not(:has(.poster-paper)) > .masthead { position: static; padding-top: 0; }
-  .poster-layout:not(:has(.poster-paper)) .poster-wrap { max-width: 460px; margin: 40px auto 0; }
+  /* /poster:單欄(標題在上、海報置中,同 /yijing/gua);分欄已棄用 */
 }
 
 @media (min-width: 1280px) {

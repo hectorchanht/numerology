@@ -107,7 +107,7 @@ export default function ChartPoster() {
   return (
     <>
       <style>{`
-        .poster-wrap { max-width: 430px; margin: 0 auto; }
+        .poster-wrap { max-width: 460px; margin: 8px auto 0; }
         .poster-paper {
           position: relative;
           background: var(--card);
@@ -137,14 +137,13 @@ export default function ChartPoster() {
         .poster-actions .muted { text-align: center; margin: 8px 0 0; }
       `}</style>
 
-      {/* .poster-layout:手機 display:contents;桌面左欄標題、右欄海報 */}
-      <div className="poster-layout">
-        <div className="masthead">
-          <h1>{yjT("poster.title", loc)}</h1>
-          <div className="sub">{yjT("poster.sub", loc)}</div>
-        </div>
+      {/* 單欄:標題在上、海報置中(同 /yijing/gua) */}
+      <div className="masthead">
+        <h1>{yjT("poster.title", loc)}</h1>
+        <div className="sub">{yjT("poster.sub", loc)}</div>
+      </div>
 
-        <div className="poster-wrap">
+      <div className="poster-wrap">
           {reading === undefined && (
             <p className="muted" style={{ textAlign: "center" }}>
               …
@@ -228,7 +227,6 @@ export default function ChartPoster() {
               </div>
             </>
           )}
-        </div>
       </div>
     </>
   );
