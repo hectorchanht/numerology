@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PROVINCES, COUNTRIES, REGIONS } from "../test-dist/locations.js";
+import { PROVINCES, COUNTRIES, REGIONS, locName } from "../test-dist/locations.js";
 
 test("locations:中國省數據完整", () => {
   assert.ok(PROVINCES.length >= 30, `provinces=${PROVINCES.length}`);
@@ -39,4 +39,10 @@ test("locations:REGIONS 統一結構無重名", () => {
   const calgary = canada.cities.find((c) => c.name === "卡尔加里");
   assert.ok(calgary, "無卡尔加里");
   assert.equal(calgary.longitude, -114.07);
+  // 預轉繁體:簡體 UI 名同繁體名唔同,而且繁體名唔含簡體特徵字
+  assert.equal(calgary.nameHant, "卡爾加里");
+  assert.equal(canada.nameHant, "加拿大");
+  assert.equal(locName("zhs", calgary.name, calgary.nameHant), "卡尔加里");
+  assert.equal(locName("zht", calgary.name, calgary.nameHant), "卡爾加里");
+  assert.equal(locName("en", calgary.name, calgary.nameHant), "卡爾加里");
 });

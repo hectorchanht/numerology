@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { REGIONS } from "@/lib/locations";
-import { useLocale, useScript } from "@/lib/i18n";
+import { REGIONS, locName } from "@/lib/locations";
+import { useLocale } from "@/lib/i18n";
 import { Icon } from "@/components/Icon";
 
 interface Props {
@@ -16,8 +16,9 @@ const MANUAL = "__manual";
 
 /** 地區(中國省 / 世界國家,按大洲分組) → 城市 二級選擇,另可手動輸入經度。 */
 export function LocationPicker({ value, onChange }: Props) {
-  const { t } = useLocale();
-  const { z } = useScript();
+  const { t, locale } = useLocale();
+  /** 地名跟 UI locale:預轉好嘅數據直接揀,唔經 runtime 轉換 */
+  const L = (name: string, nameHant: string) => locName(locale, name, nameHant);
   const [regionIdx, setRegionIdx] = useState("");
   const region =
     regionIdx !== "" && regionIdx !== MANUAL ? (REGIONS[Number(regionIdx)] ?? null) : null;
@@ -36,15 +37,18 @@ export function LocationPicker({ value, onChange }: Props) {
         >
           <option value="">{t("loc.noRegion")}</option>
           <option value={MANUAL}>{t("loc.manualEntry")}</option>
-          {groups.map((g) => (
-            <optgroup key={g} label={z(g)}>
-              {REGIONS.map((r, i) =>
-                r.group === g ? (
-                  <option key={r.name} value={String(i)}>{z(r.name)}</option>
-                ) : null,
-              )}
-            </optgroup>
-          ))}
+          {groups.map((g) => {
+            const gr = REGIONS.find((r) => r.group === g)!;
+            return (
+              <optgroup key={g} label={L(gr.group, gr.groupHant)}>
+                {REGIONS.map((r, i) =>
+                  r.group === g ? (
+                    <option key={r.name} value={String(i)}>{L(r.name, r.nameHant)}</option>
+                  ) : null,
+                )}
+              </optgroup>
+            );
+          })}
         </select>
       </label>
       {regionIdx === MANUAL ? (
@@ -73,7 +77,7 @@ export function LocationPicker({ value, onChange }: Props) {
           >
             <option value="">{region ? t("loc.pickCity") : "—"}</option>
             {(region?.cities ?? []).map((c) => (
-              <option key={c.name} value={c.longitude}>{z(c.name)}</option>
+              <option key={c.name} value={c.longitude}>{L(c.name, c.nameHant)}</option>
             ))}
           </select>
         </label>
