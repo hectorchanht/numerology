@@ -82,8 +82,10 @@ export function ScreenNav({
           <Icon name="back" />
         </button>
       ) : (
-        <img className="logo logo-dark" src="/logo.png" width={28} height={28} alt="" aria-hidden="true" />
-        <img className="logo logo-light" src="/logo-light.png" width={28} height={28} alt="" aria-hidden="true" />
+        <>
+          <img className="logo logo-dark" src="/logo.png" width={28} height={28} alt="" aria-hidden="true" />
+          <img className="logo logo-light" src="/logo-light.png" width={28} height={28} alt="" aria-hidden="true" />
+        </>
       )}
       <span className="eyebrow">{eyebrow}</span>
       <span className="nav-actions">
