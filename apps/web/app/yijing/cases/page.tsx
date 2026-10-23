@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense } from "react";
 import {
   getHexagram,
   ZHANLI_CASES,
@@ -10,6 +10,7 @@ import {
 import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { withQuoteRefs, type QuoteRefEntry } from "@/lib/quoteRef";
+import { useQueryParam, useSetQueryParams, useDetailCloser } from "@/lib/useQueryParams";
 import { withTermHighlights } from "@/lib/highlightTerms";
 
 /** 經典卦形:陽爻一橫,陰爻兩截(由下而上)。 */
@@ -214,15 +215,23 @@ function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBa
   );
 }
 
-export default function CasesPage() {
+function CasesInner() {
   const { locale } = useLocale();
   const { zT } = useScript();
   const loc = locale as YijingLocale;
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const active = activeId ? ZHANLI_CASES.find((c) => c.id === activeId) ?? null : null;
+  // 占例詳情落 URL(?case=<id>),等用戶可以 share / review — Hector 2026-10-23 STANDING RULE
+  const caseId = useQueryParam("case");
+  const setParams = useSetQueryParams();
+  const { markPushed, close } = useDetailCloser("/yijing/cases");
+  const active = caseId ? ZHANLI_CASES.find((c) => c.id === caseId) ?? null : null;
+
+  const openCase = (id: string) => {
+    markPushed();
+    setParams({ case: id }, "push");
+  };
 
   // padding 由 app/yijing/layout.tsx 嘅 PageShell 統一提供,呢度唔再包。
-  if (active) return <CaseDetail c={active} loc={loc} onBack={() => setActiveId(null)} />;
+  if (active) return <CaseDetail c={active} loc={loc} onBack={close} />;
 
   return (
     <>
@@ -244,7 +253,7 @@ export default function CasesPage() {
           return (
             <button
               key={c.id}
-              onClick={() => setActiveId(c.id)}
+              onClick={() => openCase(c.id)}
               className="card case-row"
               aria-label={zT(c.title)}
             >
@@ -270,5 +279,14 @@ export default function CasesPage() {
         })}
       </div>
     </>
+  );
+}
+
+/** useSearchParams 要 Suspense 包住,先可以 static prerender。 */
+export default function CasesPage() {
+  return (
+    <Suspense>
+      <CasesInner />
+    </Suspense>
   );
 }

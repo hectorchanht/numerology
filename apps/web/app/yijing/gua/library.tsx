@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   allHexagrams,
   getHexagram,
@@ -15,6 +15,7 @@ import {
 import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale as YL } from "@/lib/yijingStrings";
 import { Term, withTermHighlights } from "@/lib/highlightTerms";
+import { useQueryParam, useSetQueryParams, useDetailCloser } from "@/lib/useQueryParams";
 
 const TABS = ["coreMeaning", "career", "love", "wealth", "health", "advice"] as const;
 const TAB_IDS: Record<(typeof TABS)[number], string> = {
@@ -40,7 +41,14 @@ function TrigramTag({ name, loc }: { name: keyof typeof TRIGRAM_INFO; loc: Yijin
 }
 
 function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => void }) {
-  const [tab, setTab] = useState<(typeof TABS)[number]>("coreMeaning");
+  // 詳情內 tab 落 URL(?tab=),分享連結還原埋睇緊邊個 tab
+  const tabParam = useQueryParam("tab");
+  const setParams = useSetQueryParams();
+  const tab: (typeof TABS)[number] = (TABS as readonly string[]).includes(tabParam ?? "")
+    ? (tabParam as (typeof TABS)[number])
+    : "coreMeaning";
+  const setTab = (t: (typeof TABS)[number]) =>
+    setParams({ tab: t === "coreMeaning" ? null : t }, "replace");
   const interp: YijingInterp = interpOf(hex, loc as YijingLocale);
   // 卦爻辭 / 大象係繁體正本 → zT(只喺 zhs 轉);interp 已按 locale 出
   const { zT } = useScript();
@@ -154,11 +162,31 @@ export default function GuaLibrary() {
   const { locale } = useLocale();
   const { zT } = useScript();
   const loc = locale as YL;
-  const [q, setQ] = useState("");
-  const [selected, setSelected] = useState<number | null>(null);
+  const setParams = useSetQueryParams();
+  const { markPushed, close } = useDetailCloser("/yijing/gua");
+
+  // 搜尋 filter 落 URL(?q=):打字即時 replace,back/forward 跟返 URL
+  const qParam = useQueryParam("q") ?? "";
+  const [q, setQ] = useState(qParam);
+  useEffect(() => {
+    setQ((prev) => (prev === qParam ? prev : qParam));
+  }, [qParam]);
+  const onQ = (v: string) => {
+    setQ(v);
+    setParams({ q: v || null }, "replace");
+  };
+
+  // 卦詳情落 URL(?gua=<n>):開 push,閂 smart back
+  const guaParam = useQueryParam("gua");
+  const selected = guaParam ? Number(guaParam) : null;
+  const openGua = (n: number) => {
+    markPushed();
+    setParams({ gua: String(n) }, "push");
+  };
+
   const all = useMemo(() => allHexagrams(), []);
   const results = useMemo(() => searchHexagrams(q), [q]);
-  const hex = selected != null ? getHexagram(selected) : undefined;
+  const hex = selected != null && !Number.isNaN(selected) ? getHexagram(selected) : undefined;
 
   return (
     <>
@@ -168,13 +196,13 @@ export default function GuaLibrary() {
       </div>
 
       {hex ? (
-        <Detail hex={hex} loc={loc} onBack={() => setSelected(null)} />
+        <Detail hex={hex} loc={loc} onBack={close} />
       ) : (
         <div className="card">
           <div className="field" style={{ marginBottom: "1.2rem" }}>
             <input
               value={q}
-              onChange={(e) => setQ(e.target.value)}
+              onChange={(e) => onQ(e.target.value)}
               placeholder={yjT("gua.searchPh", loc)}
               aria-label={yjT("gua.searchPh", loc)}
             />
@@ -192,7 +220,7 @@ export default function GuaLibrary() {
               {results.map((h: Hexagram) => (
                 <button
                   key={h.number}
-                  onClick={() => setSelected(h.number)}
+                  onClick={() => openGua(h.number)}
                   style={{
                     background: "var(--paper)",
                     borderRadius: "12px",
