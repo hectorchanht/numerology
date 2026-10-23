@@ -93,11 +93,23 @@ test("resolveVoice:指定 voice 名/URI 精確匹配", () => {
 
 test("resolveVoice:lang 精確匹配 → 基底匹配 → undefined", () => {
   assert.equal(resolveVoice(FAKE_VOICES, "zh-HK").name, "Google 粵語（香港）");
-  // zh-TW 無精確匹配,退回基底 zh 的第一個
-  assert.equal(resolveVoice(FAKE_VOICES, "zh-TW").lang, "zh-HK");
+  // zh-TW 無精確匹配,退回同組國語 zh-CN(唔再退去粵語)
+  assert.equal(resolveVoice(FAKE_VOICES, "zh-TW").lang, "zh-CN");
   assert.equal(resolveVoice(FAKE_VOICES, "ja-JP"), undefined);
   // 下劃線分隔亦正規化
   assert.equal(resolveVoice(FAKE_VOICES, "en_US").name, "Samantha");
+});
+
+test("resolveVoice:中文變體絕不跨組 fallback(國語唔可以用粵語 voice 讀)", () => {
+  const yueOnly = [{ name: "Sin-ji", lang: "zh-HK", voiceURI: "uri-yue" }];
+  // 無國語 voice:寧願 undefined(等瀏覽器按 utterance.lang 處理),唔好拎粵語 voice 讀國語
+  assert.equal(resolveVoice(yueOnly, "zh-CN"), undefined);
+  assert.equal(resolveVoice(yueOnly, "zh-TW"), undefined);
+  assert.equal(resolveVoice(yueOnly, "zh-HK").name, "Sin-ji");
+  // yue-HK 視同 zh-HK(新版 macOS 欣欣上報 yue-HK)
+  const yueTag = [{ name: "Sin-ji", lang: "yue-HK", voiceURI: "uri-yue" }];
+  assert.equal(resolveVoice(yueTag, "zh-HK").name, "Sin-ji");
+  assert.equal(resolveVoice(yueTag, "zh-CN"), undefined);
 });
 
 test("normalizeLangTag:下劃線 → 連字號", () => {

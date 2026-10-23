@@ -84,7 +84,10 @@ const v = resolveVoice(voices, "zh-HK", "Google 粵語（香港）");
 
 `SpeechLang` is just `string` — pass any BCP-47 tag. Voice selection order:
 custom `pickVoice` → explicit `voice` name/URI → exact lang match → base-language match
-(`zh-HK` falls back to any `zh` voice) → browser default for the utterance lang.
+→ browser default for the utterance lang.
+Chinese variants never cross-fallback: `zh-CN`/`zh-TW` (Mandarin) and `zh-HK`/`yue-HK`
+(Cantonese) only match within their own group — a missing Mandarin voice will NOT
+silently speak Cantonese, it falls through to the browser default.
 
 Helpers: `getLangLabel(tag, locale, custom?)`, `getLangBadge(tag, custom?)`,
 `getLangColor(tag, custom?)`, `normalizeLangTag(tag)`,

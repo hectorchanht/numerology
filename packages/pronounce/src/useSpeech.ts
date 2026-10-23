@@ -37,9 +37,12 @@ export interface UseSpeechOptions {
 
 /**
  * 內建語音挑選(純函數,可測試):
- * 1. lang 精確匹配(如 "zh-HK")
- * 2. 基底語言匹配(如 lang "zh-HK" 配 voice.lang "zh")
- * 3. 退回 undefined(瀏覽器用 utterance.lang 的預設語音)
+ * 1. 指定 voice 名/URI 精確匹配(優先)
+ * 2. 中文變體:只在組內匹配(國語 zh-CN/zh-TW 一組,粵語 zh-HK/yue-HK 一組),
+ *    絕不跨組(粵語/國語互不相通,讀錯語言比無聲更差);組內無則回 undefined,
+ *    等瀏覽器按 utterance.lang 自行處理
+ * 3. 其他語言:lang 精確匹配 → 基底語言匹配(如 lang "en-US" 配 voice.lang "en")
+ * 4. 退回 undefined(瀏覽器用 utterance.lang 的預設語音)
  */
 export function resolveVoice<
   V extends Pick<SpeechSynthesisVoice, "lang" | "name" | "voiceURI">,
@@ -52,6 +55,18 @@ export function resolveVoice<
   }
   const norm = (t: string) => t.replace("_", "-").toLowerCase();
   const want = norm(lang);
+  // 中文變體分組:國語 / 粵語(新版 macOS 欣欣上報 yue-HK,視同 zh-HK)
+  const CN_GROUPS = [
+    ["zh-cn", "zh-tw"],
+    ["zh-hk", "yue-hk"],
+  ];
+  const group = CN_GROUPS.find((g) => g.includes(want));
+  if (group) {
+    const exact = voices.find((v) => norm(v.lang) === want);
+    if (exact) return exact;
+    const alt = group.find((t) => t !== want);
+    return alt ? voices.find((v) => norm(v.lang) === alt) : undefined;
+  }
   const exact = voices.find((v) => norm(v.lang) === want);
   if (exact) return exact;
   const base = want.split("-")[0]!;
