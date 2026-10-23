@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { type AiSettings, DEFAULT_AI, loadAi, saveAi } from "@/lib/aiSettings";
-import { useLocale, type TKey } from "@/lib/i18n";
+import { useLocale, LocaleSwitch, type TKey } from "@/lib/i18n";
+import { go } from "@/lib/nav";
+import { Icon } from "@/components/Icon";
 import {
   PROVIDER_META,
   STATIC_MODELS,
@@ -47,7 +49,6 @@ function writeModelsCache(provider: string, models: ModelOption[], source: strin
 
 export function SettingsPanel() {
   const { t } = useLocale();
-  const [open, setOpen] = useState(false);
   const [value, setValue] = useState<AiSettings>(DEFAULT_AI);
   const [filter, setFilter] = useState<ProviderFilter>("all");
   const [models, setModels] = useState<ModelOption[]>([]);
@@ -130,164 +131,156 @@ export function SettingsPanel() {
         : t("settings.models.static");
 
   return (
-    <div className="settings">
-      <button type="button" className="settings-toggle" onClick={() => setOpen((o) => !o)}>
-        {t("settings.toggle")} {t(meta.shortKey)}
-        <span className="caret">{open ? "▴" : "▾"}</span>
-      </button>
+    <>
+      <h1 className="large">{t("settings.title")}</h1>
+      <p className="lede">{t("settings.modelLabel")}</p>
 
-      {open ? (
-        <div className="settings-body">
-          <label className="fld" htmlFor="prov">
-            {t("settings.modelLabel")}
+      <h2 className="group-title">{t("settings.provider")}</h2>
+      {/* filter chips */}
+      <div className="strip" role="group" aria-label="provider filter">
+        {FILTER_ORDER.map((f) => (
+          <button
+            key={f}
+            type="button"
+            className={`chip${filter === f ? " on" : ""}`}
+            aria-pressed={filter === f}
+            onClick={() => selectFilter(f)}
+          >
+            {t(FILTER_LABEL_KEYS[f])}
+          </button>
+        ))}
+      </div>
+
+      {/* provider tabs:只显示短名 */}
+      <div className="strip" role="tablist" aria-label="provider" style={{ marginTop: 8 }}>
+        {visible.map((p) => (
+          <button
+            key={p.name}
+            type="button"
+            role="tab"
+            aria-selected={value.provider === p.name}
+            className={`chip${value.provider === p.name ? " on" : ""}`}
+            onClick={() => selectProvider(p.name)}
+          >
+            {t(p.shortKey)}
+          </button>
+        ))}
+      </div>
+
+      {/* 属性面板:选中 provider 的结构化属性 + key + 模型 */}
+      <div className="list prov-card">
+        <div className="row plain">
+          <span className="lbl">{t("settings.apiKey")}</span>
+          <span className={`badge ${meta.needsKey ? "badge-warn" : "badge-ok"}`}>
+            {meta.needsKey ? t("settings.prop.needKey") : t("settings.prop.noKey")}
+          </span>
+        </div>
+        <div className="row plain">
+          <span className="lbl">{t("settings.prop.cost")}</span>
+          <span className="badge">{t(COST_LABEL_KEYS[meta.cost])}</span>
+        </div>
+
+        {meta.needsKey || meta.optionalKey ? (
+          <label className="row plain" htmlFor="key">
+            <Icon name="key" className="ic" />
+            <input
+              id="key"
+              type="password"
+              autoComplete="off"
+              placeholder={t("settings.apiKeyPh")}
+              aria-label={t("settings.apiKey")}
+              // 每个 provider 各记各的 key;没填过 → 显示为空,绝不显示别的 provider 的 key。
+              value={value.keys[value.provider] ?? ""}
+              onChange={(e) => set({ keys: { ...value.keys, [value.provider]: e.target.value } })}
+            />
+            {meta.signup ? (
+              <a className="row-link" href={meta.signup} target="_blank" rel="noreferrer">
+                {t("settings.apply")}
+              </a>
+            ) : null}
           </label>
+        ) : null}
 
-          {/* filter chips */}
-          <div className="filter-chips" role="group" aria-label="provider filter">
-            {FILTER_ORDER.map((f) => (
-              <button
-                key={f}
-                type="button"
-                className="filter-chip"
-                aria-pressed={filter === f}
-                onClick={() => selectFilter(f)}
-              >
-                {t(FILTER_LABEL_KEYS[f])}
-              </button>
-            ))}
-          </div>
-
-          {/* provider tabs:只显示短名 */}
-          <div className="prov-tabs" role="tablist" aria-label="provider">
-            {visible.map((p) => (
-              <button
-                key={p.name}
-                type="button"
-                role="tab"
-                aria-selected={value.provider === p.name}
-                className="prov-tab"
-                onClick={() => selectProvider(p.name)}
-              >
-                {t(p.shortKey)}
-              </button>
-            ))}
-          </div>
-
-          {/* 属性面板:选中 provider 的结构化属性 */}
-          <div className="prov-props">
-            <div className="prov-prop">
-              <span className="prov-prop-label">{t("settings.apiKey")}</span>
-              <span className={`badge ${meta.needsKey ? "badge-warn" : "badge-ok"}`}>
-                {meta.needsKey ? t("settings.prop.needKey") : t("settings.prop.noKey")}
-              </span>
-            </div>
-            <div className="prov-prop">
-              <span className="prov-prop-label">{t("settings.prop.cost")}</span>
-              <span className="badge">{t(COST_LABEL_KEYS[meta.cost])}</span>
-            </div>
-            <p className="prov-note">{t(meta.noteKey)}</p>
-          </div>
-
-          {meta.needsKey || meta.optionalKey ? (
-            <>
-              <label className="fld" htmlFor="key" style={{ marginTop: "0.8rem" }}>
-                {t("settings.apiKey")}
-                {meta.signup ? (
-                  <>
-                    {" · "}
-                    <a href={meta.signup} target="_blank" rel="noreferrer">
-                      {t("settings.apply")}
-                    </a>
-                  </>
-                ) : null}
-              </label>
-              <input
-                id="key"
-                className="settings-input"
-                type="password"
-                autoComplete="off"
-                placeholder={t("settings.apiKeyPh")}
-                // 每个 provider 各记各的 key;没填过 → 显示为空,绝不显示别的 provider 的 key。
-                value={value.keys[value.provider] ?? ""}
-                onChange={(e) => set({ keys: { ...value.keys, [value.provider]: e.target.value } })}
-              />
-            </>
-          ) : null}
-
-          {value.provider === "custom" ? (
-            <>
-              <label className="fld" htmlFor="base" style={{ marginTop: "0.8rem" }}>
-                {t("settings.baseUrl")}
-              </label>
+        {value.provider === "custom" ? (
+          <>
+            <label className="row plain stack" htmlFor="base">
+              <span className="lbl">{t("settings.baseUrl")}</span>
               <input
                 id="base"
-                className="settings-input"
+                type="text"
                 placeholder="https://.../v1"
                 value={value.baseURL}
                 onChange={(e) => set({ baseURL: e.target.value })}
               />
-              <label className="fld" htmlFor="model" style={{ marginTop: "0.8rem" }}>
-                {t("settings.modelName")}
-              </label>
+            </label>
+            <label className="row plain stack" htmlFor="model">
+              <span className="lbl">{t("settings.modelName")}</span>
               <input
                 id="model"
-                className="settings-input"
+                type="text"
                 placeholder={t("settings.modelNamePh")}
                 value={value.model}
                 onChange={(e) => set({ model: e.target.value })}
               />
-            </>
-          ) : models.length > 0 ? (
-            <>
-              <label className="fld" htmlFor="model2" style={{ marginTop: "0.8rem" }}>
-                {t("settings.model")} · {sourceLabel}
-              </label>
-              <select
-                id="model2"
-                className="settings-select"
-                value={value.model || models[0]!.id}
-                onChange={(e) => set({ model: e.target.value })}
-              >
-                {models.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {modelLabel(m)}
-                  </option>
-                ))}
-              </select>
-            </>
-          ) : null}
-
-          {/* 自定义 AI 人设 / 系统提示:空 = 用默认;非空则追加为 system 末块,优先级最高 */}
-          <div style={{ marginTop: "0.8rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <label className="fld" htmlFor="persona" style={{ margin: 0 }}>
-              {t("settings.personaLabel")}
             </label>
-            <button
-              type="button"
-              className="btn ghost"
-              style={{ padding: "0.25rem 0.7rem", fontSize: "0.85em" }}
-              onClick={() => set({ systemPrompt: "" })}
+          </>
+        ) : models.length > 0 ? (
+          <label className="row plain stack" htmlFor="model2">
+            <span className="lbl">
+              {t("settings.model")}
+              <span className="sub">{sourceLabel}</span>
+            </span>
+            <select
+              id="model2"
+              value={value.model || models[0]!.id}
+              onChange={(e) => set({ model: e.target.value })}
             >
-              {t("settings.personaReset")}
-            </button>
-          </div>
-          <textarea
-            id="persona"
-            className="settings-input"
-            rows={4}
-            placeholder={t("settings.personaPh")}
-            value={value.systemPrompt}
-            onChange={(e) => set({ systemPrompt: e.target.value })}
-            style={{ resize: "vertical", fontFamily: "inherit" }}
-          />
+              {models.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {modelLabel(m)}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+      </div>
+      <p className="note">{t(meta.noteKey)}</p>
 
-          <p className="settings-note">
-            {t("settings.noteA")}
-            <b>{t("settings.noteB")}</b>
-            {t("settings.noteC")}
-          </p>
+      {/* 自定义 AI 人设 / 系统提示:空 = 用默认;非空则追加为 system 末块,优先级最高 */}
+      <div className="group-head">
+        <h2 className="group-title"><label htmlFor="persona">{t("settings.personaLabel")}</label></h2>
+        <button type="button" className="text-btn" onClick={() => set({ systemPrompt: "" })}>
+          {t("settings.personaReset")}
+        </button>
+      </div>
+      <textarea
+        id="persona"
+        className="prompt"
+        rows={4}
+        placeholder={t("settings.personaPh")}
+        value={value.systemPrompt}
+        onChange={(e) => set({ systemPrompt: e.target.value })}
+      />
+
+      <p className="note">
+        {t("settings.noteA")}
+        <b>{t("settings.noteB")}</b>
+        {t("settings.noteC")}
+      </p>
+
+      <h2 className="group-title">{t("settings.general")}</h2>
+      <div className="list">
+        <div className="row">
+          <Icon name="lang" className="ic" />
+          <span className="lbl">{t("settings.language")}</span>
+          <LocaleSwitch />
         </div>
-      ) : null}
-    </div>
+        <button type="button" className="row" onClick={() => go("history")}>
+          <Icon name="history" className="ic" />
+          <span className="lbl">{t("history.title")}</span>
+          <Icon name="chev" small className="chev" />
+        </button>
+      </div>
+    </>
   );
 }

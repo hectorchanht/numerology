@@ -10,6 +10,11 @@
  * 仅服务端调用。分类依据:SDK 错误的 `status` 字段(OpenAI/Anthropic SDK 均携带)
  * + 错误消息的关键词;调用方可用 stage 声明错误发生的阶段(AI 阶段默认按 502 兜底)。
  */
+/**
+ * 预算耗尽(Workers AI 月 $2 硬上限):固定标记 AI_BUDGET_EXCEEDED,
+ * 必须在限流关键词之前匹配,返回 429(客户端可据此提示切换 provider)。
+ */
+const BUDGET_RE = /AI_BUDGET_EXCEEDED|用量已達本月上限|用量已达本月上限/;
 /** 校验/输入类错误的消息特征 → 400。注意:「未知 AI provider」是客户端传错名字,按 400。 */
 const VALIDATION_RE = /非法|请求体格式错误|非数字|必须为整数|性别必须|超出范围|经度|未知 AI provider|农历日期必须|不能为空|未知.*章节/;
 /** 上游故障特征 → 502(按类别给出清晰中文信息)。 */
@@ -42,6 +47,13 @@ export function classifyError(err, stage = "input") {
     // 明确的输入/校验错误 → 400(无论哪个阶段)。
     if (VALIDATION_RE.test(raw))
         return { status: 400, message: raw };
+    // 预算耗尽 → 429(必须在 429→502 的限流映射之前)。
+    if (BUDGET_RE.test(raw))
+        return { status: 429, message: raw.replace(/^AI_BUDGET_EXCEEDED:/, "") };
+    // 服务端配置缺失(binding 未配) → 502 但保留原消息(它是给运维看的明确指引,
+    // 不应被 AI 阶段兜底替换成泛化文案)。
+    if (/binding 未配置/.test(raw))
+        return { status: 502, message: raw };
     // SDK 状态码:401/403(鉴权)/408/429(限流)/5xx(上游) → 502。
     if (status !== undefined && (status === 401 || status === 403 || status === 408 || status === 429 || status >= 500)) {
         const hit = UPSTREAM_PATTERNS.find((p) => p.re.test(raw) || p.re.test(String(status)));

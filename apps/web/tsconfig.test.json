@@ -29,6 +29,7 @@
     "lib/history.ts",
     "lib/aiOpts.ts",
     "lib/sectionIcons.ts",
+    "lib/ganzhi.ts",
     "lib/yijingStrings.ts",
     "lib/yijingSite.ts"
   ]

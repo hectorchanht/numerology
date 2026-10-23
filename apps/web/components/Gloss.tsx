@@ -27,9 +27,9 @@ export function Gloss({
           if (e.key === "Enter" || e.key === " ") setOpen((v) => !v);
         }}
         style={{
-          borderBottom: "1px dotted var(--cinnabar-soft)",
-          cursor: "help",
-          color: "var(--ink)",
+          borderBottom: "1px dotted var(--accent-line)",
+          cursor: "pointer",
+          color: "var(--label)",
         }}
         aria-expanded={open}
       >
@@ -42,16 +42,15 @@ export function Gloss({
             zIndex: 20,
             left: 0,
             top: "1.7em",
-            minWidth: "220px",
-            maxWidth: "300px",
-            background: "var(--surface)",
-            border: "1px solid var(--line-strong)",
-            borderRadius: "8px",
-            padding: "0.6rem 0.8rem",
-            fontSize: "0.8rem",
+            minWidth: "min(220px, 70vw)",
+            maxWidth: "min(300px, 80vw)",
+            background: "var(--card-2)",
+            borderRadius: "12px",
+            padding: "10px 14px",
+            fontSize: "14px",
             lineHeight: 1.6,
-            color: "var(--ink-soft)",
-            boxShadow: "0 8px 24px oklch(40% 0.02 60 / 0.18)",
+            color: "var(--label-2)",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.5)",
           }}
         >
           <span

@@ -48,14 +48,14 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
       </button>
       <div style={{ display: "flex", gap: "1rem", alignItems: "flex-start", flexWrap: "wrap" }}>
         <span style={{ fontSize: "3.4rem", lineHeight: 1 }}>{hex.symbol}</span>
-        <div>
+        <div style={{ flex: "1 1 200px", minWidth: 0 }}>
           <h2 style={{ margin: "0 0 0.2rem", fontSize: "1.7rem" }}>
             {hex.name}
             <span className="muted" style={{ fontSize: "0.85rem", marginLeft: "0.6rem" }}>
               #{hex.number} · {hex.pinyin} · {hex.nameEn}
             </span>
           </h2>
-          <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+          <div className="strip" style={{ gap: "0.4rem", alignItems: "center", margin: "0.5rem 0 0", padding: "2px 0" }}>
             <span className="muted">
               {yjT("gua.upper", loc)}:
             </span>
@@ -158,8 +158,8 @@ export default function GuaLibrary() {
 
   return (
     <>
-      <div className="masthead" style={{ paddingTop: "1.2rem" }}>
-        <h1 style={{ letterSpacing: "0.28em" }}>{yjT("gua.title", loc)}</h1>
+      <div className="masthead">
+        <h1>{yjT("gua.title", loc)}</h1>
         <div className="sub">{yjT("gua.sub", loc)}</div>
       </div>
 
@@ -173,14 +173,6 @@ export default function GuaLibrary() {
               onChange={(e) => setQ(e.target.value)}
               placeholder={yjT("gua.searchPh", loc)}
               aria-label={yjT("gua.searchPh", loc)}
-              style={{
-                font: "inherit",
-                padding: "0.55rem 0.65rem",
-                background: "var(--paper)",
-                color: "var(--ink)",
-                border: "1px solid var(--line-strong)",
-                borderRadius: "var(--r)",
-              }}
             />
           </div>
           {results.length === 0 ? (
@@ -198,23 +190,14 @@ export default function GuaLibrary() {
                   key={h.number}
                   onClick={() => setSelected(h.number)}
                   style={{
-                    font: "inherit",
-                    cursor: "pointer",
                     background: "var(--paper)",
-                    border: "1px solid var(--line-strong)",
-                    borderRadius: "8px",
+                    borderRadius: "12px",
                     padding: "0.7rem 0.4rem",
+                    minHeight: "88px",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
                     gap: "0.25rem",
-                    transition: "all 120ms",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "var(--cinnabar)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "var(--line-strong)";
                   }}
                 >
                   <span style={{ fontSize: "1.9rem", lineHeight: 1.2 }}>{h.symbol}</span>

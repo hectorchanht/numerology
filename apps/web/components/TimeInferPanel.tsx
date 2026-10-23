@@ -8,7 +8,10 @@ import type { BirthFormValue, Calendar } from "@/lib/formTypes";
 import { streamPost } from "@/lib/streamClient";
 import { aiRequestParts } from "@/lib/aiSettings";
 import { useLocale } from "@/lib/i18n";
+import { yjT } from "@/lib/yijingStrings";
 import { LocationPicker } from "@/components/LocationPicker";
+import { Icon } from "@/components/Icon";
+import { Seg, ToggleRow } from "@/components/ui";
 
 interface Turn { role: "user" | "assistant"; content: string }
 
@@ -25,6 +28,7 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
   const [calendar, setCalendar] = useState<Calendar>("solar");
   const [isLeapMonth, setIsLeapMonth] = useState(false);
   const [longitude, setLongitude] = useState<string>("");
+  const [trueSolar, setTrueSolar] = useState(true);
   const [started, setStarted] = useState(false);
   const [candidates, setCandidates] = useState<HourCandidate[]>([]);
   const [log, setLog] = useState<Turn[]>([]);
@@ -32,11 +36,14 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
+  // 真太陽時關閉 → 唔帶經度(與 BirthForm 一致)。
+  const lon = trueSolar && longitude !== "" ? { longitude: Number(longitude) } : {};
+
   const inferInput = () => ({
     year: Number(v.year), month: Number(v.month), day: Number(v.day), gender,
     calendar,
     ...(calendar === "lunar" && isLeapMonth ? { isLeapMonth: true } : {}),
-    ...(longitude !== "" ? { longitude: Number(longitude) } : {}),
+    ...lon,
   });
 
   const validDate = (): boolean =>
@@ -102,84 +109,106 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
       year: Number(v.year), month: Number(v.month), day: Number(v.day),
       hour, minute: 0, gender, calendar,
       ...(calendar === "lunar" && isLeapMonth ? { isLeapMonth: true } : {}),
-      ...(longitude !== "" ? { longitude: Number(longitude) } : {}),
+      ...lon,
     });
   };
 
   if (!started) {
     return (
-      <div className="card">
-        <h2 className="section-title">{t("infer.title")}</h2>
-        <p className="muted" style={{ marginTop: 0 }}>
+      <div>
+        <p className="note lead-note">
           {t("infer.descA")}<strong>{t("infer.descB")}</strong>{t("infer.descC")}
         </p>
-        <div className="cal-toggle">
-          <button type="button" className={calendar === "solar" ? "active" : ""} onClick={() => setCalendar("solar")}>{t("form.solar")}</button>
-          <button type="button" className={calendar === "lunar" ? "active" : ""} onClick={() => setCalendar("lunar")}>{t("form.lunar")}</button>
+        <h2 className="group-title">{t("infer.groupKnown")}</h2>
+        <div className="list">
+          <div className="row">
+            <Icon name="cal" className="ic" />
+            <span className="lbl">{t("form.calendar")}</span>
+            <Seg
+              compact
+              label={t("form.calendar")}
+              value={calendar}
+              onChange={setCalendar}
+              options={[
+                { value: "solar", label: t("form.solarShort") },
+                { value: "lunar", label: t("form.lunarShort") },
+              ]}
+            />
+          </div>
           {calendar === "lunar" ? (
-            <label className="leap-check">
-              <input type="checkbox" checked={isLeapMonth} onChange={(e) => setIsLeapMonth(e.target.checked)} />{t("form.leap")}
-            </label>
+            <ToggleRow icon="cal" label={t("form.leap")} checked={isLeapMonth} onChange={setIsLeapMonth} />
           ) : null}
-        </div>
-        <div className="form-grid">
           {DATE_FIELDS.map((f) => (
-            <div className="field" key={f.key}>
-              <label htmlFor={`ti-${f.key}`}>{f.key === "year" ? (calendar === "lunar" ? t("form.yearLunar") : t("form.yearSolar")) : t(f.labelKey)}</label>
+            <label className="row" key={f.key} htmlFor={`ti-${f.key}`}>
+              <Icon name="cal" className="ic" />
+              <span className="lbl">{f.key === "year" ? (calendar === "lunar" ? t("form.yearLunar") : t("form.yearSolar")) : t(f.labelKey)}</span>
               <input id={`ti-${f.key}`} type="number" inputMode="numeric" min={f.min} max={f.max}
                 value={v[f.key]} onChange={(e) => setV((s) => ({ ...s, [f.key]: e.target.value }))} />
-            </div>
+            </label>
           ))}
-          <div className="field">
-            <label htmlFor="ti-gender">{t("form.gender")}</label>
-            <select id="ti-gender" value={gender} onChange={(e) => setGender(e.target.value as "男" | "女")}>
-              <option value="男">{t("form.male")}</option><option value="女">{t("form.female")}</option>
-            </select>
+          <div className="row">
+            <Icon name="user" className="ic" />
+            <span className="lbl">{t("form.gender")}</span>
+            <Seg
+              compact
+              label={t("form.gender")}
+              value={gender}
+              onChange={setGender}
+              options={[
+                { value: "男", label: t("form.male") },
+                { value: "女", label: t("form.female") },
+              ]}
+            />
           </div>
-          <div className="field" style={{ gridColumn: "1 / -1" }}>
-            <label>{t("form.birthplace")}</label>
-            <LocationPicker value={longitude} onChange={setLongitude} />
-          </div>
+          <LocationPicker value={longitude} onChange={setLongitude} />
+          <ToggleRow
+            icon="sun"
+            label={t("form.trueSolar")}
+            sub={!trueSolar ? t("form.trueSolarOff") : longitude === "" ? t("form.trueSolarNeedCity") : t("form.trueSolarOn")}
+            checked={trueSolar}
+            onChange={setTrueSolar}
+          />
         </div>
-        <div style={{ marginTop: "1.1rem" }}>
-          <button className="btn" onClick={start} disabled={busy}>{busy ? t("infer.preparing") : t("infer.start")}</button>
-          {error ? <span className="notice" style={{ marginLeft: "1rem" }}>{error}</span> : null}
-        </div>
+        {error ? <p className="notice" role="alert">{error}</p> : null}
+        <button type="button" className="btn block cta" onClick={start} disabled={busy}>
+          <Icon name="spark" />
+          {busy ? t("infer.preparing") : t("infer.start")}
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="card">
-      <h2 className="section-title">{t("infer.chatTitle")}</h2>
+    <div>
+      <h2 className="group-title">{t("infer.chatTitle")}</h2>
       <div className="chat-log">
         {log.map((t2, i) => (
           <div key={i} className={`bubble ${t2.role}`}>
             {t2.role === "assistant" ? (
-              <div className={`prose ${busy && i === log.length - 1 ? "cursor" : ""}`}>
+              <div className={`prose ${busy && i === log.length - 1 ? "is-streaming" : ""}`}>
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{t2.content || t("chat.thinking")}</ReactMarkdown>
               </div>
             ) : t2.content}
           </div>
         ))}
       </div>
-      {error ? <p className="notice">{error}</p> : null}
+      {error ? <p className="notice" role="alert">{error}</p> : null}
       <form className="chat-input" onSubmit={(e) => { e.preventDefault(); answer(); }}>
-        <input value={draft} placeholder={t("infer.answerPh")} onChange={(e) => setDraft(e.target.value)} disabled={busy} />
-        <button className="btn" type="submit" disabled={busy || !draft.trim()}>{t("infer.answerBtn")}</button>
+        <input value={draft} placeholder={t("infer.answerPh")} onChange={(e) => setDraft(e.target.value)} disabled={busy} aria-label={t("infer.answerPh")} />
+        <button className="icon-btn solid" type="submit" disabled={busy || !draft.trim()} aria-label={t("infer.answerBtn")}>
+          <Icon name="send" />
+        </button>
       </form>
 
-      <div style={{ marginTop: "1.2rem", borderTop: "1px dashed var(--line)", paddingTop: "1rem" }}>
-        <p className="muted" style={{ marginTop: 0 }}>{t("infer.adoptHint")}</p>
-        <div className="shichen-grid">
-          {candidates.map((c) => (
-            <button key={c.shichen} className="shichen-btn" onClick={() => adopt(c.hour)} disabled={busy}>
-              <span className="sc-name">{c.shichen}</span>
-              <span className="sc-range">{c.range}</span>
-              <span className="sc-soul">命宫{c.soulBranch}·{c.soulMajorStars.join("") || t("infer.emptyPalace")}</span>
-            </button>
-          ))}
-        </div>
+      <h2 className="group-title">{t("infer.adoptHint")}</h2>
+      <div className="strip">
+        {candidates.map((c) => (
+          <button key={c.shichen} type="button" className="shichen-btn" onClick={() => adopt(c.hour)} disabled={busy}>
+            <span className="sc-name">{c.shichen}</span>
+            <span className="sc-range">{c.range}</span>
+            <span className="sc-soul">{yjT("poster.soulPalace", locale)} {c.soulBranch}·{c.soulMajorStars.join("") || t("infer.emptyPalace")}</span>
+          </button>
+        ))}
       </div>
     </div>
   );
