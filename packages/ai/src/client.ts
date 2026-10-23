@@ -14,6 +14,7 @@ export {
   listProviders,
   providerBaseUrl,
   providerNeedsKey,
+  applyCustomPrompt,
   type Usage,
   type TextStream,
   type SystemBlock,

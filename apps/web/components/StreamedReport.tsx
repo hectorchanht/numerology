@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { BirthInput } from "@numerology/engine";
 import { streamPost } from "@/lib/streamClient";
 import { printReport } from "@/lib/exportPdf";
-import { loadAi } from "@/lib/aiSettings";
+import { aiRequestParts } from "@/lib/aiSettings";
 import { useLocale, type Locale } from "@/lib/i18n";
 
 /** 分段定义:key 对应引擎 REPORT_SEGMENTS / FORTUNE_SEGMENTS,label 用于占位标题。 */
@@ -30,12 +30,16 @@ interface Props {
   description: string;
   /** 传入则启用「分段并行」:各节并发请求、按序就位,绕开 Vercel 60s 上限。不传则整篇一次生成。 */
   segments?: readonly ReportSeg[];
+  /** 某节成功生成后回调(供历史记录保存):(sectionKey, 正文 markdown, lens)。 */
+  onSectionDone?: (segKey: string, markdown: string, lens: string) => void;
+  /** 从历史记录恢复:sectionKey → 正文 markdown(不含 ## 标题,按当前语言重拼)。 */
+  restoredSections?: Record<string, string> | null;
 }
 
 type State = "idle" | "streaming" | "done" | "error";
 
 /** 通用流式报告卡:选视角(八字/紫微/合参)→ 调指定 endpoint → 逐字渲染 Markdown。支持分段并行。 */
-export function StreamedReport({ input, endpoint, title, description, segments }: Props) {
+export function StreamedReport({ input, endpoint, title, description, segments, onSectionDone, restoredSections }: Props) {
   const { t, locale } = useLocale();
   const [text, setText] = useState("");
   const [state, setState] = useState<State>("idle");
@@ -63,6 +67,25 @@ export function StreamedReport({ input, endpoint, title, description, segments }
     if (state !== "idle") setState("idle");
   }
 
+  // 从历史记录恢复:按当前语言重拼 ## 标题,直接显示为完成态,零 API 调用。
+  useEffect(() => {
+    if (!restoredSections || !segments || !segments.length) return;
+    const combined = segments
+      .map((seg) => {
+        const saved = restoredSections[seg.key];
+        return saved && saved.trim()
+          ? `## ${seg.label}\n\n${saved}`
+          : `## ${seg.label}\n\n${t("report.segEmpty")}`;
+      })
+      .join("\n\n");
+    startedFor.current = key;
+    setText(combined);
+    setProgress(null);
+    setError("");
+    setState("done");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [restoredSections]);
+
   // 按固定顺序拼接各节;未到/吐空/失败的节给占位,保证顺序与可读性。
   const combine = (segs: readonly ReportSeg[], slots: Slot[]): string =>
     segs
@@ -75,7 +98,11 @@ export function StreamedReport({ input, endpoint, title, description, segments }
       })
       .join("\n\n");
 
-  const postBody = (extra: Record<string, unknown>, loc: Locale) => ({ input, ai: loadAi(), locale: loc, ...extra });
+  // 每次请求都重读设置:key 取当前 provider 名下的(没填 → 空),人设为空则省略。
+  const postBody = (extra: Record<string, unknown>, loc: Locale) => {
+    const { ai, systemPrompt } = aiRequestParts();
+    return { input, ai, locale: loc, ...(systemPrompt ? { systemPrompt } : {}), ...extra };
+  };
 
   const generateSegmented = async (segs: readonly ReportSeg[], useLens: Lens, loc: Locale) => {
     setError("");
@@ -96,6 +123,9 @@ export function StreamedReport({ input, endpoint, title, description, segments }
         })
           .then(() => {
             slots[i] = { ...slots[i], status: "done" };
+            // 成功且有正文 → 通知父组件存入本机历史(失败/吐空的不存)。
+            const doneText = slots[i].text.trim();
+            if (doneText) onSectionDone?.(seg.key, slots[i].text, useLens);
           })
           .catch((e: unknown) => {
             slots[i] = { ...slots[i], status: "error", err: e instanceof Error ? e.message : t("report.segFailShort") };

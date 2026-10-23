@@ -73,7 +73,9 @@ export function SettingsPanel() {
     (async () => {
       try {
         const headers: Record<string, string> = {};
-        if (value.apiKey.trim()) headers["X-AI-Key"] = value.apiKey.trim();
+        // 取当前 provider 名下的 key(没填 → 不带头,不拿别的 provider 的 key 顶替)。
+        const k = (value.keys[value.provider] ?? "").trim();
+        if (k) headers["X-AI-Key"] = k;
         const res = await fetch(`/api/models?provider=${encodeURIComponent(provider)}`, { headers });
         if (!res.ok) return;
         const data = (await res.json()) as { models?: ModelOption[]; source?: string };
@@ -205,8 +207,9 @@ export function SettingsPanel() {
                 type="password"
                 autoComplete="off"
                 placeholder={t("settings.apiKeyPh")}
-                value={value.apiKey}
-                onChange={(e) => set({ apiKey: e.target.value })}
+                // 每个 provider 各记各的 key;没填过 → 显示为空,绝不显示别的 provider 的 key。
+                value={value.keys[value.provider] ?? ""}
+                onChange={(e) => set({ keys: { ...value.keys, [value.provider]: e.target.value } })}
               />
             </>
           ) : null}
@@ -253,6 +256,30 @@ export function SettingsPanel() {
               </select>
             </>
           ) : null}
+
+          {/* 自定义 AI 人设 / 系统提示:空 = 用默认;非空则追加为 system 末块,优先级最高 */}
+          <div style={{ marginTop: "0.8rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <label className="fld" htmlFor="persona" style={{ margin: 0 }}>
+              {t("settings.personaLabel")}
+            </label>
+            <button
+              type="button"
+              className="btn ghost"
+              style={{ padding: "0.25rem 0.7rem", fontSize: "0.85em" }}
+              onClick={() => set({ systemPrompt: "" })}
+            >
+              {t("settings.personaReset")}
+            </button>
+          </div>
+          <textarea
+            id="persona"
+            className="settings-input"
+            rows={4}
+            placeholder={t("settings.personaPh")}
+            value={value.systemPrompt}
+            onChange={(e) => set({ systemPrompt: e.target.value })}
+            style={{ resize: "vertical", fontFamily: "inherit" }}
+          />
 
           <p className="settings-note">
             {t("settings.noteA")}

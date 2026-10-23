@@ -60,6 +60,20 @@ export interface ProviderOptions {
    * 也绝不序列化给客户端):{ ai: env.AI, kv: env.AI_BUDGET_KV }。
    */
   aiBinding?: { ai?: unknown; kv?: unknown };
+  /**
+   * 用户自定义的 AI 人设 / 系统提示(可空)。若非空,追加为 system 的**最后**一块
+   * (在 locale 语言指令之后),优先级最高,用户可覆盖默认人设。
+   */
+  customSystemPrompt?: string;
+}
+
+/**
+ * 把用户自定义人设追加为 system 末块;为空/空白则原样返回。
+ * 导出以便测试。
+ */
+export function applyCustomPrompt(system: SystemBlock[], opts?: ProviderOptions): SystemBlock[] {
+  const p = opts?.customSystemPrompt?.trim();
+  return p ? [...system, { text: p }] : system;
 }
 
 interface ProviderDef {
@@ -475,12 +489,14 @@ export async function chatComplete(
 ): Promise<{ text: string; usage: Usage }> {
   const name = activeProviderName(opts);
   const def = resolveDef(name, opts);
+  // 用户自定义人设追加为 system 末块(语言指令之后),优先级最高。
+  const system = applyCustomPrompt(req.system, opts);
   if (def.kind === "workers-ai") {
     const { ai, kv } = workersAiRuntime(opts);
     const model = modelFor(def, req.kind, opts);
     await checkBudget(kv);
     const res = (await ai.run(model, {
-      messages: toWorkersAiMessages(req.system, req.messages),
+      messages: toWorkersAiMessages(system, req.messages),
       max_tokens: req.maxTokens,
     })) as { response?: unknown; usage?: WorkersAiSseUsage };
     const text = typeof res.response === "string" ? res.response : "";
@@ -502,7 +518,7 @@ export async function chatComplete(
     const res = await makeAnthropic(apiKey).messages.create({
       model: modelFor(def, req.kind, opts),
       max_tokens: req.maxTokens,
-      system: toAnthropicSystem(req.system),
+      system: toAnthropicSystem(system),
       messages: req.messages.map((m) => ({ role: m.role, content: m.content })),
     });
     const text = res.content
@@ -514,7 +530,7 @@ export async function chatComplete(
   const res = await makeOpenAI(apiKey, def.baseURL).chat.completions.create({
     model: modelFor(def, req.kind, opts),
     max_tokens: req.maxTokens,
-    messages: toOpenAIMessages(req.system, req.messages),
+    messages: toOpenAIMessages(system, req.messages),
   });
   return {
     text: res.choices?.[0]?.message?.content ?? "",
@@ -526,13 +542,15 @@ export async function chatComplete(
 export function chatStream(req: CompletionRequest, opts?: ProviderOptions): TextStream {
   const name = activeProviderName(opts);
   const def = resolveDef(name, opts);
+  // 用户自定义人设追加为 system 末块(语言指令之后),优先级最高。
+  const system = applyCustomPrompt(req.system, opts);
   if (def.kind === "workers-ai") {
     const { ai, kv } = workersAiRuntime(opts);
     return new WorkersAITextStream({
       binding: ai,
       kv,
       model: modelFor(def, req.kind, opts),
-      system: req.system,
+      system,
       messages: req.messages,
       maxTokens: req.maxTokens,
     });
@@ -542,13 +560,13 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
     return makeAnthropic(apiKey).messages.stream({
       model: modelFor(def, req.kind, opts),
       max_tokens: req.maxTokens,
-      system: toAnthropicSystem(req.system),
+      system: toAnthropicSystem(system),
       messages: req.messages.map((m) => ({ role: m.role, content: m.content })),
     }) as unknown as TextStream;
   }
   const client = makeOpenAI(apiKey, def.baseURL);
   const model = modelFor(def, req.kind, opts);
-  const messages = toOpenAIMessages(req.system, req.messages);
+  const messages = toOpenAIMessages(system, req.messages);
   return new OpenAITextStream((signal) =>
     client.chat.completions.create({ model, max_tokens: req.maxTokens, stream: true, messages }, { signal }),
   );

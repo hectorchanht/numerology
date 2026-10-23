@@ -24,3 +24,19 @@ export function getServerAiBindings(): ServerAiBindings | null {
     return null;
   }
 }
+
+/**
+ * 取 Cloudflare 的 waitUntil(用于响应返回后继续做缓存写入等后台工作)。
+ * 非 Cloudflare 环境(本地 next dev)返回 null。
+ */
+export function getWaitUntil(): ((p: Promise<unknown>) => void) | null {
+  try {
+    const ctx = getRequestContext() as unknown as {
+      ctx?: { waitUntil?: (p: Promise<unknown>) => void };
+    };
+    const w = ctx?.ctx?.waitUntil;
+    return typeof w === "function" ? w.bind(ctx.ctx) : null;
+  } catch {
+    return null;
+  }
+}

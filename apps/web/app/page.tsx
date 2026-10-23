@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { BirthInput, ChartResult } from "@numerology/engine";
 import type { BirthFormValue } from "@/lib/formTypes";
-import { useLocale, LocaleSwitch } from "@/lib/i18n";
+import { useLocale, LocaleSwitch, type Locale } from "@/lib/i18n";
 import { BirthForm } from "@/components/BirthForm";
 import { ZiweiBoard } from "@/components/ZiweiBoard";
 import { BaziTable } from "@/components/BaziTable";
@@ -12,16 +12,21 @@ import { StreamedReport } from "@/components/StreamedReport";
 import { ChatPanel } from "@/components/ChatPanel";
 import { TimeInferPanel } from "@/components/TimeInferPanel";
 import { SettingsPanel } from "@/components/SettingsPanel";
+import { HistoryPanel } from "@/components/HistoryPanel";
+import { loadAi } from "@/lib/aiSettings";
+import { upsertReading, saveSection, type Reading } from "@/lib/history";
 
 type Mode = "known" | "infer";
 
 export default function Home() {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [mode, setMode] = useState<Mode>("known");
   const [input, setInput] = useState<BirthInput | null>(null);
   const [chart, setChart] = useState<ChartResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  /** 从历史记录恢复的章节正文(sectionKey → markdown),分 report/fortune 两组。 */
+  const [restored, setRestored] = useState<{ report: Record<string, string>; fortune: Record<string, string> } | null>(null);
 
   // 分段并行:key 对应引擎 REPORT_SEGMENTS / FORTUNE_SEGMENTS,各节 <60s 绕开 Vercel 函数上限。
   const REPORT_SEGS = [
@@ -57,12 +62,50 @@ export default function Home() {
       setChart(data.chart);
       // 用服务端解析后的阳历输入(农历已转换),供后续报告/对话复用
       setInput(data.chart.input);
+      setRestored(null);
+      // 存入本机历史(保留已有章节,只更新命盘/时间)。
+      upsertReading({ input: data.chart.input, locale, chart: data.chart }).catch(() => {});
     } catch (e) {
       setError(e instanceof Error ? e.message : t("chart.errorFallback"));
     } finally {
       setLoading(false);
     }
   };
+
+  /** 从历史记录恢复:命盘 + 已生成的章节即时显示,零 API 调用。 */
+  const handleRestore = (r: Reading) => {
+    setMode("known");
+    setError("");
+    setInput(r.input);
+    setChart(r.chart);
+    const report: Record<string, string> = {};
+    const fortune: Record<string, string> = {};
+    for (const [k, s] of Object.entries(r.sections)) {
+      if (k.startsWith("report:")) report[k.slice("report:".length)] = s.markdown;
+      else if (k.startsWith("fortune:")) fortune[k.slice("fortune:".length)] = s.markdown;
+    }
+    setRestored({ report, fortune });
+    try {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch {
+      /* ignore */
+    }
+  };
+
+  /** 某节成功生成 → 存入本机历史(带当时的 lens/provider/model)。 */
+  const handleSectionDone =
+    (endpoint: "report" | "fortune") =>
+    (segKey: string, markdown: string, lens: string) => {
+      if (!input) return;
+      const s = loadAi();
+      saveSection(input, `${endpoint}:${segKey}`, {
+        markdown,
+        lens,
+        provider: s.provider,
+        model: s.model.trim(),
+        at: Date.now(),
+      }).catch(() => {});
+    };
 
   return (
     <div className="shell">
@@ -91,6 +134,7 @@ export default function Home() {
       )}
 
       <SettingsPanel />
+      <HistoryPanel onRestore={handleRestore} />
 
       {error ? <p className="notice" style={{ textAlign: "center" }}>{error}</p> : null}
 
@@ -154,6 +198,8 @@ export default function Home() {
               title={t("card.chartTitle")}
               description={t("card.chartDesc")}
               segments={REPORT_SEGS}
+              onSectionDone={handleSectionDone("report")}
+              restoredSections={restored?.report ?? null}
             />
             <StreamedReport
               input={input}
@@ -161,6 +207,8 @@ export default function Home() {
               title={t("card.fortuneTitle")}
               description={t("card.fortuneDesc")}
               segments={FORTUNE_SEGS}
+              onSectionDone={handleSectionDone("fortune")}
+              restoredSections={restored?.fortune ?? null}
             />
             <ChatPanel input={input} />
             </div>
