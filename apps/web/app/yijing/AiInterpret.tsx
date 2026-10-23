@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { CoinLine } from "@numerology/engine";
 import { streamPost } from "@/lib/streamClient";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
+import { AiModelNote } from "@/components/AiModelNote";
 
 /**
  * AI 解卦按鈕:走 /api/yijing/interpret(Workers AI,共用 $2/月預算守衛 + KV 緩存)。
@@ -71,9 +72,7 @@ export function AiInterpret({
           </button>
         </div>
       )}
-      <p className="muted" style={{ marginTop: "0.6rem", marginBottom: 0 }}>
-        {yjT("ai.budgetNote", locale)}
-      </p>
+      <AiModelNote />
     </div>
   );
 }

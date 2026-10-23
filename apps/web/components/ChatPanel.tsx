@@ -8,6 +8,7 @@ import { streamPost } from "@/lib/streamClient";
 import { aiRequestParts } from "@/lib/aiSettings";
 import { useLocale } from "@/lib/i18n";
 import { Icon } from "@/components/Icon";
+import { AiModelNote } from "@/components/AiModelNote";
 import { markdownTermComponents } from "@/lib/highlightTerms";
 import { onChatAskRequest, takePendingChatAsk } from "@/lib/chatJump";
 
@@ -105,6 +106,7 @@ export function ChatPanel({ input }: { input: BirthInput }) {
           <Icon name="send" />
         </button>
       </form>
+      <AiModelNote />
     </div>
   );
 }

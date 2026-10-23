@@ -26,6 +26,7 @@
     "lib/primeTimeout.ts",
     "lib/hash.ts",
     "lib/aiSettings.ts",
+    "lib/aiNote.ts",
     "lib/aiCache.ts",
     "lib/history.ts",
     "lib/aiOpts.ts",

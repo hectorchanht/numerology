@@ -24,6 +24,12 @@ export const DEFAULT_AI: AiSettings = {
 const LS_KEY = "mingli.ai.v1";
 
 /**
+ * saveAi 成功後派發嘅 window 事件;AiModelNote 等 UI 即時更新,唔使 refresh。
+ * 同 tab 內 storage 事件唔會觸發,所以要自己派。
+ */
+export const AI_SETTINGS_EVENT = "ai-settings-changed";
+
+/**
  * 纯函数:把 localStorage 里读到的旧对象迁移到新结构(不碰 window,可测试)。
  * - 旧版单 `apiKey` 非空 且 新版 `keys` 为空 → 归到当时选中的 provider 名下。
  */
@@ -66,6 +72,7 @@ export function saveAi(s: AiSettings): void {
     const { apiKey: _drop, ...rest } = s;
     void _drop;
     window.localStorage.setItem(LS_KEY, JSON.stringify(rest));
+    window.dispatchEvent(new Event(AI_SETTINGS_EVENT));
   } catch {
     /* ignore */
   }

@@ -10,6 +10,7 @@ import { aiRequestParts } from "@/lib/aiSettings";
 import { useLocale, useScript } from "@/lib/i18n";
 import { yjT } from "@/lib/yijingStrings";
 import { LocationPicker } from "@/components/LocationPicker";
+import { AiModelNote } from "@/components/AiModelNote";
 import { Icon } from "@/components/Icon";
 import { Seg, ToggleRow } from "@/components/ui";
 
@@ -175,6 +176,7 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
           <Icon name="spark" />
           {busy ? t("infer.preparing") : t("infer.start")}
         </button>
+        <AiModelNote />
       </div>
     );
   }

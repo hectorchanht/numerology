@@ -93,7 +93,6 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "ai.interpretTitle": S("AI 解卦", "AI 解卦", "AI interpretation"),
   "ai.loading": S("解卦中…", "解卦中…", "Interpreting…"),
   "ai.retry": S("再解一次", "再解一次", "Retry"),
-  "ai.budgetNote": S("經本站 Cloudflare 帳號調用,計入每月 $2 預算;相同卦象會用緩存,不重複扣費。", "经本站 Cloudflare 帐号调用,计入每月 $2 预算;相同卦象会用缓存,不重复扣费。", "Runs on this site's Cloudflare account under the $2/month budget; cached results cost nothing extra."),
   "yijing.askHonest": S("傳統講究:一事一占、心誠則靈,不義之問不占。", "传统讲究:一事一占、心诚则灵,不义之问不占。", "Tradition: one question per casting, asked with sincerity."),
 
   /* —— 六十四卦庫 —— */

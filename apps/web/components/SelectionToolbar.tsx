@@ -19,6 +19,7 @@ import {
 } from "@floating-ui/react";
 import { useSpeech, type SpeechLang } from "@dawn-studio/pronounce";
 import { useLocale } from "@/lib/i18n";
+import { AiModelNote } from "@/components/AiModelNote";
 import { lookupTerm, markdownTermComponents } from "@/lib/highlightTerms";
 import { requestChatAsk, isChatAvailable } from "@/lib/chatJump";
 import { go } from "@/lib/nav";
@@ -418,6 +419,7 @@ export function SelectionToolbar() {
           </button>
         </div>
       ) : null}
+      {isExplain ? <AiModelNote style={{ padding: "2px 12px 10px" }} /> : null}
     </div>
   );
 }

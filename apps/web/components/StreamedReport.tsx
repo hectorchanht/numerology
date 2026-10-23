@@ -13,6 +13,7 @@ import { markdownTermComponents, withTermHighlights } from "@/lib/highlightTerms
 import { splitTldr } from "@/lib/tldr";
 import { parseEvidenceBlock } from "@/lib/fortuneBlocks";
 import { Icon, SECTION_ICON } from "@/components/Icon";
+import { AiModelNote } from "@/components/AiModelNote";
 import { Seg, ScreenNav } from "@/components/ui";
 import { PronounceButton } from "@dawn-studio/pronounce";
 import { speechText } from "@/lib/speechText";
@@ -305,6 +306,7 @@ export function StreamedReport({
           <Icon name={slots ? "refresh" : "spark"} />
           {slots ? t("report.regenShort") : t("report.generate")}
         </button>
+        <AiModelNote />
       </div>
 
       {!slots ? (
