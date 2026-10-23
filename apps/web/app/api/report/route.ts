@@ -16,9 +16,9 @@ export const dynamic = "force-dynamic";
 
 /**
  * prompt 版本:改 prompt 即換緩存鍵,不串味。
- * v3 = 2026-10-23 research-backed:精简去重人设 + exemplar 风格示范 + plan-then-write + self-check。
+ * v4 = 2026-10-23 v3.1 targeted fixes:TL;DR 禁列岁数年份干支、陳腔 ban list 擴充(與 fortune/v4 同步)。
  */
-const PROMPT_VERSION = "report/v3";
+const PROMPT_VERSION = "report/v4";
 
 /** 流式生成命盘解读报告(动静结合)。首 token 前失败 → JSON 错误(502),而非截断流。 */
 export async function POST(req: Request): Promise<Response> {

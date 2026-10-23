@@ -16,10 +16,10 @@ export const dynamic = "force-dynamic";
 
 /**
  * prompt 版本:改 prompt 即換緩存鍵,不串味。
- * v3 = 2026-10-23 research-backed:精简去重人设 + decoding params(temp 0.7/top_p 0.9/rep 1.1)
- * + exemplar 风格示范 + plan-then-write + self-check。
+ * v4 = 2026-10-23 v3.1 targeted fixes:TL;DR 禁列岁数年份干支(佔位符修復)、
+ * 每步/每年只点 1–2 个最強信號、定性「起外號」具體化、同期大限稱謂統一、陳腔 ban list 擴充。
  */
-const PROMPT_VERSION = "fortune/v3";
+const PROMPT_VERSION = "fortune/v4";
 
 /** 流式生成《大运流年深析》(八字 × 紫微合参,逐步逐年)。首 token 前失败 → JSON 错误(502),而非截断流。 */
 export async function POST(req: Request): Promise<Response> {

@@ -132,9 +132,9 @@ test("dayun 节:三段式(定性/分析/依据系统生成) + 同期大限", () 
 test("dayun 节:正文不做机械罗列(v3 正面表述)", () => {
   const p = buildFortuneSectionPrompt([], seg("dayun"), "both", "zht");
   assert.ok(p.includes("只点对结论有实质影响的一两个组合"), "支藏十神只点关键组合");
-  assert.ok(p.includes("不逐个播报"), "四化飞宫不逐个播报");
+  assert.ok(p.includes("只点影响最大的 1–2 个四化"), "每步只点 1–2 个四化,不全报");
   assert.ok(p.includes("系统图表呈现"), "十神/四化由系统图表呈现,正文不罗列");
-  assert.ok(p.includes("同期大限"), "同期大限看各步自己的,不套用当前大限");
+  assert.ok(p.includes("这步同期大限"), "同期大限称谓统一为这步同期大限");
 });
 
 test("review/future 节:定性+分析两段式 + 禁填表模板", () => {
