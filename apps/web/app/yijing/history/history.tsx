@@ -36,11 +36,16 @@ function CastRow({ rec, loc, zT }: { rec: YijingCast; loc: YijingLocale; zT: (s:
   const sum = useMemo(() => summarizeYijingCast(rec), [rec]);
   const ben = sum ? getHexagram(sum.hexagram) : undefined;
   const bian = sum?.changed ? getHexagram(sum.changed) : undefined;
+  /** 兩段式刪除:第一撳變確認掣,第二撳先真刪(唔用 native confirm,手機體驗好啲) */
+  const [confirming, setConfirming] = useState(false);
 
   const onDelete = useCallback(async () => {
-    if (!window.confirm(yjT("yijing.hist.confirmDelete", loc))) return;
+    if (!confirming) {
+      setConfirming(true);
+      return;
+    }
     await deleteYijingCast(rec.id).catch(() => {});
-  }, [rec.id, loc]);
+  }, [rec.id, confirming]);
 
   return (
     <div className="card" style={{ marginBottom: "0.8rem" }}>
@@ -48,15 +53,36 @@ function CastRow({ rec, loc, zT }: { rec: YijingCast; loc: YijingLocale; zT: (s:
         <span className="badge">{yjT(KIND_LABEL[rec.kind], loc)}</span>
         <span className="muted" style={{ fontSize: "0.85rem" }}>{fmtDate(rec.at)}</span>
         <span style={{ flex: 1 }} />
-        <button
-          type="button"
-          className="icon-btn"
-          aria-label={yjT("yijing.hist.delete", loc)}
-          onClick={onDelete}
-          style={{ color: "var(--label-2)" }}
-        >
-          <Icon name="trash" small />
-        </button>
+        {confirming ? (
+          <>
+            <button
+              type="button"
+              className="btn"
+              onClick={onDelete}
+              style={{ color: "var(--cinnabar)", borderColor: "var(--cinnabar-soft)", padding: "0.3rem 0.7rem", fontSize: "0.85rem" }}
+            >
+              {yjT("yijing.hist.confirmDelete", loc)}
+            </button>
+            <button
+              type="button"
+              className="btn ghost"
+              onClick={() => setConfirming(false)}
+              style={{ padding: "0.3rem 0.7rem", fontSize: "0.85rem" }}
+            >
+              ✕
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            className="icon-btn"
+            aria-label={yjT("yijing.hist.delete", loc)}
+            onClick={onDelete}
+            style={{ color: "var(--label-2)" }}
+          >
+            <Icon name="trash" small />
+          </button>
+        )}
       </div>
 
       {rec.question ? (

@@ -49,7 +49,7 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "yijing.hist.kind.liuyao": S("六爻納甲", "六爻纳甲", "Six lines"),
   "yijing.hist.review": S("查看", "查看", "Review"),
   "yijing.hist.delete": S("刪除", "删除", "Delete"),
-  "yijing.hist.confirmDelete": S("確定刪除這條記錄？", "确定删除这条记录？", "Delete this record?"),
+  "yijing.hist.confirmDelete": S("確定刪除", "确定删除", "Confirm delete"),
   "yijing.hist.reviewing": S("歷史回顧", "历史回顾", "Reviewing history"),
   "yijing.hist.backToHistory": S("返回歷史", "返回历史", "Back to history"),
   "yijing.judgment": S("卦辭", "卦辞", "Judgment"),
