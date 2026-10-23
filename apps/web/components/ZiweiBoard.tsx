@@ -24,7 +24,9 @@ function sanFangBranches(branch: string): { self: string; opposite: string; trin
   };
 }
 
-const BADGE_KEYS: Record<"self" | "opposite" | "trine", TKey> = {
+type Highlight = "self" | "opposite" | "trine";
+
+const BADGE_KEYS: Record<Highlight, TKey> = {
   self: "zw.ben",
   opposite: "zw.dui",
   trine: "zw.sanhe",
@@ -44,7 +46,7 @@ function Palace({
   p, highlight, onSelect,
 }: {
   p: ZiweiPalace;
-  highlight: "self" | "opposite" | "trine" | null;
+  highlight: Highlight | null;
   onSelect: (branch: string) => void;
 }) {
   const { t } = useLocale();
@@ -56,47 +58,43 @@ function Palace({
     highlight ? `hl-${highlight}` : "",
   ].filter(Boolean).join(" ");
   return (
-    <div
+    <button
+      type="button"
       className={cls}
       style={{ gridRow: row, gridColumn: col }}
       onClick={() => onSelect(p.earthlyBranch)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === "Enter") onSelect(p.earthlyBranch); }}
+      aria-pressed={highlight === "self"}
+      aria-label={`${p.name} ${p.heavenlyStem}${p.earthlyBranch}`}
     >
-      <div className="pname">
-        <span>{p.name}</span>
-        <span className="gz">{p.heavenlyStem}{p.earthlyBranch}</span>
-      </div>
-      <div className="stars">
-        {p.majorStars.map((s) => <StarSpan key={s.name} star={s} kind="major" />)}
+      <span className="stars">
+        {p.majorStars.length
+          ? p.majorStars.map((s) => <StarSpan key={s.name} star={s} kind="major" />)
+          : <span className="empty">{t("zw.noMajor")}</span>}
         {p.minorStars.map((s) => <StarSpan key={s.name} star={s} kind="minor" />)}
-      </div>
-      {p.adjectiveStars.length ? (
-        <div className="adj">{p.adjectiveStars.map((s) => s.name).join(" ")}</div>
-      ) : null}
-      <div className="pmeta">
-        <span className="decadal">{p.decadal.range[0]}–{p.decadal.range[1]}</span>
-        <span>{p.changsheng12}·{p.boshi12}</span>
-        <span className="faint">{p.jiangqian12}·{p.suiqian12}</span>
-      </div>
+      </span>
+      <span className="pn">
+        <b>{p.name}</b>
+        <span className="dr">{p.decadal.range[0]}–{p.decadal.range[1]}</span>
+      </span>
       {p.isBodyPalace ? <span className="tag">{t("zw.body")}</span> : null}
       {highlight ? <span className="sfsz-badge">{t(BADGE_KEYS[highlight])}</span> : null}
-    </div>
+    </button>
   );
 }
 
-export function ZiweiBoard({ ziwei, center }: { ziwei: ZiweiChart; center: React.ReactNode }) {
+/** 紫微 4×4 宮盤:撳宮位高亮三方四正,下方列出該宮全部星曜與十二神。 */
+export function ZiweiBoard({ ziwei, center }: { ziwei: ZiweiChart; center?: React.ReactNode }) {
   const { t } = useLocale();
   const [selected, setSelected] = useState<string>(ziwei.soulPalaceBranch);
   const sf = sanFangBranches(selected);
-  const highlightOf = (branch: string): "self" | "opposite" | "trine" | null => {
+  const highlightOf = (branch: string): Highlight | null => {
     if (branch === sf.self) return "self";
     if (branch === sf.opposite) return "opposite";
     if (sf.trine.includes(branch)) return "trine";
     return null;
   };
-  const selName = ziwei.palaces.find((p) => p.earthlyBranch === selected)?.name ?? "";
+  const sel = ziwei.palaces.find((p) => p.earthlyBranch === selected);
+  const selName = sel?.name ?? "";
   const relNames = [sf.opposite, ...sf.trine]
     .map((b) => ziwei.palaces.find((p) => p.earthlyBranch === b)?.name)
     .filter(Boolean)
@@ -108,12 +106,62 @@ export function ZiweiBoard({ ziwei, center }: { ziwei: ZiweiChart; center: React
         {ziwei.palaces.map((p) => (
           <Palace key={p.index} p={p} highlight={highlightOf(p.earthlyBranch)} onSelect={setSelected} />
         ))}
-        <div className="board-center">{center}</div>
+        <div className="board-center">
+          {center ?? (
+            <>
+              <div className="big">{ziwei.fiveElementsClass}</div>
+              <div className="sm">
+                {t("baziT.kvSoulLord")} {ziwei.soul} · {t("baziT.kvBodyLord")} {ziwei.body}
+                <br />
+                {t("zw.soulBody", { a: ziwei.soulPalaceBranch, b: ziwei.bodyPalaceBranch })}
+                <br />
+                {ziwei.chineseDate}
+              </div>
+            </>
+          )}
+        </div>
       </div>
-      <p className="muted sfsz-hint">
+      <p className="note sfsz-hint">
         {t("zw.hintA")}<strong>{t("zw.hintB")}</strong>{t("zw.hintC")}
-        <strong style={{ color: "var(--cinnabar)" }}>{selName}</strong>{t("zw.hintD")}{selName}{t("zw.hintE")} + {relNames}。
+        <strong className="accent">{selName}</strong>{t("zw.hintD")}{selName}{t("zw.hintE")} + {relNames}。
       </p>
+
+      {sel ? (
+        <div className="list palace-detail">
+          <div className="row plain">
+            <span className="lbl"><b>{sel.name}</b></span>
+            <span className="val">{sel.heavenlyStem}{sel.earthlyBranch}{sel.isBodyPalace ? ` · ${t("zw.body")}` : ""}</span>
+          </div>
+          <div className="row plain">
+            <span className="lbl">{t("zw.major")}</span>
+            <span className="val wrap">
+              {sel.majorStars.length ? sel.majorStars.map((s) => <StarSpan key={s.name} star={s} kind="major" />) : t("zw.noMajor")}
+            </span>
+          </div>
+          {sel.minorStars.length ? (
+            <div className="row plain">
+              <span className="lbl">{t("zw.minor")}</span>
+              <span className="val wrap">{sel.minorStars.map((s) => <StarSpan key={s.name} star={s} kind="minor" />)}</span>
+            </div>
+          ) : null}
+          {sel.adjectiveStars.length ? (
+            <div className="row plain">
+              <span className="lbl">{t("zw.adj")}</span>
+              <span className="val wrap">{sel.adjectiveStars.map((s) => s.name).join(" ")}</span>
+            </div>
+          ) : null}
+          <div className="row plain">
+            <span className="lbl">{t("zw.decadal")}</span>
+            <span className="val">
+              {sel.decadal.range[0]}–{sel.decadal.range[1]} · {sel.decadal.heavenlyStem}{sel.decadal.earthlyBranch}
+            </span>
+          </div>
+          <div className="row plain">
+            <span className="lbl">{t("zw.gods")}</span>
+            <span className="val wrap">{sel.changsheng12} · {sel.boshi12} · {sel.jiangqian12} · {sel.suiqian12}</span>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

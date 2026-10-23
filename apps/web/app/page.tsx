@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { BirthInput, ChartResult } from "@numerology/engine";
 import type { BirthFormValue } from "@/lib/formTypes";
-import { useLocale, LocaleSwitch, type Locale } from "@/lib/i18n";
+import { useLocale } from "@/lib/i18n";
+import { go, goBack, useNav, type Screen } from "@/lib/nav";
+import { currentLuckStep } from "@/lib/ganzhi";
+import { yjT } from "@/lib/yijingStrings";
 import { BirthForm } from "@/components/BirthForm";
 import { ZiweiBoard } from "@/components/ZiweiBoard";
 import { BaziTable } from "@/components/BaziTable";
@@ -13,22 +17,59 @@ import { ChatPanel } from "@/components/ChatPanel";
 import { TimeInferPanel } from "@/components/TimeInferPanel";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { HistoryPanel } from "@/components/HistoryPanel";
+import { FortuneTimeline } from "@/components/FortuneTimeline";
+import { Icon } from "@/components/Icon";
+import { EmptyChart, ScreenNav, Seg } from "@/components/ui";
 import { loadAi } from "@/lib/aiSettings";
-import { upsertReading, saveSection, type Reading } from "@/lib/history";
+import { upsertReading, saveSection, getReading, readingId, type Reading } from "@/lib/history";
 
 type Mode = "known" | "infer";
+type Sys = "bazi" | "ziwei";
+type Restored = { report: Record<string, string> | null; fortune: Record<string, string> | null };
+
+/** 跨 client 路由保留當前命盤(去 /poster、/yijing 再返嚟唔使重排)。 */
+let kept: { input: BirthInput; chart: ChartResult } | null = null;
+
+/** 歷史記錄 → 兩份報告的已存章節(冇就 null,保持未生成狀態)。 */
+function sectionsOf(r: Reading): Restored {
+  const report: Record<string, string> = {};
+  const fortune: Record<string, string> = {};
+  for (const [k, s] of Object.entries(r.sections)) {
+    if (k.startsWith("report:")) report[k.slice("report:".length)] = s.markdown;
+    else if (k.startsWith("fortune:")) fortune[k.slice("fortune:".length)] = s.markdown;
+  }
+  return {
+    report: Object.keys(report).length ? report : null,
+    fortune: Object.keys(fortune).length ? fortune : null,
+  };
+}
 
 export default function Home() {
   const { t, locale } = useLocale();
+  const { screen } = useNav();
   const [mode, setMode] = useState<Mode>("known");
-  const [input, setInput] = useState<BirthInput | null>(null);
-  const [chart, setChart] = useState<ChartResult | null>(null);
+  const [sys, setSys] = useState<Sys>("bazi");
+  const [input, setInput] = useState<BirthInput | null>(() => kept?.input ?? null);
+  const [chart, setChart] = useState<ChartResult | null>(() => kept?.chart ?? null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   /** 从历史记录恢复的章节正文(sectionKey → markdown),分 report/fortune 两组。 */
-  const [restored, setRestored] = useState<{ report: Record<string, string>; fortune: Record<string, string> } | null>(null);
+  const [restored, setRestored] = useState<Restored | null>(null);
 
-  // 分段并行:key 对应引擎 REPORT_SEGMENTS / FORTUNE_SEGMENTS,各节 <60s 绕开 Vercel 函数上限。
+  useEffect(() => {
+    kept = input && chart ? { input, chart } : null;
+  }, [input, chart]);
+
+  // 由子路由返嚟:從本機歷史補返已生成的章節。
+  useEffect(() => {
+    if (!kept) return;
+    readingId(kept.input)
+      .then(getReading)
+      .then((r) => { if (r) setRestored(sectionsOf(r)); })
+      .catch(() => {});
+  }, []);
+
+  // 分段并行:key 对应引擎 REPORT_SEGMENTS / FORTUNE_SEGMENTS。
   const REPORT_SEGS = [
     { key: "personality", label: t("seg.personality") },
     { key: "career", label: t("seg.career") },
@@ -65,6 +106,7 @@ export default function Home() {
       setRestored(null);
       // 存入本机历史(保留已有章节,只更新命盘/时间)。
       upsertReading({ input: data.chart.input, locale, chart: data.chart }).catch(() => {});
+      go("chart");
     } catch (e) {
       setError(e instanceof Error ? e.message : t("chart.errorFallback"));
     } finally {
@@ -78,18 +120,10 @@ export default function Home() {
     setError("");
     setInput(r.input);
     setChart(r.chart);
-    const report: Record<string, string> = {};
-    const fortune: Record<string, string> = {};
-    for (const [k, s] of Object.entries(r.sections)) {
-      if (k.startsWith("report:")) report[k.slice("report:".length)] = s.markdown;
-      else if (k.startsWith("fortune:")) fortune[k.slice("fortune:".length)] = s.markdown;
-    }
-    setRestored({ report, fortune });
-    try {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch {
-      /* ignore */
-    }
+    setRestored(sectionsOf(r));
+    // 頂返做最新一條,令「命盤海報」(取最新記錄)同畫面一致;已存章節照留。
+    upsertReading({ input: r.input, locale, chart: r.chart }).catch(() => {});
+    go("chart");
   };
 
   /** 某节成功生成 → 存入本机历史(带当时的 lens/provider/model)。 */
@@ -107,119 +141,197 @@ export default function Home() {
       }).catch(() => {});
     };
 
+  const ready = chart && input ? { chart, input } : null;
+  const nowLuck = chart ? currentLuckStep(chart.bazi) : undefined;
+  const show = (s: Screen) => ({ className: "screen", hidden: screen !== s });
+
   return (
-    <div className="shell">
-      <header className="masthead">
-        <div className="seal">{t("app.seal")}</div>
-        <h1>{t("app.title")}</h1>
-        <div className="sub">{t("app.subtitle")}</div>
-        <LocaleSwitch />
-      </header>
+    <>
+      {/* ============ 起盤 ============ */}
+      <section {...show("home")} aria-label={t("tab.home")}>
+        <ScreenNav eyebrow={t("app.subtitle")} />
+        <div className="hero-mark" aria-hidden="true">{t("app.seal")}</div>
+        <h1 className="large">{t("form.title")}</h1>
+        <p className="lede">{t("home.lede")}</p>
 
-      <div className="mode-switch">
-        <button className={mode === "known" ? "active" : ""} onClick={() => setMode("known")}>
-          {t("mode.known")}
-        </button>
-        <button className={mode === "infer" ? "active" : ""} onClick={() => setMode("infer")}>
-          {t("mode.infer")}
-        </button>
-      </div>
-
-      {mode === "infer" ? (
-        <TimeInferPanel
-          onAdopt={(birth) => { setMode("known"); onSubmit(birth); }}
+        <Seg
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: "known", label: t("mode.knownShort") },
+            { value: "infer", label: t("mode.inferShort") },
+          ]}
         />
-      ) : (
-        <BirthForm loading={loading} onSubmit={onSubmit} />
-      )}
 
-      <SettingsPanel />
-      <HistoryPanel onRestore={handleRestore} />
+        {mode === "infer" ? (
+          <TimeInferPanel onAdopt={(birth) => { setMode("known"); onSubmit(birth); }} />
+        ) : (
+          <BirthForm loading={loading} onSubmit={onSubmit} />
+        )}
 
-      {error ? <p className="notice" style={{ textAlign: "center" }}>{error}</p> : null}
+        {error ? <p className="notice" role="alert">{error}</p> : null}
 
-      {mode === "known" && chart && input ? (
-        <div className="cross-flow">
-          {/* 汇流·并置带:八字 ⇄ 紫微,同源合参 */}
-          <div className="flow-systems">
-            <div className="sys sys-a">
-              <span className="sys-tag">八字</span>
-              <span className="sys-sub">{t("flow.baziSub")}</span>
+        <p className="disclaimer">
+          {t("app.disclaimer1")}<br />
+          {t("app.disclaimer2")}
+        </p>
+      </section>
+
+      {/* ============ 命盤 ============ */}
+      <section {...show("chart")} aria-label={t("tab.chart")}>
+        <ScreenNav eyebrow={t("tab.chart")}>
+          {ready ? (
+            <Link href="/poster" className="icon-btn" aria-label={t("chart.posterSub")}>
+              <Icon name="share" />
+            </Link>
+          ) : null}
+        </ScreenNav>
+        {ready ? (
+          <>
+            <div className="who">
+              <div className="avatar" aria-hidden="true">{ready.input.gender}</div>
+              <div>
+                <div className="name">
+                  {ready.chart.input.year}-{ready.chart.input.month}-{ready.chart.input.day}{" "}
+                  {String(ready.chart.input.hour).padStart(2, "0")}:
+                  {String(ready.chart.input.minute ?? 0).padStart(2, "0")} · {ready.chart.input.gender}
+                </div>
+                <div className="meta">
+                  {ready.chart.bazi.lunarDate} ·{" "}
+                  {ready.chart.meta.trueSolarTimeApplied
+                    ? t("chart.corrected", { lon: ready.chart.meta.correction?.longitude ?? "", off: ready.chart.meta.correction?.offsetMinutes ?? "" })
+                    : t("chart.notCorrected")}
+                </div>
+              </div>
             </div>
-            <div className="flow-x" aria-hidden>⇄</div>
-            <div className="sys sys-b">
-              <span className="sys-tag">紫微</span>
-              <span className="sys-sub">{t("flow.ziweiSub")}</span>
-            </div>
-            <div className="flow-moment">{t("flow.moment")}</div>
-          </div>
 
-          <div className="card" style={{ marginTop: "var(--space)" }}>
-            <h2 className="section-title"><span className="sys-chip is-b">紫微</span>{t("chart.ziweiTitle")}</h2>
-            <ZiweiBoard
-              ziwei={chart.ziwei}
-              center={<BaziTable bazi={chart.bazi} ziwei={chart.ziwei} />}
+            <Seg
+              value={sys}
+              onChange={setSys}
+              options={[
+                { value: "bazi", label: t("chart.segBazi") },
+                { value: "ziwei", label: t("chart.segZiwei") },
+              ]}
             />
-            <p className="muted" style={{ marginTop: "0.8rem" }}>
-              {chart.input.year}-{chart.input.month}-{chart.input.day}{" "}
-              {String(chart.input.hour).padStart(2, "0")}:
-              {String(chart.input.minute ?? 0).padStart(2, "0")} {chart.input.gender} ·{" "}
-              {chart.bazi.lunarDate} ·{" "}
-              {chart.meta.trueSolarTimeApplied
-                ? t("chart.corrected", { lon: chart.meta.correction?.longitude ?? "", off: chart.meta.correction?.offsetMinutes ?? "" })
-                : t("chart.notCorrected")}
-            </p>
-            <p className="muted">
-              {t("chart.palaceNote")}
-            </p>
-          </div>
 
-          <div style={{ marginTop: "var(--space)" }}>
-            <BaziDetail bazi={chart.bazi} />
-          </div>
-
-          {/* 汇流箭头:两盘 → 合参解读 */}
-          <div className="flow-funnel" aria-hidden>
-            <span className="ff-a" />
-            <span className="ff-b" />
-          </div>
-
-          {/* 解读:八字 / 紫微 / 合参,各自独立可选 */}
-          <div className="synthesis">
-            <div className="synthesis-head">
-              <span className="dot" />
-              <h2>{t("chart.readingTitle")}</h2>
-              <span className="who">{t("chart.readingSub")}</span>
+            <div hidden={sys !== "bazi"}>
+              <BaziTable bazi={ready.chart.bazi} ziwei={ready.chart.ziwei} />
+              <BaziDetail bazi={ready.chart.bazi} />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space)" }}>
-            <StreamedReport
-              input={input}
-              endpoint="/api/report"
-              title={t("card.chartTitle")}
-              description={t("card.chartDesc")}
-              segments={REPORT_SEGS}
-              onSectionDone={handleSectionDone("report")}
-              restoredSections={restored?.report ?? null}
-            />
-            <StreamedReport
-              input={input}
-              endpoint="/api/fortune"
-              title={t("card.fortuneTitle")}
-              description={t("card.fortuneDesc")}
-              segments={FORTUNE_SEGS}
-              onSectionDone={handleSectionDone("fortune")}
-              restoredSections={restored?.fortune ?? null}
-            />
-            <ChatPanel input={input} />
+            <div hidden={sys !== "ziwei"}>
+              <h2 className="group-title">{t("chart.palacesTitle")}</h2>
+              <ZiweiBoard key={JSON.stringify(ready.input)} ziwei={ready.chart.ziwei} />
+              <p className="note">{t("chart.palaceNote")}</p>
             </div>
-          </div>
-        </div>
-      ) : null}
 
-      <p className="disclaimer">
-        {t("app.disclaimer1")}<br />
-        {t("app.disclaimer2")}
-      </p>
-    </div>
+            <h2 className="group-title">{t("chart.readings")}</h2>
+            <div className="list">
+              <button type="button" className="row" onClick={() => go("report")}>
+                <Icon name="file" className="ic" />
+                <span className="lbl">{t("card.chartTitle")}<span className="sub">{t("chart.reportSub")}</span></span>
+                <Icon name="chev" small className="chev" />
+              </button>
+              <button type="button" className="row" onClick={() => go("fortune")}>
+                <Icon name="trend" className="ic" />
+                <span className="lbl">
+                  {t("card.fortuneTitle")}
+                  <span className="sub">{nowLuck ? t("chart.fortuneSub", { gz: nowLuck.ganZhi }) : t("chart.fortuneSubNone")}</span>
+                </span>
+                <Icon name="chev" small className="chev" />
+              </button>
+              <button type="button" className="row" onClick={() => go("chat")}>
+                <Icon name="msg" className="ic" />
+                <span className="lbl">{t("chat.title")}<span className="sub">{t("chat.sub")}</span></span>
+                <Icon name="chev" small className="chev" />
+              </button>
+            </div>
+
+            <h2 className="group-title">{t("chart.tools")}</h2>
+            <div className="tools">
+              <Link href="/yijing" className="tool">
+                <Icon name="hex" />
+                <div><div className="t">{yjT("nav.yijing", locale)}</div><div className="d">{t("chart.yijingSub")}</div></div>
+              </Link>
+              <Link href="/poster" className="tool">
+                <Icon name="image" />
+                <div><div className="t">{yjT("nav.poster", locale)}</div><div className="d">{t("chart.posterSub")}</div></div>
+              </Link>
+            </div>
+          </>
+        ) : (
+          <EmptyChart />
+        )}
+      </section>
+
+      {/* ============ 報告 ============ */}
+      <section {...show("report")} aria-label={t("tab.report")}>
+        {ready ? (
+          <StreamedReport
+            input={ready.input}
+            endpoint="/api/report"
+            title={t("card.chartTitle")}
+            description={t("card.chartDesc")}
+            segments={REPORT_SEGS}
+            onSectionDone={handleSectionDone("report")}
+            restoredSections={restored?.report ?? null}
+            onAsk={() => go("chat")}
+          />
+        ) : (
+          <>
+            <ScreenNav eyebrow={t("card.chartTitle")} />
+            <EmptyChart />
+          </>
+        )}
+      </section>
+
+      {/* ============ 大運 ============ */}
+      <section {...show("fortune")} aria-label={t("tab.fortune")}>
+        {ready ? (
+          <StreamedReport
+            input={ready.input}
+            endpoint="/api/fortune"
+            title={t("card.fortuneTitle")}
+            description={t("card.fortuneDesc")}
+            segments={FORTUNE_SEGS}
+            onSectionDone={handleSectionDone("fortune")}
+            restoredSections={restored?.fortune ?? null}
+            onAsk={() => go("chat")}
+            collapsible
+          >
+            <FortuneTimeline chart={ready.chart} visible={screen === "fortune"} />
+            <h2 className="group-title">{t("card.fortuneTitle")}</h2>
+          </StreamedReport>
+        ) : (
+          <>
+            <ScreenNav eyebrow={t("card.fortuneTitle")} />
+            <EmptyChart />
+          </>
+        )}
+      </section>
+
+      {/* ============ 歷史 ============ */}
+      <section {...show("history")} aria-label={t("tab.history")}>
+        <ScreenNav eyebrow={t("history.privacy")}>
+          <button type="button" className="icon-btn" onClick={() => go("home")} aria-label={t("history.new")}>
+            <Icon name="plus" />
+          </button>
+        </ScreenNav>
+        <h1 className="large">{t("history.title")}</h1>
+        <HistoryPanel onRestore={handleRestore} />
+      </section>
+
+      {/* ============ 設定(齒輪) ============ */}
+      <section {...show("settings")} aria-label={t("nav.settings")}>
+        <ScreenNav eyebrow={t("nav.settings")} onBack={goBack} gear={false} />
+        <SettingsPanel />
+        <p className="disclaimer">{t("app.disclaimer1")}</p>
+      </section>
+
+      {/* ============ 命盤對話 ============ */}
+      <section {...show("chat")} aria-label={t("chat.title")}>
+        <ScreenNav eyebrow={t("tab.chart")} onBack={goBack} gear={false} />
+        {ready ? <ChatPanel key={JSON.stringify(ready.input)} input={ready.input} /> : <EmptyChart />}
+      </section>
+    </>
   );
 }

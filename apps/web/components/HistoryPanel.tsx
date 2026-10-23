@@ -10,6 +10,7 @@ import {
   type Reading,
 } from "@/lib/history";
 import { useLocale } from "@/lib/i18n";
+import { Icon } from "@/components/Icon";
 
 function fmtTime(ts: number): string {
   const d = new Date(ts);
@@ -17,14 +18,18 @@ function fmtTime(ts: number): string {
   return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}`;
 }
 
+function countSections(r: Reading, prefix: "report:" | "fortune:"): number {
+  return Object.keys(r.sections).filter((k) => k.startsWith(prefix)).length;
+}
+
 /**
- * 历史记录面板:列出本机保存的排盘,点击即恢复命盘 + 已生成的章节(零 API 调用)。
+ * 历史记录:搜尋 + 列表,点击即恢复命盘 + 已生成的章节(零 API 调用)。
  * 记录只存在本机 IndexedDB,不上传。
  */
 export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void }) {
   const { t } = useLocale();
-  const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Reading[]>([]);
+  const [q, setQ] = useState("");
 
   const refresh = () => {
     listReadings()
@@ -48,59 +53,68 @@ export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void })
     refresh();
   };
 
+  const needle = q.trim().toLowerCase();
+  const shown = needle
+    ? items.filter((r) => `${summarizeInput(r.input)} ${r.chart?.bazi?.lunarDate ?? ""}`.toLowerCase().includes(needle))
+    : items;
+
   return (
-    <div className="settings" style={{ marginTop: "0.6rem" }}>
-      <button type="button" className="settings-toggle" onClick={() => setOpen((o) => !o)}>
-        {t("history.title")}({items.length})
-        <span className="caret">{open ? "▴" : "▾"}</span>
-      </button>
+    <>
+      <label className="search">
+        <Icon name="search" small />
+        <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("history.search")} aria-label={t("history.search")} />
+      </label>
 
-      {open ? (
-        <div className="settings-body">
-          {items.length === 0 ? (
-            <p className="muted" style={{ margin: 0 }}>{t("history.empty")}</p>
-          ) : (
-            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-              {items.map((r) => {
-                const n = Object.keys(r.sections).length;
-                return (
-                  <li
-                    key={r.id}
-                    style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-                  >
-                    <button
-                      type="button"
-                      className="btn ghost"
-                      style={{ flex: 1, textAlign: "left", justifyContent: "flex-start" }}
-                      onClick={() => onRestore(r)}
-                      title={fmtTime(r.updatedAt)}
-                    >
-                      {summarizeInput(r.input)}
-                      {n > 0 ? <span className="muted">{t("history.sections", { n })}</span> : null}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn ghost"
-                      onClick={() => handleDelete(r.id)}
-                      aria-label={t("history.delete")}
-                    >
-                      ✕
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-
-          {items.length > 0 ? (
-            <button type="button" className="btn ghost" style={{ marginTop: "0.6rem" }} onClick={handleClear}>
-              {t("history.clear")}
-            </button>
-          ) : null}
-
-          <p className="settings-note" style={{ marginBottom: 0 }}>🔒 {t("history.privacy")}</p>
+      {items.length === 0 ? (
+        <div className="card empty">
+          <Icon name="history" />
+          <div className="empty-t">{t("history.empty")}</div>
         </div>
+      ) : shown.length === 0 ? (
+        <p className="note">{t("history.noMatch")}</p>
+      ) : (
+        <div className="list hist">
+          {shown.map((r) => {
+            const rep = countSections(r, "report:");
+            const fot = countSections(r, "fortune:");
+            return (
+              <div className="row hist-row" key={r.id}>
+                <button type="button" className="hist-main" onClick={() => onRestore(r)}>
+                  <span className="avatar" aria-hidden="true">{r.input.gender}</span>
+                  <span className="lbl">
+                    {summarizeInput(r.input)}
+                    <span className="sub">{r.chart?.bazi?.lunarDate}</span>
+                    {rep || fot ? (
+                      <span className="badges">
+                        {rep ? <span className="tag">{t("history.reportBadge", { n: rep })}</span> : null}
+                        {fot ? <span className="tag">{t("history.fortuneBadge", { n: fot })}</span> : null}
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="when">{fmtTime(r.updatedAt)}</span>
+                </button>
+                <button
+                  type="button"
+                  className="icon-btn danger"
+                  onClick={() => handleDelete(r.id)}
+                  aria-label={t("history.delete")}
+                >
+                  <Icon name="trash" small />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <p className="note">{t("history.restoreNote")}</p>
+
+      {items.length > 0 ? (
+        <button type="button" className="btn secondary block danger-text" onClick={handleClear}>
+          <Icon name="trash" />
+          {t("history.clear")}
+        </button>
       ) : null}
-    </div>
+    </>
   );
 }

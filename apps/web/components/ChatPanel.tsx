@@ -7,11 +7,13 @@ import type { BirthInput } from "@numerology/engine";
 import { streamPost } from "@/lib/streamClient";
 import { aiRequestParts } from "@/lib/aiSettings";
 import { useLocale } from "@/lib/i18n";
+import { Icon } from "@/components/Icon";
 
 interface Turn { role: "user" | "assistant"; content: string }
 
 const SUGGESTION_KEYS = ["chat.sug1", "chat.sug2", "chat.sug3", "chat.sug4"] as const;
 
+/** 命盤對話:就同一命盤追問,建議問題橫向捲動。 */
 export function ChatPanel({ input }: { input: BirthInput }) {
   const { t, locale } = useLocale();
   const [log, setLog] = useState<Turn[]>([]);
@@ -44,16 +46,14 @@ export function ChatPanel({ input }: { input: BirthInput }) {
   };
 
   return (
-    <div className="card">
-      <h2 className="section-title">{t("chat.title")}</h2>
-      <p className="muted" style={{ marginTop: 0 }}>
-        {t("chat.sub")}
-      </p>
+    <div className="chat">
+      <h1 className="large">{t("chat.title")}</h1>
+      <p className="lede">{t("chat.sub")}</p>
 
       {log.length === 0 ? (
-        <div className="suggest">
+        <div className="strip">
           {SUGGESTION_KEYS.map((k) => (
-            <button key={k} className="chip" onClick={() => ask(t(k))} disabled={busy}>{t(k)}</button>
+            <button key={k} type="button" className="chip" onClick={() => ask(t(k))} disabled={busy}>{t(k)}</button>
           ))}
         </div>
       ) : (
@@ -61,7 +61,7 @@ export function ChatPanel({ input }: { input: BirthInput }) {
           {log.map((t2, i) => (
             <div key={i} className={`bubble ${t2.role}`}>
               {t2.role === "assistant" ? (
-                <div className={`prose ${busy && i === log.length - 1 ? "cursor" : ""}`}>
+                <div className={`prose ${busy && i === log.length - 1 ? "is-streaming" : ""}`}>
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {t2.content || t("chat.thinking")}
                   </ReactMarkdown>
@@ -74,7 +74,7 @@ export function ChatPanel({ input }: { input: BirthInput }) {
         </div>
       )}
 
-      {error ? <p className="notice">{error}</p> : null}
+      {error ? <p className="notice" role="alert">{error}</p> : null}
 
       <form
         className="chat-input"
@@ -83,11 +83,12 @@ export function ChatPanel({ input }: { input: BirthInput }) {
         <input
           value={draft}
           placeholder={t("chat.placeholder")}
+          aria-label={t("chat.placeholder")}
           onChange={(e) => setDraft(e.target.value)}
           disabled={busy}
         />
-        <button className="btn" type="submit" disabled={busy || !draft.trim()}>
-          {busy ? "…" : t("chat.ask")}
+        <button className="icon-btn solid" type="submit" disabled={busy || !draft.trim()} aria-label={t("chat.ask")}>
+          <Icon name="send" />
         </button>
       </form>
     </div>

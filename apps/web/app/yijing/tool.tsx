@@ -133,23 +133,20 @@ export default function YijingTool() {
         .yj-coin {
           width: 34px; height: 34px; border-radius: 50%;
           display: grid; place-items: center;
-          font-family: var(--serif); font-size: 1rem;
-          background: radial-gradient(circle at 35% 30%, oklch(88% 0.08 80), oklch(72% 0.1 75));
-          border: 1px solid oklch(60% 0.08 70);
-          color: oklch(35% 0.05 60);
-          box-shadow: 0 2px 4px oklch(40% 0.02 60 / 0.25);
+          font-size: 15px; font-weight: 600;
+          background: var(--accent); color: #1a1206;
         }
         .yj-coin.flipping { animation: yj-flip 0.32s linear infinite; }
         .yj-coin.pop { animation: yj-pop 0.4s ease-out; }
         @keyframes yj-flip { from { transform: rotateY(0); } to { transform: rotateY(360deg); } }
         @keyframes yj-pop { 0% { transform: scale(0.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        .yj-line-row { display: flex; align-items: center; gap: 0.9rem; padding: 0.5rem 0; border-bottom: 1px dashed var(--line); }
+        .yj-line-row { display: flex; align-items: center; gap: 0.9rem; padding: 0.5rem 0; border-bottom: 0.5px solid var(--line); overflow-x: auto; }
         .yj-line-row:last-child { border-bottom: none; }
         .yj-glyph { font-size: 1.5rem; min-width: 3.2em; text-align: center; letter-spacing: 0.1em; }
       `}</style>
 
-      <div className="masthead" style={{ paddingTop: "1.2rem" }}>
-        <h1 style={{ letterSpacing: "0.28em" }}>{yjT("yijing.title", loc)}</h1>
+      <div className="masthead">
+        <h1>{yjT("yijing.title", loc)}</h1>
         <div className="sub">{yjT("yijing.sub", loc)}</div>
       </div>
 
@@ -161,14 +158,6 @@ export default function YijingTool() {
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder={yjT("yijing.question.ph", loc)}
-            style={{
-              font: "inherit",
-              padding: "0.55rem 0.65rem",
-              background: "var(--paper)",
-              color: "var(--ink)",
-              border: "1px solid var(--line-strong)",
-              borderRadius: "var(--r)",
-            }}
           />
         </div>
         <p className="muted" style={{ marginTop: "0.7rem", marginBottom: 0 }}>
@@ -180,7 +169,7 @@ export default function YijingTool() {
         <h2 className="section-title">
           {yjFmt(yjT("yijing.toss", loc), { n: Math.min(lines.length + 1, 6) })}
         </h2>
-        <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap", marginBottom: "1rem" }}>
+        <div className="strip" style={{ marginBottom: "1rem" }}>
           <button className="btn" onClick={tossOne} disabled={rolling || done}>
             {yjFmt(yjT("yijing.toss", loc), { n: Math.min(lines.length + 1, 6) })}
           </button>
@@ -270,11 +259,10 @@ export default function YijingTool() {
                 <div
                   key={p}
                   style={{
-                    border: "1px solid var(--cinnabar-soft)",
-                    borderRadius: "8px",
+                    borderRadius: "12px",
                     padding: "0.6rem 0.8rem",
                     marginBottom: "0.5rem",
-                    background: "oklch(60% 0.14 32 / 0.05)",
+                    background: "var(--accent-soft)",
                   }}
                 >
                   <div style={{ fontFamily: "var(--serif)", color: "var(--cinnabar)", marginBottom: "0.2rem" }}>

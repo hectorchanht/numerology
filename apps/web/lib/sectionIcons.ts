@@ -32,9 +32,10 @@ export function sectionIcon(key: string): string {
  * 历史记录里存的仍是无图标原文,图标只在渲染这一层出现。
  */
 export function withIconHeading(segKey: string, label: string, markdown: string): string {
-  const heading = `## ${sectionIcon(segKey)} ${label}`;
-  if (/^##[^\n]*/.test(markdown)) {
-    return markdown.replace(/^##[^\n]*/, heading);
-  }
-  return `${heading}\n\n${markdown}`;
+  return `## ${sectionIcon(segKey)} ${label}\n\n${stripLeadingHeading(markdown)}`;
+}
+
+/** 去掉 AI 文本自帶的首個 `## ` 標題行(章節卡已有確定性標題,正文其餘部分原樣不動)。 */
+export function stripLeadingHeading(markdown: string): string {
+  return markdown.replace(/^\s*##[^\n]*\n*/, "");
 }

@@ -20,6 +20,15 @@ const PRINT_CSS = `
   strong { color: #1f1b18; }
   .doc-foot { margin-top: 24px; padding-top: 10px; border-top: 1px solid #eee;
     color: #8a8178; font-size: 11px; text-align: center; }
+  /* 章節卡(StreamedReport):標題列 + 正文;摺埋的章節照樣印出 */
+  article { break-inside: auto; margin: 0 0 14px; }
+  .sec-hd { font-size: 16px; margin: 20px 0 8px; padding-bottom: 4px; border-bottom: 1px solid #ddd; }
+  .sec-h { display: flex; align-items: center; gap: 6px; border: 0; background: none; padding: 0;
+    font: inherit; color: inherit; width: 100%; text-align: left; }
+  .sec-h svg { width: 16px; height: 16px; fill: none; stroke: #9b3b2f; stroke-width: 1.8;
+    stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .sec-h .caret-ic, .sec-state, .skel { display: none; }
+  [hidden] { display: block !important; }
 `;
 
 function escapeHtml(s: string): string {

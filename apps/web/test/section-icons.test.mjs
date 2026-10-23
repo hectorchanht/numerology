@@ -1,6 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { SECTION_ICONS, sectionIcon, withIconHeading } from "../test-dist/sectionIcons.js";
+import { SECTION_ICONS, sectionIcon, withIconHeading, stripLeadingHeading } from "../test-dist/sectionIcons.js";
+
+test("stripLeadingHeading 去掉 AI 自帶標題,無標題時原樣返回", () => {
+  assert.equal(stripLeadingHeading("## 一、當前總覽\n\n正文。\n\n## 小節\n續"), "正文。\n\n## 小節\n續");
+  assert.equal(stripLeadingHeading("正文。"), "正文。");
+  assert.equal(stripLeadingHeading(""), "");
+});
 
 // 与 REPORT_SECTIONS / FORTUNE_SEGMENTS 的 key 保持一致(两份报告共 13 节)
 const ALL_KEYS = [

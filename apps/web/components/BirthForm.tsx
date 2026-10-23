@@ -5,6 +5,8 @@ import type { BirthInput } from "@numerology/engine";
 import type { BirthFormValue, Calendar } from "@/lib/formTypes";
 import { useLocale } from "@/lib/i18n";
 import { LocationPicker } from "@/components/LocationPicker";
+import { Icon } from "@/components/Icon";
+import { Seg, ToggleRow } from "@/components/ui";
 
 interface Props {
   loading: boolean;
@@ -15,10 +17,10 @@ interface Props {
 
 /** 必填字段 */
 const FIELDS = [
-  { key: "year", labelKey: "form.year" as const, min: 1900, max: 2100 },
-  { key: "month", labelKey: "form.month" as const, min: 1, max: 12 },
-  { key: "day", labelKey: "form.day" as const, min: 1, max: 31 },
-  { key: "hour", labelKey: "form.hour" as const, min: 0, max: 23 },
+  { key: "year", labelKey: "form.year" as const, min: 1900, max: 2100, icon: "cal" },
+  { key: "month", labelKey: "form.month" as const, min: 1, max: 12, icon: "cal" },
+  { key: "day", labelKey: "form.day" as const, min: 1, max: 31, icon: "cal" },
+  { key: "hour", labelKey: "form.hour" as const, min: 0, max: 23, icon: "clock" },
 ] as const;
 
 export function BirthForm({ loading, onSubmit, defaults }: Props) {
@@ -34,6 +36,8 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
   const [longitude, setLongitude] = useState<string>(
     defaults?.longitude !== undefined ? String(defaults.longitude) : "",
   );
+  // 真太陽時:開 = 有揀城市就帶經度校正;關 = 按時鐘時間(保留已揀城市)。
+  const [trueSolar, setTrueSolar] = useState(true);
   const [error, setError] = useState<string>("");
 
   const submit = (e: React.FormEvent) => {
@@ -63,67 +67,85 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
       calendar,
       ...(calendar === "lunar" && isLeapMonth ? { isLeapMonth: true } : {}),
     };
-    if (longitude !== "") out.longitude = Number(longitude);
+    if (trueSolar && longitude !== "") out.longitude = Number(longitude);
     onSubmit(out);
   };
 
   const yearLabel = calendar === "lunar" ? t("form.yearLunar") : t("form.yearSolar");
+  const solarSub = !trueSolar ? t("form.trueSolarOff") : longitude === "" ? t("form.trueSolarNeedCity") : t("form.trueSolarOn");
 
   return (
-    <form className="card" onSubmit={submit}>
-      <h2 className="section-title">{t("form.title")}</h2>
-      <div className="cal-toggle">
-        <button type="button" className={calendar === "solar" ? "active" : ""} onClick={() => setCalendar("solar")}>{t("form.solar")}</button>
-        <button type="button" className={calendar === "lunar" ? "active" : ""} onClick={() => setCalendar("lunar")}>{t("form.lunar")}</button>
+    <form onSubmit={submit} noValidate>
+      <h2 className="group-title">{t("form.groupTime")}</h2>
+      <div className="list">
+        <div className="row">
+          <Icon name="cal" className="ic" />
+          <span className="lbl">{t("form.calendar")}</span>
+          <Seg
+            compact
+            label={t("form.calendar")}
+            value={calendar}
+            onChange={setCalendar}
+            options={[
+              { value: "solar", label: t("form.solarShort") },
+              { value: "lunar", label: t("form.lunarShort") },
+            ]}
+          />
+        </div>
         {calendar === "lunar" ? (
-          <label className="leap-check">
-            <input type="checkbox" checked={isLeapMonth} onChange={(e) => setIsLeapMonth(e.target.checked)} />
-            {t("form.leap")}
-          </label>
+          <ToggleRow icon="cal" label={t("form.leap")} checked={isLeapMonth} onChange={setIsLeapMonth} />
         ) : null}
-      </div>
-      <div className="form-grid">
         {FIELDS.map((f) => (
-          <div className="field" key={f.key}>
-            <label htmlFor={f.key}>{f.key === "year" ? yearLabel : t(f.labelKey)}</label>
+          <label className="row" key={f.key} htmlFor={f.key}>
+            <Icon name={f.icon} className="ic" />
+            <span className="lbl">{f.key === "year" ? yearLabel : t(f.labelKey)}</span>
             <input
               id={f.key} type="number" inputMode="numeric"
-              min={f.key === "year" ? f.min : undefined} max={f.key === "year" ? f.max : undefined}
+              min={f.min} max={f.max}
               value={v[f.key]}
               onChange={(e) => setV((s) => ({ ...s, [f.key]: e.target.value }))}
             />
-          </div>
+          </label>
         ))}
-        <div className="field">
-          <label htmlFor="minute">{t("form.minute")}</label>
+        <label className="row" htmlFor="minute">
+          <Icon name="clock" className="ic dim" />
+          <span className="lbl">{t("form.minute")}</span>
           <input
             id="minute" type="number" inputMode="numeric" min={0} max={59}
             value={v.minute}
             onChange={(e) => setV((s) => ({ ...s, minute: e.target.value }))}
           />
-        </div>
-        <div className="field">
-          <label htmlFor="gender">{t("form.gender")}</label>
-          <select id="gender" value={gender} onChange={(e) => setGender(e.target.value as "男" | "女")}>
-            <option value="男">{t("form.male")}</option>
-            <option value="女">{t("form.female")}</option>
-          </select>
-        </div>
-        <div className="field" style={{ gridColumn: "1 / -1" }}>
-          <label>{t("form.birthplace")}</label>
-          <LocationPicker value={longitude} onChange={setLongitude} />
-        </div>
+        </label>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginTop: "1.1rem" }}>
-        <button className="btn" type="submit" disabled={loading}>
-          {loading ? t("form.submitting") : t("form.submit")}
-        </button>
-        {error ? <span className="notice">{error}</span> : (
-          <span className="muted">
-            {calendar === "lunar" ? t("form.hintLunar") : t("form.hintSolar")}
-          </span>
-        )}
+
+      <h2 className="group-title">{t("form.groupPerson")}</h2>
+      <div className="list">
+        <div className="row">
+          <Icon name="user" className="ic" />
+          <span className="lbl">{t("form.gender")}</span>
+          <Seg
+            compact
+            label={t("form.gender")}
+            value={gender}
+            onChange={setGender}
+            options={[
+              { value: "男", label: t("form.male") },
+              { value: "女", label: t("form.female") },
+            ]}
+          />
+        </div>
+        <LocationPicker value={longitude} onChange={setLongitude} />
+        <ToggleRow icon="sun" label={t("form.trueSolar")} sub={solarSub} checked={trueSolar} onChange={setTrueSolar} />
       </div>
+
+      {error ? <p className="notice" role="alert">{error}</p> : null}
+      <button className="btn block cta" type="submit" disabled={loading}>
+        <Icon name="spark" />
+        {loading ? t("form.submitting") : t("form.submit")}
+      </button>
+      <p className="note">
+        {calendar === "lunar" ? t("form.hintLunar") : t("form.hintSolar")} {t("form.privacy")}
+      </p>
     </form>
   );
 }
