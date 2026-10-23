@@ -29,6 +29,9 @@ export interface Reading {
 }
 
 const DB_NAME = "numerology";
+/** v2:加 yijing store(易經占卦歷史);同 lib/yijingHistory.ts 保持一致。 */
+const DB_VERSION = 2;
+const YIJING_STORE = "yijing";
 const STORE = "readings";
 const HISTORY_EVENT = "numerology-history-changed";
 
@@ -40,10 +43,14 @@ function openDb(): Promise<IDBDatabase> {
   const f = idb();
   if (!f) return Promise.reject(new Error("当前环境不支持 IndexedDB"));
   return new Promise((resolve, reject) => {
-    const req = f.open(DB_NAME, 1);
+    const req = f.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
-      if (!req.result.objectStoreNames.contains(STORE)) {
-        req.result.createObjectStore(STORE, { keyPath: "id" });
+      const db = req.result;
+      if (!db.objectStoreNames.contains(STORE)) {
+        db.createObjectStore(STORE, { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains(YIJING_STORE)) {
+        db.createObjectStore(YIJING_STORE, { keyPath: "id" });
       }
     };
     req.onsuccess = () => resolve(req.result);

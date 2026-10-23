@@ -8,10 +8,10 @@ export const metadata: Metadata = {
     "三錢起卦占卦工具:六爻由下而上,得本卦、變卦、互卦與動爻爻辭。問題只存於本頁,不會上傳;AI 解卦即將推出。",
 };
 
-export default function YijingPage() {
+export default function YijingPage({ searchParams }: { searchParams?: { h?: string } }) {
   return (
     <>
-      <YijingTool />
+      <YijingTool historyId={searchParams?.h} />
     </>
   );
 }

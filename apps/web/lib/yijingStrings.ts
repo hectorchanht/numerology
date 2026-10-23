@@ -18,6 +18,7 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "nav.poster": S("命盤海報", "命盘海报", "Chart Poster"),
   "nav.academy": S("易經學院", "易经学院", "Yi Jing Academy"),
   "nav.liuyao": S("六爻納甲", "六爻纳甲", "Six Lines"),
+  "nav.yijingHistory": S("占卦歷史", "占卦历史", "Cast history"),
 
   /* —— 占卦頁 —— */
   "yijing.title": S("易經占卦", "易经占卦", "Yi Jing Divination"),
@@ -37,6 +38,20 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "yijing.benGua": S("本卦", "本卦", "Primary"),
   "yijing.bianGua": S("變卦", "变卦", "Changed"),
   "yijing.huGua": S("互卦", "互卦", "Nuclear"),
+
+  /* —— 占卦歷史 —— */
+  "yijing.hist.title": S("占卦歷史", "占卦历史", "Divination history"),
+  "yijing.hist.sub": S("銅錢、梅花、六爻的起卦記錄,只儲存於本機", "铜钱、梅花、六爻的起卦记录,只储存于本机", "Coin, plum-blossom and liuyao casts — stored on this device only"),
+  "yijing.hist.empty": S("還沒有占卦記錄", "还没有占卦记录", "No casts yet"),
+  "yijing.hist.emptyHint": S("起卦後會自動保存於此,隨時回來看", "起卦后会自动保存于此,随时回来查看", "Casts are saved here automatically — review them anytime"),
+  "yijing.hist.kind.coin": S("銅錢占卦", "铜钱占卦", "Coin toss"),
+  "yijing.hist.kind.meihua": S("梅花易數", "梅花易数", "Plum blossom"),
+  "yijing.hist.kind.liuyao": S("六爻納甲", "六爻纳甲", "Six lines"),
+  "yijing.hist.review": S("查看", "查看", "Review"),
+  "yijing.hist.delete": S("刪除", "删除", "Delete"),
+  "yijing.hist.confirmDelete": S("確定刪除這條記錄？", "确定删除这条记录？", "Delete this record?"),
+  "yijing.hist.reviewing": S("歷史回顧", "历史回顾", "Reviewing history"),
+  "yijing.hist.backToHistory": S("返回歷史", "返回历史", "Back to history"),
   "yijing.judgment": S("卦辭", "卦辞", "Judgment"),
   "yijing.changing": S("動爻", "动爻", "Moving lines"),
   "yijing.noChange": S("無動爻:此卦不變,看本卦卦辭即可。", "无动爻:此卦不变,看本卦卦辞即可。", "No moving lines: the hexagram stands as cast — read the primary judgment."),

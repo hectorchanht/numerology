@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   paigua,
   ganzhiForDate,
@@ -12,6 +13,7 @@ import { getHexagram } from "@numerology/knowledge";
 import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { Term } from "@/lib/highlightTerms";
+import { saveYijingCast, getYijingCast } from "@/lib/yijingHistory";
 
 const LINE_OPTS: { v: YaoValue; id: string }[] = [
   { v: 6, id: "yijing.line.oldYin" },
@@ -73,7 +75,7 @@ function YaoGlyph({ yang, moving }: { yang: boolean; moving: boolean }) {
   );
 }
 
-export default function LiuyaoTool() {
+export default function LiuyaoTool({ historyId }: { historyId?: string }) {
   const { locale } = useLocale();
   // 六爻引擎 / 卦名係繁體正本 → zT(只喺 zhs 轉)
   const { zT } = useScript();
@@ -83,8 +85,29 @@ export default function LiuyaoTool() {
   const [lines, setLines] = useState<YaoValue[]>([]);
   const [manual, setManual] = useState<(YaoValue | 0)[]>([0, 0, 0, 0, 0, 0]);
   const [rolling, setRolling] = useState(false);
+  /** 歷史回顧模式:由 ?h=<id> 入嚟,唔再存檔 */
+  const reviewMode = useRef(false);
+  const [reviewAt, setReviewAt] = useState<number | null>(null);
 
   const done = lines.length === 6;
+
+  // 歷史回顧:還原日期 + 六爻
+  useEffect(() => {
+    if (!historyId) return;
+    let alive = true;
+    getYijingCast(historyId)
+      .then((rec) => {
+        if (!alive || !rec || rec.kind !== "liuyao" || !rec.lines) return;
+        reviewMode.current = true;
+        setReviewAt(rec.at);
+        if (rec.date) setDate(rec.date);
+        setLines(rec.lines as YaoValue[]);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [historyId]);
 
   const result: { r: LiuyaoResult; hexName: string; err: string } = useMemo(() => {
     if (!done) return { r: null as unknown as LiuyaoResult, hexName: "", err: "" };
@@ -104,6 +127,16 @@ export default function LiuyaoTool() {
     }
   }, [done, lines, date]);
   const showResult = done && !result.err && result.r;
+
+  // 起卦完成自動存檔(每組爻值+日期只存一次;回顧模式唔存)
+  const savedSig = useRef<string | null>(null);
+  useEffect(() => {
+    if (!showResult || reviewMode.current) return;
+    const sig = `${date}:${lines.join(",")}`;
+    if (savedSig.current === sig) return;
+    savedSig.current = sig;
+    saveYijingCast({ kind: "liuyao", at: Date.now(), date, lines: [...lines] }).catch(() => {});
+  }, [showResult, date, lines]);
 
   const tossOne = () => {
     if (rolling || done) return;
@@ -135,6 +168,7 @@ export default function LiuyaoTool() {
     setLines([]);
     setManual([0, 0, 0, 0, 0, 0]);
     setRolling(false);
+    savedSig.current = null;
   };
   const manualReady = manual.every((v) => v !== 0);
   const castManual = () => {
@@ -148,6 +182,16 @@ export default function LiuyaoTool() {
         <h1 style={{ letterSpacing: "0.28em" }}>{yjT("liuyao.title", loc)}</h1>
         <div className="sub">{yjT("liuyao.sub", loc)}</div>
       </div>
+
+      {reviewAt !== null && (
+        <div className="card" style={{ borderColor: "var(--cinnabar-soft)", marginBottom: "1rem" }}>
+          <span className="badge">{yjT("yijing.hist.reviewing", loc)}</span>{" "}
+          <span className="muted">{new Date(reviewAt).toLocaleString()}</span>{" "}
+          <Link href="/yijing/history" style={{ marginLeft: "0.5rem" }}>
+            {yjT("yijing.hist.backToHistory", loc)}
+          </Link>
+        </div>
+      )}
 
       <div className="card">
         <div className="field">

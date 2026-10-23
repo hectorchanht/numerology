@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   castYijing,
   type CastResult,
@@ -11,6 +11,8 @@ import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, yjFmt, type YijingLocale } from "@/lib/yijingStrings";
 import { AiInterpret } from "./AiInterpret";
 import { Term, withTermHighlights } from "@/lib/highlightTerms";
+import { saveYijingCast, getYijingCast } from "@/lib/yijingHistory";
+import Link from "next/link";
 
 interface TossedLine {
   value: CoinLine;
@@ -69,7 +71,7 @@ function HexFigure({ bits, moving }: { bits: number[]; moving?: boolean[] }) {
   );
 }
 
-export default function YijingTool() {
+export default function YijingTool({ historyId }: { historyId?: string }) {
   const { locale } = useLocale();
   // 卦爻辭係繁體正本 → zT(只喺 zhs 轉)
   const { zT } = useScript();
@@ -78,12 +80,54 @@ export default function YijingTool() {
   const [lines, setLines] = useState<TossedLine[]>([]);
   const [rolling, setRolling] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** 歷史回顧模式:由 ?h=<id> 入嚟,唔再存檔 */
+  const reviewMode = useRef(false);
+  const [reviewAt, setReviewAt] = useState<number | null>(null);
 
   const done = lines.length === 6;
   const cast: CastResult | null = useMemo(
     () => (done ? castYijing(lines.map((l) => l.value)) : null),
     [done, lines],
   );
+
+  // 歷史回顧:還原問題 + 六爻
+  useEffect(() => {
+    if (!historyId) return;
+    let alive = true;
+    getYijingCast(historyId)
+      .then((rec) => {
+        if (!alive || !rec || rec.kind !== "coin" || !rec.lines) return;
+        reviewMode.current = true;
+        setReviewAt(rec.at);
+        if (rec.question) setQuestion(rec.question);
+        setLines(
+          rec.lines.map((v, i) => ({
+            value: v as CoinLine,
+            coins: rec.coins?.[i] ?? [true, true, true],
+          })),
+        );
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [historyId]);
+
+  // 起卦完成自動存檔(每組爻值只存一次;回顧模式唔存)
+  const savedSig = useRef<string | null>(null);
+  useEffect(() => {
+    if (!done || !cast || reviewMode.current) return;
+    const sig = lines.map((l) => l.value).join(",");
+    if (savedSig.current === sig) return;
+    savedSig.current = sig;
+    saveYijingCast({
+      kind: "coin",
+      at: Date.now(),
+      question: question.trim() || undefined,
+      lines: lines.map((l) => l.value),
+      coins: lines.map((l) => l.coins),
+    }).catch(() => {});
+  }, [done, cast, lines, question]);
   const ben = cast ? getHexagram(cast.hexagram) : undefined;
   const bian = cast?.changed ? getHexagram(cast.changed) : undefined;
   const hu = cast ? getHexagram(cast.hu) : undefined;
@@ -127,6 +171,7 @@ export default function YijingTool() {
     if (timer.current) clearTimeout(timer.current);
     setLines([]);
     setRolling(false);
+    savedSig.current = null;
   };
 
   return (
@@ -152,6 +197,18 @@ export default function YijingTool() {
         <h1>{yjT("yijing.title", loc)}</h1>
         <div className="sub">{yjT("yijing.sub", loc)}</div>
       </div>
+
+      {reviewAt !== null && (
+        <div className="card" style={{ borderColor: "var(--cinnabar-soft)", marginBottom: "1rem" }}>
+          <span className="badge">{yjT("yijing.hist.reviewing", loc)}</span>{" "}
+          <span className="muted">
+            {new Date(reviewAt).toLocaleString()}
+          </span>{" "}
+          <Link href="/yijing/history" style={{ marginLeft: "0.5rem" }}>
+            {yjT("yijing.hist.backToHistory", loc)}
+          </Link>
+        </div>
+      )}
 
       {/* .yj-layout:手機 display:contents;桌面左欄問卦/起卦、右欄卦象結果 */}
       <div className="yj-layout">
