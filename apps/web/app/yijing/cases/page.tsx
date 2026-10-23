@@ -188,8 +188,8 @@ export default function CasesPage() {
   const active = activeId ? ZHANLI_CASES.find((c) => c.id === activeId) ?? null : null;
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
-      <main className="mx-auto max-w-2xl px-4 pb-16 pt-6">
+    <div className="shell min-h-screen bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+      <main className="mx-auto max-w-2xl">
         {!active ? (
           <>
             <h1 className="text-2xl font-bold">{yjT("cases.title", loc)}</h1>

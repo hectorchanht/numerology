@@ -114,7 +114,7 @@ export default function MeihuaPage() {
   };
 
   return (
-    <>
+    <div className="shell">
       <div className="masthead">
         <h1>{yjT("meihua.title", loc)}</h1>
         <div className="sub">{yjT("meihua.sub", loc)}</div>
@@ -232,6 +232,6 @@ export default function MeihuaPage() {
           <AiInterpret hexagram={result.hexagram} lines={result.lines} locale={loc} />
         </div>
       )}
-    </>
+    </div>
   );
 }
