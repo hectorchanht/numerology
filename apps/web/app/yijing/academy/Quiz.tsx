@@ -5,6 +5,7 @@ import type { AcademyQuizQ, AcademyLesson } from "./lessons";
 import { saveProgress, loadProgress } from "./lessons";
 import { useLocale } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
+import { withTermHighlights } from "@/lib/highlightTerms";
 
 /** 自我檢測:單選 → 對答案 → 記分,完成後寫入 localStorage 進度。 */
 export function Quiz({ lesson, onDone }: { lesson: AcademyLesson; onDone?: () => void }) {
@@ -44,7 +45,7 @@ export function Quiz({ lesson, onDone }: { lesson: AcademyLesson; onDone?: () =>
         return (
           <div key={qi} style={{ marginBottom: "1.1rem" }}>
             <div style={{ fontWeight: 600, marginBottom: "0.5rem" }}>
-              {qi + 1}. {q.q}{" "}
+              {qi + 1}. {withTermHighlights(q.q)}{" "}
               {checked && (
                 <span className={`badge ${ok ? "badge-ok" : "badge-warn"}`}>
                   {ok ? yjT("academy.quizRight", loc) : yjT("academy.quizWrong", loc)}
@@ -86,8 +87,8 @@ export function Quiz({ lesson, onDone }: { lesson: AcademyLesson; onDone?: () =>
                 );
               })}
             </div>
-            {bad && <p className="muted" style={{ marginTop: "0.4rem" }}>{q.explain}</p>}
-            {ok && <p className="muted" style={{ marginTop: "0.4rem" }}>{q.explain}</p>}
+            {bad && <p className="muted" style={{ marginTop: "0.4rem" }}>{withTermHighlights(q.explain)}</p>}
+            {ok && <p className="muted" style={{ marginTop: "0.4rem" }}>{withTermHighlights(q.explain)}</p>}
           </div>
         );
       })}

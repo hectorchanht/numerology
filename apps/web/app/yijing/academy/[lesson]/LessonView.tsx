@@ -6,6 +6,7 @@ import { ACADEMY_LESSONS, getLesson } from "../lessons";
 import { Quiz } from "../Quiz";
 import { useLocale } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
+import { withTermHighlights } from "@/lib/highlightTerms";
 
 /** 單課頁(客戶端):正文 + 自我檢測。 */
 export function LessonView({ lessonId }: { lessonId: string }) {
@@ -43,10 +44,9 @@ export function LessonView({ lessonId }: { lessonId: string }) {
             <h2 className="section-title">{s.heading}</h2>
             {s.body.map((p, pi) => (
               <p key={pi} style={{ lineHeight: 1.9, marginBottom: "0.8rem" }}>
-                {p}
+                {withTermHighlights(p)}
               </p>
             ))}
-            {/* TODO: 接入全站術語高亮(@/lib/highlightTerms,待該模組合併到 main 後啟用) */}
           </section>
         ))}
       </div>

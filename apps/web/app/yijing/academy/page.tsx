@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ACADEMY_LESSONS, loadProgress, type AcademyProgress } from "./lessons";
 import { useLocale } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
+import { withTermHighlights } from "@/lib/highlightTerms";
 
 /** 課程首頁:四課列表 + localStorage 進度。 */
 export default function AcademyIndexPage() {
@@ -29,7 +30,7 @@ export default function AcademyIndexPage() {
       </div>
 
       <div className="card">
-        <p style={{ lineHeight: 1.9, margin: 0 }}>{yjT("academy.intro", loc)}</p>
+        <p style={{ lineHeight: 1.9, margin: 0 }}>{withTermHighlights(yjT("academy.intro", loc))}</p>
         <p className="muted" style={{ marginTop: "0.6rem", marginBottom: 0 }}>
           {yjT("academy.progress", loc)
             .replace("{d}", String(doneCount))

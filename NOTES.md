@@ -625,3 +625,10 @@ live 验证:7 个 `###` 标题全部带真实数字,全文零占位符。
 - commit `2127b6b7`(18 文件)推 main,Pages 部署 `326b3669` → **success**。
 - 線上驗證: 6 路由皆 200;`POST /api/fortune/data` → 200,回傳確定性 fortune JSON;
   術語(正官等)已在 live bundle 內。
+
+## Academy 術語高亮接入 (2026-10-23)
+- `apps/web/lib/highlightTerms.tsx` (共享工具,已在 main: `withTermHighlights` /
+  `markdownTermComponents` / `Term`,彈窗點別處/Escape 關閉)接入易經學院:
+  `academy/page.tsx` 課程簡介、`[lesson]/LessonView.tsx` 課文段落(移除 TODO)、
+  `Quiz.tsx` 題目 + 解析。選項在 `<button>` 內,按設計跳過。
+- 驗證: ai 57/engine 62/knowledge 22/web 83 全過;`next build` + `npm run cf:pages` 成功。
