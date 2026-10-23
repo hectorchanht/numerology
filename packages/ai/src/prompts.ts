@@ -83,6 +83,9 @@ export const REPORT_SECTIONS = [
 
 export type ReportSectionKey = (typeof REPORT_SECTIONS)[number]["key"];
 
+/** 整篇模式(CLI 兼容)的 TL;DR 规则;标记与分段模式同为 TLDR_MARKER。 */
+const WHOLE_TLDR_RULE = `【每节开头 TL;DR】每个「## 」小标题之后第一行写「TL;DR:<1–3 句一针见血的结论>」(标记原样照抄、不翻译),空一行再写正文。`;
+
 /** 组装报告的用户指令。locale 决定章节标题的语言(正文语言由 localeDirective 指令模型)。 */
 export function buildReportUserPrompt(caveats: string[], locale: AiLocale = "zht"): string {
   const sections = REPORT_SECTIONS.map((s, i) => `${i + 1}. ${segmentTitle(s.key, locale)}:${s.brief}`).join("\n");
@@ -98,6 +101,7 @@ ${sections}
 - 【真实直接、不模棱两可】每节给出明确判断,优点缺点都直说,该断就断;少用"可能/也许/倾向于"的安全垫,杜绝放之四海皆准、谁都适用的废话。真矛盾或数据有边界时,明说"不确定/两种力量并存",而非含糊带过。
 - 【详实为准】以充分、深入为第一标准,不要为追求简短而牺牲细节;每节都展开充分论证,把推理链条讲透,宁可长而扎实,不要短而空泛。
 - 每个论断尽量指出依据(哪一柱/哪个十神/哪个宫位的哪颗星或四化)。
+- ${WHOLE_TLDR_RULE}
 - 【紫微看格局】判断性格与命格时,不要只看命宫单宫,务必结合「命宫三方四正」的四宫合看主星来定格局(如杀破狼、紫府相朝垣、府相朝垣、机月同梁、君臣庆会等),先点明格局再展开。
 - 八字与紫微相互印证或分歧都要体现。
 - 本报告聚焦【命盘格局】(先天底色)。性格/事业/财富/感情/健康各节为静态底色;「大运流年概览」一节只用一段话点出当前大运/大限对这些底色的加强或削弱即可——【逐步逐年的详细动态分析在另一份《大运流年深析》中,这里不要展开成长篇】。
@@ -395,6 +399,7 @@ export function buildFortuneReportPrompt(caveats: string[], locale: AiLocale = "
 ## ${segmentTitle("action", locale)}
 落到"当前及未来几年大方向上怎么做"。
 
+${WHOLE_TLDR_RULE}
 要求:八字与紫微务必【全程合参】,每个结论指出依据(哪步运/哪年、什么十神/什么四化飞哪宫);判断要直接、敢断、不和稀泥,但**严格区分"命盘能给的领域与吉凶倾向(可肯定)"和"具体事件(不可编造)"**;年份均按"倾向应期、可能±1年"对待。
 ${FORTUNE_NUMBERS_RULE}
 【去套话】各步大运/各年只讲独有信息,不重复同一句式;每步大运看**它自己的同期大限**(动态运势里每步的 └ 大限行),不要把当前大限套到每一步;形容词必须带机制(哪个干支/哪颗星→哪个宫→什么效果),写不出就删。
@@ -493,6 +498,19 @@ function lensDirective(lens: ReportLens): string {
   return `【八字 × 紫微合参】两套都看,各按各自规矩取,再比对结论:相互印证则更可信、分歧则如实标出,不强行圆说。`;
 }
 
+/**
+ * 每节 TL;DR 的固定标记(三地语言皆用同一 ASCII 标记,前端据此切出摘要卡)。
+ * TL;DR 与正文同一次请求、同一条流输出——**绝不另开 AI 调用**(Workers AI 预算守卫)。
+ */
+export const TLDR_MARKER = "TL;DR";
+
+/** TL;DR 指令:紧跟小标题输出一行摘要,再空一行接正文。 */
+function tldrDirective(title: string): string {
+  return `【开头 TL;DR·硬性格式】「## ${title}」小标题之后,**第一行**必须是:
+${TLDR_MARKER}:<1–3 句、合共不超过 60 字(英文不超过 45 词)的一句话结论>
+——直接给本节判决,像"事业:今年宜守不宜攻,转工等秋后。"这样一针见血;用输出语言写,标记「${TLDR_MARKER}:」本身原样照抄、不翻译、不加粗、不放引用符号。TL;DR 只写一行,然后空一行,再写正文。正文不要重复 TL;DR 原句。`;
+}
+
 /** 单节《命盘格局解读》指令(分段模式)。lens 决定纯八字/纯紫微/合参;locale 决定小标题语言。 */
 export function buildReportSectionPrompt(caveats: string[], seg: ReportSegment, lens: ReportLens = "both", locale: AiLocale = "zht"): string {
   const title = segmentTitle(seg.key, locale);
@@ -505,7 +523,8 @@ ${lensDirective(lens)}
 - 【真实直接、不模棱两可】给出明确判断,优点缺点都直说,该断就断;少用"可能/也许/倾向于"安全垫,杜绝放之四海皆准、谁都适用的废话。真矛盾或数据有边界时明说"不确定/两种力量并存"。
 - 【篇幅·硬性】本节扼要讲透核心即可,约 ${SECTION_WORDS} 字、3–4 段;**务必在篇幅内把话说完、自然收尾(以句号结束),宁可少写一点,也绝不写到一半被切断。** 不要越界写其它节,也不要把大运流年展开成长篇(那是另一份报告)。
 - 每个论断挂依据${lens === "ziwei" ? "(哪个宫位的哪颗星或四化)" : lens === "bazi" ? "(哪一柱/哪个十神/星运/神煞)" : "(哪一柱/哪个十神/哪个宫位的哪颗星或四化)"}。若本节涉及性格/命格${lens === "bazi" ? ",以日主与十神格局立论" : lens === "ziwei" ? ",务必结合命宫三方四正四宫合看主星定格局,先点格局再展开" : ",紫微部分须结合命宫三方四正四宫合看主星定格局"}。
-- **输出以「## ${title}」作为小标题开头,只写这一节。**${caveatBlockOf(caveats)}`;
+- **输出以「## ${title}」作为小标题开头,只写这一节。**
+${tldrDirective(title)}${caveatBlockOf(caveats)}`;
 }
 
 /** 单节《大运流年深析》指令(分段模式)。lens 决定纯八字/纯紫微/合参;locale 决定小标题语言。 */
@@ -531,5 +550,6 @@ ${FORTUNE_STYLE_RULES}
 【篇幅·硬性】本节约 ${SECTION_WORDS} 字、扼要写透;**务必在篇幅内把话说完、自然收尾(以句号结束),宁短勿断,绝不写到一半被切。**
 
 ${ledger}
-**输出以「## ${title}」作为小标题开头,只写这一节,不要写其它节。**${caveatBlockOf(caveats)}`;
+**输出以「## ${title}」作为小标题开头,只写这一节,不要写其它节。**
+${tldrDirective(title)}${caveatBlockOf(caveats)}`;
 }

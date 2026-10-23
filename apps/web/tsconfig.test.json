@@ -34,6 +34,8 @@
     "lib/yijingSite.ts",
     "lib/theme.ts",
     "lib/fortuneRepair.ts",
-    "lib/highlightTerms.tsx"
+    "lib/highlightTerms.tsx",
+    "lib/tldr.ts",
+    "lib/dragScroll.ts"
   ]
 }
