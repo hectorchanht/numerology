@@ -48,25 +48,10 @@ export function subscribeScript(fn: () => void): () => void {
  * 傳 "zh-Hant" → 繁體目標就唔郁。原因:s2t 會將古籍異體「正規化」(系→繫、御→禦、牀→床),
  * 繁體正本唔應該被改。(簡體目標照轉:t2s 對簡體係 no-op,仲順手修正舊記錄存咗嘅繁體。)
  */
-/**
- * 占(卜筮義)保護:tongwen s2t 會將「占」→「佔」,但占卜/占例/占辭等必須保留「占」
- * (實測 lockScriptSync('易經占例庫','zh-Hant') → '易經佔例庫')。
- * 策略:轉換前將「占(唔係占有)」換成 PUA 佔位,轉完還原。
- * 「占有」照舊轉「佔有」(正確繁體);t2s 方向唔受影響(佔→占本來就啱)。
- */
-const ZHAN_GUARD = "";
-const ZHAN_RE = /占(?!有)/g;
-function guardZhan(s: string): string {
-  return s.replace(ZHAN_RE, ZHAN_GUARD);
-}
-function unguardZhan(s: string): string {
-  return s.replaceAll(ZHAN_GUARD, "占");
-}
-
 export function lockScript(text: string, loc: Locale, from: ZhScript = "zh-Hans"): string {
   const target = LOCALE_SCRIPT[loc];
   if (!text || (from === "zh-Hant" && target === "zh-Hant")) return text;
-  return unguardZhan(lockScriptSync(guardZhan(text), target));
+  return lockScriptSync(text, target);
 }
 
 /**
@@ -77,7 +62,7 @@ export async function scriptLocker(loc: Locale): Promise<((s: string) => string)
   const target = AI_SCRIPT[loc];
   if (!target) return null;
   await warmScriptFor(target);
-  return (s) => (s ? unguardZhan(lockScriptSync(guardZhan(s), target)) : s);
+  return (s) => (s ? lockScriptSync(s, target) : s);
 }
 
 /** 安全斷點:換行、空白、中英標點之後(詞組唔會跨呢啲字)。 */
