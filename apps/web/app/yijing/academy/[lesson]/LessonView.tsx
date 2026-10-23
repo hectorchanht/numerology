@@ -53,6 +53,24 @@ export function LessonView({ lessonId }: { lessonId: string }) {
 
       <Quiz lesson={lesson} onDone={() => setRefresh((r) => r + 1)} />
 
+      {lesson.sources && lesson.sources.length > 0 && (
+        <div className="card" style={{ marginTop: "1.2rem" }}>
+          <h2 className="section-title">延伸出處</h2>
+          <p className="muted" style={{ fontSize: "0.85rem", marginBottom: "0.6rem" }}>
+            以下為公有領域原文,課文引文皆可於此稽考:
+          </p>
+          <ul style={{ paddingLeft: "1.2rem", margin: 0 }}>
+            {lesson.sources.map((s, i) => (
+              <li key={i} style={{ marginBottom: "0.4rem" }}>
+                <a href={s.url} target="_blank" rel="noopener noreferrer">
+                  {s.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div
         style={{
           display: "flex",

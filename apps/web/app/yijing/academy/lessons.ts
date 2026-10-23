@@ -17,6 +17,12 @@ export interface AcademySection {
   body: string[];
 }
 
+/** 課程出處:已親自抓取核實過的公有領域原文鏈接(勿憑空編造 URL)。 */
+export interface AcademySource {
+  label: string;
+  url: string;
+}
+
 export interface AcademyLesson {
   id: string;
   index: number;
@@ -25,6 +31,8 @@ export interface AcademyLesson {
   minutes: number;
   sections: AcademySection[];
   quiz: AcademyQuizQ[];
+  /** 延伸出處:每課 2–4 個已核實的公有領域原文鏈接。 */
+  sources: AcademySource[];
 }
 
 export const ACADEMY_LESSONS: AcademyLesson[] = [
@@ -92,6 +100,11 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
         explain: "物極必反:老陽(9)動則變陰,老陰(6)動則變陽,這就是變卦的由來。",
       },
     ],
+    sources: [
+      { label: "《繫辭上》第五章:一陰一陽之謂道", url: "https://zh.wikisource.org/wiki/周易/繫辭上" },
+      { label: "《繫辭上》第十一章:太極生兩儀、兩儀生四象、四象生八卦", url: "https://zh.wikisource.org/wiki/周易/繫辭上" },
+      { label: "《繫辭下》:八卦成列;乾至健、坤至順", url: "https://zh.wikisource.org/wiki/周易/繫辭下" },
+    ],
   },
   {
     id: "reading-gua",
@@ -113,7 +126,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
         heading: "實例:乾䷀ 與 坤䷁",
         body: [
           "乾䷀:六爻全陽,上下皆乾。卦辭「元亨利貞」。初九「潛龍勿用」——時機未到,先蓄力;九二「見龍在田,利見大人」——可以出場了,宜見貴人;九五「飛龍在天,利見大人」——大展宏圖之時;上九「亢龍有悔」——過滿則虧,該收斂。六爻就是一條龍的一生,也是任何事業的完整週期。",
-          "坤䷁:六爻全陰,上下皆坤。卦辭「元亨,利牝馬之貞」——像母馬一樣柔順而堅定則吉。初六「履霜,堅冰至」——見微知著;六二「直方大,不習无不利」——正直方大,不必刻意學習也有利。坤卦教的是配合與承載,和乾卦的開創正好一陰一陽。",
+          "坤䷁:六爻全陰,上下皆坤。卦辭「元亨,利牝馬之貞」——像母馬一樣柔順而堅定則吉。初六「履霜,堅冰至」——見微知著;六二「直方大,不習無不利」——正直方大,不必刻意學習也有利。坤卦教的是配合與承載,和乾卦的開創正好一陰一陽。",
           "去「六十四卦」庫親手點開這兩卦,對照卦辭、六爻爻辭、大象看一遍,比看十遍講解有用。解卦的功力,一半來自對爻辭原文的熟悉度。",
         ],
       },
@@ -144,6 +157,10 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
         explain: "潛龍是時位問題不是吉凶問題:能量在積累期,妄動則凶,待時而動則吉。",
       },
     ],
+    sources: [
+      { label: "乾卦:卦辭、爻辭、彖象原文", url: "https://zh.wikisource.org/wiki/周易/乾" },
+      { label: "坤卦:卦辭、爻辭、彖象原文", url: "https://zh.wikisource.org/wiki/周易/坤" },
+    ],
   },
   {
     id: "asking",
@@ -155,7 +172,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
       {
         heading: "好問題是解卦的一半",
         body: [
-          "第一戒:一事一占。一次只問一件事,「事業感情健康都問問」這種問題,卦象無法對應,解出來也是模稜兩可。想清楚此刻最困擾你的那一個抉擇。",
+          "第一戒:一事一占。一次只問一件事,「事業感情健康都問問」這種問題,卦象無法對應,解出來也是模稜兩可。想清楚此刻最困擾你的那一個抉擇。(此為朱熹《易學啟蒙》一路的占戒,後世各派多沿用。)",
           "第二戒:問題要具體。不要問「我今年運勢如何」(太大),要問「這份 offer 該不該接」「這個合作該不該簽」。具體的問題才有具體的爻辭可以對應。",
           "第三戒:不義不占,戲不占。拿占卦當兒戲反覆試、或問損人利己之事,傳統認為心不誠則卦不靈——從心理學看也一樣:你都不認真,解出來的建議你也不會聽。",
           "第四戒:不反覆問同一件事。今天占到不喜歡的結果,明天換個問法再占,直到占出想要的答案為止,這叫「瀆卦」。真想再占,至少等情勢有實質變化。",
@@ -201,6 +218,10 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
         explain: "占卦的本質是自我對話與決策輔助;動機不正,整個過程就失去反思價值。",
       },
     ],
+    sources: [
+      { label: "《繫辭上》第九章:大衍之數(古占法之源)", url: "https://zh.wikisource.org/wiki/周易/繫辭上" },
+      { label: "《繫辭上》第十章:問焉而以言,其受命也如響", url: "https://zh.wikisource.org/wiki/周易/繫辭上" },
+    ],
   },
   {
     id: "interpreting",
@@ -214,7 +235,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
         body: [
           "本卦是你占到的原卦,代表事情的現狀與主體,是解讀的核心。變卦由動爻翻轉而來,代表事情的發展方向與結果——本卦為「貞」(現狀),變卦為「悔」(趨向)。",
           "互卦取二三四爻為下卦、三四五爻為上卦,代表事情發展的「過程」與內在機制,常揭示表面下真正的動力。錯卦是六爻陰陽全反,綜卦是整卦顛倒,兩者提供「換個角度看」的參照:如果從反面看也成立,結論就更可靠。",
-          "實戰權重:本卦卦辭與動爻爻辭為主(七成),變卦為輔(兩成),互卦看過程(一成),錯綜作驗證。不要五個平均用力,那會越解越亂。",
+          "實戰權重:本卦卦辭與動爻爻辭為主(七成),變卦為輔(兩成),互卦看過程(一成),錯綜作驗證。不要五個平均用力,那會越解越亂。(以上配比為本站給初學者的建議,非古法;熟練後可按實際調整。)",
         ],
       },
       {
@@ -263,6 +284,11 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
         answer: 1,
         explain: "六爻全動等於格局翻篇,直接看變卦(結果)的卦辭;乾坤兩卦則看用九用六。",
       },
+    ],
+    sources: [
+      { label: "乾卦原文(含用九)", url: "https://zh.wikisource.org/wiki/周易/乾" },
+      { label: "姤卦原文:女壯,勿用取女", url: "https://zh.wikisource.org/wiki/周易/姤" },
+      { label: "《繫辭上》第十章:參伍以變,錯綜其數", url: "https://zh.wikisource.org/wiki/周易/繫辭上" },
     ],
   },
 ];
