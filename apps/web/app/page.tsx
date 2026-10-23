@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { BirthInput, ChartResult, FortuneAnalysis } from "@numerology/engine";
 import type { BirthFormValue } from "@/lib/formTypes";
-import { useLocale } from "@/lib/i18n";
+import { useLocale, STRINGS, type TKey } from "@/lib/i18n";
 import { go, goBack, useNav, type Screen } from "@/lib/nav";
 import { setChatAvailable } from "@/lib/chatJump";
 import { currentLuckStep } from "@/lib/ganzhi";
@@ -46,6 +46,20 @@ function sectionsOf(r: Reading): Restored {
     fortune: Object.keys(fortune).length ? fortune : null,
   };
 }
+
+/** SEO:FAQ 結構化資料(同下面可見 FAQ 內容一致,畀 Google 拎 rich result)。 */
+const FAQ_JSONLD = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [1, 2, 3, 4, 5].map((n) => ({
+    "@type": "Question",
+    name: STRINGS.zht[`intro.q${n}` as TKey],
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: STRINGS.zht[`intro.a${n}` as TKey],
+    },
+  })),
+});
 
 export default function Home() {
   const { t, locale } = useLocale();
@@ -218,6 +232,60 @@ export default function Home() {
               {t("app.disclaimer2")}
             </p>
           </div>
+        </div>
+
+        {/* 介紹:三樣嘢 + 點用 + FAQ(SEO 可索引內容 + 新手睇得明) */}
+        <div className="intro">
+          <h2 className="group-title">{t("intro.title")}</h2>
+          <div className="intro-grid">
+            <div className="intro-card">
+              <div className="it">{t("intro.f1t")}</div>
+              <p>{t("intro.f1d")}</p>
+            </div>
+            <Link href="/yijing" className="intro-card">
+              <div className="it">{t("intro.f2t")}<Icon name="chev" small /></div>
+              <p>{t("intro.f2d")}</p>
+            </Link>
+            <Link href="/yijing/academy" className="intro-card">
+              <div className="it">{t("intro.f3t")}<Icon name="chev" small /></div>
+              <p>{t("intro.f3d")}</p>
+            </Link>
+          </div>
+
+          <h3 className="intro-sub">{t("intro.stepsTitle")}</h3>
+          <ol className="intro-steps">
+            <li>{t("intro.s1")}</li>
+            <li>{t("intro.s2")}</li>
+            <li>{t("intro.s3")}</li>
+          </ol>
+
+          <h2 className="group-title">{t("intro.faqTitle")}</h2>
+          <div className="faq">
+            <details>
+              <summary>{t("intro.q1")}</summary>
+              <p>{t("intro.a1")}</p>
+            </details>
+            <details>
+              <summary>{t("intro.q2")}</summary>
+              <p>{t("intro.a2")}</p>
+            </details>
+            <details>
+              <summary>{t("intro.q3")}</summary>
+              <p>{t("intro.a3")}</p>
+            </details>
+            <details>
+              <summary>{t("intro.q4")}</summary>
+              <p>{t("intro.a4")}</p>
+            </details>
+            <details>
+              <summary>{t("intro.q5")}</summary>
+              <p>{t("intro.a5")}</p>
+            </details>
+          </div>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: FAQ_JSONLD }}
+          />
         </div>
 
         {/* 核心理念 manifesto */}

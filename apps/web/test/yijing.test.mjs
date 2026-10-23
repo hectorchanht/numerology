@@ -51,7 +51,7 @@ test("yijingStrings:yjFmt 填充佔位符", () => {
 
 // —— sitemap 路由 ——
 test("yijingSite:包含全部公開路由且形狀正確", () => {
-  assert.equal(SITE_BASE, "https://numerology-7v4.pages.dev");
+  assert.equal(SITE_BASE, "https://numerology.dawnstudio.app");
   const paths = SITE_ROUTES.map((r) => r.path);
   for (const p of ["/", "/yijing", "/yijing/gua", "/poster"]) {
     assert.ok(paths.includes(p), `缺少路由 ${p}`);

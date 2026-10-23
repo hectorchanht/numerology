@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://numerology-7v4.pages.dev/sitemap.xml
+Sitemap: https://numerology.dawnstudio.app/sitemap.xml
