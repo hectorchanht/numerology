@@ -35,6 +35,7 @@
     "lib/yijingSite.ts",
     "lib/theme.ts",
     "lib/fortuneRepair.ts",
+    "lib/speechText.ts",
     "lib/highlightTerms.tsx",
     "lib/tldr.ts",
     "lib/dragScroll.ts"

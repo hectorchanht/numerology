@@ -36,13 +36,19 @@ const BTN_SIZE = 32;
 export function PronounceButton({
   text,
   locale = "zht",
+  mode = "single",
 }: {
   /** 要朗讀的文字 */
   text: string;
   /** 介面語言(只影響按鈕標籤/提示,不影響發音) */
   locale?: PronounceLocale;
+  /**
+   * "single":一次讀完(text 應為短句);
+   * "all":先按句讀分句再排隊讀(適合段落/章節長文本)。
+   */
+  mode?: "single" | "all";
 }) {
-  const { speak, stop, isPlaying, currentLang } = useSpeech();
+  const { speak, speakAll, stop, isPlaying, currentLang } = useSpeech();
   const [selectedLang, setSelectedLang] = useState<SpeechLang>("zh-HK");
   const [showMenu, setShowMenu] = useState(false);
   const [hovered, setHovered] = useState<SpeechLang | null>(null);
@@ -110,6 +116,7 @@ export function PronounceButton({
     e.stopPropagation();
     if (showMenu) setShowMenu(false);
     if (isPlaying) stop();
+    else if (mode === "all") speakAll(text, selectedLang);
     else speak(text, selectedLang);
   };
 
@@ -123,7 +130,8 @@ export function PronounceButton({
   const toggleLanguage = (lang: SpeechLang) => {
     setSelectedLang(lang);
     setShowMenu(false);
-    speak(text, lang); // 切換即讀一次,即時確認
+    if (mode === "all") speakAll(text, lang);
+    else speak(text, lang); // 切換即讀一次,即時確認
   };
 
   const menuItem = (lang: SpeechLang) =>

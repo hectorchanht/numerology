@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { BirthInput } from "@numerology/engine";
@@ -9,6 +9,7 @@ import { aiRequestParts } from "@/lib/aiSettings";
 import { useLocale } from "@/lib/i18n";
 import { Icon } from "@/components/Icon";
 import { markdownTermComponents } from "@/lib/highlightTerms";
+import { onChatAskRequest, takePendingChatAsk } from "@/lib/chatJump";
 
 interface Turn { role: "user" | "assistant"; content: string }
 
@@ -45,6 +46,18 @@ export function ChatPanel({ input }: { input: BirthInput }) {
       setBusy(false);
     }
   };
+
+  // 選詞 popover 的「跳去 AI Chat」:經 chatJump 收到問題即追問。
+  const askRef = useRef(ask);
+  askRef.current = ask;
+  useEffect(
+    () =>
+      onChatAskRequest(() => {
+        const q = takePendingChatAsk();
+        if (q) askRef.current(q);
+      }),
+    [],
+  );
 
   return (
     <div className="chat">

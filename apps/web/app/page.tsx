@@ -6,6 +6,7 @@ import type { BirthInput, ChartResult, FortuneAnalysis } from "@numerology/engin
 import type { BirthFormValue } from "@/lib/formTypes";
 import { useLocale } from "@/lib/i18n";
 import { go, goBack, useNav, type Screen } from "@/lib/nav";
+import { setChatAvailable } from "@/lib/chatJump";
 import { currentLuckStep } from "@/lib/ganzhi";
 import { yjT } from "@/lib/yijingStrings";
 import { BirthForm } from "@/components/BirthForm";
@@ -18,7 +19,6 @@ import { TimeInferPanel } from "@/components/TimeInferPanel";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { HistoryPanel } from "@/components/HistoryPanel";
 import { FortuneTimeline } from "@/components/FortuneTimeline";
-import { ChartSummary, WuxingChart } from "@/components/Charts";
 import { Icon } from "@/components/Icon";
 import { EmptyChart, ScreenNav, Seg } from "@/components/ui";
 import { loadAi } from "@/lib/aiSettings";
@@ -144,6 +144,12 @@ export default function Home() {
     };
 
   const ready = chart && input ? { chart, input } : null;
+  // 選詞 popover 的「跳去 AI Chat」掣只在有可用命盤時出現。
+  const hasReady = !!ready;
+  useEffect(() => {
+    setChatAvailable(hasReady);
+    return () => setChatAvailable(false);
+  }, [hasReady]);
   const nowLuck = chart ? currentLuckStep(chart.bazi) : undefined;
   /** 确定性运势数据(无 AI 调用):渲染前修复小标题数字与紫微大限:無(含旧缓存文本)。 */
   const [fortuneJson, setFortuneJson] = useState<FortuneAnalysis | null>(null);
@@ -243,12 +249,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 一眼睇晒:摘要卡 + 五行圖(確定性數據,零 AI) */}
-              <h2 className="group-title">{t("viz.summary")}</h2>
-              <ChartSummary chart={ready.chart} />
-              <h2 className="group-title">{t("chart.wuxing")}</h2>
-              <WuxingChart chart={ready.chart} />
-
               <Seg
                 value={sys}
                 onChange={setSys}
@@ -259,7 +259,7 @@ export default function Home() {
               />
 
               <div hidden={sys !== "bazi"}>
-                <BaziTable bazi={ready.chart.bazi} />
+                <BaziTable bazi={ready.chart.bazi} ziwei={ready.chart.ziwei} />
                 <BaziDetail bazi={ready.chart.bazi} />
               </div>
               <div hidden={sys !== "ziwei"}>

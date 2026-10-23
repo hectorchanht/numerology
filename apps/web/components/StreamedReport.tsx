@@ -12,6 +12,8 @@ import { stripLeadingHeading } from "@/lib/sectionIcons";
 import { markdownTermComponents } from "@/lib/highlightTerms";
 import { Icon, SECTION_ICON } from "@/components/Icon";
 import { Seg, ScreenNav } from "@/components/ui";
+import { PronounceButton } from "@dawn-studio/pronounce";
+import { speechText } from "@/lib/speechText";
 
 /** 分段定义:key 对应引擎 REPORT_SEGMENTS / FORTUNE_SEGMENTS,label 用作章節卡標題。 */
 export interface ReportSeg {
@@ -282,6 +284,9 @@ export function StreamedReport({
                   s.status === "error" ? "failed" : "",
                 ].filter(Boolean).join(" ");
                 const isOpen = !collapsible || open.has(seg.key);
+                // 朗讀本節:修復佔位符 → 去 markdown → 分句排隊讀。
+                const rawBody = repairText ? repairText(stripLeadingHeading(s.text)) : stripLeadingHeading(s.text);
+                const readText = has ? speechText(rawBody) : "";
                 const head = (
                   <>
                     <Icon name={SECTION_ICON[seg.key] ?? "spark"} />
@@ -291,11 +296,12 @@ export function StreamedReport({
                 );
                 return (
                   <article className={cls} id={`${idBase}-${seg.key}`} key={seg.key}>
-                    {collapsible ? (
-                      <h3 className="sec-hd">
+                    <h3 className="sec-hd" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      {collapsible ? (
                         <button
                           type="button"
                           className="sec-h"
+                          style={{ flex: 1, minWidth: 0 }}
                           aria-expanded={isOpen}
                           aria-controls={`${idBase}-${seg.key}-b`}
                           onClick={() => toggle(seg.key)}
@@ -303,10 +309,15 @@ export function StreamedReport({
                           {head}
                           <Icon name="chevDown" small className={`caret-ic${isOpen ? " up" : ""}`} />
                         </button>
-                      </h3>
-                    ) : (
-                      <h3 className="sec-hd"><span className="sec-h">{head}</span></h3>
-                    )}
+                      ) : (
+                        <span className="sec-h" style={{ flex: 1, minWidth: 0 }}>{head}</span>
+                      )}
+                      {readText ? (
+                        <span style={{ flex: "none" }} title={t("select.readSection")}>
+                          <PronounceButton text={readText} locale={locale} mode="all" />
+                        </span>
+                      ) : null}
+                    </h3>
                     <div className="sec-b" id={`${idBase}-${seg.key}-b`} hidden={!isOpen}>
                       {has ? (
                         <div className={`prose${s.status === "streaming" ? " is-streaming" : ""}`}>
