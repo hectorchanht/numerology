@@ -71,11 +71,19 @@ export function Quiz({ lesson, onDone }: { lesson: AcademyLesson; onDone?: () =>
                       border: `1px solid ${
                         checked && isAns
                           ? "var(--cinnabar)"
-                          : isPick
-                            ? "var(--line-strong)"
-                            : "var(--line)"
+                          : // 揀緊(未對答案):reveal 正解嘅淡版 — 同色系,冇咁光
+                            !checked && isPick
+                            ? "var(--cinnabar-soft)"
+                            : isPick
+                              ? "var(--line-strong)"
+                              : "var(--line)"
                       }`,
-                      background: checked && isAns ? "oklch(60% 0.14 32 / 0.07)" : "transparent",
+                      background:
+                        checked && isAns
+                          ? "oklch(60% 0.14 32 / 0.07)"
+                          : !checked && isPick
+                            ? "oklch(60% 0.14 32 / 0.035)"
+                            : "transparent",
                       color: "var(--ink)",
                       opacity: checked && !isAns && !isPick ? 0.55 : 1,
                     }}
