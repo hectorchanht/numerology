@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   description:
     "AI 輔助的中國命理工具:八字四柱 + 紫微斗數,動靜結合解讀人生格局與大運走向。文化與自我反思工具,非宿命預測。",
   appleWebApp: { capable: true, statusBarStyle: "black" },
+  icons: {
+    icon: "/favicon.png",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 // DARK-THEME DEFAULT:theme-color 純黑,唔會閃白;用戶揀 light 時由 lib/theme 改寫。
