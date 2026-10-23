@@ -9,6 +9,17 @@ An AI-assisted Chinese metaphysics tool combining **BaZi (Four Pillars of Destin
 
 A hardened fork of [Crazycreate/Numerology](https://github.com/Crazycreate/Numerology) (MIT): service-layer bugs fixed, error handling rebuilt, and new features added continuously.
 
+## Manifesto
+
+People drawn to the I Ching and Chinese metaphysics usually lack knowledge and judgment, not interest. This site's goal:
+
+- **Zero barrier** — enter your birth data and get a reading. No prior knowledge needed.
+- **Evidence-backed** — every classical quote is traceable. No hallucination, no bullshit.
+- **Deeper as you learn** — tap any term for its meaning; the academy takes you further.
+- **0 → 1** — from beginner to master, step by step.
+
+> Although most of the content is phrased and concatenated by AI, we are evidence / reference backed up. Not hallucination, no bullshit. Straight to the point.
+
 ## Core Design Principle
 
 > **Chart casting is computed; only interpretation uses AI.**

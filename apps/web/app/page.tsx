@@ -229,6 +229,7 @@ export default function Home() {
             <li>{t("creed.b3")}</li>
             <li>{t("creed.b4")}</li>
           </ol>
+          <p className="creed-signoff">{t("creed.evidence")}</p>
         </div>
       </section>
 

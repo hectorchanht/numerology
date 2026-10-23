@@ -230,6 +230,17 @@ label.row { cursor: pointer; }
 [data-theme="light"] .nav .logo-light { display: block; }
 .lede + .seg, .split-home .split-main > .seg:first-child { margin-bottom: 4px; }
 
+/* 首頁核心理念 manifesto */
+.creed { margin-top: 30px; }
+.creed ol { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; counter-reset: creed; }
+.creed li { counter-increment: creed; position: relative; background: var(--card); border-radius: var(--radius);
+  padding: 14px 16px 14px 54px; font-size: 14px; line-height: 1.65; color: var(--label); }
+.creed li::before { content: "0" counter(creed); position: absolute; left: 16px; top: 15px;
+  color: var(--accent); font-size: 13px; font-weight: 700; letter-spacing: .05em; }
+.creed-signoff { margin: 14px 2px 0; padding-left: 12px; border-left: 2px solid var(--accent);
+  font-size: 13.5px; line-height: 1.7; color: var(--label-2); }
+
+
 /* ---------- 命盤:摘要 ---------- */
 .who { display: flex; align-items: center; gap: 14px; margin: 8px 0 20px; }
 .avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--card-2); display: grid; place-items: center;
