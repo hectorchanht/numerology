@@ -22,7 +22,11 @@ export {
 export { analyzeFortune } from "./fortune.js";
 export { castHourCandidates, type HourInferInput, type HourCandidate } from "./hourinfer.js";
 export { solarFromLunar, type LunarDate, type SolarDate } from "./calendar.js";
-export { tossCoins, castYijing, divine, type CoinLine, type CastResult, type TrigramKey } from "./yijing.js";
+export { tossCoins, castYijing, divine, trigramOfBits, type CoinLine, type CastResult, type TrigramKey } from "./yijing.js";
+export {
+  paigua, ganzhiForDate, palaceOf, qinOf, beastOf, xunKong, chong,
+  type YaoValue, type Qin, type PalaceInfo, type LiuyaoYao, type LiuyaoResult,
+} from "./liuyao.js";
 export type {
   FortuneAnalysis,
   DaYunAnalysis,

@@ -109,6 +109,11 @@ function trigramOf(bits: number[]): TrigramKey {
   return t;
 }
 
+/** 三爻 bits(由下而上,1=陽/非零亦視為陽) → 卦名(供六爻納甲等模組用)。 */
+export function trigramOfBits(bits: readonly number[]): TrigramKey {
+  return trigramOf(bits.map((b) => (b ? 1 : 0)));
+}
+
 function numberOf(upper: TrigramKey, lower: TrigramKey): number {
   const n = GUAMAP[`${upper},${lower}`];
   if (!n) throw new Error(`查無卦序: 上${upper}下${lower}`);

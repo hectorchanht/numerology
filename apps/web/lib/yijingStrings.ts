@@ -16,6 +16,8 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "nav.yijing": S("易經占卦", "易经占卦", "Yi Jing Divination"),
   "nav.gua": S("六十四卦", "六十四卦", "64 Hexagrams"),
   "nav.poster": S("命盤海報", "命盘海报", "Chart Poster"),
+  "nav.academy": S("易經學院", "易经学院", "Yi Jing Academy"),
+  "nav.liuyao": S("六爻納甲", "六爻纳甲", "Six Lines"),
 
   /* —— 占卦頁 —— */
   "yijing.title": S("易經占卦", "易经占卦", "Yi Jing Divination"),
@@ -40,6 +42,56 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "yijing.noChange": S("無動爻:此卦不變,看本卦卦辭即可。", "无动爻:此卦不变,看本卦卦辞即可。", "No moving lines: the hexagram stands as cast — read the primary judgment."),
   "yijing.lineText": S("爻辭", "爻辞", "Line text"),
   "yijing.aiSoon": S("AI 解卦即將推出(目前保護預算,暫不調用 AI)。", "AI 解卦即将推出(目前保护预算,暂不调用 AI)。", "AI interpretation is coming soon (AI calls are disabled for now to protect the budget)."),
+
+  /* —— 易經學院 —— */
+  "academy.title": S("易經學院", "易经学院", "Yi Jing Academy"),
+  "academy.sub": S("從零學懂易經 · 四課入門", "从零学懂易经 · 四课入门", "Learn the Yi Jing from zero · 4 lessons"),
+  "academy.intro": S(
+    "四課帶你由陰陽五行八卦,讀到點問卦、點解卦。全部白話講解,每課附自我檢測,學完可以直接去占卦頁實戰。",
+    "四课带你由阴阳五行八卦,读到点问卦、点解卦。全部白话讲解,每课附自我检测,学完可以直接去占卦页实战。",
+    "Four lessons from yin-yang and the trigrams to asking and interpreting. Plain-language guides with quizzes — then try the divination tool.",
+  ),
+  "academy.progress": S("已完成 {d} / {t} 課", "已完成 {d} / {t} 课", "{d} of {t} lessons done"),
+  "academy.minutes": S("約 {n} 分鐘", "约 {n} 分钟", "~{n} min"),
+  "academy.best": S("最佳 {s}/{t}", "最佳 {s}/{t}", "best {s}/{t}"),
+  "academy.localNote": S("進度只保存在此裝置,不會上傳。", "进度只保存在此装置,不会上传。", "Progress stays on this device only."),
+  "academy.lessonNo": S("第 {n} 課", "第 {n} 课", "Lesson {n}"),
+  "academy.back": S("← 返回學院首頁", "← 返回学院首页", "← Back to Academy"),
+  "academy.notFound": S("找不到這一課。", "找不到这一课。", "Lesson not found."),
+  "academy.goDivine": S("去占一卦實戰", "去占一卦实战", "Cast a hexagram"),
+  "academy.quiz": S("自我檢測", "自我检测", "Self-check"),
+  "academy.quizCheck": S("對答案", "对答案", "Check answers"),
+  "academy.quizRetry": S("再測一次", "再测一次", "Retry"),
+  "academy.quizScore": S("得分 {s} / {t}", "得分 {s} / {t}", "Score {s} / {t}"),
+  "academy.quizRight": S("正確", "正确", "Correct"),
+  "academy.quizWrong": S("再想想", "再想想", "Review"),
+
+  /* —— 六爻納甲 —— */
+  "liuyao.title": S("六爻納甲", "六爻纳甲", "Six Lines Najia"),
+  "liuyao.sub": S("裝卦排盤 · 干支六親世應六獸", "装卦排盘 · 干支六亲世应六兽", "Full najia chart · stems, kinship, gen/ying, beasts"),
+  "liuyao.dateLabel": S("占問日期(取日辰月建,預設今日)", "占问日期(取日辰月建,预设今日)", "Divination date (day & month pillars, default today)"),
+  "liuyao.dateHint": S("日辰、月建、旬空、六獸皆按此日起,月建按節氣定。", "日辰、月建、旬空、六兽皆按此日起,月建按节气定。", "Day stem-branch, month branch, voids and beasts derive from this date; month follows solar terms."),
+  "liuyao.modeCoin": S("搖錢起卦", "摇钱起卦", "Coin toss"),
+  "liuyao.modeManual": S("手動裝卦", "手动装卦", "Manual lines"),
+  "liuyao.toss": S("搖一爻", "摇一爻", "Toss a line"),
+  "liuyao.rolling": S("搖卦中…", "摇卦中…", "Tossing…"),
+  "liuyao.cast": S("裝卦", "装卦", "Cast chart"),
+  "liuyao.yaoTop": S("上爻", "上爻", "Top"),
+  "liuyao.yaoBottom": S("初爻", "初爻", "Bottom"),
+  "liuyao.result": S("裝卦結果", "装卦结果", "Chart"),
+  "liuyao.moving": S("動", "动", "moving"),
+  "liuyao.static": S("靜", "静", "still"),
+  "liuyao.kong": S("旬空", "旬空", "void"),
+  "liuyao.yuePo": S("月破", "月破", "month-break"),
+  "liuyao.riPo": S("日破", "日破", "day-break"),
+  "liuyao.note": S("世為我方、應為對方;旬空月破日破之爻力量受損,須結合動變參看。用神選取因事而異,此處只作客觀排盤。", "世为我方、应为对方;旬空月破日破之爻力量受损,须结合动变参看。用神选取因事而异,此处只作客观排盘。", "Gen = self, ying = other; void/broken lines are weakened. Reference only — the useful god depends on the question."),
+
+  /* —— AI 解卦 —— */
+  "ai.interpret": S("AI 解卦", "AI 解卦", "AI interpretation"),
+  "ai.interpretTitle": S("AI 解卦", "AI 解卦", "AI interpretation"),
+  "ai.loading": S("解卦中…", "解卦中…", "Interpreting…"),
+  "ai.retry": S("再解一次", "再解一次", "Retry"),
+  "ai.budgetNote": S("經本站 Cloudflare 帳號調用,計入每月 $2 預算;相同卦象會用緩存,不重複扣費。", "经本站 Cloudflare 帐号调用,计入每月 $2 预算;相同卦象会用缓存,不重复扣费。", "Runs on this site's Cloudflare account under the $2/month budget; cached results cost nothing extra."),
   "yijing.askHonest": S("傳統講究:一事一占、心誠則靈,不義之問不占。", "传统讲究:一事一占、心诚则灵,不义之问不占。", "Tradition: one question per casting, asked with sincerity."),
 
   /* —— 六十四卦庫 —— */

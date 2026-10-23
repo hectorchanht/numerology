@@ -10,6 +10,7 @@ import { getHexagram, yaoName } from "@numerology/knowledge";
 import { useLocale } from "@/lib/i18n";
 import { yjT, yjFmt, type YijingLocale } from "@/lib/yijingStrings";
 import { Gloss } from "@/components/Gloss";
+import { AiInterpret } from "./AiInterpret";
 
 interface TossedLine {
   value: CoinLine;
@@ -309,9 +310,7 @@ export default function YijingTool() {
               </div>
             )}
 
-            <p className="muted" style={{ marginTop: "1.2rem", marginBottom: 0 }}>
-              {yjT("yijing.aiSoon", loc)}
-            </p>
+            <AiInterpret hexagram={cast.hexagram} lines={cast.lines} locale={loc} />
           </div>
         )}
       </div>
