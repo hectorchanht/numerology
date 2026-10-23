@@ -147,7 +147,7 @@ export default function YijingHistoryList() {
       </div>
 
       {recs === null ? (
-        <p className="muted">{yjT("yijing.hist.empty", loc)}</p>
+        <p className="muted">{yjT("yijing.hist.loading", loc)}</p>
       ) : recs.length === 0 ? (
         <div className="card">
           <p style={{ margin: "0 0 0.4rem" }}>{yjT("yijing.hist.empty", loc)}</p>

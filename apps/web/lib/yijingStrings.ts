@@ -43,6 +43,7 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "yijing.hist.title": S("占卦歷史", "占卦历史", "Divination history"),
   "yijing.hist.sub": S("銅錢、梅花、六爻的起卦記錄,只儲存於本機", "铜钱、梅花、六爻的起卦记录,只储存于本机", "Coin, plum-blossom and liuyao casts — stored on this device only"),
   "yijing.hist.empty": S("還沒有占卦記錄", "还没有占卦记录", "No casts yet"),
+  "yijing.hist.loading": S("載入中…", "载入中…", "Loading…"),
   "yijing.hist.emptyHint": S("起卦後會自動保存於此,隨時回來看", "起卦后会自动保存于此,随时回来查看", "Casts are saved here automatically — review them anytime"),
   "yijing.hist.kind.coin": S("銅錢占卦", "铜钱占卦", "Coin toss"),
   "yijing.hist.kind.meihua": S("梅花易數", "梅花易数", "Plum blossom"),
