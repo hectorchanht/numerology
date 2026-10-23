@@ -494,8 +494,12 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
 - `next build` ✓;`npm run cf:pages` ✓(輸出含 yijing.html、yijing/gua.html、
   poster.html、robots.txt、llms.txt;中途清掉殘留 .vercel/output 的 EEXIST、
   sitemap 加 edge runtime)。
-- 線上驗證(部署成功後):/yijing 載入 + 完整擲卦出本卦/變卦、/yijing/gua 卦詳情
-  6 爻辭、/poster 渲染。
+- 線上驗證(2026-10-23,部署 `aaab1840` 成功):/yijing → 200(標題「易經占卦 · 三錢起卦」,
+  bundle 含 老陽/動爻 等占卦 UI 字串);/yijing/gua → 200(標題「六十四卦 · 卦辭爻辭全覽」,
+  卦庫數據 chunk 含 潛龍勿用 等爻辭);/poster → 200(標題「命盤海報 · 水墨命盤」);
+  /sitemap.xml 列出 4 路由;/robots.txt + /llms.txt 正常。
+  註:擲錢 6 次的完整點擊流程未在真瀏覽器走過(引擎 castYijing 已單測覆蓋;
+  同 history 點擊恢復一樣,值得手機上親手點一次)。
 - 與 fortune 質量修復 worker 的分工:本 job 只新增文件,唯一改動是
   layout.tsx 加 YijingNav(一行 import + 一行 JSX,已確認當時為 16 行版本);
   prompts.ts/context.ts/StreamedReport/page.tsx/i18n.ts 均未碰。
