@@ -22,6 +22,7 @@ export {
 export { analyzeFortune } from "./fortune.js";
 export { castHourCandidates, type HourInferInput, type HourCandidate } from "./hourinfer.js";
 export { solarFromLunar, type LunarDate, type SolarDate } from "./calendar.js";
+export { tossCoins, castYijing, divine, type CoinLine, type CastResult, type TrigramKey } from "./yijing.js";
 export type {
   FortuneAnalysis,
   DaYunAnalysis,

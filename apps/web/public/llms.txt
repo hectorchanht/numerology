@@ -1,0 +1,22 @@
+# 命理 · 八字紫微合參 (numerology-7v4.pages.dev)
+
+AI 輔助的中國命理工具:八字四柱 + 紫微斗數,動靜結合解讀人生格局與大運走向。
+文化與自我反思工具,非宿命預測。界面語言:繁體(zht,預設)/簡體(zhs)/英文(en)。
+命盤記錄只存本機 IndexedDB,不上傳。
+
+## Key routes
+
+- / — 出生信息輸入 + 八字紫微排盤 + AI 解讀(Workers AI,每月 $2 硬上限)
+- /yijing — 易經占卦:三錢起卦 × 六,得本卦/變卦/互卦與動爻爻辭(純前端,無 AI 調用)
+- /yijing/gua — 六十四卦庫:文王卦序,搜卦名/拼音/英文/卦序號,卦辭/爻辭/大象/今解
+- /poster — 水墨風命盤海報:取本機最新排盤生成分享圖(截圖分享)
+
+## APIs (JSON)
+
+- POST /api/chart — 出生信息 → { bazi, ziwei } 雙盤
+- POST /api/report — 分段/整篇命盤解讀(流式)
+- POST /api/fortune — 大運流年深析(流式)
+- POST /api/chat — 命理問答(流式)
+- POST /api/hour-candidates — 不知時辰的 12 候選
+- POST /api/infer-time — AI 推斷時辰
+- GET /api/models — AI provider 模型列表

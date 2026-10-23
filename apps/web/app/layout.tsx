@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { YijingNav } from "@/components/YijingNav";
 
 export const metadata: Metadata = {
   title: "命理 · 八字紫微合參",
@@ -10,7 +11,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-Hant">
-      <body>{children}</body>
+      <body>
+        <YijingNav />
+        {children}
+      </body>
     </html>
   );
 }

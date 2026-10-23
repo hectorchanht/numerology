@@ -1,0 +1,237 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import {
+  allHexagrams,
+  getHexagram,
+  searchHexagrams,
+  yaoName,
+  interpOf,
+  TRIGRAM_INFO,
+  type Hexagram,
+  type YijingInterp,
+  type YijingLocale,
+} from "@numerology/knowledge";
+import { useLocale } from "@/lib/i18n";
+import { yjT, type YijingLocale as YL } from "@/lib/yijingStrings";
+import { Gloss } from "@/components/Gloss";
+
+const TABS = ["coreMeaning", "career", "love", "wealth", "health", "advice"] as const;
+const TAB_IDS: Record<(typeof TABS)[number], string> = {
+  coreMeaning: "gua.interp.core",
+  career: "gua.interp.career",
+  love: "gua.interp.love",
+  wealth: "gua.interp.wealth",
+  health: "gua.interp.health",
+  advice: "gua.interp.advice",
+};
+
+function TrigramTag({ name, loc }: { name: keyof typeof TRIGRAM_INFO; loc: YijingLocale }) {
+  const info = TRIGRAM_INFO[name];
+  return (
+    <span
+      className="badge"
+      title={`${info.pinyin} · ${info.en} · ${info.nature} · ${info.element}`}
+    >
+      {info.symbol} {name}
+    </span>
+  );
+}
+
+function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => void }) {
+  const [tab, setTab] = useState<(typeof TABS)[number]>("coreMeaning");
+  const interp: YijingInterp = interpOf(hex, loc as YijingLocale);
+  return (
+    <div className="card">
+      <button className="btn ghost" onClick={onBack} style={{ marginBottom: "1rem" }}>
+        {yjT("gua.detail.back", loc)}
+      </button>
+      <div style={{ display: "flex", gap: "1rem", alignItems: "flex-start", flexWrap: "wrap" }}>
+        <span style={{ fontSize: "3.4rem", lineHeight: 1 }}>{hex.symbol}</span>
+        <div>
+          <h2 style={{ margin: "0 0 0.2rem", fontSize: "1.7rem" }}>
+            {hex.name}
+            <span className="muted" style={{ fontSize: "0.85rem", marginLeft: "0.6rem" }}>
+              #{hex.number} · {hex.pinyin} · {hex.nameEn}
+            </span>
+          </h2>
+          <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+            <span className="muted">
+              {yjT("gua.upper", loc)}:
+            </span>
+            <TrigramTag name={hex.upperTrigram} loc={loc} />
+            <span className="muted">{yjT("gua.lower", loc)}:</span>
+            <TrigramTag name={hex.lowerTrigram} loc={loc} />
+            <span className="badge">
+              {yjT("gua.element", loc)} {hex.element}
+            </span>
+            <span className="badge">
+              {yjT("gua.yinyang", loc)} {hex.yinYang}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <h3 className="section-title" style={{ marginTop: "1.4rem" }}>
+        <Gloss term="卦辭" locale={loc} />
+      </h3>
+      <p style={{ fontFamily: "var(--serif)", fontSize: "1.05rem", marginTop: 0 }}>
+        {hex.judgment}
+      </p>
+
+      <h3 className="section-title">
+        <Gloss term="爻辭" locale={loc} />
+      </h3>
+      <div>
+        {[...hex.lines].reverse().map((text, ri) => {
+          const pos = 6 - ri;
+          return (
+            <div
+              key={pos}
+              style={{
+                display: "flex",
+                gap: "0.8rem",
+                padding: "0.45rem 0",
+                borderBottom: "1px dashed var(--line)",
+              }}
+            >
+              <span
+                style={{
+                  minWidth: "3.4em",
+                  fontFamily: "var(--serif)",
+                  color: "var(--cinnabar)",
+                }}
+              >
+                {yaoName(hex, pos)}
+              </span>
+              <span style={{ fontSize: "0.92rem" }}>{text}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      <h3 className="section-title" style={{ marginTop: "1.4rem" }}>
+        <Gloss term="大象" locale={loc} />
+      </h3>
+      <blockquote
+        style={{
+          margin: "0.5rem 0",
+          padding: "0.5rem 0.9rem",
+          borderLeft: "3px solid var(--gold)",
+          background: "var(--paper-2)",
+          color: "var(--ink-soft)",
+          fontSize: "0.92rem",
+        }}
+      >
+        {hex.image}
+      </blockquote>
+
+      <h3 className="section-title" style={{ marginTop: "1.4rem" }}>
+        {yjT("gua.interp", loc)}
+      </h3>
+      <div className="filter-chips" role="tablist">
+        {TABS.map((k) => (
+          <button
+            key={k}
+            role="tab"
+            aria-selected={tab === k}
+            className="filter-chip"
+            onClick={() => setTab(k)}
+          >
+            {yjT(TAB_IDS[k], loc)}
+          </button>
+        ))}
+      </div>
+      <p style={{ fontSize: "0.94rem", lineHeight: 1.8 }}>{interp[tab]}</p>
+    </div>
+  );
+}
+
+export default function GuaLibrary() {
+  const { locale } = useLocale();
+  const loc = locale as YL;
+  const [q, setQ] = useState("");
+  const [selected, setSelected] = useState<number | null>(null);
+  const all = useMemo(() => allHexagrams(), []);
+  const results = useMemo(() => searchHexagrams(q), [q]);
+  const hex = selected != null ? getHexagram(selected) : undefined;
+
+  return (
+    <>
+      <div className="masthead" style={{ paddingTop: "1.2rem" }}>
+        <h1 style={{ letterSpacing: "0.28em" }}>{yjT("gua.title", loc)}</h1>
+        <div className="sub">{yjT("gua.sub", loc)}</div>
+      </div>
+
+      {hex ? (
+        <Detail hex={hex} loc={loc} onBack={() => setSelected(null)} />
+      ) : (
+        <div className="card">
+          <div className="field" style={{ marginBottom: "1.2rem" }}>
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder={yjT("gua.searchPh", loc)}
+              aria-label={yjT("gua.searchPh", loc)}
+              style={{
+                font: "inherit",
+                padding: "0.55rem 0.65rem",
+                background: "var(--paper)",
+                color: "var(--ink)",
+                border: "1px solid var(--line-strong)",
+                borderRadius: "var(--r)",
+              }}
+            />
+          </div>
+          {results.length === 0 ? (
+            <p className="muted">{yjT("gua.empty", loc)}</p>
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(104px, 1fr))",
+                gap: "0.6rem",
+              }}
+            >
+              {results.map((h: Hexagram) => (
+                <button
+                  key={h.number}
+                  onClick={() => setSelected(h.number)}
+                  style={{
+                    font: "inherit",
+                    cursor: "pointer",
+                    background: "var(--paper)",
+                    border: "1px solid var(--line-strong)",
+                    borderRadius: "8px",
+                    padding: "0.7rem 0.4rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    transition: "all 120ms",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "var(--cinnabar)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "var(--line-strong)";
+                  }}
+                >
+                  <span style={{ fontSize: "1.9rem", lineHeight: 1.2 }}>{h.symbol}</span>
+                  <span style={{ fontFamily: "var(--serif)", fontSize: "0.92rem" }}>{h.name}</span>
+                  <span className="muted" style={{ fontSize: "0.68rem" }}>
+                    #{h.number}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+          <p className="muted" style={{ marginTop: "1rem", marginBottom: 0 }}>
+            <Gloss term="文王卦序" locale={loc} /> · {all.length}
+            {loc === "en" ? " hexagrams" : loc === "zhs" ? " 卦" : " 卦"}
+          </p>
+        </div>
+      )}
+    </>
+  );
+}

@@ -443,3 +443,64 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
 
 验证:140/140 测试通过(engine 41/ai 42/knowledge 5/web 52);`next build` +
 `npm run cf:pages` 均成功。
+
+## 易經學院 Phase 1(2026-10-23,用戶已批 build 順序)
+
+用戶決策:「兩樣都要,分階段做」— Phase 1 = 占卦工具 + 64卦庫;Phase 2 = 課程體系。
+
+### 數據層(`packages/knowledge`)
+- `src/yijing.data.ts`(生成文件,2712 行):64 卦 × {文王卦序、卦名/拼音/英文、
+  卦符䷀、上下卦、五行(按上卦)、陰陽、卦辭、6 爻辭、大象辭、六爻陰陽 bits、
+  三地現代解讀(核心/事業/感情/財運/健康/建議)}。
+  來源(文件頭已標註):卦辭/爻辭/大象辭 ← crane1102/iching-llm (MIT,公版通行本);
+  拼音/英文 ← FENGTING2025/iching-64-hexagrams-json (MIT);
+  上下卦/現代解讀 ← HeTaobaba123/iching-64-hexagrams-dataset (CC0-1.0)。
+- `scripts/gen-yijing-data.py`:重現生成的轉換器。正字化用 OpenCC
+  STCharacters 首選映射(/tmp/STCharacters.txt,Apache-2.0),並人工核對歧義字:
+  干父→幹父 / 噬干→噬乾(乾肉) / 于干(水涯)保留 / 咸(卦名)保留 / 斗(北斗)保留 /
+  里(百里)保留;繁體解讀另修 關係→關係。`reviewed: false`(經文公版可信,
+  現代解讀為 CC0 種子文本,學院白話解讀日後以本站自寫為準)。
+- `src/yijing.ts`:型別 + `allHexagrams/getHexagram/searchHexagrams`(拼音去聲調搜尋)、
+  `yaoName`(初九/六二/九五/上六規則)、`TRIGRAM_INFO`(八卦符號/拼音/英文/卦性/五行)、
+  `YIJING_GLOSSARY`(19 術語三地短釋義,供點按釋義)。
+- 回歸測試:`test/yijing.test.mjs`(10 項:64 卦齊全/每卦 6 爻辭/卦符區段/
+  bits 與卦象一致/爻位命名/三地解讀非空/搜尋/八卦資訊/術語表/META 授權標註)。
+
+### 引擎層(`packages/engine/src/yijing.ts`,純函數零依賴)
+- `tossCoins(rng?)`:三錢 ×6,6 老陰 / 7 少陽 / 8 少陰 / 9 老陽。
+- `castYijing(lines)`:本卦 + 動爻 + 變卦(動爻翻轉) + 互卦(2-3-4/3-4-5 爻) +
+  錯卦(全反) + 綜卦(顛倒);`divine()` 一次完成。
+- TRIGRAM/GUAMAP 移植自 iching-llm `iching_coin.py`(MIT),字形統一繁體。
+- 回歸測試:`test/yijing.test.mjs`(11 項:乾/坤/屯定位、動爻變卦姤#44、
+  屯之互剝#23/錯鼎#50/綜蒙#4、非法輸入、1000 次擲錢分佈、確定性 rng)。
+
+### Web 層(`apps/web`)
+- `/yijing` 占卦:選填問題(純前端不上傳)、逐爻擲或全部自動、CSS 錢幣翻轉動畫、
+  爻形(老陽⚊○/少陽⚊/少陰⚋/老陰⚋×)、本卦/變卦/互卦 + 動爻爻辭高亮、
+  **零 AI 調用**(保護 $2 Workers AI 預算;AI 解卦列為 Phase 2)。
+- `/yijing/gua` 卦庫:搜尋 + 64 卦網格,詳情含卦辭/六爻爻辭(爻位名)/大象/
+  六 tab 現代解讀(三地)。
+- `/poster` 水墨命盤海報:讀 IndexedDB 最新命盤,無記錄則空狀態引導;
+  CSS 紙紋 + 直書 accent + 朱砂印,480px 截圖優化。當前大運用虛歲近似匹配
+  `bazi.daYun` 區間(ChartResult 無 fortune 欄位)。
+- `components/YijingNav.tsx`(頂部瘦導航,sticky)+`components/Gloss.tsx`
+  (術語點按釋義)+`lib/yijingStrings.ts`(新 UI 文案三地字典,未動 i18n.ts)。
+- SEO:`app/sitemap.ts`(edge runtime;/,/yijing,/yijing/gua,/poster)、
+  `public/robots.txt`、`public/llms.txt`。
+- 回歸測試:`test/yijing.test.mjs`(7 項:字典三地一致性/yjT/yjFmt/sitemap 形狀)。
+
+### 驗證
+- 168/168 測試通過(knowledge 15 / engine 52 / ai 42 / web 59)。
+- `next build` ✓;`npm run cf:pages` ✓(輸出含 yijing.html、yijing/gua.html、
+  poster.html、robots.txt、llms.txt;中途清掉殘留 .vercel/output 的 EEXIST、
+  sitemap 加 edge runtime)。
+- 線上驗證(部署成功後):/yijing 載入 + 完整擲卦出本卦/變卦、/yijing/gua 卦詳情
+  6 爻辭、/poster 渲染。
+- 與 fortune 質量修復 worker 的分工:本 job 只新增文件,唯一改動是
+  layout.tsx 加 YijingNav(一行 import + 一行 JSX,已確認當時為 16 行版本);
+  prompts.ts/context.ts/StreamedReport/page.tsx/i18n.ts 均未碰。
+
+### 後續(Phase 2 / 待辦)
+- AI 解卦(接 Workers AI,注意預算)、六爻納甲裝卦(kentang2017/ichingshifa MIT 作算法規格)、
+  課程體系(陰陽五行八卦 → 64卦精講 → 問卦解卦實戰;白話解讀自寫)、
+  海報當前大運改精確起運歲數、GSC 提交新路由。
