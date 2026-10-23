@@ -245,3 +245,63 @@ test("poster:海報有分享邀請 + 連結(三語)", () => {
     assert.ok(texts.includes(m.cta), `${loc} 版面冇畫出 cta`);
   }
 });
+
+// —— 大運全表 + 五行 ——
+
+const SRC2 = {
+  ...SRC,
+  allDayun: [
+    { ganZhi: "己酉", startAge: 22, endAge: 31 },
+    { ganZhi: "庚戌", startAge: 32, endAge: 41 },
+    { ganZhi: "辛亥", startAge: 42, endAge: 51 },
+  ],
+  wuxing: [
+    { label: "木", count: 2 }, { label: "火", count: 1 }, { label: "土", count: 3 },
+    { label: "金", count: 1 }, { label: "水", count: 1 },
+  ],
+};
+
+test("poster:大運全表標示當前步", () => {
+  const m = buildPosterModel(SRC2, "zht", { includeBirth: false });
+  assert.equal(m.dayunSteps.length, 3);
+  assert.deepEqual(m.dayunSteps.map((s) => s.current), [false, true, false]);
+  assert.ok(m.dayunSteps[1].ages.includes("32") && m.dayunSteps[1].ages.includes("41"));
+  assert.equal(m.dayunHeading, "大運");
+});
+
+test("poster:冇 allDayun 時退返用單步 dayun", () => {
+  const m = buildPosterModel(SRC, "zht", { includeBirth: false });
+  assert.equal(m.dayunSteps.length, 1);
+  assert.equal(m.dayunSteps[0].current, true);
+  assert.equal(m.dayunSteps[0].ganZhi, "庚戌");
+});
+
+test("poster:五行一行 compact", () => {
+  const m = buildPosterModel(SRC2, "zht", { includeBirth: false });
+  assert.equal(m.wuxing.key, "wuxing");
+  assert.equal(m.wuxing.value, "木2 · 火1 · 土3 · 金1 · 水1");
+  const m2 = buildPosterModel(SRC, "en", { includeBirth: false });
+  assert.equal(m2.wuxing.value, "—");
+});
+
+test("poster:大運 grid 畫出嚟,當前往 accent 框", () => {
+  const layout = layoutPoster(buildPosterModel(SRC2, "zht", { includeBirth: false }), fakeMeasure);
+  const strokes = layout.ops.filter((o) => o.t === "rect" && o.stroke === "accent");
+  assert.equal(strokes.length, 1);
+  const texts = layout.ops.filter((o) => o.t === "text").map((o) => o.text);
+  assert.ok(texts.includes("己酉") && texts.includes("辛亥"));
+  assert.ok(texts.some((t) => t.includes("木2")));
+  // 所有指令唔出畫布
+  for (const o of layout.ops) {
+    if (o.t === "text" || o.t === "rect") {
+      assert.ok(o.x >= 0 && o.x <= layout.width, `op 超出畫布: ${JSON.stringify(o).slice(0, 80)}`);
+      assert.ok(o.y >= 0 && o.y <= layout.height, `op 超出畫布: ${JSON.stringify(o).slice(0, 80)}`);
+    }
+  }
+});
+
+test("poster:en 大運標題係英文", () => {
+  const m = buildPosterModel(SRC2, "en", { includeBirth: false });
+  assert.equal(m.dayunHeading, "Luck Cycles");
+  assert.equal(m.wuxing.label, "Five Phases");
+});

@@ -4,10 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useLocale, useScript } from "@/lib/i18n";
 import { listReadings, type Reading } from "@/lib/history";
-import { currentLuckStep } from "@/lib/ganzhi";
+import { currentLuckStep, luckSteps, wuxingCount } from "@/lib/ganzhi";
 import { go } from "@/lib/nav";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
-import { buildPosterModel, posterFilename, type PosterRow, type PosterSource } from "@/lib/poster";
+import { buildPosterModel, posterFilename, POSTER_PILLARS, type PosterRow, type PosterSource } from "@/lib/poster";
 import { renderPosterPng, savePosterPng } from "@/lib/posterExport";
 import { Icon } from "@/components/Icon";
 
@@ -79,6 +79,12 @@ export default function ChartPoster() {
   const src = useMemo<PosterSource | null>(() => {
     if (!reading) return null;
     const chart = reading.chart;
+    const wx = wuxingCount(
+      POSTER_PILLARS.map((k) => {
+        const gz = chart.bazi.fourPillars[k].ganZhi;
+        return { gan: gz[0] ?? "", zhi: gz[1] ?? "" };
+      }),
+    );
     return {
       input: chart.input,
       lunarDate: chart.bazi.lunarDate,
@@ -87,6 +93,12 @@ export default function ChartPoster() {
       soul: chart.ziwei.palaces.find((p) => p.isSoulPalace),
       body: chart.ziwei.palaces.find((p) => p.isBodyPalace),
       dayun: currentLuckStep(chart.bazi),
+      allDayun: luckSteps(chart.bazi).map((d) => ({
+        ganZhi: d.ganZhi,
+        startAge: d.startAge,
+        endAge: d.endAge,
+      })),
+      wuxing: (["木", "火", "土", "金", "水"] as const).map((label) => ({ label, count: wx[label] })),
       generatedAt: new Date(reading.updatedAt),
       name: name.trim() || undefined,
     };
@@ -143,16 +155,22 @@ export default function ChartPoster() {
         .poster-logo-light { display: none; }
         [data-theme="light"] .poster-logo-dark { display: none; }
         [data-theme="light"] .poster-logo-light { display: block; }
-        .poster-row { display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-bottom: 0.5px solid var(--sep); }
+        .poster-row { display: flex; gap: 12px; align-items: baseline; padding: 7px 0; border-bottom: 0.5px solid var(--sep); }
         .poster-row:last-child { border-bottom: none; }
         .poster-k { min-width: 4.2em; color: var(--label-2); font-size: 13px; }
         .poster-v2 { font-size: 16px; }
         .poster-h { color: var(--accent); font-size: 13px; letter-spacing: 0.04em; margin-bottom: 4px; }
-        .poster-pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px; }
-        .poster-pillar { text-align: center; border-radius: 12px; padding: 12px 4px; background: var(--card-2); }
+        .poster-pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 6px; }
+        .poster-pillar { text-align: center; border-radius: 12px; padding: 10px 4px; background: var(--card-2); }
         .poster-pillar .gz { font-size: 24px; font-weight: 500; color: var(--label); }
         .poster-pillar .ss { font-size: 12px; color: var(--accent); margin-top: 2px; min-height: 1.2em; }
         .poster-pillar .lb { font-size: 11px; color: var(--label-3); margin-top: 2px; }
+        .poster-dayun-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 6px; }
+        .poster-dayun-cell { text-align: center; border-radius: 10px; padding: 8px 4px; background: var(--card-2); border: 1.5px solid transparent; }
+        .poster-dayun-cell.cur { border-color: var(--accent); }
+        .poster-dayun-cell .gz { font-size: 15px; font-weight: 500; color: var(--label); }
+        .poster-dayun-cell.cur .gz { color: var(--accent); font-weight: 700; }
+        .poster-dayun-cell .ag { font-size: 11px; color: var(--label-3); margin-top: 2px; }
         .poster-actions { margin-top: 16px; }
         .poster-actions .muted { text-align: center; margin: 8px 0 0; }
       `}</style>
@@ -220,14 +238,14 @@ export default function ChartPoster() {
 
                 {/* 生辰只喺屏幕顯示;導出 PNG 用另一份冇生辰嘅 model 畫(見 lib/poster.ts) */}
                 {screen.birth.length > 0 && (
-                  <div style={{ marginTop: "1.3rem" }} data-export-hide>
+                  <div style={{ marginTop: "1rem" }} data-export-hide>
                     {screen.birth.map((r) => (
                       <Row key={r.key} r={r} />
                     ))}
                   </div>
                 )}
 
-                <div style={{ marginTop: "1.1rem" }}>
+                <div style={{ marginTop: "0.8rem" }}>
                   <div className="poster-h">{screen.baziHeading}</div>
                   <div className="poster-pillars">
                     {screen.pillars.map((p) => (
@@ -239,19 +257,34 @@ export default function ChartPoster() {
                       </div>
                     ))}
                   </div>
-                  <div style={{ marginTop: "0.6rem" }}>
+                  <div style={{ marginTop: "0.5rem" }}>
                     <Row r={screen.dayMaster} />
+                    <Row r={screen.wuxing} />
                   </div>
                 </div>
 
-                <div style={{ marginTop: "1.1rem" }}>
+                <div style={{ marginTop: "0.8rem" }}>
                   <div className="poster-h">{screen.ziweiHeading}</div>
                   {screen.ziwei.map((r) => (
                     <Row key={r.key} r={r} />
                   ))}
                 </div>
 
-                <p className="muted" style={{ textAlign: "center", marginTop: "1.4rem", marginBottom: 0, fontSize: "0.72rem" }}>
+                {screen.dayunSteps.length > 0 && (
+                  <div style={{ marginTop: "0.8rem" }}>
+                    <div className="poster-h">{screen.dayunHeading}</div>
+                    <div className="poster-dayun-grid">
+                      {screen.dayunSteps.map((s) => (
+                        <div className={`poster-dayun-cell${s.current ? " cur" : ""}`} key={s.key}>
+                          <div className="gz">{s.ganZhi}</div>
+                          <div className="ag">{s.ages}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <p className="muted" style={{ textAlign: "center", marginTop: "1rem", marginBottom: 0, fontSize: "0.72rem" }}>
                   {screen.disclaimer}
                 </p>
               </div>

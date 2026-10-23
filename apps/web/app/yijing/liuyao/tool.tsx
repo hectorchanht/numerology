@@ -14,6 +14,7 @@ import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { Term } from "@/lib/highlightTerms";
 import { saveYijingCast, getYijingCast } from "@/lib/yijingHistory";
+import { AiLiuyao } from "./AiLiuyao";
 
 const LINE_OPTS: { v: YaoValue; id: string }[] = [
   { v: 6, id: "yijing.line.oldYin" },
@@ -354,6 +355,7 @@ export default function LiuyaoTool({ historyId }: { historyId?: string }) {
           <p className="muted" style={{ marginTop: "1rem", marginBottom: 0 }}>
             {yjT("liuyao.note", loc)}
           </p>
+          <AiLiuyao lines={lines} date={date} locale={loc} />
         </div>
       )}
     </>

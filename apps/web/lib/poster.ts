@@ -66,6 +66,10 @@ export interface PosterSource {
   soul?: { name: string; majorStars: { name: string }[] };
   body?: { name: string };
   dayun?: { ganZhi: string; startAge: number; endAge: number } | null;
+  /** 全部大運(大運全表用);current 嗰步由 dayun 判定 */
+  allDayun?: { ganZhi: string; startAge: number; endAge: number }[];
+  /** 五行個數(由四柱計出),順序木火土金水 */
+  wuxing?: { label: string; count: number }[];
   generatedAt: Date;
   /** 用戶自填名字(選填);屏幕同導出都會顯示,令海報更個人化。 */
   name?: string;
@@ -87,6 +91,13 @@ export interface PosterPillar {
   label: string;
 }
 
+export interface PosterDayunStep {
+  key: string;
+  ganZhi: string;
+  ages: string;
+  current: boolean;
+}
+
 export interface PosterModel {
   title: string;
   /** 用戶自填名字(已 trim,可空字串=唔顯示);屏幕同導出共用。 */
@@ -98,8 +109,13 @@ export interface PosterModel {
   baziHeading: string;
   pillars: PosterPillar[];
   dayMaster: PosterRow;
+  /** 五行分布(compact 一行) */
+  wuxing: PosterRow;
   ziweiHeading: string;
   ziwei: PosterRow[];
+  /** 大運全表 */
+  dayunHeading: string;
+  dayunSteps: PosterDayunStep[];
   disclaimer: string;
   /** 分享邀請 + 連結:睇到海報嘅人可以自己去起盤。 */
   cta: string;
@@ -144,14 +160,22 @@ export function buildPosterModel(
   if (src.body) {
     ziwei.push({ key: "body", label: yjT("poster.bodyPalace", loc), value: posterTerm(src.body.name, loc) });
   }
-  if (src.dayun) {
-    ziwei.push({
-      key: "dayun",
-      label: yjT("poster.dayun", loc),
-      value: posterName(src.dayun.ganZhi, loc),
-      note: yjFmt(yjT("poster.ageRange", loc), { a: src.dayun.startAge, b: src.dayun.endAge }),
-    });
-  }
+
+  // 五行分布:compact 一行(木2 · 火1 …);冇資料就唔出
+  const wuxing: PosterRow = {
+    key: "wuxing",
+    label: yjT("poster.wuxing", loc),
+    value: (src.wuxing ?? []).map((w) => `${posterName(w.label, loc)}${w.count}`).join(" · ") || "—",
+  };
+
+  // 大運全表:當前往 accent 標示;冇 allDayun 就退返用單步 dayun
+  const steps = src.allDayun ?? (src.dayun ? [src.dayun] : []);
+  const dayunSteps: PosterDayunStep[] = steps.map((s, i) => ({
+    key: `dayun-${i}`,
+    ganZhi: posterName(s.ganZhi, loc),
+    ages: yjFmt(yjT("poster.ageRange", loc), { a: s.startAge, b: s.endAge }),
+    current: !!src.dayun && src.dayun.ganZhi === s.ganZhi && src.dayun.startAge === s.startAge,
+  }));
 
   return {
     title: yjT("poster.title", loc),
@@ -173,8 +197,11 @@ export function buildPosterModel(
       value: posterName(src.dayMaster, loc),
       accent: true,
     },
+    wuxing,
     ziweiHeading: yjT("poster.ziwei", loc),
     ziwei,
+    dayunHeading: yjT("poster.allDayun", loc),
+    dayunSteps,
     disclaimer: yjT("poster.disclaimer", loc),
     cta: yjT("poster.cta", loc),
   };
@@ -182,11 +209,13 @@ export function buildPosterModel(
 
 /** 模型內所有會畫出嚟嘅文字(測試用:檢查簡體洩漏 / 生辰洩漏)。 */
 export function posterTexts(m: PosterModel): string[] {
-  const rows = [...m.birth, m.dayMaster, ...m.ziwei];
+  const rows = [...m.birth, m.dayMaster, m.wuxing, ...m.ziwei];
   return [
-    m.title, m.name, m.generatedAt, m.brand, m.baziHeading, m.ziweiHeading, m.disclaimer, m.cta,
+    m.title, m.name, m.generatedAt, m.brand, m.baziHeading, m.ziweiHeading, m.dayunHeading,
+    m.disclaimer, m.cta,
     ...m.pillars.flatMap((p) => [p.ganZhi, p.shiShen, p.label]),
     ...rows.flatMap((r) => [r.label, r.value, r.note ?? ""]),
+    ...m.dayunSteps.flatMap((s) => [s.ganZhi, s.ages]),
   ].filter(Boolean);
 }
 
@@ -212,7 +241,7 @@ export type PosterColor = keyof typeof POSTER_COLOR_VARS;
 export type PosterPalette = Record<PosterColor, string>;
 
 export type PosterOp =
-  | { t: "rect"; x: number; y: number; w: number; h: number; r: number; fill: PosterColor }
+  | { t: "rect"; x: number; y: number; w: number; h: number; r: number; fill: PosterColor; stroke?: PosterColor }
   | { t: "line"; x: number; y: number; w: number; color: PosterColor }
   | {
       t: "text";
@@ -303,11 +332,11 @@ export function layoutPoster(m: PosterModel, measure: MeasureFn): PosterLayout {
   y += Math.max(leftH, logoSize, vChars * vStep);
 
   /* —— 列(label | value + note) —— */
-  const labelW = Math.max(13 * 4.2, ...[...m.birth, m.dayMaster, ...m.ziwei].map((r) => measure(r.label, 13, 400)));
+  const labelW = Math.max(13 * 4.2, ...[...m.birth, m.dayMaster, m.wuxing, ...m.ziwei].map((r) => measure(r.label, 13, 400)));
   const row = (r: PosterRow, last: boolean): void => {
     const vx = x0 + labelW + 12;
     const vMax = right - vx;
-    const top = y + 10;
+    const top = y + 7;
     let base = top + 16 * 1.1;
     ops.push({ t: "text", x: x0, y: base, text: r.label, size: 13, weight: 400, color: "label2", align: "left" });
     ops.push({ t: "text", x: vx, y: base, text: r.value, size: 16, weight: 400, color: r.accent ? "accent" : "label", align: "left" });
@@ -325,32 +354,32 @@ export function layoutPoster(m: PosterModel, measure: MeasureFn): PosterLayout {
         }
       }
     }
-    y = top + h + 10;
+    y = top + h + 7;
     if (!last) ops.push({ t: "line", x: x0, y, w: cw, color: "sep" });
   };
   const heading = (text: string): void => {
     ops.push({ t: "text", x: x0, y: y + 13 * 1.1, text, size: 13, weight: 400, color: "accent", align: "left" });
-    y += 13 * 1.45 + 4;
+    y += 13 * 1.45 + 2;
   };
 
   /* —— 生辰(導出時 model.birth 為空,整段唔畫) —— */
   if (m.birth.length) {
-    y += 1.3 * REM;
+    y += 1.0 * REM;
     m.birth.forEach((r, i) => row(r, i === m.birth.length - 1));
   }
 
   /* —— 八字四柱 —— */
-  y += 1.1 * REM;
+  y += 0.8 * REM;
   heading(m.baziHeading);
-  y += 8;
+  y += 6;
   const gap = 8;
   const colW = (cw - gap * 3) / 4;
-  const pillarH = 12 + 24 * 1.3 + 2 + 12 * 1.35 + 2 + 11 * 1.3 + 12;
+  const pillarH = 10 + 24 * 1.3 + 2 + 12 * 1.35 + 2 + 11 * 1.3 + 10;
   m.pillars.forEach((p, i) => {
     const px = x0 + i * (colW + gap);
     const cx = px + colW / 2;
     ops.push({ t: "rect", x: px, y, w: colW, h: pillarH, r: 12, fill: "card2" });
-    let b = y + 12 + 24 * 1.05;
+    let b = y + 10 + 24 * 1.05;
     ops.push({ t: "text", x: cx, y: b, text: p.ganZhi, size: 24, weight: 500, color: "label", align: "center" });
     b += 24 * 0.25 + 2 + 12 * 1.1;
     if (p.shiShen) {
@@ -360,16 +389,42 @@ export function layoutPoster(m: PosterModel, measure: MeasureFn): PosterLayout {
     b += 12 * 0.25 + 2 + 11 * 1.1;
     ops.push({ t: "text", x: cx, y: b, text: p.label, size: 11, weight: 400, color: "label3", align: "center" });
   });
-  y += pillarH + 0.6 * REM;
-  row(m.dayMaster, true);
+  y += pillarH + 0.5 * REM;
+  row(m.dayMaster, false);
+  row(m.wuxing, true);
 
   /* —— 紫微 —— */
-  y += 1.1 * REM;
+  y += 0.8 * REM;
   heading(m.ziweiHeading);
   m.ziwei.forEach((r, i) => row(r, i === m.ziwei.length - 1));
 
+  /* —— 大運全表:compact grid,當前往 accent 框 —— */
+  if (m.dayunSteps.length > 0) {
+    y += 0.8 * REM;
+    heading(m.dayunHeading);
+    y += 6;
+    const cols = 4;
+    const dGap = 8;
+    const cellW = (cw - dGap * (cols - 1)) / cols;
+    const cellH = 8 + 15 * 1.3 + 2 + 11 * 1.3 + 8;
+    m.dayunSteps.forEach((s, i) => {
+      const cx0 = x0 + (i % cols) * (cellW + dGap);
+      const cy0 = y + Math.floor(i / cols) * (cellH + dGap);
+      const ccx = cx0 + cellW / 2;
+      ops.push({
+        t: "rect", x: cx0, y: cy0, w: cellW, h: cellH, r: 10, fill: "card2",
+        ...(s.current ? { stroke: "accent" as const } : {}),
+      });
+      let b = cy0 + 8 + 15 * 1.05;
+      ops.push({ t: "text", x: ccx, y: b, text: s.ganZhi, size: 15, weight: s.current ? 700 : 500, color: s.current ? "accent" : "label", align: "center" });
+      b += 15 * 0.25 + 2 + 11 * 1.1;
+      ops.push({ t: "text", x: ccx, y: b, text: s.ages, size: 11, weight: 400, color: "label3", align: "center" });
+    });
+    y += Math.ceil(m.dayunSteps.length / cols) * (cellH + dGap) - dGap;
+  }
+
   /* —— 免責 —— */
-  y += 1.4 * REM;
+  y += 1.0 * REM;
   const dSize = 0.72 * REM;
   for (const line of wrapText(m.disclaimer, cw, dSize, 400, measure)) {
     ops.push({ t: "text", x: x0 + cw / 2, y: y + dSize * 1.1, text: line, size: dSize, weight: 400, color: "label2", align: "center" });
@@ -453,6 +508,12 @@ export function paintPoster(
         ctx.fillStyle = palette[op.fill];
         roundRectPath(ctx, op.x, op.y, op.w, op.h, op.r);
         ctx.fill();
+        if (op.stroke) {
+          ctx.strokeStyle = palette[op.stroke];
+          ctx.lineWidth = 1.5;
+          roundRectPath(ctx, op.x, op.y, op.w, op.h, op.r);
+          ctx.stroke();
+        }
         break;
       case "line":
         ctx.fillStyle = palette[op.color];
