@@ -191,3 +191,65 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
   - `POST /api/chart` 2023-02-30 → **400** `非法出生信息: 日 30(2023年2月只有 28 天)`。
   - `POST /api/report` 未知 provider → **400** JSON,立即返回。
   - `POST /api/report` section=personality(默认 pollinations)→ **200** 流式中文报告,无 500/截断。
+
+## Provider 大改(2026-10-22,Workers AI 預設 + $2/月硬上限 + 動態模型)
+
+背景:Pollinations 免費 tier 從 Cloudflare edge 連線飄忽(首 token > 20s → 502、
+共享 IP 被限流 429),edge 外直連則正常。改為預設走 Cloudflare Workers AI binding。
+
+### Workers AI 接入
+- `packages/ai/src/provider.ts`:新增 `kind: "workers-ai"`,經 `env.AI` binding 調用,
+  無需 API key。`ProviderOptions.aiBinding`(僅服務端注入,絕不來自請求體/序列化給客戶端)。
+- API 路由經 `@cloudflare/next-on-pages` 的 `getRequestContext()` 取 `env.AI` /
+  `env.AI_BUDGET_KV`(`apps/web/lib/aiBinding.ts` + `aiOpts.resolveServerAi()`),
+  4 個 AI 路由已切換。binding 缺失(本地開發)→ 502 但保留明確指引(不被兜底文案吞掉)。
+- 流式:SSE(`data: {"response":"..."}` … `data: [DONE]`)解析為統一 TextStream;
+  非流式直接取 `response` 字段。
+- 預設模型 **`@cf/meta/llama-3.1-8b-instruct-fp8`**:實測中文補全乾淨(繁體)、無推理外泄、
+  `usage.neurons` 直接可用。備選(同表,皆經 catalog 核驗存在):
+  `@cf/meta/llama-3.2-3b-instruct`(最快最便宜,80K ctx)、
+  `@cf/mistralai/mistral-small-3.1-24b-instruct`(更強,128K ctx)。
+- **明確排除**:`@cf/zai-org/glm-4.7-flash`、`@cf/qwen/qwen3-30b-a3b-fp8` 等 reasoning 模型——
+  實測會把思考過程塞進 `reasoning`/`reasoning_content` 字段而 `content` 為 null,
+  不適合直接做解讀。`@cf/deepseek-ai/deepseek-v4-flash-0731` 等標 `require_workers_paid` 的不用。
+
+### $2/月硬預算守衛(`packages/ai/src/budget.ts`)
+- Workers AI 無原生 spending cap,應用層強制:每次調用前 `checkBudget()`、
+  調用後 `recordUsage()` 經 KV(`AI_BUDGET_KV`,namespace `numerology-ai-budget`)
+  讀寫當月(UTC)`ai-budget:YYYY-MM` 累計 neurons;達上限拋 `BudgetExceededError`
+  → `http.ts` 分類為 **JSON 429**(訊息去掉內部標記)。
+- 計價(官方定價,2026-10-22 核驗):$0.011 / 1,000 neurons →
+  **$2 = 181,818 neurons/月**(向下取整)。
+- **保守口徑**:所有 neurons 都計入(包含每日免費 10,000 neurons)。
+  因此實際賬單恆為 $0:上限 181,818/月 < 免費額度總量(≈300,000/月),到上限即停,
+  永遠不會產生付費用量。KV 最終一致性下併發可能輕微超調,可接受。
+- 估算:一節報告約 60 neurons(3k input tokens),完整 13 節約 800 neurons →
+  $2 ≈ 227 次完整解讀/月,個人用綽綽有餘。
+
+### 動態模型列表(`GET /api/models`)
+- `?provider=<name>`:OpenAI 兼容 provider 實時代理 `{baseURL}/models`
+  (key 經 `X-AI-Key` 頭傳,不進 URL/日誌/響應;401 → `needsKey:true` + 靜態回落);
+  `workers-ai` 返回構建時核驗表(`source: verified-static`,binding 無 list 接口);
+  `anthropic`/`custom` 返回靜態表(無標準端點)。
+- `GET /api/models`(無參數):provider 元信息(分組/是否需 key/申請地址)。
+- SettingsPanel:按 provider 拉取,localStorage 快取 24h(`numerology-models-<provider>`),
+  失敗回落靜態表;openrouter 標註免費模型。
+
+### Provider 分組(SettingsPanel,三語)
+- 免 key 即用:workers-ai(預設)、pollinations
+- 免費(需 key):glm、gemini、groq、openrouter
+- 付費:anthropic、custom
+- `apps/web/lib/providerMeta.ts`(客戶端安全,不含 SDK)與
+  `provider.ts` 的 `listProviders()` 保持同名同序,兩處同步改。
+
+### Cloudflare 配置(已做)
+- Pages `numerology`:AI binding(`AI`)+ KV binding(`AI_BUDGET_KV` → `numerology-ai-budget`)
+  已加到 production/preview;`AI_PROVIDER=workers-ai`(原 pollinations)。
+
+### 驗證
+- 88/88 測試通過(ai 22/engine 36/knowledge 5/web 26;新增 17 項:預算數學與跨月、
+  provider 分組、models 路由邏輯、429 分類)。
+- `next build` + `npm run cf:pages` 通過;本地 workerd(`wrangler pages dev`)實測:
+  `/api/models` 分組正確、`/api/models?provider=workers-ai` 核驗表正確、
+  無 binding 時 report 返回明確指引(502)、`/api/chart` 200。
+- 待線上驗證(部署後):預設 provider 的真實中文報告流、KV 計數器增長。
