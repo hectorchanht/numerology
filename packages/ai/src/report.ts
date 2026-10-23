@@ -46,7 +46,7 @@ export async function generateReport(
     kind: "report",
     maxTokens: opts.maxTokens ?? MAX_TOKENS.report,
     system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"),
-    messages: [{ role: "user", content: buildReportUserPrompt(caveats) }],
+    messages: [{ role: "user", content: buildReportUserPrompt(caveats, opts.locale ?? "zht") }],
   }, opts.ai);
   return { markdown: text, usage };
 }
@@ -58,7 +58,7 @@ export function streamReport(chart: ChartResult, opts: ReportOptions = {}) {
     kind: "report",
     maxTokens: opts.maxTokens ?? MAX_TOKENS.report,
     system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"),
-    messages: [{ role: "user", content: buildReportUserPrompt(caveats) }],
+    messages: [{ role: "user", content: buildReportUserPrompt(caveats, opts.locale ?? "zht") }],
   }, opts.ai);
 }
 
@@ -72,7 +72,7 @@ export async function generateFortuneReport(
     kind: "report",
     maxTokens: opts.maxTokens ?? MAX_TOKENS.report,
     system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"),
-    messages: [{ role: "user", content: buildFortuneReportPrompt(caveats) }],
+    messages: [{ role: "user", content: buildFortuneReportPrompt(caveats, opts.locale ?? "zht") }],
   }, opts.ai);
   return { markdown: text, usage };
 }
@@ -84,7 +84,7 @@ export function streamFortuneReport(chart: ChartResult, opts: ReportOptions = {}
     kind: "report",
     maxTokens: opts.maxTokens ?? MAX_TOKENS.report,
     system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"),
-    messages: [{ role: "user", content: buildFortuneReportPrompt(caveats) }],
+    messages: [{ role: "user", content: buildFortuneReportPrompt(caveats, opts.locale ?? "zht") }],
   }, opts.ai);
 }
 
@@ -105,7 +105,7 @@ export function streamReportSection(chart: ChartResult, sectionKey: string, opts
     kind: "report",
     maxTokens: opts.maxTokens ?? SECTION_MAX_TOKENS,
     system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"),
-    messages: [{ role: "user", content: buildReportSectionPrompt(caveats, seg, opts.lens ?? "both") }],
+    messages: [{ role: "user", content: buildReportSectionPrompt(caveats, seg, opts.lens ?? "both", opts.locale ?? "zht") }],
   }, opts.ai);
 }
 
@@ -118,6 +118,6 @@ export function streamFortuneSection(chart: ChartResult, sectionKey: string, opt
     kind: "report",
     maxTokens: opts.maxTokens ?? SECTION_MAX_TOKENS,
     system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"),
-    messages: [{ role: "user", content: buildFortuneSectionPrompt(caveats, seg, opts.lens ?? "both") }],
+    messages: [{ role: "user", content: buildFortuneSectionPrompt(caveats, seg, opts.lens ?? "both", opts.locale ?? "zht") }],
   }, opts.ai);
 }

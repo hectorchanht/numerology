@@ -47,10 +47,15 @@ test("系统人设强调动静结合、运为主导", () => {
 
 test("报告用户指令包含全部章节与注意事项", () => {
   const { caveats } = buildContextPack(chart);
-  const prompt = buildReportUserPrompt(caveats);
+  // zhs 下标题应为简体原文(与 REPORT_SECTIONS.title 一致)
+  const promptZhs = buildReportUserPrompt(caveats, "zhs");
   for (const s of REPORT_SECTIONS) {
-    assert.ok(prompt.includes(s.title), `指令缺少章节: ${s.title}`);
+    assert.ok(promptZhs.includes(s.title), `指令缺少章节: ${s.title}`);
   }
-  assert.ok(prompt.includes("真太阳时"), "指令应带出 caveat");
+  assert.ok(promptZhs.includes("真太阳时"), "指令应带出 caveat");
   assert.ok(SYSTEM_PERSONA.includes("八字") && SYSTEM_PERSONA.includes("紫微"));
+  // 默认 locale 为 zht:标题应为繁体
+  const promptDefault = buildReportUserPrompt(caveats);
+  assert.ok(promptDefault.includes("性格特質"), "默认应为繁体标题");
+  assert.ok(!promptDefault.includes("性格特质"), "默认不应出现简体标题");
 });

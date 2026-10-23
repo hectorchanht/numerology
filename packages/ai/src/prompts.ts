@@ -12,6 +12,32 @@ export function localeDirective(locale: AiLocale): string {
   return "【輸出語言】請全程使用繁體中文(香港用語)撰寫,包括標題、術語解釋與標點習慣。";
 }
 
+/**
+ * 各报告章节标题的三地对照(key → locale → 标题)。
+ * 模型会把 prompt 里的小标题逐字照抄进输出,故标题必须与输出语言一致,
+ * 否则会出现"正文繁体、标题简体"的错位。
+ */
+export const SEGMENT_TITLES: Record<string, Record<AiLocale, string>> = {
+  personality: { zht: "性格特質", zhs: "性格特质", en: "Personality Traits" },
+  career: { zht: "事業方向", zhs: "事业方向", en: "Career Direction" },
+  wealth: { zht: "財富特點", zhs: "财富特点", en: "Wealth Profile" },
+  relationship: { zht: "感情婚姻", zhs: "感情婚姻", en: "Relationships & Marriage" },
+  health: { zht: "健康提示", zhs: "健康提示", en: "Health Notes" },
+  luck: { zht: "大運流年概覽", zhs: "大运流年概览", en: "Luck Cycle Overview" },
+  advice: { zht: "總體建議 · 開運參考", zhs: "总体建议 · 开运参考", en: "Overall Advice & Remedies" },
+  overview: { zht: "一、當前總覽", zhs: "一、当前总览", en: "1. Current Overview" },
+  dayun: { zht: "二、大運逐步精講", zhs: "二、大运逐步精讲", en: "2. Major Luck Periods in Detail" },
+  review: { zht: "三、回看校準", zhs: "三、回看校准", en: "3. Review & Calibration" },
+  future: { zht: "四、未來流年走向", zhs: "四、未来流年走向", en: "4. Upcoming Annual Trends" },
+  rhythm: { zht: "五、節奏與轉折", zhs: "五、节奏与转折", en: "5. Rhythm & Turning Points" },
+  action: { zht: "六、行動建議", zhs: "六、行动建议", en: "6. Actionable Advice" },
+};
+
+/** 取某章节在指定语言下的标题(缺失时回落简体,再缺失回落 key 本身)。 */
+export function segmentTitle(key: string, locale: AiLocale): string {
+  return SEGMENT_TITLES[key]?.[locale] ?? SEGMENT_TITLES[key]?.zhs ?? key;
+}
+
 /** 解读师人设:真实准确为先、直话直说,不模棱两可。 */
 export const SYSTEM_PERSONA = `你是一位兼通【八字四柱】与【紫微斗数】的命理解读师。
 
@@ -55,9 +81,9 @@ export const REPORT_SECTIONS = [
 
 export type ReportSectionKey = (typeof REPORT_SECTIONS)[number]["key"];
 
-/** 组装报告的用户指令。 */
-export function buildReportUserPrompt(caveats: string[]): string {
-  const sections = REPORT_SECTIONS.map((s, i) => `${i + 1}. ${s.title}:${s.brief}`).join("\n");
+/** 组装报告的用户指令。locale 决定章节标题的语言(正文语言由 localeDirective 指令模型)。 */
+export function buildReportUserPrompt(caveats: string[], locale: AiLocale = "zht"): string {
+  const sections = REPORT_SECTIONS.map((s, i) => `${i + 1}. ${segmentTitle(s.key, locale)}:${s.brief}`).join("\n");
   const caveatBlock = caveats.length
     ? `\n\n【必须遵守的注意事项(在相关结论处自然带出,不要堆在开头)】\n` +
       caveats.map((c) => "- " + c).join("\n")
@@ -73,11 +99,11 @@ ${sections}
 - 【紫微看格局】判断性格与命格时,不要只看命宫单宫,务必结合「命宫三方四正」的四宫合看主星来定格局(如杀破狼、紫府相朝垣、府相朝垣、机月同梁、君臣庆会等),先点明格局再展开。
 - 八字与紫微相互印证或分歧都要体现。
 - 本报告聚焦【命盘格局】(先天底色)。性格/事业/财富/感情/健康各节为静态底色;「大运流年概览」一节只用一段话点出当前大运/大限对这些底色的加强或削弱即可——【逐步逐年的详细动态分析在另一份《大运流年深析》中,这里不要展开成长篇】。
-- 结尾"总体建议"落到当前阶段的大方向,并据上方「喜用神方位」给出**开运参考**(有利方位/颜色,可顺带提及适配的行业或环境特质),说明是趋吉性的辅助参考、非硬性规定。${caveatBlock}`;
+- 结尾「${segmentTitle("advice", locale)}」落到当前阶段的大方向,并据上方「喜用神方位」给出**开运参考**(有利方位/颜色,可顺带提及适配的行业或环境特质),说明是趋吉性的辅助参考、非硬性规定。${caveatBlock}`;
 }
 
-/** 组装《大运流年深析》的用户指令——八字 × 紫微合参,逐步逐年,不限篇幅。 */
-export function buildFortuneReportPrompt(caveats: string[]): string {
+/** 组装《大运流年深析》的用户指令——八字 × 紫微合参,逐步逐年,不限篇幅。locale 决定章节标题的语言。 */
+export function buildFortuneReportPrompt(caveats: string[], locale: AiLocale = "zht"): string {
   const caveatBlock = caveats.length
     ? `\n\n【必须遵守的注意事项(在相关结论处自然带出)】\n` + caveats.map((c) => "- " + c).join("\n")
     : "";
@@ -85,33 +111,33 @@ export function buildFortuneReportPrompt(caveats: string[]): string {
 
 请按以下结构组织:
 
-## 一、当前总览
+## ${segmentTitle("overview", locale)}
 你此刻正行哪一步【八字大运】+哪一步【紫微大限】,两者基调(补益/受困)是否同步,给出一句话定性。
 
-## 二、大运逐步精讲(从当前及前后各步展开)
-对每一步大运:
+## ${segmentTitle("dayun", locale)}
+从当前及前后各步展开。对每一步大运:
 - 八字看:大运干支的十神、是否引动喜用神/调候、与命局的刑冲合会;
 - 紫微看:该阶段大限所行宫位、大限四化(禄权科忌)飞入本命哪些宫;
 - 【合参】综合两者,点出这步运的主题、机会与风险,以及它如何改写命盘静态格局。
 
-## 三、回看校准(对【已过年份】给"主题",请用户对照)
-对上方标【已过】的流年,逐年给出那一年的【主题/基调】,依据是该年八字流年十神/是否引动用神 + 紫微流年四化飞入本命哪宫(如化忌冲官禄→事业承压/变动方向、化禄入财帛→财上得力)。
+## ${segmentTitle("review", locale)}
+对【已过年份】给"主题",请用户对照。对上方标【已过】的流年,逐年给出那一年的【主题/基调】,依据是该年八字流年十神/是否引动用神 + 紫微流年四化飞入本命哪宫(如化忌冲官禄→事业承压/变动方向、化禄入财帛→财上得力)。
 **关键纪律——只说"领域 + 性质 + 吉凶强弱",绝不脑补具体事件当事实。** 命盘给得出"这一年事业容易承压、有变动倾向",但给不出"你换了工作"——后者是编造,正是细节出错的根源。所以:
 - ✅ 这样写:"2023 事业宫受流年化忌冲,这一年事业上压力或变动偏大,人际易有摩擦"
 - ❌ 别这样写:"2023 你换了工作并和上司闹翻"
 - 然后主动邀请校准:"这些年里若有哪一年的实际经历和上面对不上,或你印象最深的转折在某年,请告诉我具体年份和发生了什么——我据此校准你的时辰与后续判断。"
 - 【年份有边界】流年以立春分界、交运换岁也有过渡,某主题的应期可能落在标注年的前后 1 年;不要把年份说得像精确到天。
 
-## 四、未来流年走向(参考年/今年起,逐年)
-同样**只给领域 + 性质 + 吉凶 + 利防建议,不预言具体事件**:
+## ${segmentTitle("future", locale)}
+从参考年/今年起,逐年。同样**只给领域 + 性质 + 吉凶 + 利防建议,不预言具体事件**:
 - 八字看:流年干支十神、是否引动用神;
 - 紫微看:流年四化(化禄入哪宫=该领域得力、化忌冲哪宫=该领域承压);
 - 【合参】这一年哪个领域偏顺/偏逆、宜进还是宜守,据此给"利做什么、防什么"。同样提示应期可能 ±1 年。
 
-## 五、节奏与转折
+## ${segmentTitle("rhythm", locale)}
 点明:换运/换限的年份、最强发力期、最需谨慎期(同属趋势,非精确到年)。
 
-## 六、行动建议
+## ${segmentTitle("action", locale)}
 落到"当前及未来几年大方向上怎么做"。
 
 要求:八字与紫微务必【全程合参】,每个结论指出依据(哪步运/哪年、什么十神/什么四化飞哪宫);判断要直接、敢断、不和稀泥,但**严格区分"命盘能给的领域与吉凶倾向(可肯定)"和"具体事件(不可编造)"**;年份均按"倾向应期、可能±1年"对待。${caveatBlock}`;
@@ -208,9 +234,10 @@ function lensDirective(lens: ReportLens): string {
   return `【八字 × 紫微合参】两套都看,各按各自规矩取,再比对结论:相互印证则更可信、分歧则如实标出,不强行圆说。`;
 }
 
-/** 单节《命盘格局解读》指令(分段模式)。lens 决定纯八字/纯紫微/合参。 */
-export function buildReportSectionPrompt(caveats: string[], seg: ReportSegment, lens: ReportLens = "both"): string {
-  return `请基于上方命盘事实,**只**写【命盘格局解读】中的这一节:「${seg.title}」。
+/** 单节《命盘格局解读》指令(分段模式)。lens 决定纯八字/纯紫微/合参;locale 决定小标题语言。 */
+export function buildReportSectionPrompt(caveats: string[], seg: ReportSegment, lens: ReportLens = "both", locale: AiLocale = "zht"): string {
+  const title = segmentTitle(seg.key, locale);
+  return `请基于上方命盘事实,**只**写【命盘格局解读】中的这一节:「${title}」。
 本节要点:${seg.instruction}
 
 ${lensDirective(lens)}
@@ -219,21 +246,22 @@ ${lensDirective(lens)}
 - 【真实直接、不模棱两可】给出明确判断,优点缺点都直说,该断就断;少用"可能/也许/倾向于"安全垫,杜绝放之四海皆准、谁都适用的废话。真矛盾或数据有边界时明说"不确定/两种力量并存"。
 - 【篇幅·硬性】本节扼要讲透核心即可,约 ${SECTION_WORDS} 字、3–4 段;**务必在篇幅内把话说完、自然收尾(以句号结束),宁可少写一点,也绝不写到一半被切断。** 不要越界写其它节,也不要把大运流年展开成长篇(那是另一份报告)。
 - 每个论断挂依据${lens === "ziwei" ? "(哪个宫位的哪颗星或四化)" : lens === "bazi" ? "(哪一柱/哪个十神/星运/神煞)" : "(哪一柱/哪个十神/哪个宫位的哪颗星或四化)"}。若本节涉及性格/命格${lens === "bazi" ? ",以日主与十神格局立论" : lens === "ziwei" ? ",务必结合命宫三方四正四宫合看主星定格局,先点格局再展开" : ",紫微部分须结合命宫三方四正四宫合看主星定格局"}。
-- **输出以「## ${seg.title}」作为小标题开头,只写这一节。**${caveatBlockOf(caveats)}`;
+- **输出以「## ${title}」作为小标题开头,只写这一节。**${caveatBlockOf(caveats)}`;
 }
 
-/** 单节《大运流年深析》指令(分段模式)。lens 决定纯八字/纯紫微/合参。 */
-export function buildFortuneSectionPrompt(caveats: string[], seg: ReportSegment, lens: ReportLens = "both"): string {
+/** 单节《大运流年深析》指令(分段模式)。lens 决定纯八字/纯紫微/合参;locale 决定小标题语言。 */
+export function buildFortuneSectionPrompt(caveats: string[], seg: ReportSegment, lens: ReportLens = "both", locale: AiLocale = "zht"): string {
+  const title = segmentTitle(seg.key, locale);
   const basis =
     lens === "bazi" ? "(哪步大运/哪年、什么十神、是否引动喜用神)" :
     lens === "ziwei" ? "(哪步大限/哪年、什么四化飞入哪宫)" :
     "(哪步运/哪年、什么十神/什么四化飞哪宫)";
-  return `请基于上方命盘事实(尤其【动态运势】数据),**只**写《大运流年深析》中的这一节:「${seg.title}」。每个结论挂依据${basis}。
+  return `请基于上方命盘事实(尤其【动态运势】数据),**只**写《大运流年深析》中的这一节:「${title}」。每个结论挂依据${basis}。
 本节要点:${seg.instruction}
 
 ${lensDirective(lens)}
 
 铁律:严格区分"命盘能给的领域与吉凶倾向(可肯定)"与"具体事件(不可编造)";流年以立春分界,年份按"倾向应期、可能±1 年"对待,别说得像精确到天。判断要直接敢断、不和稀泥。
 【篇幅·硬性】本节约 ${SECTION_WORDS} 字、扼要写透;**务必在篇幅内把话说完、自然收尾(以句号结束),宁短勿断,绝不写到一半被切。**
-**输出以「## ${seg.title}」作为小标题开头,只写这一节,不要写其它节。**${caveatBlockOf(caveats)}`;
+**输出以「## ${title}」作为小标题开头,只写这一节,不要写其它节。**${caveatBlockOf(caveats)}`;
 }
