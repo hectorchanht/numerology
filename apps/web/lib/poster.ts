@@ -67,6 +67,8 @@ export interface PosterSource {
   body?: { name: string };
   dayun?: { ganZhi: string; startAge: number; endAge: number } | null;
   generatedAt: Date;
+  /** 用戶自填名字(選填);屏幕同導出都會顯示,令海報更個人化。 */
+  name?: string;
 }
 
 export interface PosterRow {
@@ -87,6 +89,8 @@ export interface PosterPillar {
 
 export interface PosterModel {
   title: string;
+  /** 用戶自填名字(已 trim,可空字串=唔顯示);屏幕同導出共用。 */
+  name: string;
   generatedAt: string;
   brand: string;
   /** 生辰區(公曆 + 農曆);導出時為空陣列。 */
@@ -149,6 +153,8 @@ export function buildPosterModel(
 
   return {
     title: yjT("poster.title", loc),
+    // 名字係用戶自願填寫、為咗分享而個人化,屏幕同導出都要;同生辰唔同,唔使隱藏。
+    name: (src.name ?? "").trim(),
     generatedAt: yjFmt(yjT("poster.generatedAt", loc), { date: posterDate(src.generatedAt, loc) }),
     brand: yjT("poster.brand", loc),
     birth,
@@ -175,7 +181,7 @@ export function buildPosterModel(
 export function posterTexts(m: PosterModel): string[] {
   const rows = [...m.birth, m.dayMaster, ...m.ziwei];
   return [
-    m.title, m.generatedAt, m.brand, m.baziHeading, m.ziweiHeading, m.disclaimer,
+    m.title, m.name, m.generatedAt, m.brand, m.baziHeading, m.ziweiHeading, m.disclaimer,
     ...m.pillars.flatMap((p) => [p.ganZhi, p.shiShen, p.label]),
     ...rows.flatMap((r) => [r.label, r.value, r.note ?? ""]),
   ].filter(Boolean);
@@ -270,10 +276,17 @@ export function layoutPoster(m: PosterModel, measure: MeasureFn): PosterLayout {
   const right = x0 + cw;
   let y = MARGIN + PAD_T;
 
-  /* —— 頂部:標題 + 生成日期 | 直排品牌字 + logo —— */
+  /* —— 頂部:標題 [+ 用戶名字] + 生成日期 | 直排品牌字 + logo —— */
   const titleSize = 28;
   ops.push({ t: "text", x: x0, y: y + titleSize * 1.05, text: m.title, size: titleSize, weight: 700, color: "label", align: "left" });
-  const dateTop = y + titleSize * 1.3 + 0.3 * REM;
+  let dateTop = y + titleSize * 1.3 + 0.3 * REM;
+  if (m.name) {
+    // 名字太長塞唔落就縮細字號(唔好撞到右邊 logo)
+    const nameMaxW = right - 52 - x0 - 8;
+    const nameSize = fitSize(m.name, nameMaxW, 20, 600, measure);
+    ops.push({ t: "text", x: x0, y: dateTop + nameSize * 1.1, text: m.name, size: nameSize, weight: 600, color: "label", align: "left" });
+    dateTop += nameSize * 1.45;
+  }
   ops.push({ t: "text", x: x0, y: dateTop + 13 * 1.1, text: m.generatedAt, size: 13, weight: 400, color: "label2", align: "left" });
   const leftH = dateTop + 13 * 1.45 - y;
 

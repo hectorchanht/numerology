@@ -50,6 +50,25 @@ export default function ChartPoster() {
   const pngRef = useRef<Promise<Blob> | null>(null);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  // 用戶自填名字:只存本機 localStorage,唔上傳;屏幕同導出 PNG 都會顯示
+  const [name, setName] = useState("");
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem("numerology-poster-name");
+      if (v) setName(v);
+    } catch {
+      /* 無痕/私隱模式,唔理 */
+    }
+  }, []);
+  const onNameChange = (v: string) => {
+    setName(v);
+    try {
+      if (v.trim()) localStorage.setItem("numerology-poster-name", v);
+      else localStorage.removeItem("numerology-poster-name");
+    } catch {
+      /* ignore */
+    }
+  };
 
   useEffect(() => {
     listReadings()
@@ -69,8 +88,9 @@ export default function ChartPoster() {
       body: chart.ziwei.palaces.find((p) => p.isBodyPalace),
       dayun: currentLuckStep(chart.bazi),
       generatedAt: new Date(reading.updatedAt),
+      name: name.trim() || undefined,
     };
-  }, [reading]);
+  }, [reading, name]);
 
   /** 屏幕版:含生辰,方便用戶核對係咪啱嗰個盤。 */
   const screen = useMemo(() => (src ? buildPosterModel(src, loc, { includeBirth: true }) : null), [src, loc, z]);
@@ -162,10 +182,29 @@ export default function ChartPoster() {
 
           {screen && (
             <>
+              <div className="field" style={{ marginBottom: "12px" }}>
+                <label htmlFor="poster-name">{yjT("poster.nameLabel", loc)}</label>
+                <input
+                  id="poster-name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => onNameChange(e.target.value)}
+                  placeholder={yjT("poster.namePlaceholder", loc)}
+                  maxLength={20}
+                  autoComplete="off"
+                />
+                <p className="muted" style={{ fontSize: "0.75rem", margin: 0 }}>
+                  {yjT("poster.nameHint", loc)}
+                </p>
+              </div>
+
               <div className="poster-paper" ref={paperRef}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                   <div>
                     <div style={{ fontSize: "28px", fontWeight: 700, letterSpacing: "0.04em" }}>{screen.title}</div>
+                    {screen.name && (
+                      <div style={{ fontSize: "20px", fontWeight: 600, marginTop: "0.2rem" }}>{screen.name}</div>
+                    )}
                     <div className="muted" style={{ marginTop: "0.3rem" }}>
                       {screen.generatedAt}
                     </div>

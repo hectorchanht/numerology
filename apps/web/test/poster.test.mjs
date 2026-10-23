@@ -187,3 +187,49 @@ test("poster:wrapText / fitSize", () => {
 test("poster:檔名只含今日日期,唔含生辰", () => {
   assert.equal(posterFilename(new Date(2026, 9, 3)), "chart-poster-2026-10-03.png");
 });
+
+// —— 用戶自填名字 ——
+test("poster:名字入 model(會 trim);冇填就係空字串", () => {
+  const m = buildPosterModel({ ...SRC, name: "  陳大文 " }, "zht", { includeBirth: true });
+  assert.equal(m.name, "陳大文");
+  assert.ok(posterTexts(m).join("|").includes("陳大文"));
+  assert.equal(buildPosterModel(SRC, "zht", { includeBirth: true }).name, "");
+  assert.equal(buildPosterModel({ ...SRC, name: "   " }, "zht", { includeBirth: true }).name, "");
+});
+
+test("poster:名字會入導出 model(用戶自願分享,唔同生辰要隱藏)", () => {
+  for (const loc of ["zht", "zhs", "en"]) {
+    const m = buildPosterModel({ ...SRC, name: "陳大文" }, loc, { includeBirth: false });
+    assert.equal(m.name, "陳大文");
+    assert.deepEqual(m.birth, [], "生辰依然唔入導出 model");
+  }
+});
+
+function paintedName(name) {
+  const layout = layoutPoster(buildPosterModel({ ...SRC, name }, "zht", { includeBirth: false }), fakeMeasure);
+  const ctx = recordingCtx();
+  paintPoster(ctx, layout, PALETTE, "sans-serif", 3, { fake: true });
+  return { layout, texts: ctx.texts };
+}
+
+test("poster:有名字先至畫,冇名字唔畫唔佔位", () => {
+  const withName = paintedName("陳大文");
+  assert.ok(withName.texts.includes("陳大文"), "畫布要有名字");
+  const without = paintedName(undefined);
+  assert.ok(!without.texts.includes("陳大文"));
+  assert.ok(withName.layout.height > without.layout.height, "有名字畫布要高啲");
+  // 版面指令唔越界(同上面個尺寸測試一樣嘅檢查)
+  for (const op of withName.layout.ops) {
+    assert.ok(op.x >= 0 && op.x <= withName.layout.width);
+    assert.ok(op.y >= 0 && op.y <= withName.layout.height);
+  }
+});
+
+test("poster:超長名字會縮細字號,唔撞 logo", () => {
+  const long = "陳大文陳大文陳大文陳大文陳大文陳大文陳大文陳大"; // 25 字,20px 會超闊
+  const { layout, texts } = paintedName(long);
+  const nameOp = layout.ops.find((op) => op.t === "text" && op.text === long);
+  assert.ok(nameOp, "長名都要畫");
+  assert.ok(nameOp.size < 20, `長名應縮細字號,實際 ${nameOp.size}`);
+  assert.ok(texts.includes(long));
+});
