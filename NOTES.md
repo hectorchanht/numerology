@@ -283,3 +283,24 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
   anthropic「按量付費」;custom「任意 OpenAI 兼容端點」。
 - 动态模型下拉 + 24h 缓存 + 静态回落保持不变;旧的长描述 `settings.prov.*` /
   `settings.group.*` / `settings.budget` keys 已删除(信息移入属性面板)。
+
+## 报告章节标题 locale 化(2026-10-22,小修复)
+
+问题:分段报告的小标题(`## 性格特质`)是硬编码简体,模型逐字照抄 → locale=zht 时
+正文繁体、标题简体错位。
+
+- `packages/ai/src/prompts.ts`:新增 `SEGMENT_TITLES`(13 个节 × zht/zhs/en 三地对照)
+  + `segmentTitle(key, locale)`(缺失回落简体 → key)。
+  `buildReportSectionPrompt` / `buildFortuneSectionPrompt` 新增 `locale` 参数(默认 zht),
+  小标题与节名引用均用本地化标题。
+  整篇模式同样修:`buildReportUserPrompt` 的章节列表、`buildFortuneReportPrompt` 的
+  六个 `##` 标题(含结尾"总体建议"引用)全部走 `segmentTitle`。
+- `packages/ai/src/report.ts`:六处调用点全部传入 `opts.locale ?? "zht"`。
+- 英文标题为自然英文(如 "Personality Traits"、"1. Current Overview");zht 为香港书面繁体。
+- 测试:新增 `packages/ai/test/segment-titles.test.mjs`(5 项:三地标题齐全非空、
+  两节 builders 三地标题正确、整篇 builders 三地标题正确);`context.test.mjs`
+  更新(zhs 显式传入保持原断言,默认 zht 断言繁体)。105/105 通过。
+- `next build` + `npm run cf:pages` 均成功;commit `a9b5c9e` 已推 main,
+  Pages 部署 `0dba3f80` 成功。線上驗證:
+  `POST /api/report`(locale=zht,section=personality)→ 200,`## 性格特質`;
+  (locale=en)→ 200,`## Personality Traits`(英文正文)。
