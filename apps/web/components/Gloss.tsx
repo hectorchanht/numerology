@@ -50,7 +50,7 @@ export function Gloss({
             fontSize: "14px",
             lineHeight: 1.6,
             color: "var(--label-2)",
-            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.5)",
+            boxShadow: "var(--pop-shadow)",
           }}
         >
           <span

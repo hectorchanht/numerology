@@ -63,7 +63,7 @@ export default function ChartPoster() {
         .poster-seal {
           display: inline-grid; place-items: center;
           width: 52px; height: 52px;
-          background: var(--accent); color: #1a1206;
+          background: var(--accent); color: var(--on-accent);
           font-size: 26px; font-weight: 600;
           border-radius: 14px;
         }

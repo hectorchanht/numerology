@@ -3,6 +3,7 @@
 import { useLocale } from "@/lib/i18n";
 import { go } from "@/lib/nav";
 import { Icon, type IconName } from "@/components/Icon";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 /** iOS 風格分段控件(單選)。 */
 export function Seg<T extends string>({
@@ -61,7 +62,7 @@ export function ToggleRow({
   );
 }
 
-/** 頂部導航列:左邊 eyebrow 或返回鍵,右邊 icon 按鈕;齒輪 = 設定。 */
+/** 頂部導航列:左邊 logo(或返回鍵)+ eyebrow,右邊 icon 按鈕;最右 [主題][齒輪 = 設定]。 */
 export function ScreenNav({
   eyebrow,
   onBack,
@@ -80,10 +81,16 @@ export function ScreenNav({
         <button type="button" className="icon-btn lead" onClick={onBack} aria-label={t("nav.back")}>
           <Icon name="back" />
         </button>
-      ) : null}
+      ) : (
+        <>
+          <img className="logo logo-dark" src="/logo.png" width={28} height={28} alt="" aria-hidden="true" />
+          <img className="logo logo-light" src="/logo-light.png" width={28} height={28} alt="" aria-hidden="true" />
+        </>
+      )}
       <span className="eyebrow">{eyebrow}</span>
       <span className="nav-actions">
         {children}
+        <ThemeToggle />
         {gear ? (
           <button type="button" className="icon-btn" onClick={() => go("settings")} aria-label={t("nav.settings")}>
             <Icon name="gear" />

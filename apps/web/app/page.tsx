@@ -150,7 +150,6 @@ export default function Home() {
       {/* ============ 起盤 ============ */}
       <section {...show("home")} aria-label={t("tab.home")}>
         <ScreenNav eyebrow={t("app.subtitle")} />
-        <div className="hero-mark" aria-hidden="true">{t("app.seal")}</div>
         <h1 className="large">{t("form.title")}</h1>
         <p className="lede">{t("home.lede")}</p>
 
