@@ -1,5 +1,5 @@
 {
-  "description": "Tiny reusable Cantonese/Mandarin pronunciation button: Web Speech API TTS (zero cost, on-device) + Framer Motion physics micro-interactions.",
+  "description": "Tiny reusable any-language pronunciation kit: Web Speech API TTS (zero cost, on-device) + Framer Motion physics micro-interactions. Any BCP-47 language, every setting user-configurable.",
   "devDependencies": {
     "@types/react": "18.3.3"
   },
@@ -25,5 +25,5 @@
   },
   "type": "module",
   "types": "./dist/index.d.ts",
-  "version": "0.3.0"
+  "version": "0.4.0"
 }

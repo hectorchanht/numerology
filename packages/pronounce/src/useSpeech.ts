@@ -2,13 +2,66 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 
-/** 支援的發音語言:粵語(zh-HK)/國語(zh-CN)。 */
-export type SpeechLang = "zh-HK" | "zh-CN";
+/**
+ * 朗讀語言:任意 BCP-47 標籤("zh-HK"、"zh-CN"、"en-US"、"ja-JP"…),
+ * 實際可用視裝置系統語音包而定。
+ */
+export type SpeechLang = string;
 
+/** 常用標籤的短寫常量(向後兼容舊版 "zh-HK" | "zh-CN")。 */
+export const ZH_HK: SpeechLang = "zh-HK";
+export const ZH_CN: SpeechLang = "zh-CN";
+
+/** useSpeech 的全部設定:全部暴露給使用者,無隱藏預設。 */
 export interface UseSpeechOptions {
+  /** 語速(0.1–10,預設 1.0) */
   rate?: number;
+  /** 音調(0–2,預設 1.0) */
   pitch?: number;
+  /** 音量(0–1,預設 1.0) */
   volume?: number;
+  /**
+   * 指定語音:匹配 SpeechSynthesisVoice.name 或 voiceURI(精確相等)。
+   * 未指定時按語言自動挑選。
+   */
+  voice?: string | null;
+  /**
+   * 自訂語音挑選邏輯,優先於內建自動匹配。
+   * 傳回 undefined 則退回內建匹配。
+   */
+  pickVoice?: (
+    voices: SpeechSynthesisVoice[],
+    lang: SpeechLang,
+  ) => SpeechSynthesisVoice | undefined;
+}
+
+/**
+ * 內建語音挑選(純函數,可測試):
+ * 1. lang 精確匹配(如 "zh-HK")
+ * 2. 基底語言匹配(如 lang "zh-HK" 配 voice.lang "zh")
+ * 3. 退回 undefined(瀏覽器用 utterance.lang 的預設語音)
+ */
+export function resolveVoice<
+  V extends Pick<SpeechSynthesisVoice, "lang" | "name" | "voiceURI">,
+>(voices: V[], lang: SpeechLang, preferred?: string | null): V | undefined {
+  if (preferred) {
+    const hit = voices.find(
+      (v) => v.name === preferred || v.voiceURI === preferred,
+    );
+    if (hit) return hit;
+  }
+  const norm = (t: string) => t.replace("_", "-").toLowerCase();
+  const want = norm(lang);
+  const exact = voices.find((v) => norm(v.lang) === want);
+  if (exact) return exact;
+  const base = want.split("-")[0]!;
+  const baseHit = voices.find((v) => norm(v.lang).split("-")[0] === base);
+  return baseHit;
+}
+
+/** BCP-47 標籤正規化("zh_HK" → "zh-HK"),供比較用。 */
+export function normalizeLangTag(tag: string): string {
+  return tag.replace("_", "-");
 }
 
 /**
@@ -49,16 +102,36 @@ export function splitSpeechSentences(text: string, maxLen = 120): string[] {
 }
 
 /**
+ * 系統語音列表 Hook(響應式):訂閱 voiceschanged,列表一到即更新。
+ * 供 app 自建語音/語言設定面板用。SSR 安全。
+ */
+export function useVoices(): SpeechSynthesisVoice[] {
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    const synth = window.speechSynthesis;
+    const refresh = () => setVoices(synth.getVoices());
+    refresh();
+    synth.addEventListener("voiceschanged", refresh);
+    return () => synth.removeEventListener("voiceschanged", refresh);
+  }, []);
+  return voices;
+}
+
+/**
  * 核心發音 Hook:Web Speech API 朗讀(零成本、裝置端發聲,不耗 AI 額度)。
+ * 語言為任意 BCP-47 標籤,語速/音調/音量/語音全部可配。
  * - speak(text, lang):單句,立即中斷上一次發音再讀。
  * - speakAll(text, lang):長文本先分句再排隊逐句讀(避開長 utterance 在部分瀏覽器中途停頓的問題)。
  * - isPlaying/currentLang:追蹤播放狀態,供 UI 顯示「播放中」。
+ * - voices:當前系統語音列表(供設定面板用)。
  * - stop():手動中斷(含排隊中的句子)。
  * SSR 安全:所有 window.speechSynthesis 存取都在事件/ effect / 回調內。
  */
 export function useSpeech(options: UseSpeechOptions = {}) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentLang, setCurrentLang] = useState<SpeechLang | null>(null);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   /** 世代計數:stop()/新 speak 使舊隊列的 onend 回調失效,防競態。 */
   const genRef = useRef(0);
   const queueRef = useRef<string[]>([]);
@@ -67,15 +140,16 @@ export function useSpeech(options: UseSpeechOptions = {}) {
     (text: string, lang: SpeechLang, gen: number) => {
       if (typeof window === "undefined" || !window.speechSynthesis) return;
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = lang;
+      utterance.lang = normalizeLangTag(lang);
       utterance.rate = options.rate ?? 1.0;
       utterance.pitch = options.pitch ?? 1.0;
       utterance.volume = options.volume ?? 1.0;
 
-      // 尋找系統最匹配的方言語音包
-      const voices = window.speechSynthesis.getVoices();
-      const voice = voices.find((v) => v.lang.replace("_", "-").includes(lang));
-      if (voice) utterance.voice = voice;
+      // 語音選擇:自訂 pickVoice > 指定 voice 名/URI > 內建語言匹配
+      const all = window.speechSynthesis.getVoices();
+      const picked =
+        options.pickVoice?.(all, lang) ?? resolveVoice(all, lang, options.voice);
+      if (picked) utterance.voice = picked;
 
       utterance.onstart = () => {
         if (genRef.current !== gen) return;
@@ -100,7 +174,13 @@ export function useSpeech(options: UseSpeechOptions = {}) {
 
       window.speechSynthesis.speak(utterance);
     },
-    [options.rate, options.pitch, options.volume],
+    [
+      options.rate,
+      options.pitch,
+      options.volume,
+      options.voice,
+      options.pickVoice,
+    ],
   );
 
   const speak = useCallback(
@@ -143,11 +223,11 @@ export function useSpeech(options: UseSpeechOptions = {}) {
   useEffect(() => {
     if (typeof window === "undefined" || !window.speechSynthesis) return;
     const synth = window.speechSynthesis;
-    const prime = () => synth.getVoices();
-    prime();
-    synth.addEventListener("voiceschanged", prime);
-    return () => synth.removeEventListener("voiceschanged", prime);
+    const refresh = () => setVoices(synth.getVoices());
+    refresh();
+    synth.addEventListener("voiceschanged", refresh);
+    return () => synth.removeEventListener("voiceschanged", refresh);
   }, []);
 
-  return { speak, speakAll, stop, isPlaying, currentLang };
+  return { speak, speakAll, stop, isPlaying, currentLang, voices };
 }

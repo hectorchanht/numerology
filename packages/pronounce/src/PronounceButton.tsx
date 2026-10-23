@@ -2,42 +2,48 @@
 
 import { createElement, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSpeech, type SpeechLang } from "./useSpeech.js";
+import { useSpeech, type SpeechLang, type UseSpeechOptions } from "./useSpeech.js";
+import {
+  DEFAULT_LANGS,
+  getLangBadge,
+  getLangColor,
+  getLangLabel,
+  type PronounceLocale,
+} from "./langs.js";
+
+export type { PronounceLocale };
 
 /**
- * 單一發音圖標按鈕(32px):左鍵播放/停止(預設廣東話),
- * 右鍵 / 長按開語言選單切換普通話。Framer Motion 物理回饋:
+ * 單一發音圖標按鈕(32px):左鍵播放/停止(預設第一個語言),
+ * 右鍵 / 長按開語言選單切換。Framer Motion 物理回饋:
  * whileTap spring 壓縮 + 播放中雙層波紋擴散,停止即 Rest。
+ *
+ * 全部設定暴露給使用者:
+ * - `langs`:任意 BCP-47 語言清單(預設 ["zh-HK","zh-CN"],向後兼容)
+ * - `defaultLang` / `controlledLang` + `onLangChange`:語言選擇
+ * - `langNames` / `langBadges` / `langColors`:標籤、角標、主題色自訂
+ * - `speechOptions`:語速/音調/音量/語音 全部透傳給 useSpeech
  *
  * Self-contained:不依賴任何 app 的 i18n,語言標籤經 `locale` prop 傳入。
  * 無 Tailwind:全 inline style,顏色走 CSS 變數(--card/--sep/--label/--fill/--pop-shadow,
  * 未定義時瀏覽器回退為預設值),深淺色模式皆可。
  */
 
-export type PronounceLocale = "zht" | "zhs" | "en";
-
-const CANTO_COLOR = "#0071e3"; // iOS 藍
-const MANDO_COLOR = "#34c759"; // iOS 綠
-
-const LANG_NAME: Record<PronounceLocale, Record<SpeechLang, string>> = {
-  zht: { "zh-HK": "廣東話", "zh-CN": "普通話" },
-  zhs: { "zh-HK": "广东话", "zh-CN": "普通话" },
-  en: { "zh-HK": "Cantonese", "zh-CN": "Mandarin" },
-};
-
 const SWITCH_HINT: Record<PronounceLocale, string> = {
   zht: "右鍵 / 長按切換語言",
   zhs: "右键 / 长按切换语言",
-  en: "right-click / long-press to switch",
+  en: "right-click / long-press to switch language",
+};
+
+const SPEAK_WORD: Record<PronounceLocale, string> = {
+  zht: "發音",
+  zhs: "发音",
+  en: "speak",
 };
 
 const BTN_SIZE = 32;
 
-export function PronounceButton({
-  text,
-  locale = "zht",
-  mode = "single",
-}: {
+export interface PronounceButtonProps {
   /** 要朗讀的文字 */
   text: string;
   /** 介面語言(只影響按鈕標籤/提示,不影響發音) */
@@ -47,18 +53,69 @@ export function PronounceButton({
    * "all":先按句讀分句再排隊讀(適合段落/章節長文本)。
    */
   mode?: "single" | "all";
-}) {
-  const { speak, speakAll, stop, isPlaying, currentLang } = useSpeech();
-  const [selectedLang, setSelectedLang] = useState<SpeechLang>("zh-HK");
+  /** 可選語言清單(BCP-47)。預設 ["zh-HK","zh-CN"]。 */
+  langs?: SpeechLang[];
+  /** 初始語言。預設為 langs[0]。 */
+  defaultLang?: SpeechLang;
+  /** 受控語言:傳入後按鈕語言完全由父層控制(配合 onLangChange)。 */
+  controlledLang?: SpeechLang;
+  /** 語言切換回調(使用者在選單選了語言時觸發)。 */
+  onLangChange?: (lang: SpeechLang) => void;
+  /**
+   * 自訂語言顯示名:{ [bcp47]: { zht, zhs, en } }。
+   * 內建 18 種常見語言,未覆寫的用內建,內建沒有的直接顯示標籤。
+   */
+  langNames?: Partial<
+    Record<string, Partial<Record<PronounceLocale, string>>>
+  >;
+  /** 自訂角標:{ [bcp47]: "粵" }。預設 粵/普,其他語言退回標籤基底大寫(如 "EN")。 */
+  langBadges?: Record<string, string>;
+  /** 自訂主題色:{ [bcp47]: "#0071e3" }。未指定的退回 iOS 藍。 */
+  langColors?: Record<string, string>;
+  /** 發音設定:語速/音調/音量/指定語音/自訂語音挑選,全部透傳給 useSpeech。 */
+  speechOptions?: UseSpeechOptions;
+}
+
+export function PronounceButton({
+  text,
+  locale = "zht",
+  mode = "single",
+  langs,
+  defaultLang,
+  controlledLang,
+  onLangChange,
+  langNames,
+  langBadges,
+  langColors,
+  speechOptions,
+}: PronounceButtonProps) {
+  const { speak, speakAll, stop, isPlaying, currentLang } =
+    useSpeech(speechOptions);
+  const langList =
+    langs && langs.length > 0 ? langs : DEFAULT_LANGS;
+  const initialLang =
+    controlledLang ??
+    (defaultLang && langList.includes(defaultLang)
+      ? defaultLang
+      : langList[0]!);
+  const [internalLang, setInternalLang] = useState<SpeechLang>(initialLang);
+  const selectedLang = controlledLang ?? internalLang;
   const [showMenu, setShowMenu] = useState(false);
   const [hovered, setHovered] = useState<SpeechLang | null>(null);
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suppressMenuUntil = useRef(0); // 長按已開選單:忽略隨之而來的 contextmenu
+  const onLangChangeRef = useRef(onLangChange);
+  onLangChangeRef.current = onLangChange;
 
   const supported =
     typeof window !== "undefined" && "speechSynthesis" in window;
+
+  // 受控語言變化時同步(非受控模式忽略)
+  useEffect(() => {
+    if (controlledLang !== undefined) setInternalLang(controlledLang);
+  }, [controlledLang]);
 
   // 觸控長按開選單(550ms):non-passive 才能 preventDefault 擋住系統選單
   useEffect(() => {
@@ -107,10 +164,9 @@ export function PronounceButton({
   if (!supported) return null;
 
   // 主題色跟隨「正在播放的語言」,靜態時跟隨已選語言
-  const isCanto =
-    currentLang === "zh-HK" || (!isPlaying && selectedLang === "zh-HK");
-  const themeColor = isCanto ? CANTO_COLOR : MANDO_COLOR;
-  const names = LANG_NAME[locale] ?? LANG_NAME.zht;
+  const activeLang = isPlaying && currentLang ? currentLang : selectedLang;
+  const themeColor = getLangColor(activeLang, langColors);
+  const labelOf = (lang: SpeechLang) => getLangLabel(lang, locale, langNames);
 
   const handlePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -128,8 +184,9 @@ export function PronounceButton({
   };
 
   const toggleLanguage = (lang: SpeechLang) => {
-    setSelectedLang(lang);
+    setInternalLang(lang);
     setShowMenu(false);
+    onLangChangeRef.current?.(lang);
     if (mode === "all") speakAll(text, lang);
     else speak(text, lang); // 切換即讀一次,即時確認
   };
@@ -153,17 +210,14 @@ export function PronounceButton({
           borderRadius: "6px",
           cursor: "pointer",
           backgroundColor: hovered === lang ? "var(--fill)" : "transparent",
-          color:
-            selectedLang === lang
-              ? lang === "zh-HK"
-                ? CANTO_COLOR
-                : MANDO_COLOR
-              : "var(--label)",
+          color: selectedLang === lang ? getLangColor(lang, langColors) : "var(--label)",
           fontWeight: selectedLang === lang ? 600 : 400,
         },
       },
-      names[lang],
+      labelOf(lang),
     );
+
+  const selectedLabel = labelOf(selectedLang);
 
   return createElement(
     "span",
@@ -185,9 +239,9 @@ export function PronounceButton({
         // Emil Kowalski 式輕量彈性按壓(stiff physics feel)
         whileTap: { scale: 0.88 },
         transition: { type: "spring", stiffness: 400, damping: 25 },
-        "aria-label": `${names[selectedLang]}發音`,
+        "aria-label": `${selectedLabel}${SPEAK_WORD[locale] ?? SPEAK_WORD.zht}`,
         "aria-pressed": isPlaying,
-        title: `${names[selectedLang]} · ${SWITCH_HINT[locale] ?? SWITCH_HINT.zht}`,
+        title: `${selectedLabel} · ${SWITCH_HINT[locale] ?? SWITCH_HINT.zht}`,
         style: {
           position: "relative",
           display: "flex",
@@ -292,7 +346,7 @@ export function PronounceButton({
           },
         }),
     ),
-    // 角落語言角標:粵 / 普
+    // 角落語言角標
     createElement(
       "span",
       {
@@ -320,7 +374,7 @@ export function PronounceButton({
           transformOrigin: "bottom right",
         },
       },
-      selectedLang === "zh-HK" ? "粵" : "普",
+      getLangBadge(selectedLang, langBadges),
     ),
     // 語言切換選單
     showMenu &&
@@ -336,7 +390,7 @@ export function PronounceButton({
             right: 0,
             top: "100%",
             marginTop: 4,
-            width: 84,
+            minWidth: 84,
             backgroundColor: "var(--card)",
             border: "1px solid var(--sep)",
             borderRadius: 10,
@@ -345,8 +399,7 @@ export function PronounceButton({
             zIndex: 30,
           },
         },
-        menuItem("zh-HK"),
-        menuItem("zh-CN"),
+        ...langList.map(menuItem),
       ),
   );
 }

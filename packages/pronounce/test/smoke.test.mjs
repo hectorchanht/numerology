@@ -56,3 +56,73 @@ test("speechText:空/純文字 pass-through", () => {
   assert.equal(speechText("   "), "");
   assert.equal(speechText("你好世界"), "你好世界");
 });
+
+import {
+  resolveVoice,
+  normalizeLangTag,
+  useVoices,
+  getLangLabel,
+  getLangBadge,
+  getLangColor,
+  DEFAULT_LANGS,
+  ZH_HK,
+  ZH_CN,
+} from "../dist/index.js";
+
+test("exports new v0.4.0 symbols", () => {
+  assert.equal(typeof useVoices, "function");
+  assert.equal(typeof resolveVoice, "function");
+  assert.equal(typeof getLangLabel, "function");
+  assert.equal(typeof getLangBadge, "function");
+  assert.equal(typeof getLangColor, "function");
+  assert.deepEqual(DEFAULT_LANGS, ["zh-HK", "zh-CN"]);
+  assert.equal(ZH_HK, "zh-HK");
+  assert.equal(ZH_CN, "zh-CN");
+});
+
+const FAKE_VOICES = [
+  { name: "Google 粵語（香港）", lang: "zh-HK", voiceURI: "uri-yue" },
+  { name: "Google 國語（中國）", lang: "zh-CN", voiceURI: "uri-cmn" },
+  { name: "Samantha", lang: "en-US", voiceURI: "uri-en" },
+];
+
+test("resolveVoice:指定 voice 名/URI 精確匹配", () => {
+  assert.equal(resolveVoice(FAKE_VOICES, "zh-HK", "Samantha").name, "Samantha");
+  assert.equal(resolveVoice(FAKE_VOICES, "en-US", "uri-yue").lang, "zh-HK");
+});
+
+test("resolveVoice:lang 精確匹配 → 基底匹配 → undefined", () => {
+  assert.equal(resolveVoice(FAKE_VOICES, "zh-HK").name, "Google 粵語（香港）");
+  // zh-TW 無精確匹配,退回基底 zh 的第一個
+  assert.equal(resolveVoice(FAKE_VOICES, "zh-TW").lang, "zh-HK");
+  assert.equal(resolveVoice(FAKE_VOICES, "ja-JP"), undefined);
+  // 下劃線分隔亦正規化
+  assert.equal(resolveVoice(FAKE_VOICES, "en_US").name, "Samantha");
+});
+
+test("normalizeLangTag:下劃線 → 連字號", () => {
+  assert.equal(normalizeLangTag("zh_HK"), "zh-HK");
+  assert.equal(normalizeLangTag("en-US"), "en-US");
+});
+
+test("getLangLabel:內建/自訂/退回標籤", () => {
+  assert.equal(getLangLabel("zh-HK", "zht"), "廣東話");
+  assert.equal(getLangLabel("ja-JP", "en"), "Japanese");
+  assert.equal(
+    getLangLabel("zh-HK", "zht", { "zh-HK": { zht: "白話" } }),
+    "白話",
+  );
+  assert.equal(getLangLabel("xx-YY", "en"), "xx-YY");
+});
+
+test("getLangBadge:內建/自訂/基底大寫", () => {
+  assert.equal(getLangBadge("zh-HK"), "粵");
+  assert.equal(getLangBadge("en-US"), "EN");
+  assert.equal(getLangBadge("en-US", { "en-US": "美" }), "美");
+});
+
+test("getLangColor:內建/自訂/退回預設藍", () => {
+  assert.equal(getLangColor("zh-HK"), "#0071e3");
+  assert.equal(getLangColor("ja-JP"), "#0071e3");
+  assert.equal(getLangColor("ja-JP", { "ja-JP": "#ff0000" }), "#ff0000");
+});
