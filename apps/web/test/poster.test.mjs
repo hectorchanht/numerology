@@ -233,3 +233,15 @@ test("poster:超長名字會縮細字號,唔撞 logo", () => {
   assert.ok(nameOp.size < 20, `長名應縮細字號,實際 ${nameOp.size}`);
   assert.ok(texts.includes(long));
 });
+
+// —— 分享邀請:海報要邀請睇到嘅人自己去起盤,附連結 ——
+test("poster:海報有分享邀請 + 連結(三語)", () => {
+  for (const loc of ["zht", "zhs", "en"]) {
+    const m = buildPosterModel(SRC, loc, { includeBirth: false });
+    assert.ok(m.cta.includes("numerology.dawnstudio.app"), `${loc} cta 冇連結: ${m.cta}`);
+    assert.ok(posterTexts(m).join("|").includes("numerology.dawnstudio.app"));
+    const layout = layoutPoster(m, fakeMeasure);
+    const texts = layout.ops.filter((o) => o.t === "text").map((o) => o.text);
+    assert.ok(texts.includes(m.cta), `${loc} 版面冇畫出 cta`);
+  }
+});

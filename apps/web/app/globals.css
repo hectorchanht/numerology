@@ -1,7 +1,14 @@
 /* 命理 · Apple-minimal dark,mobile-first(390px)。
  * 手機 <768px:單欄 max 430px + 底部 tab bar(唔好郁);平板 768–1023:闊欄 720px;
  * 桌面 ≥1024:左側欄 + 多欄內容(見檔尾 media queries)。
- * 近單色 + 唯一暖金 accent;無裝飾漸變;系統字型(無外部字型 / CDN)。 */
+ * 近單色 + 唯一暖金 accent;無裝飾漸變;系統字型(無外部字型 / CDN)。
+ *
+ * Tailwind v4 (core stack):只引 theme + utilities,唔引 preflight——
+ * preflight 會 reset 現有手寫設計,所以唔用。utilities 放 @layer utilities,
+ * 未分層嘅手寫 CSS 優先級更高:同名衝突時現有設計贏,utilities 用喺新版面。
+ */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
 :root {
   color-scheme: dark;
   --bg: #000;

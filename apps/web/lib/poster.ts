@@ -101,6 +101,8 @@ export interface PosterModel {
   ziweiHeading: string;
   ziwei: PosterRow[];
   disclaimer: string;
+  /** 分享邀請 + 連結:睇到海報嘅人可以自己去起盤。 */
+  cta: string;
 }
 
 function p2(n: number): string {
@@ -174,6 +176,7 @@ export function buildPosterModel(
     ziweiHeading: yjT("poster.ziwei", loc),
     ziwei,
     disclaimer: yjT("poster.disclaimer", loc),
+    cta: yjT("poster.cta", loc),
   };
 }
 
@@ -181,7 +184,7 @@ export function buildPosterModel(
 export function posterTexts(m: PosterModel): string[] {
   const rows = [...m.birth, m.dayMaster, ...m.ziwei];
   return [
-    m.title, m.name, m.generatedAt, m.brand, m.baziHeading, m.ziweiHeading, m.disclaimer,
+    m.title, m.name, m.generatedAt, m.brand, m.baziHeading, m.ziweiHeading, m.disclaimer, m.cta,
     ...m.pillars.flatMap((p) => [p.ganZhi, p.shiShen, p.label]),
     ...rows.flatMap((r) => [r.label, r.value, r.note ?? ""]),
   ].filter(Boolean);
@@ -372,6 +375,13 @@ export function layoutPoster(m: PosterModel, measure: MeasureFn): PosterLayout {
     ops.push({ t: "text", x: x0 + cw / 2, y: y + dSize * 1.1, text: line, size: dSize, weight: 400, color: "label2", align: "center" });
     y += dSize * 1.45;
   }
+
+  /* —— 分享邀請:睇到海報嘅人可以自己去起盤(附連結) —— */
+  y += 0.55 * REM;
+  const ctaSize = 14;
+  ops.push({ t: "text", x: x0 + cw / 2, y: y + ctaSize * 1.1, text: m.cta, size: ctaSize, weight: 600, color: "accent", align: "center" });
+  y += ctaSize * 1.45;
+
   y += PAD_B;
 
   const cardH = y - MARGIN;

@@ -143,6 +143,7 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "poster.bodyPalace": S("身宮", "身宫", "Body Palace"),
   "poster.dayun": S("當前大運", "当前大运", "Current Luck Cycle"),
   "poster.disclaimer": S("傳統文化與自我反思工具,非宿命預測,僅供參考。", "传统文化与自我反思工具,非宿命预测,仅供参考。", "A cultural self-reflection tool, not fate prediction. For reference only."),
+  "poster.cta": S("到 numerology.dawnstudio.app 起你嘅命盤", "到 numerology.dawnstudio.app 起你的命盘", "Get your own chart at numerology.dawnstudio.app"),
   "poster.generatedAt": S("生成於 {date}", "生成于 {date}", "Generated {date}"),
   "poster.mainStars": S("主星", "主星", "Major stars"),
   "poster.yearPillar": S("年", "年", "Year"),

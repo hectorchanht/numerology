@@ -107,6 +107,7 @@ export function QuoteRef({ entry }: { entry: QuoteRefEntry }) {
                 target: "_blank",
                 rel: "noopener noreferrer",
                 onClick: (e: React.MouseEvent) => e.stopPropagation(),
+                style: { whiteSpace: "nowrap", flexShrink: 0 },
               },
               "查原文 ↗",
             ),

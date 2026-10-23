@@ -80,6 +80,9 @@ const CARD_STYLE: CSSProperties = {
   zIndex: 50,
   minWidth: "220px",
   maxWidth: "300px",
+  /* 彈窗再長都唔可以高過 viewport:flip + shift 先有位走;超出就卡內 scroll。 */
+  maxHeight: "min(60vh, 420px)",
+  overflowY: "auto",
   background: "var(--card-2)",
   border: "1px solid var(--label-2)",
   borderRadius: "8px",
