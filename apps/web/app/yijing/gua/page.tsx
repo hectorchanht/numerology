@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 export default function GuaPage() {
   return (
-    <div className="shell">
+    <>
       <GuaLibrary />
-    </div>
+    </>
   );
 }

@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 export default function YijingPage() {
   return (
-    <div className="shell">
+    <>
       <YijingTool />
-    </div>
+    </>
   );
 }

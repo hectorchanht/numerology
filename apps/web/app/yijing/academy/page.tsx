@@ -24,7 +24,7 @@ export default function AcademyIndexPage() {
   const doneCount = ACADEMY_LESSONS.filter((l) => progress[l.id]?.done).length;
 
   return (
-    <div className="shell">
+    <>
       <div className="masthead" style={{ paddingTop: "1.2rem" }}>
         <h1 style={{ letterSpacing: "0.28em" }}>{yjT("academy.title", loc)}</h1>
         <div className="sub">{yjT("academy.sub", loc)}</div>
@@ -159,6 +159,6 @@ export default function AcademyIndexPage() {
       <p className="muted" style={{ marginTop: "1rem" }}>
         {yjT("academy.localNote", loc)}
       </p>
-    </div>
+    </>
   );
 }

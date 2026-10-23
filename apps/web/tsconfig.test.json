@@ -41,6 +41,7 @@
     "lib/quoteRef.tsx",
     "lib/tldr.ts",
     "lib/dragScroll.ts",
-    "lib/fortuneBlocks.ts"
+    "lib/fortuneBlocks.ts",
+    "lib/script.ts"
   ]
 }

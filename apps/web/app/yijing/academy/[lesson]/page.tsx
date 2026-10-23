@@ -18,8 +18,8 @@ export function generateMetadata({ params }: { params: { lesson: string } }): Me
 /** 單課頁(服務端外殼,靜態生成四課)。 */
 export default function AcademyLessonPage({ params }: { params: { lesson: string } }) {
   return (
-    <div className="shell">
+    <>
       <LessonView lessonId={params.lesson} />
-    </div>
+    </>
   );
 }

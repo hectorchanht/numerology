@@ -9,8 +9,8 @@ export const metadata: Metadata = {
 
 export default function LiuyaoPage() {
   return (
-    <div className="shell">
+    <>
       <LiuyaoTool />
-    </div>
+    </>
   );
 }
