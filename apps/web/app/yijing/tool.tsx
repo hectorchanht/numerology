@@ -134,7 +134,7 @@ export default function YijingTool() {
           width: 34px; height: 34px; border-radius: 50%;
           display: grid; place-items: center;
           font-size: 15px; font-weight: 600;
-          background: var(--accent); color: #1a1206;
+          background: var(--accent); color: var(--on-accent);
         }
         .yj-coin.flipping { animation: yj-flip 0.32s linear infinite; }
         .yj-coin.pop { animation: yj-pop 0.4s ease-out; }

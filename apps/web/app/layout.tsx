@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { YijingNav } from "@/components/YijingNav";
 import { TabBar } from "@/components/TabBar";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 
 export const metadata: Metadata = {
   title: "命理 · 八字紫微合參",
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, statusBarStyle: "black" },
 };
 
-// DARK-THEME DEFAULT:theme-color 純黑,唔會閃白。
+// DARK-THEME DEFAULT:theme-color 純黑,唔會閃白;用戶揀 light 時由 lib/theme 改寫。
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -21,7 +22,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="zh-Hant">
+    // data-theme 由 inline script 喺首幀前改寫(light),故此 suppressHydrationWarning。
+    <html lang="zh-Hant" data-theme="dark" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body>
         <div className="app">
           <YijingNav />

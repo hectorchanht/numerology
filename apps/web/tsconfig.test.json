@@ -31,6 +31,7 @@
     "lib/sectionIcons.ts",
     "lib/ganzhi.ts",
     "lib/yijingStrings.ts",
-    "lib/yijingSite.ts"
+    "lib/yijingSite.ts",
+    "lib/theme.ts"
   ]
 }
