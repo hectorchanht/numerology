@@ -71,7 +71,7 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
               }}
             >
               <DualPronounce
-                text={`${zT(hex.name)}。${zT(hex.judgment)}`}
+                text={zT(hex.name)}
                 locale={loc}
                 readings={{ "zh-HK": hex.jyutping, "zh-CN": hex.pinyin }}
               />
