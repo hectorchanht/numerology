@@ -14,10 +14,13 @@ export function AiInterpret({
   hexagram,
   lines,
   locale,
+  question,
 }: {
   hexagram: number;
   lines: CoinLine[];
   locale: YijingLocale;
+  /** 用戶問題(選填):有傳先會送去 server,冇就唔送(privacy) */
+  question?: string;
 }) {
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [text, setText] = useState("");
@@ -30,7 +33,7 @@ export function AiInterpret({
     try {
       await streamPost(
         "/api/yijing/interpret",
-        { hexagram, lines, locale },
+        { hexagram, lines, locale, question },
         (full) => setText(full),
       );
       setState("done");

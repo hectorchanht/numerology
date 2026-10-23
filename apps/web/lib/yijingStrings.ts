@@ -38,6 +38,7 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "yijing.benGua": S("本卦", "本卦", "Primary"),
   "yijing.bianGua": S("變卦", "变卦", "Changed"),
   "yijing.huGua": S("互卦", "互卦", "Nuclear"),
+  "yijing.sendQuestion": S("AI 解卦時參考此問題", "AI 解卦时参考此问题", "Let AI consider this question"),
 
   /* —— 占卦歷史 —— */
   "yijing.hist.title": S("占卦歷史", "占卦历史", "Divination history"),

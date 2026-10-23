@@ -77,6 +77,14 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
   const { zT } = useScript();
   const loc = locale as YijingLocale;
   const [question, setQuestion] = useState("");
+  /** AI 解卦時係咪將問題一併送去 — Hector 2026-10-23:default 開,分析要對住具體問題 */
+  const [sendQ, setSendQ] = useState<boolean>(() => {
+    try {
+      return window.localStorage.getItem("numerology-yj-sendq") !== "0";
+    } catch {
+      return true;
+    }
+  });
   const [lines, setLines] = useState<TossedLine[]>([]);
   const [rolling, setRolling] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -223,6 +231,25 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
                 placeholder={yjT("yijing.question.ph", loc)}
               />
             </div>
+            <label
+              style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.6rem", cursor: "pointer" }}
+            >
+              <input
+                type="checkbox"
+                checked={sendQ}
+                onChange={(e) => {
+                  setSendQ(e.target.checked);
+                  try {
+                    window.localStorage.setItem("numerology-yj-sendq", e.target.checked ? "1" : "0");
+                  } catch {
+                    /* ignore */
+                  }
+                }}
+              />
+              <span className="muted" style={{ fontSize: "0.85rem" }}>
+                {yjT("yijing.sendQuestion", loc)}
+              </span>
+            </label>
             <p className="muted" style={{ marginTop: "0.7rem", marginBottom: 0 }}>
               <Term term="問卦" /> · {yjT("yijing.askHonest", loc)}
             </p>
@@ -369,7 +396,12 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
               </div>
             )}
 
-            <AiInterpret hexagram={cast.hexagram} lines={cast.lines} locale={loc} />
+            <AiInterpret
+              hexagram={cast.hexagram}
+              lines={cast.lines}
+              locale={loc}
+              question={sendQ ? question.trim() || undefined : undefined}
+            />
           </div>
         )}
       </div>

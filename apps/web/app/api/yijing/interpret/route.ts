@@ -13,14 +13,14 @@ import { getServerAiBindings, getWaitUntil } from "@/lib/aiBinding";
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
-/** prompt 版本:改 prompt 即換緩存鍵,不串味。 */
-const PROMPT_VERSION = "yijing-interpret/v1";
+/** prompt 版本:改 prompt 即換緩存鍵,不串味。v2:可選接收用戶問題(入緩存鍵)。 */
+const PROMPT_VERSION = "yijing-interpret/v2";
 
 const SYS_ZHT = `你是易經解卦助手。只根據下面給出的卦爻辭解讀,不編造經文原文,不預言具體事件。
 輸出繁體中文,400字以內,分兩段:第一段第一句先給結論(此卦對所問之事的總定性,直接敢斷),再講啟示;第二段給一條可執行的建議。
 嚴格區分「卦象顯示的傾向」(可肯定)與「具體事件」(不可編造)。`;
 
-function buildUserText(hexNum: number, lines: number[], locale: string): string {
+function buildUserText(hexNum: number, lines: number[], locale: string, question?: string): string {
   const ben = getHexagram(hexNum)!;
   const changing = lines
     .map((v, i) => (v === 6 || v === 9 ? i + 1 : -1))
@@ -29,6 +29,8 @@ function buildUserText(hexNum: number, lines: number[], locale: string): string 
     `本卦:${ben.symbol}${ben.name}(第${ben.number}卦)`,
     `卦辭:${ben.judgment}`,
   ];
+  // 用戶問題(選填):有就緊扣具體問題解讀,冇就通用解讀
+  if (question) parts.push(`所問之事:${question}`);
   if (changing.length > 0) {
     const cast = castYijing(lines as [number, number, number, number, number, number]);
     const bian = cast.changed ? getHexagram(cast.changed) : undefined;
@@ -51,15 +53,26 @@ function buildUserText(hexNum: number, lines: number[], locale: string): string 
  * POST /api/yijing/interpret — AI 解卦(短解讀)。
  * 強制走 Workers AI binding,與報告路由共用同一個 $2/月 KV 預算守衛
  * (超支 → 乾淨 JSON 429,不燒錢);命中 KV 緩存則零消耗。
- * 注意:不接收用戶問題原文(問題只存於前端,不上傳)。
+ * question 選填:用戶喺前端 toggle「AI 解卦時參考此問題」(default 開)
+ * 先會送上嚟;唔送就通用解讀。有問題入緩存鍵,唔同問題唔串味。
  */
 export async function POST(req: Request): Promise<Response> {
   try {
     await ensureEnv();
-    const body = (await req.json()) as { hexagram?: unknown; lines?: unknown; locale?: unknown };
+    const body = (await req.json()) as {
+      hexagram?: unknown;
+      lines?: unknown;
+      locale?: unknown;
+      question?: unknown;
+    };
     const hexNum = body.hexagram;
     const lines = body.lines;
     const locale = body.locale === "zhs" || body.locale === "en" ? body.locale : "zht";
+    // 問題選填:字串,去頭尾空白,上限 200 字(唔係問題唔收)
+    const question =
+      typeof body.question === "string" && body.question.trim()
+        ? body.question.trim().slice(0, 200)
+        : undefined;
     if (typeof hexNum !== "number" || !Number.isInteger(hexNum) || hexNum < 1 || hexNum > 64) {
       throw new Error("非法請求: hexagram 須為 1–64 的整數");
     }
@@ -81,7 +94,7 @@ export async function POST(req: Request): Promise<Response> {
       aiBinding: getServerAiBindings() ?? undefined,
     };
     const kv = (getServerAiBindings()?.kv ?? null) as KvLike | null;
-    const userText = buildUserText(realHex.number, lines as number[], locale);
+    const userText = buildUserText(realHex.number, lines as number[], locale, question);
     const cached = await prepareCachedStream(
       kv,
       {
@@ -90,7 +103,7 @@ export async function POST(req: Request): Promise<Response> {
         locale,
         lens: "",
         section: "yijing-interpret",
-        inputHash: await sha256hex(JSON.stringify({ h: realHex.number, l: lines })),
+        inputHash: await sha256hex(JSON.stringify({ h: realHex.number, l: lines, q: question ?? "" })),
         promptHash: await sha256hex(PROMPT_VERSION),
       },
       () =>
