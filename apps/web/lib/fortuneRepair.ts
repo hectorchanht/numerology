@@ -48,7 +48,7 @@ function dayunGanzhiInLine(line: string): string | null {
   return null;
 }
 
-/** 对单份报告 markdown 做确定性修复(小标题数字 + 紫微大限:無/错配)。 */
+/** 对单份报告 markdown 做确定性修复(小标题数字 + 紫微大限:無/错配 + 去重連續小標題)。 */
 export function repairFortuneMarkdown(
   markdown: string,
   fortune: FortuneAnalysis,
@@ -153,5 +153,84 @@ export function repairFortuneMarkdown(
     return line;
   };
 
-  return markdown.split("\n").map(fixLine).join("\n");
+  return dedupeHeadings(markdown.split("\n").map(fixLine)).join("\n");
+}
+
+/* ── 去重連續小標題 ─────────────────────────────────────────────
+ * 模型常把同一小標題寫兩次:一次 markdown 標題,一次加粗 lead-in
+ * (或修復把佔位行提為規範標題,旁邊已有一個規範標題)。
+ * 只處理「相鄰(僅隔空行)」且 identity 相同的標題行:
+ *  - 純標題行(第二個) → 整行丟棄;
+ *  - 加粗 lead-in 帶正文 → 去標題留正文。
+ * 正文中的同年提及(非標題樣式、或後面還有實質文字)永不動;
+ * 不同年份/干支永不動。
+ */
+
+/** 規範小標題 identity(標題樣式行才有):大運→D:干支:起始年;流年→Y:年份:干支。 */
+function headingIdentity(line: string): string | null {
+  const t = line.trim();
+  const styled = /^#{1,4}\s/.test(t) || /^\*\*/.test(t);
+  const s = t
+    .replace(/^[#>*\-–—\s　]+/, "")
+    .replace(/\(/g, "（")
+    .replace(/\)/g, "）")
+    .replace(/[*_~\s　]+/g, "");
+  // 大運:干支運（…YYYY…）/ en "GZ Luck Period (…YYYY…)"
+  let m = s.match(new RegExp(`^(${GZ_RE})(?:[運运]|LuckPeriod)（([^）]*)）`));
+  if (m) {
+    const ym = m[2]!.match(/(\d{4})/);
+    if (!ym) return null;
+    if (!styled && s.slice(m[0].length).replace(/^[：:]+$/, "") !== "") return null;
+    return `D:${m[1]}:${ym[1]}`;
+  }
+  // 流年:YYYY年（干支…）/ en "YYYY (GZ, …)"
+  m = s.match(/^(\d{4})年?（([^）]*)）/);
+  if (m) {
+    const gm = m[2]!.match(new RegExp(`^${GZ_RE}`));
+    if (!gm) return null;
+    if (!styled && s.slice(m[0].length).replace(/^[：:]+$/, "") !== "") return null;
+    return `Y:${m[1]}:${gm[0]}`;
+  }
+  return null;
+}
+
+/** 去掉行首的標題前綴(## / **加粗** / 規範標題至第一個）),保留後面正文。 */
+function stripHeadingPrefix(line: string): string {
+  const t = line.trim().replace(/^#{1,4}\s*/, "");
+  let m = t.match(/^\*\*(.+?)\*\*\s*[：:]?\s*/);
+  if (m) return t.slice(m[0].length);
+  m = t.match(/^.+?[）)]\s*[：:]?\s*/);
+  if (m) return t.slice(m[0].length);
+  return "";
+}
+
+function dedupeHeadings(lines: string[]): string[] {
+  const out: string[] = [];
+  let lastId: string | null = null;
+  let clean = true; // 自上個標題以來只見過空行
+  for (const line of lines) {
+    const id = headingIdentity(line);
+    if (id !== null) {
+      if (id === lastId && clean) {
+        const rest = stripHeadingPrefix(line);
+        if (rest.trim() !== "") {
+          out.push(rest); // lead-in 帶正文:去標題留正文
+          lastId = null;
+          clean = false;
+        }
+        // 純標題行:整行丟棄,保留 lastId/clean(連三個同標題亦丟)
+        continue;
+      }
+      lastId = id;
+      clean = true;
+      out.push(line);
+      continue;
+    }
+    out.push(line);
+    if (line.trim() !== "") {
+      lastId = null;
+      clean = false;
+    }
+  }
+  return out;
 }

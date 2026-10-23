@@ -11,7 +11,7 @@ import {
 import { getHexagram } from "@numerology/knowledge";
 import { useLocale } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
-import { Gloss } from "@/components/Gloss";
+import { Term } from "@/lib/highlightTerms";
 
 const LINE_OPTS: { v: YaoValue; id: string }[] = [
   { v: 6, id: "yijing.line.oldYin" },
@@ -258,13 +258,13 @@ export default function LiuyaoTool() {
             <span style={{ fontSize: "1.6rem", marginRight: "0.5rem" }}>{result.hexName}</span>
             <span className="badge">{result.r.shape}</span>{" "}
             <span className="muted">
-              <Gloss term="卦宮" locale={loc} />: {result.r.palace}({result.r.palaceWuxing})
+              <Term term="卦宮" />: {result.r.palace}({result.r.palaceWuxing})
             </span>
           </div>
           <p style={{ margin: "0 0 1rem" }}>
-            <Gloss term="日辰" locale={loc} />: {result.r.dayGanzhi} ·{" "}
-            <Gloss term="月建" locale={loc} />: {result.r.monthBranch} ·{" "}
-            <Gloss term="旬空" locale={loc} />: {result.r.kong.join("")}
+            <Term term="日辰" />: {result.r.dayGanzhi} ·{" "}
+            <Term term="月建" />: {result.r.monthBranch} ·{" "}
+            <Term term="旬空" />: {result.r.kong.join("")}
           </p>
           <div>
             {[...result.r.yaos].reverse().map((y) => (

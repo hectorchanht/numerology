@@ -9,9 +9,8 @@ import {
 import { getHexagram, yaoName } from "@numerology/knowledge";
 import { useLocale } from "@/lib/i18n";
 import { yjT, yjFmt, type YijingLocale } from "@/lib/yijingStrings";
-import { Gloss } from "@/components/Gloss";
 import { AiInterpret } from "./AiInterpret";
-import { withTermHighlights } from "@/lib/highlightTerms";
+import { Term, withTermHighlights } from "@/lib/highlightTerms";
 
 interface TossedLine {
   value: CoinLine;
@@ -166,7 +165,7 @@ export default function YijingTool() {
               />
             </div>
             <p className="muted" style={{ marginTop: "0.7rem", marginBottom: 0 }}>
-              <Gloss term="問卦" locale={loc} /> · {yjT("yijing.askHonest", loc)}
+              <Term term="問卦" /> · {yjT("yijing.askHonest", loc)}
             </p>
           </div>
 
@@ -221,7 +220,7 @@ export default function YijingTool() {
                     <span style={{ color: "var(--ink-soft)" }}>{yjT(LINE_LABEL[l.value], loc)}</span>
                     {(l.value === 6 || l.value === 9) && (
                       <span className="badge badge-warn">
-                        <Gloss term="動爻" locale={loc} />
+                        <Term term="動爻" />
                       </span>
                     )}
                   </div>
@@ -243,14 +242,14 @@ export default function YijingTool() {
                 <div style={{ display: "flex", alignItems: "baseline", gap: "0.7rem", flexWrap: "wrap" }}>
                   <span style={{ fontSize: "2.6rem", lineHeight: 1 }}>{ben.symbol}</span>
                   <span style={{ fontFamily: "var(--serif)", fontSize: "1.5rem" }}>
-                    <Gloss term="本卦" locale={loc} /> · {ben.name}
+                    <Term term="本卦" /> · {ben.name}
                   </span>
                   <span className="muted">
                     {ben.pinyin} · {ben.nameEn} · #{ben.number}
                   </span>
                 </div>
                 <p style={{ marginTop: "0.7rem" }}>
-                  <Gloss term="卦辭" locale={loc} />:{` `}
+                  <Term term="卦辭" />:{` `}
                   <span style={{ fontFamily: "var(--serif)", fontSize: "1.05rem" }}>{withTermHighlights(ben.judgment)}</span>
                 </p>
               </div>
@@ -259,7 +258,7 @@ export default function YijingTool() {
             {cast.changing.length > 0 ? (
               <div style={{ marginTop: "1.2rem" }}>
                 <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
-                  <Gloss term="動爻" locale={loc} />
+                  <Term term="動爻" />
                 </h3>
                 {cast.changing.map((p) => (
                   <div
@@ -290,10 +289,10 @@ export default function YijingTool() {
                   <div className="card" style={{ marginTop: 0 }}>
                     <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>
                       <span style={{ fontSize: "1.8rem", marginRight: "0.5rem" }}>{bian.symbol}</span>
-                      <Gloss term="變卦" locale={loc} /> · {bian.name}
+                      <Term term="變卦" /> · {bian.name}
                     </h3>
                     <p style={{ margin: 0, fontSize: "0.92rem" }}>
-                      <Gloss term="卦辭" locale={loc} />: {withTermHighlights(bian.judgment)}
+                      <Term term="卦辭" />: {withTermHighlights(bian.judgment)}
                     </p>
                   </div>
                 )}
@@ -301,10 +300,10 @@ export default function YijingTool() {
                   <div className="card" style={{ marginTop: 0 }}>
                     <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>
                       <span style={{ fontSize: "1.8rem", marginRight: "0.5rem" }}>{hu.symbol}</span>
-                      <Gloss term="互卦" locale={loc} /> · {hu.name}
+                      <Term term="互卦" /> · {hu.name}
                     </h3>
                     <p style={{ margin: 0, fontSize: "0.92rem" }}>
-                      <Gloss term="卦辭" locale={loc} />: {withTermHighlights(hu.judgment)}
+                      <Term term="卦辭" />: {withTermHighlights(hu.judgment)}
                     </p>
                   </div>
                 )}

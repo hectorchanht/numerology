@@ -14,8 +14,7 @@ import {
 } from "@numerology/knowledge";
 import { useLocale } from "@/lib/i18n";
 import { yjT, type YijingLocale as YL } from "@/lib/yijingStrings";
-import { Gloss } from "@/components/Gloss";
-import { withTermHighlights } from "@/lib/highlightTerms";
+import { Term, withTermHighlights } from "@/lib/highlightTerms";
 
 const TABS = ["coreMeaning", "career", "love", "wealth", "health", "advice"] as const;
 const TAB_IDS: Record<(typeof TABS)[number], string> = {
@@ -74,14 +73,14 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
       </div>
 
       <h3 className="section-title" style={{ marginTop: "1.4rem" }}>
-        <Gloss term="卦辭" locale={loc} />
+        <Term term="卦辭" />
       </h3>
       <p style={{ fontFamily: "var(--serif)", fontSize: "1.05rem", marginTop: 0 }}>
         {withTermHighlights(hex.judgment)}
       </p>
 
       <h3 className="section-title">
-        <Gloss term="爻辭" locale={loc} />
+        <Term term="爻辭" />
       </h3>
       <div>
         {[...hex.lines].reverse().map((text, ri) => {
@@ -112,7 +111,7 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
       </div>
 
       <h3 className="section-title" style={{ marginTop: "1.4rem" }}>
-        <Gloss term="大象" locale={loc} />
+        <Term term="大象" />
       </h3>
       <blockquote
         style={{
@@ -211,7 +210,7 @@ export default function GuaLibrary() {
             </div>
           )}
           <p className="muted" style={{ marginTop: "1rem", marginBottom: 0 }}>
-            <Gloss term="文王卦序" locale={loc} /> · {all.length}
+            <Term term="文王卦序" /> · {all.length}
             {loc === "en" ? " hexagrams" : loc === "zhs" ? " 卦" : " 卦"}
           </p>
         </div>

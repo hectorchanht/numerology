@@ -10,7 +10,6 @@ import { aiRequestParts } from "@/lib/aiSettings";
 import { useLocale, HTML_LANG, type Locale, type TKey } from "@/lib/i18n";
 import { stripLeadingHeading } from "@/lib/sectionIcons";
 import { markdownTermComponents } from "@/lib/highlightTerms";
-import { splitTldr } from "@/lib/tldr";
 import { Icon, SECTION_ICON } from "@/components/Icon";
 import { Seg, ScreenNav } from "@/components/ui";
 
@@ -58,19 +57,6 @@ interface Slot {
   text: string;
   status: "streaming" | "done" | "error";
   err: string;
-}
-
-/**
- * 章節 TL;DR 摘要卡:AI 同一條流第一行輸出(唔另叫 API)。
- * 放喺可摺疊正文之外——章節摺埋都睇到結論;完整正文照樣喺下面全部顯示。
- */
-function Tldr({ text, live, label }: { text: string; live: boolean; label: string }) {
-  return (
-    <aside className={`tldr${live ? " is-streaming" : ""}`} aria-label={label}>
-      <span className="tldr-k">{label}</span>
-      {text ? <p>{text}</p> : <div className="skel w80" />}
-    </aside>
-  );
 }
 
 /** 通用流式报告:选视角 → 各节并行调 endpoint → 每节一张卡,逐字渲染 Markdown。 */
@@ -178,8 +164,12 @@ export function StreamedReport({
       return n;
     });
 
+  /** 剛手動跳轉(點擊 strip)後 900ms 內不讓 observer 搶 active,避免平滑滾動中途閃爍。 */
+  const jumpLock = useRef(0);
+
   const jump = (k: string) => {
     setActive(k);
+    jumpLock.current = Date.now();
     if (collapsible) setOpen((s) => new Set(s).add(k));
     // 等展開後先捲動。
     requestAnimationFrame(() =>
@@ -188,6 +178,29 @@ export function StreamedReport({
   };
 
   const anyError = !!slots?.some((s) => s.status === "error");
+
+  // scrollspy:單一 IntersectionObserver 監聽各節 <article>;
+  // 章節頂部進入視口上方帶即把 strip 高亮切過去。串流中 article 元素不變,照常生效。
+  useEffect(() => {
+    const root = secRef.current;
+    if (!root || !slots) return;
+    const articles = Array.from(root.querySelectorAll("article[id]"));
+    if (articles.length === 0) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (Date.now() - jumpLock.current < 900) return;
+        const vis = entries.filter((e) => e.isIntersecting);
+        if (vis.length === 0) return;
+        vis.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        const el = vis[0]!.target as HTMLElement;
+        const k = el.id.startsWith(`${idBase}-`) ? el.id.slice(idBase.length + 1) : "";
+        if (k) setActive(k);
+      },
+      { rootMargin: "-15% 0px -75% 0px", threshold: 0 },
+    );
+    articles.forEach((a) => io.observe(a));
+    return () => io.disconnect();
+  }, [slots, idBase]);
 
   return (
     <>
@@ -269,9 +282,6 @@ export function StreamedReport({
                   s.status === "error" ? "failed" : "",
                 ].filter(Boolean).join(" ");
                 const isOpen = !collapsible || open.has(seg.key);
-                const streaming = s.status === "streaming";
-                // TL;DR 同正文由同一條 AI 流切出(冇標記 → tldr 為 null,全部當正文)。
-                const split = has ? splitTldr(stripLeadingHeading(s.text)) : { tldr: null, body: "" };
                 const head = (
                   <>
                     <Icon name={SECTION_ICON[seg.key] ?? "spark"} />
@@ -297,26 +307,20 @@ export function StreamedReport({
                     ) : (
                       <h3 className="sec-hd"><span className="sec-h">{head}</span></h3>
                     )}
-                    {split.tldr !== null ? (
-                      <Tldr text={split.tldr} live={streaming && !split.body} label={t("report.tldr")} />
-                    ) : null}
                     <div className="sec-b" id={`${idBase}-${seg.key}-b`} hidden={!isOpen}>
-                      {split.body ? (
-                        <div className={`prose${streaming ? " is-streaming" : ""}`}>
+                      {has ? (
+                        <div className={`prose${s.status === "streaming" ? " is-streaming" : ""}`}>
                           <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownTermComponents}>
-                            {repairText ? repairText(stripLeadingHeading(split.body)) : stripLeadingHeading(split.body)}
+                            {repairText ? repairText(stripLeadingHeading(s.text)) : stripLeadingHeading(s.text)}
                           </ReactMarkdown>
                         </div>
-                      ) : streaming ? (
-                        // 摘要已出、正文未到:摘要卡已有游標,呢度唔使再放骨架。
-                        has ? null : (
-                          <div aria-label={t("report.stateQueued")}>
-                            <div className="skel" /><div className="skel w80" /><div className="skel w60" />
-                          </div>
-                        )
+                      ) : s.status === "streaming" ? (
+                        <div aria-label={t("report.stateQueued")}>
+                          <div className="skel" /><div className="skel w80" /><div className="skel w60" />
+                        </div>
                       ) : s.status === "error" ? (
                         <p className="notice">{t("report.segFail", { err: s.err })}</p>
-                      ) : has ? null : (
+                      ) : (
                         <p className="note">{t("report.segEmpty")}</p>
                       )}
                     </div>

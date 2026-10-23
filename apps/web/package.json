@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@dawn-studio/pronounce": "*",
+    "@floating-ui/react": "^0.27.20",
     "@numerology/ai": "*",
     "@numerology/engine": "*",
     "framer-motion": "^14.6.0",

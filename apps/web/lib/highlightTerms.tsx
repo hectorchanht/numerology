@@ -5,9 +5,7 @@ import {
   cloneElement,
   createElement,
   isValidElement,
-  useEffect,
   useRef,
-  useState,
   type ReactElement,
   type ReactNode,
 } from "react";
@@ -20,6 +18,7 @@ import {
 // Next 端經 extensionAlias 同樣解到 ./i18n.ts,同一模組。
 import { useLocale } from "./i18n.js";
 import { PronounceButton } from "@dawn-studio/pronounce";
+import { FloatingCard, useFloatPopup } from "./floatPopup.js";
 
 /* ── 合併術語表 ─────────────────────────────────────────────── */
 
@@ -94,104 +93,73 @@ export function findTermMatches(text: string, terms?: GlossaryTerm[]): TermMatch
 
 /* ── Term:點按釋義 ──────────────────────────────────────────── */
 
-const POPUP_STYLE: Record<string, string | number> = {
-  position: "absolute",
-  zIndex: 20,
-  left: 0,
-  top: "1.7em",
-  minWidth: "220px",
-  maxWidth: "300px",
-  background: "var(--card-2)",
-  border: "1px solid var(--label-2)",
-  borderRadius: "8px",
-  padding: "0.6rem 0.8rem",
-  fontSize: "0.8rem",
-  lineHeight: 1.6,
-  color: "var(--label)",
-  boxShadow: "var(--pop-shadow)",
-};
-
 /**
- * 術語點按釋義:虛線底線,點一下彈出小釋義卡(當前語言)。
+ * 術語點按釋義:虛線底線(僅底線,不改文字顏色),點一下彈出小釋義卡(當前語言)。
+ * 彈窗定位經 useFloatPopup(@floating-ui/react):flip + shift 保證永不超出 viewport。
  * POPUP DISMISSAL RULE:點別處 / 按 Escape 即關;點術語本身切換開關。
  * 查無此術語時退化為純文字。
  */
 export function Term({ term }: { term: string }) {
   const { locale } = useLocale();
-  const [open, setOpen] = useState(false);
-  const wrapRef = useRef<HTMLSpanElement | null>(null);
+  const anchorRef = useRef<HTMLSpanElement | null>(null);
+  const { open, setOpen, floatingRef, floatingStyles } = useFloatPopup(anchorRef);
   const def = lookupTerm(term);
-
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (e: PointerEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open ]);
 
   if (!def) return createElement("span", null, term);
 
   return createElement(
     "span",
-    { ref: wrapRef, style: { position: "relative", display: "inline-block" } },
+    { style: { display: "inline-block" } },
     createElement(
       "span",
       {
+        ref: anchorRef,
         role: "button",
         tabIndex: 0,
-        onClick: () => setOpen((v) => !v),
+        onClick: () => setOpen((v: boolean) => !v),
         onKeyDown: (e: React.KeyboardEvent) => {
-          if (e.key === "Enter" || e.key === " ") setOpen((v) => !v);
+          if (e.key === "Enter" || e.key === " ") setOpen((v: boolean) => !v);
         },
         "aria-expanded": open,
         style: {
           borderBottom: "1px dotted var(--accent-line)",
           cursor: "help",
-          color: "var(--ink)",
         },
       },
       term,
     ),
     open &&
-      createElement(
-        "span",
-        { style: POPUP_STYLE, role: "dialog" },
-        createElement(
-          "span",
-          {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "0.5rem",
-              marginBottom: "0.25rem",
-            },
-          },
+      createElement(FloatingCard, {
+        floatingRef,
+        floatingStyles,
+        children: [
           createElement(
             "span",
             {
+              key: "head",
               style: {
-                fontFamily: "var(--serif)",
-                color: "var(--cinnabar)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "0.5rem",
+                marginBottom: "0.25rem",
               },
             },
-            def.term,
+            createElement(
+              "span",
+              {
+                style: {
+                  fontFamily: "var(--serif)",
+                  color: "var(--cinnabar)",
+                },
+              },
+              def.term,
+            ),
+            createElement(PronounceButton, { text: def.term, locale }),
           ),
-          createElement(PronounceButton, { text: def.term, locale }),
-        ),
-        def[locale] ?? def.zht,
-      ),
+          createElement("span", { key: "body" }, def[locale] ?? def.zht),
+        ],
+      }),
   );
 }
 

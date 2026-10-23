@@ -56,15 +56,48 @@ export default function AcademyIndexPage() {
         </div>
       </div>
 
-      {ACADEMY_LESSONS.map((l) => {
-        const p = progress[l.id];
-        return (
-          <Link
-            key={l.id}
-            href={`/yijing/academy/${l.id}`}
-            style={{ textDecoration: "none", color: "inherit", display: "block" }}
-          >
-            <div className="card" style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+      {/* 學習路線圖:左側時間線 + 節點狀態(完成✓/當前/待學),卡片間留足呼吸空間 */}
+      <div style={{ position: "relative", marginTop: "1.8rem", paddingBottom: "0.4rem" }}>
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            left: "1.28rem",
+            top: "1.6rem",
+            bottom: "1.6rem",
+            width: "2px",
+            background: "var(--line)",
+          }}
+        />
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            left: "1.28rem",
+            top: "1.6rem",
+            width: "2px",
+            height: `calc(${(doneCount / ACADEMY_LESSONS.length) * 100}% - 1.6rem)`,
+            background: "var(--cinnabar)",
+            transition: "height 0.4s",
+          }}
+        />
+        {ACADEMY_LESSONS.map((l, i) => {
+          const p = progress[l.id];
+          const done = !!p?.done;
+          const isCurrent =
+            !done && ACADEMY_LESSONS.slice(0, i).every((x) => progress[x.id]?.done);
+          const last = i === ACADEMY_LESSONS.length - 1;
+          return (
+            <div
+              key={l.id}
+              style={{
+                position: "relative",
+                display: "flex",
+                gap: "1.1rem",
+                alignItems: "flex-start",
+                marginBottom: last ? 0 : "1.6rem",
+              }}
+            >
               <span
                 aria-hidden
                 style={{
@@ -74,30 +107,53 @@ export default function AcademyIndexPage() {
                   height: "2.6rem",
                   flex: "0 0 auto",
                   borderRadius: "50%",
-                  border: "1px solid var(--cinnabar-soft)",
-                  color: p?.done ? "var(--paper)" : "var(--cinnabar)",
-                  background: p?.done ? "var(--cinnabar)" : "transparent",
+                  border: done
+                    ? "1px solid var(--cinnabar)"
+                    : isCurrent
+                      ? "2px solid var(--cinnabar)"
+                      : "1px solid var(--line-strong)",
+                  color: done ? "var(--paper)" : isCurrent ? "var(--cinnabar)" : "var(--ink-faint)",
+                  background: done ? "var(--cinnabar)" : "var(--paper)",
                   fontFamily: "var(--serif)",
                   fontSize: "1.1rem",
+                  fontWeight: isCurrent ? 700 : 400,
+                  boxShadow: isCurrent ? "0 0 0 4px oklch(from var(--cinnabar) l c h / 0.15)" : "none",
+                  zIndex: 1,
                 }}
               >
-                {p?.done ? "✓" : l.index}
+                {done ? "✓" : l.index}
               </span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>{l.title}</div>
-                <div className="muted">
-                  {l.sub} · {yjT("academy.minutes", loc).replace("{n}", String(l.minutes))}
-                  {p?.done &&
-                    ` · ${yjT("academy.best", loc).replace("{s}", String(p.best)).replace("{t}", String(p.total))}`}
+              <Link
+                href={`/yijing/academy/${l.id}`}
+                style={{ textDecoration: "none", color: "inherit", display: "block", flex: 1 }}
+              >
+                <div
+                  className="card"
+                  style={{
+                    margin: 0,
+                    borderColor: isCurrent ? "var(--cinnabar-soft)" : undefined,
+                    opacity: !done && !isCurrent ? 0.75 : 1,
+                  }}
+                >
+                  <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>{l.title}</div>
+                      <div className="muted" style={{ marginTop: "0.25rem" }}>
+                        {l.sub} · {yjT("academy.minutes", loc).replace("{n}", String(l.minutes))}
+                        {p?.done &&
+                          ` · ${yjT("academy.best", loc).replace("{s}", String(p.best)).replace("{t}", String(p.total))}`}
+                      </div>
+                    </div>
+                    <span aria-hidden style={{ color: "var(--ink-faint)", flex: "0 0 auto" }}>
+                      →
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <span aria-hidden style={{ color: "var(--ink-faint)" }}>
-                →
-              </span>
+              </Link>
             </div>
-          </Link>
-        );
-      })}
+          );
+        })}
+      </div>
 
       <p className="muted" style={{ marginTop: "1rem" }}>
         {yjT("academy.localNote", loc)}
