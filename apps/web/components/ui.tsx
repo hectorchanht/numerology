@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "@/lib/i18n";
+import { useLocale, LocaleSwitch } from "@/lib/i18n";
 import { go } from "@/lib/nav";
 import { Icon, type IconName } from "@/components/Icon";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -90,7 +90,10 @@ export function ScreenNav({
       <span className="eyebrow">{eyebrow}</span>
       <span className="nav-actions">
         {children}
-        {/* nav-global:桌面由側欄提供,喺度隱藏 */}
+        {/* nav-global:桌面由側欄提供,喺度隱藏;語言切換排喺主題切換之前 */}
+        <span className="nav-global">
+          <LocaleSwitch />
+        </span>
         <ThemeToggle className="nav-global" />
         {gear ? (
           <button type="button" className="icon-btn nav-global" onClick={() => go("settings")} aria-label={t("nav.settings")}>

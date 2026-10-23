@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useLocale } from "@/lib/i18n";
+import { useLocale, LocaleSwitch } from "@/lib/i18n";
 import { go, useNav, type Screen } from "@/lib/nav";
 import { yjT } from "@/lib/yijingStrings";
 import { Icon } from "@/components/Icon";
@@ -82,6 +82,8 @@ export function SideNav() {
           <Icon name="gear" />
           {t("nav.settings")}
         </button>
+        {/* 語言切換排喺主題切換之前 */}
+        <LocaleSwitch />
         <ThemeToggle />
       </div>
     </aside>
