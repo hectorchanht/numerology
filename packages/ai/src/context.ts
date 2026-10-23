@@ -107,20 +107,23 @@ function renderFortune(f: FortuneAnalysis): string {
   const u = (b: boolean) => (b ? "✓引动用神" : "");
   const cur = (b: boolean) => (b ? " 【当前运】" : "");
 
+  const sihua = (s: { type: string; star: string; intoPalace: string }[]) =>
+    s.map((x) => `${x.type}→${x.star}(入${x.intoPalace})`).join(" ");
+
   const daYun = f.bazi.daYun
-    .map(
-      (d) =>
+    .map((d) => {
+      const dec = d.ziweiDecadal;
+      return (
         `  - ${d.ganZhi}(${d.startAge}-${d.endAge}岁/${d.startYear}-${d.endYear}) ` +
-        `天干${d.ganShiShen}、支藏${d.hideShiShen.map((h) => h.gan + h.shiShen).join("")} ${u(d.suppliesUseGod)}${cur(d.isCurrent)}`,
-    )
+        `天干${d.ganShiShen}、支藏${d.hideShiShen.map((h) => h.gan + h.shiShen).join("")} ${u(d.suppliesUseGod)}${cur(d.isCurrent)}` +
+        `\n    └ 大限${dec.heavenlyStem}${dec.earthlyBranch}(行${dec.palaceName}):${sihua(dec.sihua)}`
+      );
+    })
     .join("\n");
 
   const liuNian = f.bazi.liuNian
     .map((y) => `${y.year}(${y.age}岁)${y.ganZhi}·${y.ganShiShen}${y.suppliesUseGod ? "✓" : ""}${y.isReference ? "【参考年/今年】" : y.isPast ? "(已过)" : ""}`)
     .join(" | ");
-
-  const sihua = (s: { type: string; star: string; intoPalace: string }[]) =>
-    s.map((x) => `${x.type}→${x.star}(入${x.intoPalace})`).join(" ");
 
   const yearly = f.ziwei.yearly
     .map((y) => `  - ${y.year} ${y.heavenlyStem}${y.earthlyBranch}(行${y.palaceName}):${sihua(y.sihua)}`)
@@ -135,7 +138,7 @@ ${daYun}
 ### 八字流年(含已过年份,供回看验证)
   ${liuNian}
 
-### 紫微大限四化(飞入本命宫)
+### 紫微大限四化(当前大限,仅用于"当前总览";各步大运的同期大限见上面每步的 └ 大限行,两者不要混用)
   - 大限 ${f.ziwei.decadal.heavenlyStem}${f.ziwei.decadal.earthlyBranch}(行${f.ziwei.decadal.palaceName}):${sihua(f.ziwei.decadal.sihua)}
 
 ### 紫微流年四化(飞入本命宫,化忌冲宫尤需留意)

@@ -23,6 +23,12 @@ export interface DaYunAnalysis {
   suppliesUseGod: boolean;
   /** referenceYear 是否落在此运 */
   isCurrent: boolean;
+  /**
+   * 与该大运同期的大限(按大运起始年取 horoscope 判定,四化飞入本命宫)。
+   * 八字大运与紫微大限的十年区间不对齐,故逐运单独判定,避免模型把
+   * "当前大限"套用到每一步大运上。
+   */
+  ziweiDecadal: ZiweiScopeFortune;
 }
 
 export interface LiuNianAnalysis {
@@ -99,58 +105,7 @@ export function analyzeFortune(
   const suppliesUseGod = (gan: string, hide: Tiangan[]): boolean =>
     useGods.has(gan) || hide.some((g) => useGods.has(g));
 
-  // —— 八字大运 ——
-  const ec = Solar.fromYmdHms(
-    t.year, t.month, t.day, t.hour, t.minute, 0,
-  ).getLunar().getEightChar();
-  const rawDaYun = ec.getYun(input.gender === "男" ? 1 : 0).getDaYun();
-
-  const daYun: DaYunAnalysis[] = [];
-  const liuNian: LiuNianAnalysis[] = [];
-
-  for (const d of rawDaYun) {
-    const ganZhi = d.getGanZhi();
-    if (ganZhi.trim().length !== 2) continue; // 跳过起运前虚运
-    const gan = ganZhi[0]!;
-    const zhi = ganZhi[1]!;
-    const hide = dizhiHideGan(zhi);
-    const startYear = d.getStartYear();
-    const endYear = startYear + 9;
-    if (!isTiangan(gan)) continue;
-
-    daYun.push({
-      ganZhi, gan, zhi,
-      startAge: d.getStartAge(),
-      endAge: d.getEndAge(),
-      startYear,
-      endYear,
-      ganShiShen: shiShen(dayMaster, gan),
-      hideShiShen: hide.map((g) => ({ gan: g, shiShen: shiShen(dayMaster, g) })),
-      suppliesUseGod: suppliesUseGod(gan, hide),
-      isCurrent: referenceYear >= startYear && referenceYear <= endYear,
-    });
-
-    // 该运内、落在窗口的流年
-    for (const y of d.getLiuNian()) {
-      const year = y.getYear();
-      if (year < windowStart || year > windowEnd) continue;
-      const yGanZhi = y.getGanZhi();
-      const yGan = yGanZhi[0]!;
-      const yHide = dizhiHideGan(yGanZhi[1]!);
-      if (!isTiangan(yGan)) continue;
-      liuNian.push({
-        year,
-        age: y.getAge(),
-        ganZhi: yGanZhi,
-        ganShiShen: shiShen(dayMaster, yGan),
-        suppliesUseGod: suppliesUseGod(yGan, yHide),
-        isReference: year === referenceYear,
-        isPast: year < referenceYear,
-      });
-    }
-  }
-
-  // —— 紫微大限 / 流年四化 ——
+  // —— 紫微排盘(先建,大运循环里要逐运判定同期大限) ——
   const a = astro.bySolar(
     `${t.year}-${t.month}-${t.day}`,
     hourToTimeIndex(t.hour),
@@ -180,6 +135,67 @@ export function analyzeFortune(
     })),
   });
 
+  // —— 八字大运 ——
+  const ec = Solar.fromYmdHms(
+    t.year, t.month, t.day, t.hour, t.minute, 0,
+  ).getLunar().getEightChar();
+  const rawDaYun = ec.getYun(input.gender === "男" ? 1 : 0).getDaYun();
+
+  const daYun: DaYunAnalysis[] = [];
+  const liuNian: LiuNianAnalysis[] = [];
+
+  for (const d of rawDaYun) {
+    const ganZhi = d.getGanZhi();
+    if (ganZhi.trim().length !== 2) continue; // 跳过起运前虚运
+    const gan = ganZhi[0]!;
+    const zhi = ganZhi[1]!;
+    const hide = dizhiHideGan(zhi);
+    const startYear = d.getStartYear();
+    const endYear = startYear + 9;
+    if (!isTiangan(gan)) continue;
+
+    daYun.push({
+      ganZhi, gan, zhi,
+      startAge: d.getStartAge(),
+      endAge: d.getEndAge(),
+      startYear,
+      endYear,
+      ganShiShen: shiShen(dayMaster, gan),
+      hideShiShen: hide.map((g) => ({ gan: g, shiShen: shiShen(dayMaster, g) })),
+      suppliesUseGod: suppliesUseGod(gan, hide),
+      isCurrent: referenceYear >= startYear && referenceYear <= endYear,
+      // 该运中点年份时的紫微大限(四化飞入本命宫)。
+      // 用中点而非起点:首步大运的起点年龄常落在首个大限区间之前,
+      // 此时 horoscope 会回绕到末个大限(iztro 行为),给出错误的大限;
+      // 中点恒落在某大限区间内,结果稳定。
+      ziweiDecadal: toScope(
+        "大限",
+        a.horoscope(`${Math.round((startYear + endYear) / 2)}-6-1`).decadal,
+      ),
+    });
+
+    // 该运内、落在窗口的流年
+    for (const y of d.getLiuNian()) {
+      const year = y.getYear();
+      if (year < windowStart || year > windowEnd) continue;
+      const yGanZhi = y.getGanZhi();
+      const yGan = yGanZhi[0]!;
+      const yHide = dizhiHideGan(yGanZhi[1]!);
+      if (!isTiangan(yGan)) continue;
+      liuNian.push({
+        year,
+        age: y.getAge(),
+        ganZhi: yGanZhi,
+        ganShiShen: shiShen(dayMaster, yGan),
+        suppliesUseGod: suppliesUseGod(yGan, yHide),
+        isReference: year === referenceYear,
+        isPast: year < referenceYear,
+      });
+    }
+  }
+
+  // —— 紫微大限(当前) / 流年四化 ——
+  // a / starToPalace / palaceNameByIndex / toScope 已在上方定义,此处复用。
   const decadalH = a.horoscope(`${referenceYear}-6-1`);
   const decadal = toScope("大限", decadalH.decadal);
 

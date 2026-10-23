@@ -393,3 +393,45 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
 缓存键前缀 bump 为 `aicache:2:` 使旧坏缓存整体失效。
 回归测试:`teeTextStream:wrapper 上挂两个监听器(预热+正式)也不重复累积`。
 教训:tee/装饰器包装流时,累积逻辑必须与监听器数量解耦。
+
+## 大运流年深析质量修复(2026-10-22,用户贴出真实输出)
+
+用户贴出的《大運流年深析》有三个缺陷,已定位并修复:
+
+1. **年月数字缺失**(如 `戊辰運（- 歲/-）`、`年（辛丑年）`):
+   根因不在引擎——上下文包里数字本来就是全的(`戊辰(2-11岁/1995-2004)`、
+   `2021(28岁)辛丑`),而是 prompt 从未硬性要求模型写出数字,模型就输出了 `-` 占位。
+   修复:`prompts.ts` 新增 `FORTUNE_NUMBERS_RULE`(数字铁律·逐字照抄,大小运/流年标题格式
+   + ❌ 禁例),接入 `buildFortuneReportPrompt` 与 `buildFortuneSectionPrompt`。
+
+2. **每步大运重复同一个大限**:
+   根因是上下文只带了*当前*大限(`f.ziwei.decadal`),模型就把它套到每一步。
+   修复:引擎 `analyzeFortune` 现在为每步大运计算**同期大限**
+   (`DaYunAnalysis.ziweiDecadal`),取该运中点年份的 `horoscope().decadal`
+   (用中点而非起点:首步起点年龄常落在首个大限区间之前,iztro 的 horoscope
+   会回绕到末个大限,给出错误结果;中点恒落在某区间内)。
+   `context.ts` 把每步的 `└ 大限XX(行YY):禄→.. 权→..` 渲染进动态运势段,
+   并把原来的"当前大限"行标注为仅用于总览、不要混用。
+   回归测试:`packages/engine/test/fortune-decadal.test.mjs`(5 项:结构完整、
+   与命宫大限区间的独立交叉验证、多步不全相同、男女方向、首步不回绕)。
+
+3. **套话重复**(每步/每年同一句式、rhythm 节把前面重讲一遍):
+   修复:`fortuneAntiRepetition(key)` 按节定制纪律——dayun 每步 3–4 句只锚定独有信息
+   (十神组合/同期大限/刑冲),严禁跨步重复句式;review/future 每年 2–3 句、禁四段式
+   填表模板;rhythm 只列转折点清单、禁重播;所有形容词必须带机制(哪个干支/哪颗星→
+   哪个宫→什么效果),写不出就删。
+   另做了一次通用 prompt 优化: FORTUNE_SEGMENTS 各节 instruction 压缩到 1–3 行,
+   去掉模型会镜像的啰嗦表述;直接、敢断的语气保留并加强(机制语言要求)。
+   回归测试:`packages/ai/test/fortune-prompt.test.mjs`(7 项)。
+
+4. **报告章节加 emoji(用户要求"replace boring text with emoji/icon")**:
+   纯前端确定性方案,不靠模型:`apps/web/lib/sectionIcons.ts`(13 节 key→emoji,
+   如 overview🧭/dayun🕰️/review🔍/future🔮/rhythm🌊/action🎯/personality🪞/
+   career💼/wealth💰/relationship❤️/health🌿/luck🌠/advice💡,与语言无关),
+   `StreamedReport` 在渲染时按 section key 把 `## ` 标题行替换为
+   `## <icon> <label>`(AI 自带标题与占位标题统一处理;历史记录存的仍是无图标原文)。
+   回归测试:`apps/web/test/section-icons.test.mjs`(6 项:key 齐全、图标互异、
+   未知 key 回落 ✦、标题替换/补全、正文不动)。
+
+验证:139/139 测试通过(engine 41/ai 41/knowledge 5/web 52);`next build` +
+`npm run cf:pages` 均成功。

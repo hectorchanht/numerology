@@ -1,1 +1,33 @@
-{"compilerOptions":{"declaration":false,"declarationMap":false,"lib":["ES2021","DOM"],"outDir":"./test-dist","rootDir":"./lib","sourceMap":false,"types":["node"]},"extends":"../../tsconfig.base.json","include":["lib/env.ts","lib/http.ts","lib/birth.ts","lib/stream.ts","lib/i18n.ts","lib/models.ts","lib/providerMeta.ts","lib/primeTimeout.ts","lib/hash.ts","lib/aiSettings.ts","lib/aiCache.ts","lib/history.ts","lib/aiOpts.ts"]}
+{
+  "compilerOptions": {
+    "declaration": false,
+    "declarationMap": false,
+    "lib": [
+      "ES2021",
+      "DOM"
+    ],
+    "outDir": "./test-dist",
+    "rootDir": "./lib",
+    "sourceMap": false,
+    "types": [
+      "node"
+    ]
+  },
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "lib/env.ts",
+    "lib/http.ts",
+    "lib/birth.ts",
+    "lib/stream.ts",
+    "lib/i18n.ts",
+    "lib/models.ts",
+    "lib/providerMeta.ts",
+    "lib/primeTimeout.ts",
+    "lib/hash.ts",
+    "lib/aiSettings.ts",
+    "lib/aiCache.ts",
+    "lib/history.ts",
+    "lib/aiOpts.ts",
+    "lib/sectionIcons.ts"
+  ]
+}

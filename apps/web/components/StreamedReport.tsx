@@ -8,6 +8,7 @@ import { streamPost } from "@/lib/streamClient";
 import { printReport } from "@/lib/exportPdf";
 import { aiRequestParts } from "@/lib/aiSettings";
 import { useLocale, type Locale } from "@/lib/i18n";
+import { withIconHeading } from "@/lib/sectionIcons";
 
 /** 分段定义:key 对应引擎 REPORT_SEGMENTS / FORTUNE_SEGMENTS,label 用于占位标题。 */
 export interface ReportSeg {
@@ -73,9 +74,10 @@ export function StreamedReport({ input, endpoint, title, description, segments, 
     const combined = segments
       .map((seg) => {
         const saved = restoredSections[seg.key];
+        // 图标在渲染时注入(与语言无关);历史里存的仍是无图标原文。
         return saved && saved.trim()
-          ? `## ${seg.label}\n\n${saved}`
-          : `## ${seg.label}\n\n${t("report.segEmpty")}`;
+          ? withIconHeading(seg.key, seg.label, saved)
+          : withIconHeading(seg.key, seg.label, t("report.segEmpty"));
       })
       .join("\n\n");
     startedFor.current = key;
@@ -87,14 +89,15 @@ export function StreamedReport({ input, endpoint, title, description, segments, 
   }, [restoredSections]);
 
   // 按固定顺序拼接各节;未到/吐空/失败的节给占位,保证顺序与可读性。
+  // 章节图标在渲染时按 section key 注入(AI 文本自带的 ## 标题行会被替换为确定性标题)。
   const combine = (segs: readonly ReportSeg[], slots: Slot[]): string =>
     segs
       .map((seg, i) => {
         const sl = slots[i]!;
-        if (sl.text.trim()) return sl.text;
-        if (sl.status === "error") return `## ${seg.label}\n\n${t("report.segFail", { err: sl.err })}`;
-        if (sl.status === "done") return `## ${seg.label}\n\n${t("report.segEmpty")}`;
-        return `## ${seg.label}\n\n${t("report.segWorking")}`;
+        if (sl.text.trim()) return withIconHeading(seg.key, seg.label, sl.text);
+        if (sl.status === "error") return withIconHeading(seg.key, seg.label, t("report.segFail", { err: sl.err }));
+        if (sl.status === "done") return withIconHeading(seg.key, seg.label, t("report.segEmpty"));
+        return withIconHeading(seg.key, seg.label, t("report.segWorking"));
       })
       .join("\n\n");
 
