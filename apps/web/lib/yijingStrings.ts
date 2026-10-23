@@ -117,7 +117,15 @@ export const YIJING_STRINGS: Record<string, Dict> = {
 
   /* —— 命盤海報 —— */
   "poster.title": S("命盤海報", "命盘海报", "Chart Poster"),
-  "poster.sub": S("水墨命盤 · 截圖分享", "水墨命盘 · 截图分享", "Ink-wash chart · share a screenshot"),
+  "poster.sub": S("水墨命盤 · 下載圖片分享", "水墨命盘 · 下载图片分享", "Ink-wash chart · download & share"),
+  "poster.brand": S("易經學院", "易经学院", "YI JING ACADEMY"),
+  "poster.download": S("下載圖片", "下载图片", "Download image"),
+  "poster.exporting": S("生成圖片中…", "生成图片中…", "Creating image…"),
+  "poster.exportFail": S("生成圖片失敗,請再試一次。", "生成图片失败,请再试一次。", "Couldn't create the image — please try again."),
+  "poster.exportNote": S("下載的圖片不含生辰資料,可放心分享。", "下载的图片不含生辰资料,可放心分享。", "The downloaded image leaves out your birth details — safe to share."),
+  "poster.ageRange": S("{a}–{b} 歲", "{a}–{b} 岁", "ages {a}–{b}"),
+  "poster.male": S("男", "男", "Male"),
+  "poster.female": S("女", "女", "Female"),
   "poster.empty": S("還沒有命盤記錄。", "还没有命盘记录。", "No chart records yet."),
   "poster.emptyHint": S("先去首頁排一次盤,回來就能生成海報。", "先去首页排一次盘,回来就能生成海报。", "Cast a chart on the home page first, then come back for the poster."),
   "poster.goHome": S("去排盤", "去排盘", "Cast a chart"),

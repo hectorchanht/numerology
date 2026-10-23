@@ -1,34 +1,53 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import type { BirthInput } from "@numerology/engine";
 import { useLocale } from "@/lib/i18n";
 import { listReadings, type Reading } from "@/lib/history";
 import { currentLuckStep } from "@/lib/ganzhi";
 import { go } from "@/lib/nav";
-import { yjT, yjFmt, type YijingLocale } from "@/lib/yijingStrings";
+import { yjT, type YijingLocale } from "@/lib/yijingStrings";
+import { buildPosterModel, posterFilename, type PosterRow, type PosterSource } from "@/lib/poster";
+import { renderPosterPng, savePosterPng } from "@/lib/posterExport";
+import { Icon } from "@/components/Icon";
 
-function p2(n: number): string {
-  return String(n).padStart(2, "0");
+function Row({ r }: { r: PosterRow }) {
+  return (
+    <div className="poster-row">
+      <span className="poster-k">{r.label}</span>
+      <span className="poster-v2" style={r.accent ? { color: "var(--cinnabar)" } : undefined}>
+        {r.value}
+        {r.note && (
+          <span className="muted" style={{ fontSize: "0.8rem", marginLeft: "0.5rem" }}>
+            {r.note}
+          </span>
+        )}
+      </span>
+    </div>
+  );
 }
 
-function birthSummary(input: BirthInput, loc: YijingLocale): string {
-  return `${input.year}-${p2(input.month)}-${p2(input.day)} ${p2(input.hour)}:${p2(input.minute ?? 0)} ${input.gender}`;
+/** 跟 <html data-theme> 變化(導出用色同 logo 跟主題,主題一轉就要重畫)。 */
+function useThemeTick(): number {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const mo = new MutationObserver(() => setTick((n) => n + 1));
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => mo.disconnect();
+  }, []);
+  return tick;
 }
-
-const PILLARS = ["year", "month", "day", "hour"] as const;
-const PILLAR_IDS = {
-  year: "poster.yearPillar",
-  month: "poster.monthPillar",
-  day: "poster.dayPillar",
-  hour: "poster.hourPillar",
-} as const;
 
 export default function ChartPoster() {
   const { locale } = useLocale();
   const loc = locale as YijingLocale;
   const [reading, setReading] = useState<Reading | null | undefined>(undefined);
+  const paperRef = useRef<HTMLDivElement>(null);
+  const themeTick = useThemeTick();
+  // 預先畫好嘅 PNG:手機分享表要喺點擊手勢內即時調用,唔可以先 await 畫圖
+  const pngRef = useRef<Promise<Blob> | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     listReadings()
@@ -36,14 +55,52 @@ export default function ChartPoster() {
       .catch(() => setReading(null));
   }, []);
 
-  const poster = useMemo(() => {
+  const src = useMemo<PosterSource | null>(() => {
     if (!reading) return null;
     const chart = reading.chart;
-    const soul = chart.ziwei.palaces.find((p) => p.isSoulPalace);
-    const body = chart.ziwei.palaces.find((p) => p.isBodyPalace);
-    const dayun = currentLuckStep(chart.bazi);
-    return { chart, soul, body, dayun };
+    return {
+      input: chart.input,
+      lunarDate: chart.bazi.lunarDate,
+      pillars: chart.bazi.fourPillars,
+      dayMaster: chart.bazi.dayMaster,
+      soul: chart.ziwei.palaces.find((p) => p.isSoulPalace),
+      body: chart.ziwei.palaces.find((p) => p.isBodyPalace),
+      dayun: currentLuckStep(chart.bazi),
+      generatedAt: new Date(reading.updatedAt),
+    };
   }, [reading]);
+
+  /** 屏幕版:含生辰,方便用戶核對係咪啱嗰個盤。 */
+  const screen = useMemo(() => (src ? buildPosterModel(src, loc, { includeBirth: true }) : null), [src, loc]);
+
+  /** 導出版:includeBirth:false → model 內根本冇生辰,PNG 唔會洩漏。 */
+  const renderPng = useCallback((): Promise<Blob> | null => {
+    if (!src || !paperRef.current) return null;
+    const p = renderPosterPng(buildPosterModel(src, loc, { includeBirth: false }), paperRef.current);
+    p.catch(() => {}); // 錯誤留俾點擊時處理
+    return p;
+  }, [src, loc]);
+
+  useEffect(() => {
+    setFailed(false);
+    pngRef.current = renderPng();
+  }, [renderPng, themeTick]);
+
+  const onDownload = useCallback(async () => {
+    if (busy) return;
+    const p = pngRef.current ?? renderPng();
+    if (!p) return;
+    setBusy(true);
+    setFailed(false);
+    try {
+      await savePosterPng(await p, posterFilename(new Date()));
+    } catch {
+      pngRef.current = null; // 下次撳重新畫
+      setFailed(true);
+    } finally {
+      setBusy(false);
+    }
+  }, [busy, renderPng]);
 
   return (
     <>
@@ -60,13 +117,10 @@ export default function ChartPoster() {
           writing-mode: vertical-rl; letter-spacing: 0.5em;
           color: var(--label-3); font-size: 13px; user-select: none;
         }
-        .poster-seal {
-          display: inline-grid; place-items: center;
-          width: 52px; height: 52px;
-          background: var(--accent); color: var(--on-accent);
-          font-size: 26px; font-weight: 600;
-          border-radius: 14px;
-        }
+        .poster-logo { display: block; width: 52px; height: 52px; border-radius: 14px; flex: none; }
+        .poster-logo-light { display: none; }
+        [data-theme="light"] .poster-logo-dark { display: none; }
+        [data-theme="light"] .poster-logo-light { display: block; }
         .poster-row { display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-bottom: 0.5px solid var(--sep); }
         .poster-row:last-child { border-bottom: none; }
         .poster-k { min-width: 4.2em; color: var(--label-2); font-size: 13px; }
@@ -77,6 +131,8 @@ export default function ChartPoster() {
         .poster-pillar .gz { font-size: 24px; font-weight: 500; color: var(--label); }
         .poster-pillar .ss { font-size: 12px; color: var(--accent); margin-top: 2px; min-height: 1.2em; }
         .poster-pillar .lb { font-size: 11px; color: var(--label-3); margin-top: 2px; }
+        .poster-actions { margin-top: 16px; }
+        .poster-actions .muted { text-align: center; margin: 8px 0 0; }
       `}</style>
 
       {/* .poster-layout:手機 display:contents;桌面左欄標題、右欄海報 */}
@@ -99,106 +155,72 @@ export default function ChartPoster() {
             </div>
           )}
 
-          {poster && (
-            <div className="poster-paper">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <div>
-                  <div style={{ fontSize: "28px", fontWeight: 700, letterSpacing: "0.04em" }}>
-                    {yjT("poster.title", loc)}
+          {screen && (
+            <>
+              <div className="poster-paper" ref={paperRef}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div>
+                    <div style={{ fontSize: "28px", fontWeight: 700, letterSpacing: "0.04em" }}>{screen.title}</div>
+                    <div className="muted" style={{ marginTop: "0.3rem" }}>
+                      {screen.generatedAt}
+                    </div>
                   </div>
-                  <div className="muted" style={{ marginTop: "0.3rem" }}>
-                    {yjFmt(yjT("poster.generatedAt", loc), {
-                      date: new Date(reading!.updatedAt).toLocaleDateString(),
-                    })}
+                  <div style={{ display: "flex", gap: "0.9rem", alignItems: "flex-start" }}>
+                    <span className="poster-v" aria-hidden>
+                      {screen.brand}
+                    </span>
+                    <img className="poster-logo poster-logo-dark" src="/logo.png" width={52} height={52} alt="" aria-hidden="true" />
+                    <img className="poster-logo poster-logo-light" src="/logo-light.png" width={52} height={52} alt="" aria-hidden="true" />
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: "0.9rem", alignItems: "flex-start" }}>
-                  <span className="poster-v" aria-hidden>
-                    {loc === "en" ? "YI JING ACADEMY" : "易經學院"}
-                  </span>
-                  <span className="poster-seal" aria-hidden>
-                    印
-                  </span>
-                </div>
-              </div>
 
-              <div style={{ marginTop: "1.3rem" }}>
-                <div className="poster-row">
-                  <span className="poster-k">{yjT("poster.birth", loc)}</span>
-                  <span className="poster-v2">{birthSummary(poster.chart.input, loc)}</span>
-                </div>
-                {poster.chart.bazi.lunarDate && (
-                  <div className="poster-row">
-                    <span className="poster-k">{yjT("poster.lunar", loc)}</span>
-                    <span className="poster-v2">{poster.chart.bazi.lunarDate}</span>
+                {/* 生辰只喺屏幕顯示;導出 PNG 用另一份冇生辰嘅 model 畫(見 lib/poster.ts) */}
+                {screen.birth.length > 0 && (
+                  <div style={{ marginTop: "1.3rem" }} data-export-hide>
+                    {screen.birth.map((r) => (
+                      <Row key={r.key} r={r} />
+                    ))}
                   </div>
                 )}
-              </div>
 
-              <div style={{ marginTop: "1.1rem" }}>
-                <div className="poster-h">{yjT("poster.bazi", loc)}</div>
-                <div className="poster-pillars">
-                  {PILLARS.map((k) => {
-                    const p = poster.chart.bazi.fourPillars[k];
-                    return (
-                      <div className="poster-pillar" key={k}>
+                <div style={{ marginTop: "1.1rem" }}>
+                  <div className="poster-h">{screen.baziHeading}</div>
+                  <div className="poster-pillars">
+                    {screen.pillars.map((p) => (
+                      <div className="poster-pillar" key={p.key}>
                         <div className="gz">{p.ganZhi}</div>
-                        <div className="ss">{p.shiShenGan || " "}</div>
-                        <div className="lb">{yjT(PILLAR_IDS[k], loc)}</div>
+                        <div className="ss">{p.shiShen || " "}</div>
+                        <div className="lb">{p.label}</div>
                       </div>
-                    );
-                  })}
+                    ))}
+                  </div>
+                  <div style={{ marginTop: "0.6rem" }}>
+                    <Row r={screen.dayMaster} />
+                  </div>
                 </div>
-                <div className="poster-row" style={{ marginTop: "0.6rem" }}>
-                  <span className="poster-k">{yjT("poster.daymaster", loc)}</span>
-                  <span className="poster-v2" style={{ color: "var(--cinnabar)" }}>
-                    {poster.chart.bazi.dayMaster}
-                  </span>
+
+                <div style={{ marginTop: "1.1rem" }}>
+                  <div className="poster-h">{screen.ziweiHeading}</div>
+                  {screen.ziwei.map((r) => (
+                    <Row key={r.key} r={r} />
+                  ))}
                 </div>
+
+                <p className="muted" style={{ textAlign: "center", marginTop: "1.4rem", marginBottom: 0, fontSize: "0.72rem" }}>
+                  {screen.disclaimer}
+                </p>
               </div>
 
-              <div style={{ marginTop: "1.1rem" }}>
-                <div className="poster-h">{yjT("poster.ziwei", loc)}</div>
-                {poster.soul && (
-                  <div className="poster-row">
-                    <span className="poster-k">{yjT("poster.soulPalace", loc)}</span>
-                    <span className="poster-v2">
-                      {poster.soul.name}
-                      {` `}
-                      <span className="muted" style={{ fontSize: "0.8rem" }}>
-                        {yjT("poster.mainStars", loc)}:
-                        {poster.soul.majorStars.map((s) => s.name).join(" ") || "—"}
-                      </span>
-                    </span>
-                  </div>
-                )}
-                {poster.body && (
-                  <div className="poster-row">
-                    <span className="poster-k">{yjT("poster.bodyPalace", loc)}</span>
-                    <span className="poster-v2">{poster.body.name}</span>
-                  </div>
-                )}
-                {poster.dayun && (
-                  <div className="poster-row">
-                    <span className="poster-k">{yjT("poster.dayun", loc)}</span>
-                    <span className="poster-v2">
-                      {poster.dayun.ganZhi}
-                      <span className="muted" style={{ fontSize: "0.8rem", marginLeft: "0.5rem" }}>
-                        {poster.dayun.startAge}–{poster.dayun.endAge}
-                        {loc === "en" ? " yrs" : loc === "zhs" ? " 岁" : " 歲"}
-                      </span>
-                    </span>
-                  </div>
-                )}
+              <div className="poster-actions">
+                <button type="button" className="btn block" onClick={onDownload} disabled={busy} aria-busy={busy}>
+                  <Icon name="download" />
+                  {busy ? yjT("poster.exporting", loc) : yjT("poster.download", loc)}
+                </button>
+                <p className="muted" role={failed ? "alert" : undefined}>
+                  {failed ? yjT("poster.exportFail", loc) : yjT("poster.exportNote", loc)}
+                </p>
               </div>
-
-              <p
-                className="muted"
-                style={{ textAlign: "center", marginTop: "1.4rem", marginBottom: 0, fontSize: "0.72rem" }}
-              >
-                {yjT("poster.disclaimer", loc)}
-              </p>
-            </div>
+            </>
           )}
         </div>
       </div>
