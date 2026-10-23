@@ -19,6 +19,7 @@ import { TimeInferPanel } from "@/components/TimeInferPanel";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { HistoryPanel } from "@/components/HistoryPanel";
 import { FortuneTimeline } from "@/components/FortuneTimeline";
+import { FortuneDayun, FortuneYears, FortuneRhythm } from "@/components/FortuneSections";
 import { ChartSummary, WuxingChart } from "@/components/Charts";
 import { Icon } from "@/components/Icon";
 import { EmptyChart, ScreenNav, Seg } from "@/components/ui";
@@ -432,6 +433,24 @@ export default function Home() {
             onAsk={() => go("chat")}
             collapsible
             repairText={fortuneJson ? (md) => repairFortuneMarkdown(md, fortuneJson, locale) : undefined}
+            renderSectionBody={
+              fortuneJson
+                ? (segKey, md, lens) => {
+                    switch (segKey) {
+                      case "dayun":
+                        return <FortuneDayun md={md} fortune={fortuneJson} lens={lens} />;
+                      case "review":
+                        return <FortuneYears md={md} fortune={fortuneJson} lens={lens} past />;
+                      case "future":
+                        return <FortuneYears md={md} fortune={fortuneJson} lens={lens} past={false} />;
+                      case "rhythm":
+                        return <FortuneRhythm md={md} />;
+                      default:
+                        return null;
+                    }
+                  }
+                : undefined
+            }
           >
             <FortuneTimeline chart={ready.chart} visible={screen === "fortune"} />
             <h2 className="group-title">{t("card.fortuneTitle")}</h2>

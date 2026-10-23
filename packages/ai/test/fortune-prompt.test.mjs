@@ -120,26 +120,36 @@ test("fixFortuneHeadings:流年占位符也被修复(zhs/en)", () => {
   assert.ok(enDayun.includes("### 甲寅 Luck Period (ages 2–11 / 1995–2004)"), "en 大运应被修复");
 });
 
-test("dayun 节:同期大限 + 3–4 句 + 禁重复句式", () => {
+test("dayun 节:三段式(定性/分析/依据系统生成) + 同期大限", () => {
   const p = buildFortuneSectionPrompt([], seg("dayun"), "both", "zht");
   assert.ok(p.includes("同期大限"), "dayun 应要求看每步同期大限");
-  assert.ok(p.includes("3–4 句"), "dayun 应限制每步 3–4 句");
-  assert.ok(p.includes("严禁"), "dayun 应有严禁重复句式的纪律");
+  assert.ok(p.includes("\u3010\u5b9a\u6027\u3011"), "dayun 应要求【定性】标记");
+  assert.ok(p.includes("\u3010\u5206\u6790\u3011"), "dayun 应要求【分析】标记");
+  assert.ok(p.includes("2–3 \u53e5"), "分析应限制 2–3 句");
+  assert.ok(p.includes("\u4e25\u7981"), "dayun 应有严禁重复句式的纪律");
 });
 
 test("dayun 节:点名禁止 live 观测到的机械行为", () => {
   const p = buildFortuneSectionPrompt([], seg("dayun"), "both", "zht");
   assert.ok(p.includes("机械复述"), "应禁支藏十神的机械合刑冲复述");
   assert.ok(p.includes("逐个报一遍"), "应禁禄权科忌飞宫逐个播报");
-  assert.ok(p.includes("换切入点"), "应禁固定句式、要求各步换切入点");
-  assert.ok(p.includes("轮换"), "应禁定性句在顺利/平稳/挑战里轮换");
-  assert.ok(p.includes("原料不是提纲"), "应要求上下文是原料不是提纲");
+  assert.ok(p.includes("系统图表呈现"), "十神/四化由系统图表呈现,正文不罗列");
+  assert.ok(p.includes("同期大限"), "同期大限看各步自己的,不套用当前大限");
 });
 
-test("review/future 节:2–3 句 + 禁填表模板", () => {
+test("review/future 节:定性+分析两段式 + 禁填表模板", () => {
   for (const key of ["review", "future"]) {
     const p = buildFortuneSectionPrompt([], seg(key), "both", "zht");
-    assert.ok(p.includes("2–3 句"), `${key} 应限制每年 2–3 句`);
+    assert.ok(p.includes("\u3010\u5b9a\u6027\u3011"), `${key} 应要求【定性】标记`);
+    assert.ok(p.includes("1–2 \u53e5"), `${key} 分析应限制 1–2 句`);
+  }
+});
+
+test("通用输出纪律:结论先行,证据收纳", () => {
+  for (const key of ["overview", "dayun", "review", "future", "rhythm", "action"]) {
+    const p = buildFortuneSectionPrompt([], seg(key), "both", "zht");
+    assert.ok(p.includes("结论先行"), `${key} 应含结论先行纪律`);
+    assert.ok(p.includes("\u3010\u4f9d\u636e\u3011"), `${key} 应含【依据】块约定`);
   }
 });
 

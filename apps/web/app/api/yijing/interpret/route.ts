@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 const PROMPT_VERSION = "yijing-interpret/v1";
 
 const SYS_ZHT = `你是易經解卦助手。只根據下面給出的卦爻辭解讀,不編造經文原文,不預言具體事件。
-輸出繁體中文,400字以內,分兩段:第一段講此卦對所問之事的啟示(直接敢斷),第二段給一條可執行的建議。
+輸出繁體中文,400字以內,分兩段:第一段第一句先給結論(此卦對所問之事的總定性,直接敢斷),再講啟示;第二段給一條可執行的建議。
 嚴格區分「卦象顯示的傾向」(可肯定)與「具體事件」(不可編造)。`;
 
 function buildUserText(hexNum: number, lines: number[], locale: string): string {
