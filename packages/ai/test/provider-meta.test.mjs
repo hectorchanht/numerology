@@ -46,3 +46,11 @@ test("provider:workers-ai 模型表非空,默认模型在表中", () => {
   }
   assert.equal(WORKERS_AI_DEFAULT_MODEL, "@cf/mistralai/mistral-small-3.1-24b-instruct");
 });
+
+test("provider:实验模型不做默认(繁体稳定性待真机验证)", () => {
+  const exp = WORKERS_AI_MODELS.filter((m) => m.experimental);
+  assert.ok(exp.length >= 2, "应有 Sea Lion 27B 与 Llama 3.3 70B 两个实验模型");
+  assert.ok(exp.some((m) => m.id === "@cf/aisingapore/gemma-sea-lion-v4-27b-it"));
+  assert.ok(exp.some((m) => m.id === "@cf/meta/llama-3.3-70b-instruct-fp8-fast"));
+  for (const m of exp) assert.notEqual(m.id, WORKERS_AI_DEFAULT_MODEL, "实验模型不得为默认");
+});

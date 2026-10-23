@@ -1,5 +1,5 @@
 import type { ChartResult, FortuneAnalysis } from "@numerology/engine";
-import { buildContextPack } from "./context.js";
+import { buildContextPack, type FortuneScope } from "./context.js";
 import { SYSTEM_PERSONA, localeDirective, type AiLocale } from "./prompts.js";
 import type { SystemBlock } from "./provider.js";
 
@@ -43,8 +43,9 @@ export function buildCachedSystem(
   chart: ChartResult,
   fortune?: FortuneAnalysis,
   locale: AiLocale = "zht",
+  opts?: { fortuneScope?: FortuneScope },
 ): SystemBlock[] {
-  const { markdown } = buildContextPack(chart, fortune);
+  const { markdown } = buildContextPack(chart, fortune, opts);
   return [
     { text: SYSTEM_PERSONA },
     { text: markdown, cache: true },

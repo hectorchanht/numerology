@@ -18,8 +18,11 @@ export const dynamic = "force-dynamic";
  * prompt 版本:改 prompt 即換緩存鍵,不串味。
  * v4 = 2026-10-23 v3.1 targeted fixes:TL;DR 禁列岁数年份干支(佔位符修復)、
  * 每步/每年只点 1–2 个最強信號、定性「起外號」具體化、同期大限稱謂統一、陳腔 ban list 擴充。
+ * v5 = 2026-10-23 context-trim:分节生成按 FortuneScope 只喂该节需要的动态数据
+ * (overview/action→current, dayun/rhythm→dayun+信号digest, review→已过年, future→未来年),
+ * 整份 fortune 不再每节重倒;prompt 指令文字不变。
  */
-const PROMPT_VERSION = "fortune/v4";
+const PROMPT_VERSION = "fortune/v5";
 
 /** 流式生成《大运流年深析》(八字 × 紫微合参,逐步逐年)。首 token 前失败 → JSON 错误(502),而非截断流。 */
 export async function POST(req: Request): Promise<Response> {

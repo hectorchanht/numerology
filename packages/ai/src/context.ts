@@ -9,10 +9,27 @@ export interface ContextPack {
 }
 
 /**
+ * 动态运势的作用域——分节生成时只喂该节需要的数据,而不是每次都把整份
+ * fortune 倒给模型(2026-10-23 honest finding:模型会把逐运/逐年清单当填空模板
+ * 走,越全越罐头)。结构输入,而不是加指令。
+ * - full: 全部(整篇模式/对话,默认,保持旧行为)
+ * - dayun: 仅八字大运各步(+确定性信号 digest);不要流年
+ * - review: 仅已过流年(+年份→大运映射);不要未来年
+ * - future: 仅参考年/未来流年(+年份→大运映射);不要已过年
+ * - current: 仅当前大运/大限各一行(静态报告各节的动静结合一瞥)
+ * - none: 不要动态段(纯静态节)
+ */
+export type FortuneScope = "full" | "dayun" | "review" | "future" | "current" | "none";
+
+export interface ContextPackOptions {
+  fortuneScope?: FortuneScope;
+}
+
+/**
  * 命盘 JSON(+ 可选动态运势) → 紧凑上下文包。纯函数,不调用网络/AI,可单测。
  * 报告与对话共用此包,确保两者基于同一命盘事实,不自相矛盾。
  */
-export function buildContextPack(chart: ChartResult, fortune?: FortuneAnalysis): ContextPack {
+export function buildContextPack(chart: ChartResult, fortune?: FortuneAnalysis, opts?: ContextPackOptions): ContextPack {
   const { input, bazi: b, ziwei: z, meta } = chart;
   const caveats: string[] = [];
 
@@ -97,13 +114,19 @@ ${shenShaBlock ? "\n神煞:\n" + shenShaBlock : ""}
 - 命宫三方四正(判格局的依据):本宫${z.soulSanFang.palaceNames.self} + 对宫${z.soulSanFang.palaceNames.opposite} + 三合${z.soulSanFang.palaceNames.trine.join("/")};四宫合看主星:${z.soulSanFang.majorStars.join("、")}
 - 十二宫主星(含生年四化标注):
 ${ORDER.map((n) => "  - " + palaceLine(n)).join("\n")}
-${fortune ? "\n" + renderFortune(fortune) : ""}`;
+${fortune ? renderFortuneSection(fortune, opts?.fortuneScope ?? "full") : ""}`;
 
   return { markdown, caveats };
 }
 
+/** 按 scope 决定动态段的取舍;none → 空字符串(调用方直接不拼动态段)。 */
+function renderFortuneSection(f: FortuneAnalysis, scope: FortuneScope): string {
+  if (scope === "none") return "";
+  return "\n" + renderFortune(f, scope);
+}
+
 /** 渲染动态运势(大运/流年 + 紫微大限/流年四化飞宫)。 */
-function renderFortune(f: FortuneAnalysis): string {
+function renderFortune(f: FortuneAnalysis, scope: FortuneScope = "full"): string {
   const u = (b: boolean) => (b ? "✓引动用神" : "");
   const cur = (b: boolean) => (b ? " 【当前运】" : "");
 
@@ -121,16 +144,81 @@ function renderFortune(f: FortuneAnalysis): string {
     })
     .join("\n");
 
-  const liuNian = f.bazi.liuNian
-    .map((y) => `${y.year}(${y.age}岁)${y.ganZhi}·${y.ganShiShen}${y.suppliesUseGod ? "✓" : ""}${y.isReference ? "【参考年/今年】" : y.isPast ? "(已过)" : ""}`)
-    .join(" | ");
+  const liuNianLine = (y: (typeof f.bazi.liuNian)[number]) =>
+    `${y.year}(${y.age}岁)${y.ganZhi}·${y.ganShiShen}${y.suppliesUseGod ? "✓" : ""}${y.isReference ? "【参考年/今年】" : y.isPast ? "(已过)" : ""}`;
 
-  const yearly = f.ziwei.yearly
-    .map((y) => `  - ${y.year} ${y.heavenlyStem}${y.earthlyBranch}(行${y.palaceName}):${sihua(y.sihua)}`)
-    .join("\n");
+  const yearlyLine = (y: (typeof f.ziwei.yearly)[number]) =>
+    `  - ${y.year} ${y.heavenlyStem}${y.earthlyBranch}(行${y.palaceName}):${sihua(y.sihua)}`;
+
+  const useGodHeader = `> 喜用神(调候):${f.bazi.useGods.join("")}${f.bazi.useGodsReviewed ? "" : "(待校对)"}。"引动用神"=该运/年补益命局(补救信号);反之多为受困或需谨慎。`;
+
+  /** 年份→所属大运干支的紧凑映射(回看/未来节用,让模型知道某年落在哪步运)。 */
+  const yearToStep = (years: number[]) => {
+    const parts = years.map((yr) => {
+      const d = f.bazi.daYun.find((s) => s.startYear <= yr && yr <= s.endYear);
+      return d ? `${yr}→${d.ganZhi}运` : `${yr}→?`;
+    });
+    return parts.length ? `  年份所属大运:${parts.join("、")}\n` : "";
+  };
+
+  /** 确定性信号 digest:引动用神的步 + 大限化忌的步(纯数据,不做价值判断)。 */
+  const signalDigest = () => {
+    const yongSteps = f.bazi.daYun.filter((d) => d.suppliesUseGod).map((d) => d.ganZhi);
+    const jiSteps = f.bazi.daYun
+      .map((d) => {
+        const ji = d.ziweiDecadal.sihua.filter((s) => s.type === "忌");
+        return ji.length ? `${d.ganZhi}(忌${ji.map((s) => `→${s.star}入${s.intoPalace}`).join("")})` : "";
+      })
+      .filter(Boolean);
+    const lines: string[] = [];
+    if (yongSteps.length) lines.push(`引动用神: ${yongSteps.join("、")}`);
+    if (jiSteps.length) lines.push(`大限化忌: ${jiSteps.join("、")}`);
+    return lines.length ? `【确定性信号·全局一览】${lines.join("；")}\n` : "";
+  };
+
+  if (scope === "current") {
+    const cur = f.bazi.daYun.find((d) => d.isCurrent);
+    const curLine = cur
+      ? `  - 当前八字大运:${cur.ganZhi}(${cur.startAge}-${cur.endAge}岁/${cur.startYear}-${cur.endYear}) 天干${cur.ganShiShen} ${u(cur.suppliesUseGod)}`
+      : `  - 当前八字大运:—`;
+    return `## 动态运势(当前运总览)
+${useGodHeader}
+${curLine}
+  - 当前紫微大限:${f.ziwei.decadal.heavenlyStem}${f.ziwei.decadal.earthlyBranch}(行${f.ziwei.decadal.palaceName}):${sihua(f.ziwei.decadal.sihua)}
+`;
+  }
+
+  if (scope === "dayun") {
+    return `## 动态运势(大运逐步)
+${useGodHeader}
+${signalDigest()}
+### 八字大运(相对日主${f.bazi.dayMaster})
+${daYun}
+`;
+  }
+
+  if (scope === "review" || scope === "future") {
+    const years = f.bazi.liuNian.filter((y) => (scope === "review" ? y.isPast : !y.isPast));
+    const yearNums = years.map((y) => y.year);
+    const yearlyLines = f.ziwei.yearly.filter((y) => y.year !== undefined && yearNums.includes(y.year!)).map(yearlyLine).join("\n");
+    const title = scope === "review" ? "已过流年·回看验证" : "参考年/未来流年";
+    return `## 动态运势(${title})
+${useGodHeader}
+${yearToStep(yearNums)}
+### 八字流年
+  ${years.map(liuNianLine).join(" | ")}
+
+### 紫微流年四化(飞入本命宫,化忌冲宫尤需留意)
+${yearlyLines}
+`;
+  }
+
+  // full:旧行为(整篇模式/对话)
+  const liuNian = f.bazi.liuNian.map(liuNianLine).join(" | ");
+  const yearly = f.ziwei.yearly.map(yearlyLine).join("\n");
 
   return `## 动态运势(动静结合的关键——运在一生中占主导)
-> 喜用神(调候):${f.bazi.useGods.join("")}${f.bazi.useGodsReviewed ? "" : "(待校对)"}。"引动用神"=该运/年补益命局(补救信号);反之多为受困或需谨慎。
+${useGodHeader}
 
 ### 八字大运(相对日主${f.bazi.dayMaster})
 ${daYun}

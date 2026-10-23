@@ -1,5 +1,5 @@
 import type { ChartResult, FortuneAnalysis } from "@numerology/engine";
-import { buildContextPack } from "./context.js";
+import { buildContextPack, type FortuneScope } from "./context.js";
 import {
   buildReportUserPrompt,
   buildFortuneReportPrompt,
@@ -163,15 +163,30 @@ export function streamFortuneReport(chart: ChartResult, opts: ReportOptions = {}
  */
 const SECTION_MAX_TOKENS = 1800;
 
+/**
+ * 分节生成时动态运势的作用域映射(2026-10-23 context-trim):
+ * 每节只喂它需要的数据,整份 fortune 不再每节重倒——结构输入,不加指令。
+ */
+const FORTUNE_SECTION_SCOPE: Record<string, FortuneScope> = {
+  overview: "current",
+  dayun: "dayun",
+  review: "review",
+  future: "future",
+  rhythm: "dayun",
+  action: "current",
+};
+
 /** 《命盘格局解读》——单节流式(分段模式)。sectionKey ∈ REPORT_SEGMENTS[].key。 */
 export function streamReportSection(chart: ChartResult, sectionKey: string, opts: ReportOptions = {}) {
   const seg = REPORT_SEGMENTS.find((s) => s.key === sectionKey);
   if (!seg) throw new Error(`未知报告章节:${sectionKey}`);
-  const { caveats } = buildContextPack(chart, opts.fortune);
+  // 静态报告各节:当前运一行(动静结合一瞥),不要整份 fortune。
+  const scope: FortuneScope = "current";
+  const { caveats } = buildContextPack(chart, opts.fortune, { fortuneScope: scope });
   return chatStream({
     kind: "report",
     maxTokens: opts.maxTokens ?? SECTION_MAX_TOKENS,
-    system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht"),
+    system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht", { fortuneScope: scope }),
     messages: [{ role: "user", content: buildReportSectionPrompt(caveats, seg, opts.lens ?? "both", opts.locale ?? "zht") }],
   }, opts.ai);
 }
@@ -180,12 +195,13 @@ export function streamReportSection(chart: ChartResult, sectionKey: string, opts
 export function streamFortuneSection(chart: ChartResult, sectionKey: string, opts: ReportOptions = {}) {
   const seg = FORTUNE_SEGMENTS.find((s) => s.key === sectionKey);
   if (!seg) throw new Error(`未知大运流年章节:${sectionKey}`);
-  const { caveats } = buildContextPack(chart, opts.fortune);
+  const scope: FortuneScope = FORTUNE_SECTION_SCOPE[seg.key] ?? "full";
+  const { caveats } = buildContextPack(chart, opts.fortune, { fortuneScope: scope });
   const locale = opts.locale ?? "zht";
   const stream = chatStream({
     kind: "report",
     maxTokens: opts.maxTokens ?? SECTION_MAX_TOKENS,
-    system: buildCachedSystem(chart, opts.fortune, locale),
+    system: buildCachedSystem(chart, opts.fortune, locale, { fortuneScope: scope }),
     messages: [{ role: "user", content: buildFortuneSectionPrompt(caveats, seg, opts.lens ?? "both", locale, opts.fortune) }],
   }, opts.ai);
   return withFortuneHeadingFix(stream, opts.fortune, locale);

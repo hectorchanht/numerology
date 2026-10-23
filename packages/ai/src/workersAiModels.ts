@@ -18,6 +18,11 @@ export interface WorkersAiModelInfo {
   contextWindow: number;
   priceInPerM: number;
   priceOutPerM: number;
+  /**
+   * 实验性:已确认存在且非 reasoning 外泄型,但繁体中文稳定性尚未真机验证。
+   * 默认模型保持 mistral-small(唯一验证过繁稳);实验模型由用户在设置里手动选。
+   */
+  experimental?: boolean;
 }
 
 /** 最后一次成功核验的时间(UTC)。 */
@@ -50,6 +55,28 @@ export const WORKERS_AI_MODELS: WorkersAiModelInfo[] = [
     contextWindow: 80000,
     priceInPerM: 0.0509,
     priceOutPerM: 0.335,
+  },
+  {
+    // 2026-10-23 新增:AI Singapore 的东南亚特化模型,27B,与 mistral-small 同价
+    // (budget-neutral 升级候选),非 reasoning 型。中文(含繁体)是其强项,
+    // 但"长简体 prompt + 繁体指令"下的稳定性尚未真机验证 → experimental。
+    id: "@cf/aisingapore/gemma-sea-lion-v4-27b-it",
+    label: "Sea Lion 27B(中文特化·實驗)",
+    contextWindow: 128000,
+    priceInPerM: 0.351,
+    priceOutPerM: 0.555,
+    experimental: true,
+  },
+  {
+    // 2026-10-23 新增:Workers AI 上最强的非 reasoning 指令模型(70B)。
+    // 注意 output 价格约 mistral-small 的 4 倍,$2 预算下可跑的完整解读数更少;
+    // 24k context 对本应用(上下文 ~2k tokens + prompt)绰绰有余。experimental。
+    id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    label: "Llama 3.3 70B(最強·貴·實驗)",
+    contextWindow: 24000,
+    priceInPerM: 0.293,
+    priceOutPerM: 2.253,
+    experimental: true,
   },
 ];
 
