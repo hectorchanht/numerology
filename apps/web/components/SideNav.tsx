@@ -75,12 +75,11 @@ export function SideNav() {
       <div className="side-foot">
         <button
           type="button"
-          className={`side-item${onHome && screen === "settings" ? " on" : ""}`}
-          aria-current={onHome && screen === "settings" ? "page" : undefined}
+          className="icon-btn"
+          aria-label={t("nav.settings")}
           onClick={() => open("settings")}
         >
           <Icon name="gear" />
-          {t("nav.settings")}
         </button>
         {/* 語言切換排喺主題切換之前 */}
         <LocaleSwitch />
