@@ -37,6 +37,7 @@
     "lib/fortuneRepair.ts",
     "lib/speechText.ts",
     "lib/highlightTerms.tsx",
+    "lib/quoteRef.tsx",
     "lib/tldr.ts",
     "lib/dragScroll.ts"
   ]

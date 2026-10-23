@@ -19,6 +19,7 @@ import {
 import { useLocale } from "./i18n.js";
 import { PronounceButton } from "@dawn-studio/pronounce";
 import { FloatingCard, useFloatPopup } from "./floatPopup.js";
+import { QUOTEREF_SKIP_PROP, QuoteRef } from "./quoteRef.js";
 
 /* ── 合併術語表 ─────────────────────────────────────────────── */
 
@@ -199,6 +200,11 @@ export function withTermHighlights(children: ReactNode): ReactNode {
   return Children.map(children, (child) => {
     if (typeof child === "string") return highlightString(child);
     if (isValidElement(child)) {
+      // 古籍引文參照(QuoteRef)整棵跳過:引文內部不套術語釋義,避免彈窗套彈窗。
+      // 以元素類型判定(QuoteRef 元素本身的 props 只有 entry,標記在渲染輸出內)。
+      if (child.type === QuoteRef) return child;
+      const cprops = child.props as Record<string, unknown> | null;
+      if (cprops && cprops[QUOTEREF_SKIP_PROP]) return child;
       const type = (child as ReactElement).type;
       if (typeof type === "string" && SKIP_TAGS.has(type)) return child;
       const grand = (child.props as { children?: ReactNode } | null)?.children;

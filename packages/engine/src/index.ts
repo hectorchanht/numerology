@@ -24,6 +24,10 @@ export { castHourCandidates, type HourInferInput, type HourCandidate } from "./h
 export { solarFromLunar, type LunarDate, type SolarDate } from "./calendar.js";
 export { tossCoins, castYijing, divine, trigramOfBits, type CoinLine, type CastResult, type TrigramKey } from "./yijing.js";
 export {
+  timeNumbers, guaFromNumbers, castMeihua,
+  type MeihuaNumbers, type MeihuaResult, type MeihuaVerdict, type VerdictLevel,
+} from "./meihua.js";
+export {
   paigua, ganzhiForDate, palaceOf, qinOf, beastOf, xunKong, chong,
   type YaoValue, type Qin, type PalaceInfo, type LiuyaoYao, type LiuyaoResult,
 } from "./liuyao.js";

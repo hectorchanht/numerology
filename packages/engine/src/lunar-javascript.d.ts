@@ -27,6 +27,14 @@ declare module "lunar-javascript" {
     getEightChar(): EightChar;
     toString(): string;
     getYearInGanZhi(): string;
+    /** 农历年/月/日数字(月为负=闰月) */
+    getYear(): number;
+    getMonth(): number;
+    getDay(): number;
+    /** 农历年地支,如 "辰" */
+    getYearZhi(): string;
+    /** 生肖,如 "龙" */
+    getYearShengXiao(): string;
   }
 
   export class EightChar {

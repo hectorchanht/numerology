@@ -690,3 +690,89 @@ live 验证:7 个 `###` 标题全部带真实数字,全文零占位符。
   interpreting→乾+姤+繫辭上(錯綜)。
 - `LessonView.tsx` 新增「延伸出處」卡片(課文後、測驗後),新開頁籤。
 - 驗證:232/232 測試通過;`next build` + `npm run cf:pages` 成功。
+
+## 核心理念 manifesto(2026-10-23,Hector 口述願景落站)
+
+- 首頁(`apps/web/app/page.tsx` home 屏)新增 `.creed` 區塊:4 beats(零門檻/有證據/越學越深/0→1),
+  深色 Apple-minimal 卡片 + accent 金色 01–04 編號;文案走 `apps/web/lib/i18n.ts` 三地
+  (`creed.title`/`creed.b1`–`b4`,zht/zhs/en)。
+- Hector 原話 companion line(`creed.evidence`,三地):"內容多由 AI 措辭串連,但全部有證據、
+  有出處撐住。No hallucination,no bullshit,直話直說。"——首頁以 accent 左框線
+  `.creed-signoff` 置於 manifesto 之下;三份 README 願景節亦以引文形式收錄。
+- README.md / README.zh-Hans.md / README.en.md 頂部各加 ~4 行願景(對應語言)。
+- **ROADMAP(計劃中,未動工)**:keyword → expandable AI long-form Q&A —
+  點擊術語除了釋義 popup,加「深入問 AI」選項,展開針對該術語的長文 AI 解讀
+  (走現有 chat/report 管線,計入 $2 budget;需設計避免與現有 Term popup 衝突)。
+
+## 驗證(2026-10-23)
+- 測試全過;`next build` + `npm run cf:pages` 成功;部署成功後首頁可見 manifesto。
+
+## 易經 Phase 3:梅花易數 + 占例庫(2026-10-23)
+
+### 梅花易數(/yijing/meihua,新路由)
+- 引擎 `packages/engine/src/meihua.ts`(純函數零依賴):`timeNumbers()`
+  (農曆經 lunar-javascript;時支經 bazi 節氣曆)、`castMeihua(y,m,d,h)` →
+  {四數、上/下卦、動爻、文王卦序本卦/變卦/互卦、體用、verdict}。
+  方法:年支數(子1…亥12)/農曆月/農曆日/時支數;上=(y+m+d)%8、
+  下=(y+m+d+h)%8(餘0取8)、動=(y+m+d+h)%6(餘0取6);先天數乾1…坤8;
+  動爻所在卦為用。斷:用生體大吉/比和中吉/體剋用小吉/體生用小凶/
+  用剋體大凶——確定性,零 AI。
+- **手算核驗**(寫入測試註釋):2025-01-01 12:00 → 農曆2024-12-02,
+  年5(辰)月12日2時7(午),上離下兌=睽#38,動2爻,用兌(金)/體離(火),
+  體剋用→小吉,變噬嗑#21,互既濟#63;2024-12-25 21:00 → 姤#44動5,
+  用剋體→大凶,變鼎#50,互乾#1。另覆蓋餘0→8/6、閏月取本月、子時邊界、
+  非法輸入拋錯、五種生剋全覆蓋。測試 8/8。
+- 頁面:datetime-local(預設此刻)+一鍵起卦;四數、上/下卦卡(卦符/卦名/五行/
+  體用 badge)、體用斷卡、HexFigure 本/變/互卦、卦辭(術語高亮)、AI 解卦
+  複用 `/api/yijing/interpret`(lines 映射:動爻→9/6,其餘 7/8)。
+- 出處:《梅花易數·象數易理篇》「年月日之數為上卦,年月日加時之數為下卦…」
+  +《體用生克篇》「無動爻者為體,有動爻者為用」——QuoteRef 點按彈窗
+  (全文+維基文庫鏈接,已逐字核實)。
+- 方法歧義處理:古本體用斷法涉衰旺/黨多深文;引擎採用通行現代五級體用
+  五行生剋總斷,確定性、可文檔化,已在文件頭註明。
+
+### 占例庫(/yijing/cases,新路由)——與並行 worker 合流
+- 本任務做到一半發現另一 worker 正在同時寫占例庫(其 `cases/page.tsx`
+  覆蓋了我先寫的版本、`cases.ts` 被刪)。按 standing rule 不覆蓋其工作:
+  **採用其實現**,只做最小修復(其頁面重複渲染 `<YijingNav/>`,
+  layout 已有全局 YijingNav,會出現雙導航——刪其頁內一處)。
+- 其實現(`packages/knowledge/src/zhanli.ts`,340 行):六例皆《左傳》真實占例,
+  陳敬仲占(莊22,觀之否)、秦伯韓之戰占(僖15,蠱)、晉獻公筮嫁伯姬(僖15,
+  歸妹之睽)、穆姜占(襄9,艮之隨)、崔武子占(襄25,困之大過,本任務未核實,
+  取其文件頭核實記錄)、南蒯占(昭12,坤之比)。其占辭原文與本任務親自抓取的
+  維基文庫文本逐字一致(陳敬仲/韓之戰/伯姬/穆姜/南蒯五例已交叉核對)。
+- 其收錄標準比本任務更嚴:必須有「遇某之某」筮卦記錄;驪姬之卜筮(卜筮並用、
+  未載卦名)被其以書面理由捨棄——合理,從其標準。動爻政策亦更嚴:
+  原文未明言一律「史料未載」,僅南蒯例外(所引「黃裳元吉」即坤六五爻辭,
+  且坤變比僅六五一位不同)。本任務原先以爻位差推導動爻的做法作廢,
+  從其「不推測」政策。
+- 其頁面:列表→詳情(原文/本站白話解說/歷史應驗+verdict badge),
+  白話解說內嵌 QuoteRef 引文(與 academy 同源),術語高亮已接。
+  文案 key 為其自有體系(cases.original/baihua/history/method/ben/bian),
+  與本任務先加的 keys 並存於 yijingStrings.ts(無衝突)。
+
+### 導航/SEO
+- `YijingNav` SUB_LINKS 加梅花易數(hourglass)+占例庫(history,既有圖標);
+  `yijingSite.ts` SITE_ROUTES 加 `/yijing/meihua` + `/yijing/cases`(0.8)。
+
+### 推送合併(應用 STALE-SCRATCH + NEVER-CLOBBER standing lessons)
+- 推送前對遠端 main 做全樹 diff(200 遠端文件 vs 本地):16 個差異文件。
+  其中 9 個屬本任務線(引擎 meihua+index/d.ts、meihua 頁、quoteRef 組件+
+  highlightTerms/tsconfig 引用、academy 引文接入 lessons/LessonView、
+  導航/文案/sitemap),+2 個並行 worker 的占例庫文件(zhanli.ts、
+  cases/page.tsx 含本任務雙導航修復),其餘 7 個(首頁 manifesto 的 i18n
+  creed/globals creed/page.tsx Charts、README 三份)屬其他 worker——
+  **未推送、未覆蓋**。
+- quoteRef.tsx 為新組件:academy 的 lessons.ts/LessonView.tsx 引文接入依賴它,
+  同一 commit 推送保證功能完整;`scripts/make-brand-icons.sh` 在遠端有、本地無,
+  未納入推送(不刪除他人文件)。
+- 推送前重查遠端 head,若有 sibling 新 push 則重 diff 本推送集文件,
+  有衝突改走新分支合併(未發生,一次推成)。
+
+### 驗證
+- 282/282 測試通過(ai 60/engine 70/knowledge 28/pronounce 7/web 117;
+  web 含新增 quote-ref 測試)。
+- `next build` + `npm run cf:pages` 成功(中途一次失敗係並行 worker 寫文件中途
+  被構建掃到,重跑即過);commit 推 main;Pages 部署 → success。
+- 線上驗證:`/yijing/meihua` 200(以 2025-01-01 12:00 起卦核對四數/卦名/體用斷);
+  `/yijing/cases` 200(六例列表+詳情+原文+應驗);`/sitemap.xml` 含新路由。

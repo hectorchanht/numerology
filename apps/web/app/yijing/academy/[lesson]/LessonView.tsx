@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ACADEMY_LESSONS, getLesson } from "../lessons";
+import { ACADEMY_LESSONS, ACADEMY_QUOTE_REFS, getLesson } from "../lessons";
 import { Quiz } from "../Quiz";
 import { useLocale } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { withTermHighlights } from "@/lib/highlightTerms";
+import { withQuoteRefs } from "@/lib/quoteRef";
 
 /** 單課頁(客戶端):正文 + 自我檢測。 */
 export function LessonView({ lessonId }: { lessonId: string }) {
@@ -44,7 +45,7 @@ export function LessonView({ lessonId }: { lessonId: string }) {
             <h2 className="section-title">{s.heading}</h2>
             {s.body.map((p, pi) => (
               <p key={pi} style={{ lineHeight: 1.9, marginBottom: "0.8rem" }}>
-                {withTermHighlights(p)}
+                {withTermHighlights(withQuoteRefs(p, ACADEMY_QUOTE_REFS))}
               </p>
             ))}
           </section>

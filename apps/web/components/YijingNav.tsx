@@ -9,6 +9,8 @@ import { Icon, type IconName } from "@/components/Icon";
 /** 子頁連結(子頁頂部導航同桌面側欄共用)。 */
 export const SUB_LINKS: { href: string; id: string; icon: IconName }[] = [
   { href: "/yijing", id: "nav.yijing", icon: "hex" },
+  { href: "/yijing/meihua", id: "nav.meihua", icon: "hourglass" },
+  { href: "/yijing/cases", id: "nav.cases", icon: "history" },
   { href: "/yijing/gua", id: "nav.gua", icon: "book" },
   { href: "/yijing/liuyao", id: "nav.liuyao", icon: "grid" },
   { href: "/yijing/academy", id: "nav.academy", icon: "bulb" },
