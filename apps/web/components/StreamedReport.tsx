@@ -7,7 +7,7 @@ import type { BirthInput } from "@numerology/engine";
 import { streamPost } from "@/lib/streamClient";
 import { printReport } from "@/lib/exportPdf";
 import { aiRequestParts } from "@/lib/aiSettings";
-import { useLocale, type Locale, type TKey } from "@/lib/i18n";
+import { useLocale, HTML_LANG, type Locale, type TKey } from "@/lib/i18n";
 import { stripLeadingHeading } from "@/lib/sectionIcons";
 import { Icon, SECTION_ICON } from "@/components/Icon";
 import { Seg, ScreenNav } from "@/components/ui";
@@ -143,7 +143,11 @@ export function StreamedReport({
     const d = input;
     const tag = shownLens ? ` · ${lensLabel(shownLens)}` : "";
     const meta = `${d.year}-${d.month}-${d.day} ${String(d.hour).padStart(2, "0")}:${String(d.minute ?? 0).padStart(2, "0")} ${d.gender}${tag}`;
-    printReport(`${title}${tag}`, html, meta);
+    printReport(`${title}${tag}`, html, meta, {
+      lang: HTML_LANG[locale],
+      foot: t("app.disclaimer1"),
+      blocked: t("report.popupBlocked"),
+    });
   };
 
   const toggle = (k: string) =>

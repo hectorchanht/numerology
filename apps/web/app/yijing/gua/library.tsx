@@ -48,14 +48,14 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
       </button>
       <div style={{ display: "flex", gap: "1rem", alignItems: "flex-start", flexWrap: "wrap" }}>
         <span style={{ fontSize: "3.4rem", lineHeight: 1 }}>{hex.symbol}</span>
-        <div>
+        <div style={{ flex: "1 1 200px", minWidth: 0 }}>
           <h2 style={{ margin: "0 0 0.2rem", fontSize: "1.7rem" }}>
             {hex.name}
             <span className="muted" style={{ fontSize: "0.85rem", marginLeft: "0.6rem" }}>
               #{hex.number} · {hex.pinyin} · {hex.nameEn}
             </span>
           </h2>
-          <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+          <div className="strip" style={{ gap: "0.4rem", alignItems: "center", margin: "0.5rem 0 0", padding: "2px 0" }}>
             <span className="muted">
               {yjT("gua.upper", loc)}:
             </span>
