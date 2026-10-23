@@ -3,6 +3,7 @@ import { streamFollowUp, type ChatTurn } from "@numerology/ai";
 import { parseBirthInput } from "@/lib/birth";
 import { ensureEnv } from "@/lib/env";
 import { streamToPrimedResponse } from "@/lib/stream";
+import { primeTimeoutMs } from "@/lib/primeTimeout";
 import { errorResponse } from "@/lib/http";
 import { resolveServerAi } from "@/lib/aiOpts";
 
@@ -28,7 +29,8 @@ export async function POST(req: Request): Promise<Response> {
 
     const chart = castChart(input);
     const fortune = analyzeFortune(input, { yearsBack: 5, yearsAhead: 8 });
-    return await streamToPrimedResponse(streamFollowUp(chart, history, question, { fortune, ai: resolveServerAi(body), locale }));
+    const ai = resolveServerAi(body);
+    return await streamToPrimedResponse(streamFollowUp(chart, history, question, { fortune, ai, locale }), primeTimeoutMs(ai));
   } catch (err) {
     return errorResponse(err, { fallback: "对话失败", stage: "ai" });
   }

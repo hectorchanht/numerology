@@ -198,6 +198,10 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
 共享 IP 被限流 429),edge 外直連則正常。改為預設走 Cloudflare Workers AI binding。
 
 ### Workers AI 接入
+- **预热超时 60s(2026-10-23 補)**:Workers AI 冷启动首 token 可能 >20s(线上实测 21s+
+  触发预热超时 → 502)。`streamToPrimedResponse` 的预热超时改为按 provider 区分
+  (`apps/web/lib/primeTimeout.ts`):workers-ai 60s,其它保持 20s。4 个 AI 路由已接入。
+
 - **繁中指令前置(2026-10-23 補)**:實測 Llama 3.1 8B 對 system 末尾的 `localeDirective`
   遵循不穩(仍出簡體)——中文訓練語料以簡體為主。但把同一指令放在 user 消息開頭
   即穩定輸出繁體(REST 實測驗證)。故 workers-ai 路徑在 `provider.ts` 的

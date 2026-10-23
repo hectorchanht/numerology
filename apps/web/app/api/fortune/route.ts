@@ -3,6 +3,7 @@ import { streamFortuneReport, streamFortuneSection } from "@numerology/ai";
 import { parseBirthInput } from "@/lib/birth";
 import { ensureEnv } from "@/lib/env";
 import { streamToPrimedResponse } from "@/lib/stream";
+import { primeTimeoutMs } from "@/lib/primeTimeout";
 import { errorResponse } from "@/lib/http";
 import { resolveServerAi } from "@/lib/aiOpts";
 
@@ -25,7 +26,7 @@ export async function POST(req: Request): Promise<Response> {
     const stream = section
       ? streamFortuneSection(chart, section, { fortune, ai, lens, locale })
       : streamFortuneReport(chart, { fortune, ai, locale });
-    return await streamToPrimedResponse(stream);
+    return await streamToPrimedResponse(stream, primeTimeoutMs(ai));
   } catch (err) {
     return errorResponse(err, { fallback: "大运流年深析生成失败", stage: "ai" });
   }

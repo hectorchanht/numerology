@@ -3,6 +3,7 @@ import { streamHourInference, type ChatTurn } from "@numerology/ai";
 import { parseHourInferInput } from "@/lib/birth";
 import { ensureEnv } from "@/lib/env";
 import { streamToPrimedResponse } from "@/lib/stream";
+import { primeTimeoutMs } from "@/lib/primeTimeout";
 import { errorResponse } from "@/lib/http";
 import { resolveServerAi } from "@/lib/aiOpts";
 
@@ -25,7 +26,8 @@ export async function POST(req: Request): Promise<Response> {
     const history = Array.isArray(body.history) ? body.history.slice(-16) : [];
     const candidates = castHourCandidates(input);
     const locale = body.locale === "zhs" || body.locale === "en" ? body.locale : "zht";
-    return await streamToPrimedResponse(streamHourInference(candidates, history, message, { ai: resolveServerAi(body), locale }));
+    const ai = resolveServerAi(body);
+    return await streamToPrimedResponse(streamHourInference(candidates, history, message, { ai, locale }), primeTimeoutMs(ai));
   } catch (err) {
     return errorResponse(err, { fallback: "时辰推断失败", stage: "ai" });
   }
