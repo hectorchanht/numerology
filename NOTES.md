@@ -1,21 +1,5 @@
 # Numerology 硬化重建 — 说明
 
-## TL;DR + 图表 + 桌面拖拽 strip(分支 tldr-charts,2026-10-23)
-
-- **TL;DR**:`buildReportSectionPrompt` / `buildFortuneSectionPrompt`(及整篇 CLI 模式)要求模型在
-  `## 标题` 后第一行输出 `TL;DR:<1–3 句结论>`(标记 `TLDR_MARKER`,三地共用 ASCII)。
-  与正文**同一次请求、同一条流**,AI 调用次数不变(13 节 = 13 次,与之前相同)。
-  前端 `lib/tldr.ts` 的 `splitTldr()` 切出摘要卡(强调色左边框 + 淡底),放在可折叠正文**之外**
-  (大运深析折起也能看到结论);完整正文照常全部显示。无标记(旧历史/旧 KV 缓存)→ 只显示正文。
-  KV 缓存前缀**未**提升:旧缓存命中的章节没有 TL;DR,但不会为此重烧预算。
-- **图表**(纯 SVG + CSS 变量,零依赖、零 AI):命盘页顶部「命盘摘要」卡(日主/月令、调候用神、五行最多/缺、
-  紫微命宫主星、五行局/命主身主、当前大运)+ 五行分布堆叠条(天干地支 + 藏干,标出日主五行);
-  大运卡内两格引动度计 + 所选大运的流年柱状图。引动度 = 引擎 `suppliesUseGod` 同一规则再分两级
-  (天干透出用神 2 / 仅藏干 1 / 无 0),`lib/ganzhi.ts` 的 `useGodSignal`;测试对拍引擎,不新增任何吉凶推算。
-- **拖拽 strip**:`lib/dragScroll.ts` + `components/DragScroll.tsx`(layout 挂一次,document 事件委派),
-  覆盖 `.strip, .filter-chips`;只处理 `pointerType === "mouse"`,超过 6px 才算拖拽并吞掉随后的 click;
-  触控走原生滚动。CSS 在 `(hover: hover) and (pointer: fine)` 下给 grab 光标。
-
 ## 多语言(zht 默认 / zhs / en,2026-10-22)
 
 - 新增 `apps/web/lib/i18n.ts`:Locale 类型 `"zht"|"zhs"|"en"`,177 key 的 STRINGS 三地字典,
@@ -648,3 +632,44 @@ live 验证:7 个 `###` 标题全部带真实数字,全文零占位符。
   `academy/page.tsx` 課程簡介、`[lesson]/LessonView.tsx` 課文段落(移除 TODO)、
   `Quiz.tsx` 題目 + 解析。選項在 `<button>` 內,按設計跳過。
 - 驗證: ai 57/engine 62/knowledge 22/web 83 全過;`next build` + `npm run cf:pages` 成功。
+
+## Popup 定位統一 + 標題去重 + Scrollspy + Academy 路線圖 (2026-10-23, commit d9634e61)
+
+用戶三個跟進一次做完:
+
+1. **@floating-ui/react 全應用彈窗標準**(POPUP POSITIONING RULE, standing):
+   新增 `apps/web/lib/floatPopup.tsx` — `useFloatPopup(anchorRef)` +
+   `FloatingCard`,全應用唯一的浮動定位:`useFloating({ strategy:"fixed",
+   middleware:[offset(8), flip({padding:8}), shift({padding:8})],
+   whileElementsMounted:autoUpdate })`。flip + shift 保證彈窗永不超出
+   viewport(360px 窄屏亦然);fixed 策略逃出 overflow 容器。
+   Dismissal 沿用 standing rule:anchor 外 pointerdown / Escape 即關。
+   - `Term`(highlightTerms.tsx)改用:觸發器只留虛線底線,**不再改文字顏色**
+     (用戶要求 underline-only);彈窗改 `FloatingCard`。
+   - `components/Gloss.tsx` 遷移:三處用法
+     (yijing/tool.tsx、gua/library.tsx、liuyao/tool.tsx)的 `<Gloss>` 全換成
+     共享 `<Term>`(合併術語表已含易經術語且優先),`Gloss.tsx` 已刪除。
+   - 掃蕩:其餘無浮動 popup(SettingsPanel/HistoryPanel 係展開區塊,
+     LocationPicker 用原生 select)——無手寫定位殘留。
+   - 依賴:`@floating-ui/react@0.27.20`(npm workspace 慣例);
+     bundle 影響小:@floating-ui/dom core gzip ~7.8KB,整包 tree-shaken 約十幾 KB。
+
+2. **去重連續小標題**(`lib/fortuneRepair.ts`):
+   `dedupeHeadings` 在修復後跑:相鄰(僅隔空行)且 identity 相同的標題行只留第一個。
+   identity 規範化(去 md 標記/空白/全半形差異):大運→`D:干支:起始年`,
+   流年→`Y:年份:干支`;只有標題樣式行(## / ** / 短行規範形)才參與,
+   正文中的同年提及永不動。純標題行整行丟棄;加粗 lead-in 帶正文則去標題留正文。
+   測試 6 項:`test/fortune-repair.test.mjs`(重複合併/lead-in 留正文/全半形差異/
+   正文提及不動/不同年份不動/不相鄰不動)。
+
+3. **Scrollspy**(`components/StreamedReport.tsx`):
+   單一 IntersectionObserver(`rootMargin:"-15% 0px -75% 0px"`)監聽各節 article,
+   進入視口頂部帶即切 strip 高亮;點擊跳轉後 900ms 內不搶(平滑滾動不閃);
+   串流中 article 元素不變,照常生效。點擊仍 smooth-scroll(原有 jump 保留)。
+
+4. **Academy 路線圖**(`app/yijing/academy/page.tsx`):
+   四課改學習路線圖:左側垂直時間線 + 節點(完成✓朱砂實心/當前雙圈高光/
+   待學淡色),已完成段線段朱砂填充;卡片間 1.6rem 呼吸空間;頂部進度條保留。
+
+驗證:全 workspace 測試通過(232/232,0 fail);`next build` + `npm run cf:pages`
+成功;push d9634e61(+ Gloss.tsx 刪除 fb9cfc0f);Pages 部署待確認(見下)。
