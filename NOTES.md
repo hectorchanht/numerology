@@ -1,5 +1,21 @@
 # Numerology 硬化重建 — 说明
 
+## TL;DR + 图表 + 桌面拖拽 strip(分支 tldr-charts,2026-10-23)
+
+- **TL;DR**:`buildReportSectionPrompt` / `buildFortuneSectionPrompt`(及整篇 CLI 模式)要求模型在
+  `## 标题` 后第一行输出 `TL;DR:<1–3 句结论>`(标记 `TLDR_MARKER`,三地共用 ASCII)。
+  与正文**同一次请求、同一条流**,AI 调用次数不变(13 节 = 13 次,与之前相同)。
+  前端 `lib/tldr.ts` 的 `splitTldr()` 切出摘要卡(强调色左边框 + 淡底),放在可折叠正文**之外**
+  (大运深析折起也能看到结论);完整正文照常全部显示。无标记(旧历史/旧 KV 缓存)→ 只显示正文。
+  KV 缓存前缀**未**提升:旧缓存命中的章节没有 TL;DR,但不会为此重烧预算。
+- **图表**(纯 SVG + CSS 变量,零依赖、零 AI):命盘页顶部「命盘摘要」卡(日主/月令、调候用神、五行最多/缺、
+  紫微命宫主星、五行局/命主身主、当前大运)+ 五行分布堆叠条(天干地支 + 藏干,标出日主五行);
+  大运卡内两格引动度计 + 所选大运的流年柱状图。引动度 = 引擎 `suppliesUseGod` 同一规则再分两级
+  (天干透出用神 2 / 仅藏干 1 / 无 0),`lib/ganzhi.ts` 的 `useGodSignal`;测试对拍引擎,不新增任何吉凶推算。
+- **拖拽 strip**:`lib/dragScroll.ts` + `components/DragScroll.tsx`(layout 挂一次,document 事件委派),
+  覆盖 `.strip, .filter-chips`;只处理 `pointerType === "mouse"`,超过 6px 才算拖拽并吞掉随后的 click;
+  触控走原生滚动。CSS 在 `(hover: hover) and (pointer: fine)` 下给 grab 光标。
+
 ## 多语言(zht 默认 / zhs / en,2026-10-22)
 
 - 新增 `apps/web/lib/i18n.ts`:Locale 类型 `"zht"|"zhs"|"en"`,177 key 的 STRINGS 三地字典,

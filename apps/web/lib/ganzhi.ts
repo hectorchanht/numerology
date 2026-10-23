@@ -36,6 +36,48 @@ export function wuxingCount(pillars: { gan: string; zhi: string }[]): Record<WuX
   return out;
 }
 
+/** 四柱藏干(引擎已排好的 pillar.hideGan)的五行個數。 */
+export function wuxingHiddenCount(pillars: { hideGan: string[] }[]): Record<WuXing, number> {
+  const out: Record<WuXing, number> = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
+  for (const p of pillars) for (const g of p.hideGan) {
+    const w = GAN_WX[g];
+    if (w) out[w] += 1;
+  }
+  return out;
+}
+
+/** 天干 → 五行(非天干回 undefined)。 */
+export function ganWuXing(gan: string): WuXing | undefined {
+  return GAN_WX[gan];
+}
+
+/**
+ * 十二地支藏干(本氣在前)。與引擎 dizhiHideGan 同一張標準表——
+ * 前端唔直接 import 引擎 runtime(會將 iztro 打包入主頁),
+ * 由 test/ganzhi.test.mjs 逐支對拍引擎,防止兩邊漂移。
+ */
+export const HIDE_GAN: Record<string, readonly string[]> = {
+  子: ["癸"], 丑: ["己", "癸", "辛"], 寅: ["甲", "丙", "戊"], 卯: ["乙"],
+  辰: ["戊", "乙", "癸"], 巳: ["丙", "庚", "戊"], 午: ["丁", "己"], 未: ["己", "丁", "乙"],
+  申: ["庚", "壬", "戊"], 酉: ["辛"], 戌: ["戊", "辛", "丁"], 亥: ["壬", "甲"],
+};
+
+/** 調候用神引動度:2 = 天干透出用神;1 = 只係地支藏干有用神;0 = 未引動。 */
+export type UseGodSignal = 0 | 1 | 2;
+
+/**
+ * 某干支(大運/流年)對調候用神的引動度。
+ * 同引擎 analyzeFortune 的 suppliesUseGod 同一條規則(天干或藏干命中用神 = 補益),
+ * 只係再分「天干透出」同「藏干暗藏」兩級——唔加任何新嘅吉凶推算。
+ */
+export function useGodSignal(ganZhi: string, useGods: readonly string[]): UseGodSignal {
+  const gan = ganZhi[0] ?? "";
+  const zhi = ganZhi[1] ?? "";
+  if (useGods.includes(gan)) return 2;
+  if ((HIDE_GAN[zhi] ?? []).some((g) => useGods.includes(g))) return 1;
+  return 0;
+}
+
 /** 有干支的大運步(去掉起運前那一段空干支)。 */
 export function luckSteps(bazi: Pick<BaziChart, "daYun">): DaYunStep[] {
   return bazi.daYun.filter((d) => d.ganZhi);

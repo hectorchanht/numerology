@@ -248,14 +248,6 @@ label.row { cursor: pointer; }
 .pillar.day { box-shadow: inset 0 0 0 1px var(--accent); }
 .pillar.day .ss { color: var(--accent); }
 
-/* 五行分佈 */
-.wx { display: flex; flex-direction: column; gap: 10px; }
-.wx-row { display: grid; grid-template-columns: 24px 1fr 20px; align-items: center; gap: 10px; font-size: 15px; }
-.wx-bar { height: 6px; background: var(--fill); border-radius: 3px; overflow: hidden; }
-.wx-bar i { display: block; height: 100%; background: var(--label-2); border-radius: 3px; }
-.wx-row.hi .wx-bar i { background: var(--accent); }
-.wx-row .n { text-align: right; color: var(--label-2); font-variant-numeric: tabular-nums; }
-
 /* 八字詳盤(窄屏可橫向捲) */
 .bazi-detail-wrap { overflow-x: auto; scrollbar-width: none; }
 .bazi-detail-wrap::-webkit-scrollbar { display: none; }
@@ -360,6 +352,77 @@ button.sec-h { min-height: 44px; margin: -8px 0; }
 .prose.is-streaming > ol:last-child > li:last-child::after {
   content: ""; display: inline-block; width: 2px; height: 1em; margin-left: 2px; background: var(--accent);
   vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+
+/* 章節 TL;DR 摘要卡:強調色左邊框 + 淡色底,同正文明顯分開(章節摺埋都照顯示) */
+.tldr { margin-top: 12px; padding: 10px 14px; border-left: 3px solid var(--accent); border-radius: 4px 10px 10px 4px;
+  background: var(--accent-soft); }
+.tldr-k { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+.tldr p { margin: 2px 0 0; font-size: 16px; line-height: 1.55; font-weight: 600; color: var(--label); overflow-wrap: anywhere; }
+.tldr .skel { margin: 8px 0 4px; }
+.tldr.is-streaming p::after { content: ""; display: inline-block; width: 2px; height: 1em; margin-left: 2px; background: var(--accent);
+  vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+
+/* ---------- 圖表(純 SVG + CSS 變數,深淺主題自動跟) ---------- */
+.viz-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--label-2); margin: 0 0 10px; }
+.viz-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.viz-legend .sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.sw-vis { background: var(--label-2); }
+.sw-hid { background: var(--label-3); opacity: 0.55; }
+.wxc { display: flex; flex-direction: column; gap: 10px; }
+.wxc-row { display: grid; grid-template-columns: 64px 1fr 40px; align-items: center; gap: 10px; font-size: 15px; }
+.wxc-el { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.wxc-dm { font-size: 10px; padding: 1px 6px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.wxc-bar { display: block; width: 100%; height: 10px; overflow: visible; }
+.wxc-bar .track { fill: var(--fill); }
+.wxc-bar .seg-vis { fill: var(--label-2); }
+.wxc-bar .seg-hid { fill: var(--label-3); fill-opacity: 0.55; }
+.wxc-row.hi .seg-vis { fill: var(--accent); }
+.wxc-n { text-align: right; color: var(--label-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.wxc-h { color: var(--label-3); font-size: 12px; margin-left: 2px; }
+
+/* 命盤摘要卡:手機兩欄,闊屏三欄 */
+.stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.stat { background: var(--card); border-radius: var(--radius); padding: 12px 14px; min-width: 0; }
+.stat.accent { box-shadow: inset 0 0 0 1px var(--accent-line); }
+.stat-k { font-size: 12px; color: var(--label-2); }
+.stat-v { font-size: 19px; font-weight: 600; margin-top: 2px; overflow-wrap: anywhere; }
+.stat.accent .stat-v { color: var(--accent); }
+.stat-s { font-size: 12px; color: var(--label-3); margin-top: 2px; overflow-wrap: anywhere; }
+@media (min-width: 768px) { .stat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* 調候用神引動度三級(單一強調色由深到淺 + 高度/格數雙重編碼,唔淨靠顏色) */
+.sig-2 { fill: var(--accent); }
+.sig-1 { fill: var(--accent-line); }
+.sig-0 { fill: var(--label-3); fill-opacity: 0.45; }
+.viz-legend .sw.sig-2 { background: var(--accent); }
+.viz-legend .sw.sig-1 { background: var(--accent-line); }
+.viz-legend .sw.sig-0 { background: var(--label-3); opacity: 0.45; }
+.sig-meter { display: block; width: 30px; height: 6px; margin-top: 4px; }
+.sig-meter .on { fill: var(--accent); }
+.sig-meter .off { fill: var(--fill); }
+.dy.now .sig-meter .off { fill: var(--on-label-2); fill-opacity: 0.35; }
+.dayun + .viz-legend { margin: 10px 0 0; }
+.yb { display: grid; gap: 4px; align-items: end; }
+.yb-col { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; border-radius: 8px; padding: 4px 0 2px; }
+.yb-col.cur { box-shadow: inset 0 0 0 1.5px var(--accent); }
+.yb-svg { display: block; width: 100%; height: 72px; }
+.yb-gz { font-size: 12px; font-weight: 600; white-space: nowrap; }
+.yb-yr { font-size: 10px; color: var(--label-3); font-variant-numeric: tabular-nums; }
+.yb-col.cur .yb-yr { color: var(--accent); }
+.viz + .list { margin-top: 12px; }
+.tag.sig-tag.sig-2 { background: var(--accent-soft); color: var(--accent); }
+.tag.sig-tag.sig-1 { background: var(--fill); color: var(--label-2); }
+
+/* 桌面滑鼠:橫向 strip 可拖拽捲動(lib/dragScroll.ts);觸控唔受影響 */
+@media (hover: hover) and (pointer: fine) {
+  .strip, .filter-chips { cursor: grab; }
+  .strip.dragging, .filter-chips.dragging { cursor: grabbing; scroll-snap-type: none; user-select: none; -webkit-user-select: none; }
+  .strip.dragging *, .filter-chips.dragging * { cursor: grabbing; }
+}
+/* 桌面報告目錄變咗直排,唔使 grab */
+@media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
+  .report-body > .sticky-strip { cursor: auto; }
+}
 
 /* ---------- 大運 ---------- */
 .dayun { gap: 8px; }

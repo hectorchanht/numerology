@@ -3,6 +3,7 @@ import "./globals.css";
 import { YijingNav } from "@/components/YijingNav";
 import { TabBar } from "@/components/TabBar";
 import { SideNav } from "@/components/SideNav";
+import { DragScroll } from "@/components/DragScroll";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 
 export const metadata: Metadata = {
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </div>
         <TabBar />
+        <DragScroll />
       </body>
     </html>
   );

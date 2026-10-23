@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import type { ChartResult } from "@numerology/engine";
 import { useLocale } from "@/lib/i18n";
-import { currentLuckStep, luckSteps, stepYears, yearGanZhi } from "@/lib/ganzhi";
+import { currentLuckStep, luckSteps, stepYears, useGodSignal, yearGanZhi } from "@/lib/ganzhi";
+import { SignalLegend, SignalMeter, YearBars } from "@/components/Charts";
 
 /** 大運時間線(橫向捲動,當前大運高亮)+ 所選大運的逐年流年。純排盤數據,唔叫 AI。 */
 export function FortuneTimeline({ chart, visible }: { chart: ChartResult; visible: boolean }) {
   const { t } = useLocale();
   const steps = luckSteps(chart.bazi);
+  const useGods = chart.bazi.tiaohou.useGods;
   const thisYear = new Date().getFullYear();
   const now = currentLuckStep(chart.bazi, thisYear);
   const [picked, setPicked] = useState<number>(() => Math.max(0, now ? steps.indexOf(now) : 0));
@@ -32,6 +34,7 @@ export function FortuneTimeline({ chart, visible }: { chart: ChartResult; visibl
   const step = steps[picked];
   if (!step) return null;
   const birthYear = chart.input.year;
+  const years = stepYears(step);
 
   return (
     <>
@@ -65,21 +68,31 @@ export function FortuneTimeline({ chart, visible }: { chart: ChartResult; visibl
             <span className="age">{t("fortune.ageRange", { a: d.startAge, b: d.endAge })}</span>
             <span className="gz">{d.ganZhi}</span>
             <span className="yr">{d.startYear}</span>
+            <SignalMeter level={useGodSignal(d.ganZhi, useGods)} />
           </button>
         ))}
       </div>
-      <p className="note">{t("fortune.startLuck")}:{chart.bazi.startLuck.description}</p>
+      <SignalLegend />
+      <p className="note">
+        {t("fortune.startLuck")}:{chart.bazi.startLuck.description} · {t("viz.sigNote", { ug: useGods.join("、") })}
+      </p>
 
       <h2 className="group-title">{t("fortune.years", { gz: step.ganZhi })}</h2>
+      <YearBars years={years} useGods={useGods} thisYear={thisYear} />
       <div className="list ly">
-        {stepYears(step).map((y) => (
-          <div className={`row plain${y === thisYear ? " cur" : ""}`} key={y}>
-            <span className="yr">{y}</span>
-            <span className="gz">{yearGanZhi(y)}</span>
-            <span className="lbl">{t("fortune.age", { n: y - birthYear + 1 })}</span>
-            {y === thisYear ? <span className="tag accent">{t("fortune.thisYear")}</span> : null}
-          </div>
-        ))}
+        {years.map((y) => {
+          const gz = yearGanZhi(y);
+          const s = useGodSignal(gz, useGods);
+          return (
+            <div className={`row plain${y === thisYear ? " cur" : ""}`} key={y}>
+              <span className="yr">{y}</span>
+              <span className="gz">{gz}</span>
+              <span className="lbl">{t("fortune.age", { n: y - birthYear + 1 })}</span>
+              {y === thisYear ? <span className="tag accent">{t("fortune.thisYear")}</span> : null}
+              {s > 0 ? <span className={`tag sig-tag sig-${s}`}>{t(s === 2 ? "viz.sig2Short" : "viz.sig1Short")}</span> : null}
+            </div>
+          );
+        })}
       </div>
     </>
   );

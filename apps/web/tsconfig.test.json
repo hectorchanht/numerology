@@ -32,6 +32,8 @@
     "lib/ganzhi.ts",
     "lib/yijingStrings.ts",
     "lib/yijingSite.ts",
-    "lib/theme.ts"
+    "lib/theme.ts",
+    "lib/tldr.ts",
+    "lib/dragScroll.ts"
   ]
 }

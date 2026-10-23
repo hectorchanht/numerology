@@ -9,6 +9,7 @@ import { printReport } from "@/lib/exportPdf";
 import { aiRequestParts } from "@/lib/aiSettings";
 import { useLocale, HTML_LANG, type Locale, type TKey } from "@/lib/i18n";
 import { stripLeadingHeading } from "@/lib/sectionIcons";
+import { splitTldr } from "@/lib/tldr";
 import { Icon, SECTION_ICON } from "@/components/Icon";
 import { Seg, ScreenNav } from "@/components/ui";
 
@@ -51,6 +52,19 @@ interface Slot {
   text: string;
   status: "streaming" | "done" | "error";
   err: string;
+}
+
+/**
+ * 章節 TL;DR 摘要卡:AI 同一條流第一行輸出(唔另叫 API)。
+ * 放喺可摺疊正文之外——章節摺埋都睇到結論;完整正文照樣喺下面全部顯示。
+ */
+function Tldr({ text, live, label }: { text: string; live: boolean; label: string }) {
+  return (
+    <aside className={`tldr${live ? " is-streaming" : ""}`} aria-label={label}>
+      <span className="tldr-k">{label}</span>
+      {text ? <p>{text}</p> : <div className="skel w80" />}
+    </aside>
+  );
 }
 
 /** 通用流式报告:选视角 → 各节并行调 endpoint → 每节一张卡,逐字渲染 Markdown。 */
@@ -249,6 +263,9 @@ export function StreamedReport({
                   s.status === "error" ? "failed" : "",
                 ].filter(Boolean).join(" ");
                 const isOpen = !collapsible || open.has(seg.key);
+                const streaming = s.status === "streaming";
+                // TL;DR 同正文由同一條 AI 流切出(冇標記 → tldr 為 null,全部當正文)。
+                const split = has ? splitTldr(stripLeadingHeading(s.text)) : { tldr: null, body: "" };
                 const head = (
                   <>
                     <Icon name={SECTION_ICON[seg.key] ?? "spark"} />
@@ -274,18 +291,24 @@ export function StreamedReport({
                     ) : (
                       <h3 className="sec-hd"><span className="sec-h">{head}</span></h3>
                     )}
+                    {split.tldr !== null ? (
+                      <Tldr text={split.tldr} live={streaming && !split.body} label={t("report.tldr")} />
+                    ) : null}
                     <div className="sec-b" id={`${idBase}-${seg.key}-b`} hidden={!isOpen}>
-                      {has ? (
-                        <div className={`prose${s.status === "streaming" ? " is-streaming" : ""}`}>
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{stripLeadingHeading(s.text)}</ReactMarkdown>
+                      {split.body ? (
+                        <div className={`prose${streaming ? " is-streaming" : ""}`}>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{split.body}</ReactMarkdown>
                         </div>
-                      ) : s.status === "streaming" ? (
-                        <div aria-label={t("report.stateQueued")}>
-                          <div className="skel" /><div className="skel w80" /><div className="skel w60" />
-                        </div>
+                      ) : streaming ? (
+                        // 摘要已出、正文未到:摘要卡已有游標,呢度唔使再放骨架。
+                        has ? null : (
+                          <div aria-label={t("report.stateQueued")}>
+                            <div className="skel" /><div className="skel w80" /><div className="skel w60" />
+                          </div>
+                        )
                       ) : s.status === "error" ? (
                         <p className="notice">{t("report.segFail", { err: s.err })}</p>
-                      ) : (
+                      ) : has ? null : (
                         <p className="note">{t("report.segEmpty")}</p>
                       )}
                     </div>
