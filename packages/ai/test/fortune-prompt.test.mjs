@@ -57,3 +57,14 @@ test("数字铁律与去套话不破坏既有纪律(locale/视角/篇幅)", () =
   assert.ok(en.includes("## 2. Major Luck Periods in Detail"), "英文小标题仍在");
   assert.ok(en.includes("逐字照抄"), "英文 locale 下数字铁律仍在");
 });
+
+test("表达风格规则:一句话定性 + 禁废话开场 + 断语纪律", () => {
+  const p = buildFortuneSectionPrompt([], seg("dayun"), "both", "zht");
+  assert.ok(p.includes("一句话定性"), "应要求每步/每年先一句话定性");
+  assert.ok(p.includes("值得注意的是"), "应列出禁止的废话开场");
+  assert.ok(p.includes("绝不编造古籍断语"), "应有断语纪律");
+  assert.ok(p.includes("传统有此一说"), "传统说法必须标注口径");
+  const full = buildFortuneReportPrompt([], "zht");
+  assert.ok(full.includes("一句话定性"), "整篇 prompt 也应有风格规则");
+  assert.ok(full.includes("绝不编造古籍断语"), "整篇 prompt 也应有断语纪律");
+});

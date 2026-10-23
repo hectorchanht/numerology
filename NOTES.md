@@ -422,7 +422,15 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
    哪个宫→什么效果),写不出就删。
    另做了一次通用 prompt 优化: FORTUNE_SEGMENTS 各节 instruction 压缩到 1–3 行,
    去掉模型会镜像的啰嗦表述;直接、敢断的语气保留并加强(机制语言要求)。
-   回归测试:`packages/ai/test/fortune-prompt.test.mjs`(7 项)。
+   回归测试:`packages/ai/test/fortune-prompt.test.mjs`(7 项 → 8 项)。
+   补充对齐外部研究(2026-10-22 晚):`mingli-master` 的 `references/interpretation_guide.md`
+   (解讀風格指南:"敢斷、有类比、禁『值得注意的是』式廢話",❌/✅ 例)——
+   其与本 brief 一致的部分收为 `FORTUNE_STYLE_RULES`:每步/每年先**一句话定性**、
+   术语首次出现用日常类比翻译(每节一两个足矣)、禁用废话开场
+   (「值得注意的是」「总体而言」「整体上是XX的」「需要多加注意」);
+   与 brief 冲突的(过度迎合语气/置信度条)不采纳。另采纳
+   `Johnson-Jia/ziwei-bazi-reading` 的斷語可信度思想为**断语纪律**:绝不编造古籍断语原文,
+   想借传统说法必须写"传统有此一说"(传闻口径,非实证),不许伪引"古书云:……"。
 
 4. **报告章节加 emoji(用户要求"replace boring text with emoji/icon")**:
    纯前端确定性方案,不靠模型:`apps/web/lib/sectionIcons.ts`(13 节 key→emoji,
@@ -433,5 +441,5 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
    回归测试:`apps/web/test/section-icons.test.mjs`(6 项:key 齐全、图标互异、
    未知 key 回落 ✦、标题替换/补全、正文不动)。
 
-验证:139/139 测试通过(engine 41/ai 41/knowledge 5/web 52);`next build` +
+验证:140/140 测试通过(engine 41/ai 42/knowledge 5/web 52);`next build` +
 `npm run cf:pages` 均成功。
