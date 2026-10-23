@@ -194,7 +194,8 @@ export default function ChartPoster() {
                     {screen.pillars.map((p) => (
                       <div className="poster-pillar" key={p.key}>
                         <div className="gz">{p.ganZhi}</div>
-                        <div className="ss">{p.shiShen || " "}</div>
+                        {/* 日柱無十神:用 nbsp 佔位——普通空格會被 CSS 收走,撐唔起行高,標籤就對唔齊 */}
+                        <div className="ss">{p.shiShen || " "}</div>
                         <div className="lb">{p.label}</div>
                       </div>
                     ))}
