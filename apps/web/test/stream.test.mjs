@@ -46,7 +46,7 @@ test("首 token 前失败 → 抛错(调用方可转 JSON 502),绝不返回半�
   assert.ok(err instanceof Error, "应抛出而不是返回 Response");
   const c = classifyError(err, "ai");
   assert.equal(c.status, 502);
-  assert.ok(c.message.includes("限流"));
+  assert.ok(c.message.includes("Rate limit reached"), "应透出真实消息而非改写");
 });
 
 test("成功时正文完整:预热消费的首块会被回放,不丢失不重复", async () => {

@@ -27,22 +27,39 @@ test("http:输入错误 → 400,未知 provider → 400", () => {
   assert.equal(classifyError(new Error("字段 year 必须为整数(收到 1990.5)")).status, 400);
 });
 
-test("http:AI 上游错误 → 502 且信息清晰", () => {
+test("http:AI 上游错误 → 502 且透出真实消息(REAL-ERROR RULE)", () => {
   const cases = [
-    [new Error("缺少 智谱 GLM-4-Flash(免费) 的 API key。请在设置里填入"), "鉴权"],
-    [Object.assign(new Error("Rate limit reached"), { status: 429 }), "限流"],
-    [Object.assign(new Error("Connection error."), {}), "网络"],
-    [Object.assign(new Error("Internal Server Error"), { status: 500 }), "上游"],
-    [new Error("AI 请求超时:20s 内未收到首个文本块"), "网络"],
+    [new Error("缺少 智谱 GLM-4-Flash(免费) 的 API key。请在设置里填入"), "API key"],
+    [Object.assign(new Error("Rate limit reached"), { status: 429 }), "Rate limit reached"],
+    [Object.assign(new Error("Connection error."), {}), "Connection error."],
+    [Object.assign(new Error("Internal Server Error"), { status: 500 }), "Internal Server Error"],
+    [new Error("AI 请求超时:20s 内未收到首个文本块"), "20s 内未收到首个文本块"],
+    // 模型下架 404:真实消息必须原样透出(含 provider 的更换建议)
+    [
+      Object.assign(
+        new Error("404 This model models/gemini-2.0-flash is no longer available. Please update your code to use models/gemini-3.8-flash"),
+        { status: 404 },
+      ),
+      "gemini-3.8-flash",
+    ],
   ];
   for (const [err, want] of cases) {
     const c = classifyError(err, "ai");
     assert.equal(c.status, 502, `${err.message} 应为 502`);
-    assert.ok(c.message.includes(want), `502 信息应含「${want}」: ${c.message}`);
+    assert.ok(c.message.includes(want), `502 信息应透出真实消息(含「${want}」): ${c.message}`);
   }
-  // AI 阶段未知错误兜底 502;输入阶段未知错误保持 400。
+  // AI 阶段未知错误兜底 502;输入阶段未知错误保持 400。消息均为原样。
   assert.equal(classifyError(new Error("mystery"), "ai").status, 502);
+  assert.equal(classifyError(new Error("mystery"), "ai").message, "mystery");
   assert.equal(classifyError(new Error("mystery"), "input").status, 400);
+});
+
+test("http:超长真实消息截断但不改写", () => {
+  const long = "x".repeat(2000);
+  const c = classifyError(Object.assign(new Error(long), { status: 502 }), "ai");
+  assert.equal(c.status, 502);
+  assert.ok(c.message.length <= 1501, `应截断: ${c.message.length}`);
+  assert.ok(c.message.startsWith("x".repeat(100)));
 });
 
 test("http:预算耗尽 → 429 且去掉内部标记", () => {

@@ -134,7 +134,7 @@ const PROVIDERS: Record<string, ProviderDef> = {
     label: "Google Gemini 2.0 Flash(免费额度)",
     keys: ["GEMINI_API_KEY", "GOOGLE_API_KEY"],
     baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
-    models: { report: "gemini-2.0-flash", chat: "gemini-2.0-flash" },
+    models: { report: "gemini-3.8-flash", chat: "gemini-3.8-flash" },
     signup: "https://aistudio.google.com/apikey",
     free: true,
   },
@@ -217,6 +217,83 @@ function modelFor(def: ProviderDef, kind: ModelKind, opts?: ProviderOptions): st
   if (opts?.model && opts.model.trim()) return opts.model.trim();
   const override = kind === "report" ? process.env.AI_MODEL_REPORT : process.env.AI_MODEL_CHAT;
   return (override && override.trim()) || def.models[kind];
+}
+
+/**
+ * 动态模型回落(OpenAI 兼容 provider):默认模型可能被 provider 下架
+ * (如 gemini-2.0-flash → 404 "no longer available"),硬编码默认即永久失效。
+ * 仅当模型来自"默认"(用户与环境变量均未显式指定)时,404 触发一次实时
+ * /models 拉取,取列表首个模型重试一次。显式指定的模型 404 → 直接抛真实错误,
+ * 让用户去设置里换(前端模型列表本就是实时拉取的)。
+ * 回落结果按 baseURL 缓存 10 分钟,避免默认已死时每次请求都多两次上游调用。
+ */
+const MODEL_NOT_FOUND_RE = /not found|no longer available|does not exist|unknown model/i;
+const fallbackCache = new Map<string, { model: string; at: number }>();
+const FALLBACK_TTL_MS = 10 * 60 * 1000;
+
+function isModelNotFoundError(err: unknown): boolean {
+  const s = (err as { status?: unknown })?.status;
+  if (s !== 404) return false;
+  const msg = err instanceof Error ? err.message : String(err);
+  return MODEL_NOT_FOUND_RE.test(msg);
+}
+
+/** 模型是否显式指定(请求覆盖或环境变量):显式指定的不做动态回落。 */
+function isModelExplicit(kind: ModelKind, opts?: ProviderOptions): boolean {
+  if (opts?.model && opts.model.trim()) return true;
+  const override = kind === "report" ? process.env.AI_MODEL_REPORT : process.env.AI_MODEL_CHAT;
+  return !!(override && override.trim());
+}
+
+function fallbackCacheKey(def: ProviderDef): string {
+  return (def.baseURL ?? "").replace(/\/+$/, "");
+}
+
+/**
+ * 解析本次实际要用的模型:显式指定 → 直接用;否则看回落缓存,
+ * 命中且未过期则直接用上次验证可用的模型(默认已死时的快速路径)。
+ */
+function resolvePreferredModel(def: ProviderDef, kind: ModelKind, opts?: ProviderOptions): string {
+  if (isModelExplicit(kind, opts)) return modelFor(def, kind, opts);
+  const hit = fallbackCache.get(fallbackCacheKey(def));
+  if (hit && Date.now() - hit.at < FALLBACK_TTL_MS) return hit.model;
+  return modelFor(def, kind, opts);
+}
+
+/** 拉取 OpenAI 兼容端点的实时模型 id 列表(失败抛错,由调用方决定如何处理)。 */
+async function fetchLiveModelIds(baseURL: string, apiKey: string): Promise<string[]> {
+  const res = await fetch(`${baseURL.replace(/\/+$/, "")}/models`, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  });
+  if (!res.ok) throw new Error(`模型列表请求失败(HTTP ${res.status})`);
+  const data = (await res.json()) as { data?: { id?: string }[] };
+  const list = Array.isArray(data.data) ? data.data : [];
+  return list
+    .map((m) => m?.id)
+    .filter((id): id is string => typeof id === "string" && id.length > 0);
+}
+
+/**
+ * 404 回落:清掉可能已失效的缓存,拉实时列表取首个模型记入缓存并返回。
+ * 列表拉取失败或为空 → 抛原始 404 错误(真实消息透出,供用户换模型)。
+ */
+async function fallbackModel(
+  def: ProviderDef,
+  apiKey: string,
+  originalErr: unknown,
+): Promise<string> {
+  fallbackCache.delete(fallbackCacheKey(def));
+  if (!def.baseURL) throw originalErr;
+  let ids: string[];
+  try {
+    ids = await fetchLiveModelIds(def.baseURL, apiKey);
+  } catch {
+    throw originalErr;
+  }
+  const first = ids[0];
+  if (!first) throw originalErr;
+  fallbackCache.set(fallbackCacheKey(def), { model: first, at: Date.now() });
+  return first;
 }
 
 /** 给前端/日志看的一行摘要,不含任何 key。 */
@@ -561,16 +638,32 @@ export async function chatComplete(
       .join("");
     return { text, usage: fromAnthropicUsage(res.usage) };
   }
-  const res = await makeOpenAI(apiKey, def.baseURL).chat.completions.create({
-    model: modelFor(def, req.kind, opts),
-    max_tokens: req.maxTokens,
-    ...baseDecodeParams(),
-    messages: toOpenAIMessages(system, req.messages),
-  });
-  return {
-    text: res.choices?.[0]?.message?.content ?? "",
-    usage: fromOpenAIUsage(res.usage),
-  };
+  const client = makeOpenAI(apiKey, def.baseURL);
+  const messages = toOpenAIMessages(system, req.messages);
+  const preferred = resolvePreferredModel(def, req.kind, opts);
+  const complete = (model: string) =>
+    client.chat.completions.create({
+      model,
+      max_tokens: req.maxTokens,
+      ...baseDecodeParams(),
+      messages,
+    });
+  try {
+    const res = await complete(preferred);
+    return {
+      text: res.choices?.[0]?.message?.content ?? "",
+      usage: fromOpenAIUsage(res.usage),
+    };
+  } catch (err) {
+    // 默认模型被下架(404) → 动态回落到实时列表首个模型重试一次;
+    // 显式指定的模型 404 → 直接抛真实错误(用户去设置里换)。
+    if (!isModelNotFoundError(err) || isModelExplicit(req.kind, opts)) throw err;
+    const res = await complete(await fallbackModel(def, apiKey, err));
+    return {
+      text: res.choices?.[0]?.message?.content ?? "",
+      usage: fromOpenAIUsage(res.usage),
+    };
+  }
 }
 
 /** 流式补全。opts 可传 BYOK。返回 Anthropic 风格事件流,供 web 端逐字渲染。 */
@@ -601,14 +694,24 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
     }) as unknown as TextStream;
   }
   const client = makeOpenAI(apiKey, def.baseURL);
-  const model = modelFor(def, req.kind, opts);
   const messages = toOpenAIMessages(system, req.messages);
-  return new OpenAITextStream((signal) =>
-    client.chat.completions.create(
-      { model, max_tokens: req.maxTokens, stream: true, ...baseDecodeParams(), messages },
-      { signal },
-    ),
-  );
+  const preferred = resolvePreferredModel(def, req.kind, opts);
+  const explicit = isModelExplicit(req.kind, opts);
+  return new OpenAITextStream(async (signal) => {
+    const open = (model: string) =>
+      client.chat.completions.create(
+        { model, max_tokens: req.maxTokens, stream: true, ...baseDecodeParams(), messages },
+        { signal },
+      );
+    try {
+      return await open(preferred);
+    } catch (err) {
+      // 默认模型被下架(404) → 动态回落到实时列表首个模型重试一次(懒启动内);
+      // 显式指定的模型 404 → 直接抛真实错误。
+      if (!isModelNotFoundError(err) || explicit) throw err;
+      return open(await fallbackModel(def, apiKey, err));
+    }
+  });
 }
 
 /**
