@@ -9,7 +9,7 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: { params: { lesson: string } }): Metadata {
   const l = getLesson(params.lesson);
   return {
-    title: l ? `易經學院 · ${l.title} · 命理` : "易經學院 · 命理",
+    title: l ? `易經學院 · ${l.title} · 洛書命理` : "易經學院 · 洛書命理",
     description: l?.sub ?? "易經學院課程",
     alternates: { canonical: `/yijing/academy/${params.lesson}` },
   };
