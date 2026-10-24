@@ -397,6 +397,26 @@ export default function Home() {
 
               <h2 className="group-title">{t("chart.tools")}</h2>
               <div className="tools">
+                <Link href="/name" className="tool">
+                  <Icon name="user" />
+                  <div><div className="t">{t("name.title")}</div><div className="d">{t("more.nameSub")}</div></div>
+                </Link>
+                <Link href="/daily" className="tool">
+                  <Icon name="sun" />
+                  <div><div className="t">{t("daily.title")}</div><div className="d">{t("more.dailySub")}</div></div>
+                </Link>
+                <Link href="/hepan" className="tool">
+                  <Icon name="heart" />
+                  <div><div className="t">{t("hepan.title")}</div><div className="d">{t("more.hepanSub")}</div></div>
+                </Link>
+                <Link href="/qimen" className="tool">
+                  <Icon name="compass" />
+                  <div><div className="t">{t("qimen.title")}</div><div className="d">{t("more.qimenSub")}</div></div>
+                </Link>
+                <Link href="/fengshui" className="tool">
+                  <Icon name="pin" />
+                  <div><div className="t">{t("fengshui.title")}</div><div className="d">{t("more.fengshuiSub")}</div></div>
+                </Link>
                 <Link href="/yijing" className="tool">
                   <Icon name="hex" />
                   <div><div className="t">{yjT("nav.yijing", locale)}</div><div className="d">{t("chart.yijingSub")}</div></div>
@@ -478,9 +498,62 @@ export default function Home() {
         )}
       </section>
 
-      {/* ============ 歷史 ============ */}
-      <section {...show("history")} aria-label={t("tab.history")}>
-        <ScreenNav eyebrow={t("history.privacy")}>
+      {/* ============ 更多 ============ */}
+      <section {...show("more")} aria-label={t("tab.more")}>
+        <ScreenNav />
+        <h1 className="large">{t("more.title")}</h1>
+        <div className="list">
+          <Link href="/daily" className="row">
+            <Icon name="sun" className="ic" />
+            <span className="lbl">{t("daily.title")}<span className="sub">{t("more.dailySub")}</span></span>
+            <Icon name="chev" small className="chev" />
+          </Link>
+          <Link href="/name" className="row">
+            <Icon name="user" className="ic" />
+            <span className="lbl">{t("name.title")}<span className="sub">{t("more.nameSub")}</span></span>
+            <Icon name="chev" small className="chev" />
+          </Link>
+          <Link href="/hepan" className="row">
+            <Icon name="heart" className="ic" />
+            <span className="lbl">{t("hepan.title")}<span className="sub">{t("more.hepanSub")}</span></span>
+            <Icon name="chev" small className="chev" />
+          </Link>
+          <Link href="/qimen" className="row">
+            <Icon name="compass" className="ic" />
+            <span className="lbl">{t("qimen.title")}<span className="sub">{t("more.qimenSub")}</span></span>
+            <Icon name="chev" small className="chev" />
+          </Link>
+          <Link href="/fengshui" className="row">
+            <Icon name="pin" className="ic" />
+            <span className="lbl">{t("fengshui.title")}<span className="sub">{t("more.fengshuiSub")}</span></span>
+            <Icon name="chev" small className="chev" />
+          </Link>
+          <Link href="/yijing" className="row">
+            <Icon name="hex" className="ic" />
+            <span className="lbl">{yjT("nav.yijing", locale)}<span className="sub">{t("more.yijingSub")}</span></span>
+            <Icon name="chev" small className="chev" />
+          </Link>
+          <Link href="/poster" className="row">
+            <Icon name="image" className="ic" />
+            <span className="lbl">{yjT("nav.poster", locale)}<span className="sub">{t("more.posterSub")}</span></span>
+            <Icon name="chev" small className="chev" />
+          </Link>
+          <button type="button" className="row" onClick={() => go("history")}>
+            <Icon name="history" className="ic" />
+            <span className="lbl">{t("history.title")}<span className="sub">{t("more.historySub")}</span></span>
+            <Icon name="chev" small className="chev" />
+          </button>
+          <button type="button" className="row" onClick={() => go("settings")}>
+            <Icon name="gear" className="ic" />
+            <span className="lbl">{t("nav.settings")}<span className="sub">{t("more.settingsSub")}</span></span>
+            <Icon name="chev" small className="chev" />
+          </button>
+        </div>
+      </section>
+
+      {/* ============ 歷史(更多內子畫面) ============ */}
+      <section {...show("history", true)} aria-label={t("history.title")}>
+        <ScreenNav eyebrow={t("history.privacy")} onBack={goBack} gear={false}>
           <button type="button" className="icon-btn" onClick={() => go("home")} aria-label={t("history.new")}>
             <Icon name="plus" />
           </button>

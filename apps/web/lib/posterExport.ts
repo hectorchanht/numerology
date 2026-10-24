@@ -7,6 +7,13 @@ import {
   type PosterPalette,
   type PosterColor,
 } from "./poster.js";
+import {
+  layoutShareCard,
+  paintShareCard,
+  SHARE_CARD_W,
+  SHARE_CARD_H,
+  type ShareCardModel,
+} from "./shareCard.js";
 import { readTheme } from "./theme.js";
 
 /**
@@ -58,6 +65,29 @@ export async function renderPosterPng(model: PosterModel, el: Element): Promise<
   canvas.width = Math.round(layout.width * SCALE);
   canvas.height = Math.round(layout.height * SCALE);
   paintPoster(ctx, layout, palette, family, SCALE, logo);
+
+  return new Promise((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob failed"))), "image/png"),
+  );
+}
+
+/**
+ * 通用分享卡導出 PNG(9:16,1620x2880):同 poster 同一色板/字體,供 /name、/daily、/hepan 用。
+ * el = 屏幕上嘅卡元素(用嚟讀色板同字體)。
+ */
+export async function renderShareCardPng(model: ShareCardModel, el: Element): Promise<Blob> {
+  const palette = readPalette(el);
+  const family = getComputedStyle(el).fontFamily || "sans-serif";
+  await document.fonts?.ready;
+
+  const SCALE = 3;
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("canvas 2d unavailable");
+  const layout = layoutShareCard(model);
+  canvas.width = Math.round(SHARE_CARD_W * SCALE);
+  canvas.height = Math.round(SHARE_CARD_H * SCALE);
+  paintShareCard(ctx, layout, palette, family, SCALE);
 
   return new Promise((resolve, reject) =>
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob failed"))), "image/png"),

@@ -35,6 +35,15 @@ declare module "lunar-javascript" {
     getYearZhi(): string;
     /** 生肖,如 "龙" */
     getYearShengXiao(): string;
+    /** 上一個節氣(如立春/驚蟄等,含節) */
+    getPrevJieQi(): JieQi;
+  }
+
+  export class JieQi {
+    /** 節氣名,如 "寒露" */
+    getName(): string;
+    /** 節氣交接時刻(公曆) */
+    getSolar(): Solar;
   }
 
   export class EightChar {

@@ -71,3 +71,38 @@ export function castChart(input: BirthInput): ChartResult {
     ziwei: castZiwei(input),
   };
 }
+
+export {
+  analyzeName,
+  wuxingOfStrokes,
+  shuliOf,
+  shuliInfo,
+  type Wuxing5,
+  type WugeLuck,
+  type WugeChar,
+  type WugeGe,
+  type WugeResult,
+} from "./wuge.js";
+
+export {
+  castQimen,
+  isWuBuYuShi,
+  type QimenInput,
+  type QimenPalace,
+  type QimenResult,
+} from "./qimen.js";
+
+export {
+  castFeixing,
+  type FeixingGua,
+  type FeixingInput,
+  type FeixingPalace,
+  type FeixingResult,
+  type StarState,
+} from "./feixing.js";
+
+export {
+  sancaiOf,
+  sancaiSize,
+  type SancaiResult,
+} from "./sancai.js";
