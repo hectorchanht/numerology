@@ -207,6 +207,27 @@ export default function Home() {
           <div className="split-a">
             <h1 className="large">{t("form.title")}</h1>
             <p className="lede">{t("home.lede")}</p>
+
+            {/* 點用:擺喺 lede 下面,入嚟即睇到點玩,唔使碌落去搵 */}
+            <h2 className="intro-sub">{t("intro.stepsTitle")}</h2>
+            <ol className="intro-steps">
+              <li>{t("intro.s1")}</li>
+              <li>{t("intro.s2")}</li>
+              <li>{t("intro.s3")}</li>
+            </ol>
+
+            {/* 河圖洛書:hero 特色卡,九宮格視覺,桌面左欄唔再留白 */}
+            <Link href="/yijing/academy/hetu-luoshu" className="hero-hetu">
+              <div className="hetu-grid" aria-hidden="true">
+                {[4, 9, 2, 3, 5, 7, 8, 1, 6].map((n) => (
+                  <span key={n}>{n}</span>
+                ))}
+              </div>
+              <div className="hetu-text">
+                <div className="it">{t("intro.f4t")}<Icon name="chev" small /></div>
+                <p>{t("intro.f4d")}</p>
+              </div>
+            </Link>
           </div>
 
           <div className="split-main">
@@ -236,7 +257,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 介紹:三樣嘢 + 點用 + FAQ(SEO 可索引內容 + 新手睇得明) */}
+        {/* 介紹:三樣嘢 + FAQ(SEO 可索引內容 + 新手睇得明);點用同河圖洛書已搬上 hero */}
         <div className="intro">
           <h2 className="group-title">{t("intro.title")}</h2>
           <div className="intro-grid">
@@ -252,18 +273,7 @@ export default function Home() {
               <div className="it">{t("intro.f3t")}<Icon name="chev" small /></div>
               <p>{t("intro.f3d")}</p>
             </Link>
-            <Link href="/yijing/academy/hetu-luoshu" className="intro-card">
-              <div className="it">{t("intro.f4t")}<Icon name="chev" small /></div>
-              <p>{t("intro.f4d")}</p>
-            </Link>
           </div>
-
-          <h3 className="intro-sub">{t("intro.stepsTitle")}</h3>
-          <ol className="intro-steps">
-            <li>{t("intro.s1")}</li>
-            <li>{t("intro.s2")}</li>
-            <li>{t("intro.s3")}</li>
-          </ol>
 
           <h2 className="group-title">{t("intro.faqTitle")}</h2>
           <div className="faq">
