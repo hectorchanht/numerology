@@ -1,4 +1,5 @@
 import { fetchProviderModels } from "@/lib/models";
+import { getServerAiBindings } from "@/lib/aiBinding";
 import { listProviders } from "@numerology/ai";
 
 export const runtime = "edge";
@@ -35,7 +36,11 @@ export async function GET(req: Request): Promise<Response> {
   try {
     const key = req.headers.get("X-AI-Key")?.trim() || undefined;
     const baseUrl = url.searchParams.get("baseUrl")?.trim() || undefined;
-    const result = await fetchProviderModels(provider, { key, baseUrl });
+    const result = await fetchProviderModels(provider, {
+      key,
+      baseUrl,
+      kv: getServerAiBindings()?.kv ?? undefined,
+    });
     return Response.json(result, {
       headers: { "Cache-Control": "public, max-age=300" },
     });

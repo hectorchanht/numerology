@@ -103,3 +103,26 @@ test("models:静态回落的 :free 模型带 free:true", async () => {
   assert.ok(r.models.length > 0);
   assert.ok(r.models.every((m) => m.free === true), "openrouter 静态表应全为 :free");
 });
+
+// —— 动态下架:KV 登记的模型在 live 列表中被滤走 ——
+test("models:KV 动态登记 + hardcode seed 在 live 列表中取并集过滤", async () => {
+  const { DEAD_MODELS_KV_KEY } = await import("../test-dist/models.js").catch(() => ({}));
+  // DEAD_MODELS_KV_KEY 由 @numerology/ai 导出;经 test-dist 的 models.js 间接取不到时直接用字面 key。
+  const key = DEAD_MODELS_KV_KEY ?? "ai-dead-models:v1";
+  const kv = {
+    store: new Map([[key, JSON.stringify({ gemini: { "gemini-9.9-dead": Date.now() } })]]),
+    get: async function (k) { return this.store.get(k) ?? null; },
+  };
+  const fetchImpl = stubFetch(async () =>
+    jsonResponse(200, {
+      data: [
+        { id: "models/gemini-9.9-dead" },
+        { id: "models/gemini-2.5-flash" },
+        { id: "models/gemini-3.8-flash" },
+      ],
+    }),
+  );
+  const r = await fetchProviderModels("gemini", { fetchImpl, kv });
+  assert.equal(r.source, "live");
+  assert.deepEqual(r.models.map((m) => m.id), ["models/gemini-3.8-flash"]);
+});

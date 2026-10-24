@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { BirthInput } from "@numerology/engine";
 import { streamPost } from "@/lib/streamClient";
+import { clearModelsCache } from "@/lib/modelsCache";
 import { printReport } from "@/lib/exportPdf";
 import { aiRequestParts } from "@/lib/aiSettings";
 import { useLocale, HTML_LANG, type Locale, type TKey } from "@/lib/i18n";
@@ -209,6 +210,8 @@ export function StreamedReport({
             if (live() && local[i]!.text.trim()) onSectionDone?.(seg.key, local[i]!.text, useLens);
           })
           .catch((e: unknown) => {
+            // 模型下架 → 清模型缓存,下次打开设置时重新拉取(已滤走下架模型)。
+            if ((e as { code?: string })?.code === "MODEL_NOT_FOUND") clearModelsCache();
             local[i] = { ...local[i]!, status: "error", err: e instanceof Error ? e.message : t("report.segFailShort") };
           })
           .finally(() => {
@@ -247,6 +250,8 @@ export function StreamedReport({
       if (full.trim()) onSectionDone?.(seg.key, full, useLens);
     } catch (e: unknown) {
       if (!live()) return;
+      // 模型下架 → 清模型缓存,下次打开设置时重新拉取(已滤走下架模型)。
+      if ((e as { code?: string })?.code === "MODEL_NOT_FOUND") clearModelsCache();
       const errMsg = e instanceof Error ? e.message : t("report.segFailShort");
       setSlots((prev) => (prev ? prev.map((s, i) => (i === index ? { ...s, status: "error", err: errMsg } : s)) : prev));
     } finally {

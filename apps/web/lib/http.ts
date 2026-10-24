@@ -21,6 +21,8 @@ interface Classified {
   status: 400 | 429 | 502;
   /** 真实错误消息(不含敏感信息:key 只走请求头,从不出现在错误消息里) */
   message: string;
+  /** 机器可读错误码(目前仅模型下架);前端据此做缓存清理等动作。 */
+  code?: string;
 }
 
 /**
@@ -36,6 +38,9 @@ const VALIDATION_RE =
 /** 上游故障的消息特征 → 502(只做状态码分类,消息原样透出)。 */
 const UPSTREAM_RE =
   /rate.?limit|too many requests|quota|insufficient.*credit|429|unauthorized|authentication|invalid.*key|api.?key|401|403|timed? ?out|超时|ETIMEDOUT|ENOTFOUND|ECONNREFUSED|ECONNRESET|EAI_AGAIN|socket hang up|fetch failed|connection error|network|DNS|50[0-9]|502|503|504|internal server error|bad gateway|service unavailable|upstream|not found|no longer available/i;
+
+/** 模型本身下架的消息特征(须指向模型本身,避免 "page not found" 之类误判)。 */
+const MODEL_NOT_FOUND_RE = /model|no longer available|unknown model/i;
 
 /** 真实消息透出:超长截断(1500 字符),避免上游超大 payload 炸版面;非改写。 */
 const MAX_MESSAGE_LEN = 1500;
@@ -64,11 +69,14 @@ export function classifyError(err: unknown, stage: ErrorStage = "input"): Classi
   if (/binding 未配置/.test(raw)) return { status: 502, message: capMessage(raw) };
 
   // SDK 状态码:401/403(鉴权)/404(模型下架等)/408/429(限流)/5xx(上游) → 502,真实消息透出。
+  // 其中 404 且消息指向模型本身(非其它资源) → 附 MODEL_NOT_FOUND 码,前端据此清模型缓存。
   if (
     status !== undefined &&
     (status === 401 || status === 403 || status === 404 || status === 408 || status === 429 || status >= 500)
   ) {
-    return { status: 502, message: capMessage(raw) || "AI 服务异常,请稍后重试" };
+    const code =
+      status === 404 && MODEL_NOT_FOUND_RE.test(raw) ? "MODEL_NOT_FOUND" : undefined;
+    return { status: 502, message: capMessage(raw) || "AI 服务异常,请稍后重试", code };
   }
 
   // 无状态码但消息特征指向下游故障 → 502,真实消息透出。
@@ -82,6 +90,8 @@ export function classifyError(err: unknown, stage: ErrorStage = "input"): Classi
 
 /** 把错误转成 JSON 错误响应。fallback 用于非 Error 的极端情况。 */
 export function errorResponse(err: unknown, opts: { fallback?: string; stage?: ErrorStage } = {}): Response {
-  const { status, message } = classifyError(err, opts.stage ?? "input");
-  return Response.json({ error: message || opts.fallback || "请求失败" }, { status });
+  const { status, message, code } = classifyError(err, opts.stage ?? "input");
+  const body: { error: string; code?: string } = { error: message || opts.fallback || "请求失败" };
+  if (code) body.code = code;
+  return Response.json(body, { status });
 }

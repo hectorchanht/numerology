@@ -1,4 +1,9 @@
 import { WORKERS_AI_MODELS, WORKERS_AI_VERIFIED_AT } from "@numerology/ai";
+import {
+  deadModelIds,
+  normDeadModelId,
+  readDeadModels,
+} from "@numerology/ai";
 import { filterRetired } from "./providerMeta.js";
 
 export interface ModelEntry {
@@ -54,7 +59,13 @@ function toEntries(ids: string[]): ModelEntry[] {
  */
 export async function fetchProviderModels(
   provider: string,
-  opts: { key?: string; baseUrl?: string; fetchImpl?: FetchLike } = {},
+  opts: {
+    key?: string;
+    baseUrl?: string;
+    fetchImpl?: FetchLike;
+    /** 服务端 KV(读动态下架登记用);缺省则只滤 hardcode seed。 */
+    kv?: unknown;
+  } = {},
 ): Promise<ModelsResult> {
   const name = provider.trim().toLowerCase();
   const fetchImpl = opts.fetchImpl ?? fetch;
@@ -107,8 +118,13 @@ export async function fetchProviderModels(
       const p = raw?.pricing?.prompt;
       return p === "0" || p === 0 ? { id, free: true } : { id };
     });
-  // 下架模型直接移除(选了必 404),不让用户选到。
-  return { provider: name, source: "live", models: filterRetired(models) };
+  // 下架模型直接移除(选了必 404),不让用户选到:hardcode seed + KV 动态登记取并集。
+  // 若过滤后为空则回落原列表(避免下拉被清空,属于异常状态)。
+  const dead = opts.kv ? deadModelIds(await readDeadModels(opts.kv), name) : new Set<string>();
+  const filtered = filterRetired(models).filter(
+    (m) => !dead.has(normDeadModelId(m.id)),
+  );
+  return { provider: name, source: "live", models: filtered.length > 0 ? filtered : models };
 }
 
 /** 静态备选表(前端 24h 缓存失效/拉取失败时的回落,也供路由复用)。 */

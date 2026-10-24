@@ -17,8 +17,11 @@ export async function streamPost(
     signal: opts.signal,
   });
   if (!res.ok || !res.body) {
-    const err = (await res.json().catch(() => null)) as { error?: string } | null;
-    throw new Error(err?.error ?? `请求失败(${res.status})`);
+    const err = (await res.json().catch(() => null)) as { error?: string; code?: string } | null;
+    // code 随错误透出(如 MODEL_NOT_FOUND),调用方可据此做缓存清理等动作。
+    const e = new Error(err?.error ?? `请求失败(${res.status})`) as Error & { code?: string };
+    if (err?.code) e.code = err.code;
+    throw e;
   }
   const reader = res.body.getReader();
   const decoder = new TextDecoder();

@@ -13,42 +13,18 @@ import {
   filterProviders,
   filterModels,
   filterRetired,
+  isRecommended,
   staticModelEntries,
   type ProviderFilter,
 } from "@/lib/providerMeta";
+import { readModelsCache, writeModelsCache } from "@/lib/modelsCache";
 
 interface ModelOption {
   id: string;
   free?: boolean;
 }
 
-const MODELS_CACHE_PREFIX = "numerology-models-";
-const MODELS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-
 const FILTER_ORDER: ProviderFilter[] = ["all", "nokey", "free", "paid", "recommended"];
-
-function readModelsCache(provider: string): { models: ModelOption[]; source: string } | null {
-  try {
-    const raw = window.localStorage.getItem(MODELS_CACHE_PREFIX + provider);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as { at: number; models: ModelOption[]; source: string };
-    if (Date.now() - parsed.at > MODELS_CACHE_TTL_MS) return null;
-    return { models: parsed.models, source: parsed.source };
-  } catch {
-    return null;
-  }
-}
-
-function writeModelsCache(provider: string, models: ModelOption[], source: string): void {
-  try {
-    window.localStorage.setItem(
-      MODELS_CACHE_PREFIX + provider,
-      JSON.stringify({ at: Date.now(), models, source }),
-    );
-  } catch {
-    /* ignore */
-  }
-}
 
 export function SettingsPanel() {
   const { t } = useLocale();
@@ -62,8 +38,13 @@ export function SettingsPanel() {
   }, []);
 
   // 顶部 filter 同时是模型 filter:免费/付费作用于模型下拉;推荐只留实测可用的高性价比模型。
+  // 推荐模型置顶:长列表里好用的先看到,其余原序在后(不移除任何选项,不触发自动切换)。
   const visibleModels = useMemo(
-    () => filterModels(models, filter, value.provider),
+    () =>
+      [...filterModels(models, filter, value.provider)].sort(
+        (a, b) =>
+          Number(isRecommended(value.provider, b.id)) - Number(isRecommended(value.provider, a.id)),
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [models, filter, value.provider],
   );

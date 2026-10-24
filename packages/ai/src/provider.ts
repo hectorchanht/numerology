@@ -6,6 +6,7 @@ import {
   recordUsage,
   type BudgetKV,
 } from "./budget.js";
+import { recordDeadModel } from "./deadModels.js";
 import { WORKERS_AI_DEFAULT_MODEL } from "./workersAiModels.js";
 
 /**
@@ -695,6 +696,8 @@ export async function chatComplete(
   } catch (err) {
     // 默认模型被下架(404) → 动态回落到实时列表首个模型重试一次;
     // 显式指定的模型 404 → 直接抛真实错误(用户去设置里换)。
+    // 无论哪种,先把下架模型记入 KV:下次拉模型列表时自动滤走(动态下架)。
+    if (isModelNotFoundError(err)) await recordDeadModel(opts?.aiBinding?.kv, name, preferred);
     if (!isModelNotFoundError(err) || isModelExplicit(req.kind, opts)) throw err;
     const res = await complete(await fallbackModel(def, apiKey, err));
     return {
@@ -751,6 +754,8 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
     } catch (err) {
       // 默认模型被下架(404) → 动态回落到实时列表首个模型重试一次(懒启动内);
       // 显式指定的模型 404 → 直接抛真实错误。
+      // 无论哪种,先把下架模型记入 KV:下次拉模型列表时自动滤走(动态下架)。
+      if (isModelNotFoundError(err)) await recordDeadModel(opts?.aiBinding?.kv, name, preferred);
       if (!isModelNotFoundError(err) || explicit) throw err;
       return open(await fallbackModel(def, apiKey, err));
     }
