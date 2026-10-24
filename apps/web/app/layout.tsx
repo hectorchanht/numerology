@@ -82,6 +82,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script
+          dangerouslySetInnerHTML={{
+            __html:
+              'if("serviceWorker" in navigator && location.hostname==="numerology.dawnstudio.app"){try{navigator.serviceWorker.register("/sw.js")}catch(e){}}',
+          }}
+        />
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_JSONLD) }}
         />
