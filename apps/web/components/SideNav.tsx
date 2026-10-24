@@ -28,6 +28,20 @@ export function SideNav() {
 
   return (
     <aside className="side">
+      <div className="side-foot">
+        <button
+          type="button"
+          className="icon-btn"
+          aria-label={t("nav.settings")}
+          onClick={() => open("settings")}
+        >
+          <Icon name="gear" />
+        </button>
+        {/* 語言切換排喺主題切換之前 */}
+        <LocaleSwitch />
+        <ThemeToggle />
+      </div>
+
       <div className="side-brand">
         <img className="logo logo-dark" src="/logo.png" width={32} height={32} alt="" aria-hidden="true" />
         <img className="logo logo-light" src="/logo-light.png" width={32} height={32} alt="" aria-hidden="true" />
@@ -77,19 +91,6 @@ export function SideNav() {
         ))}
       </nav>
 
-      <div className="side-foot">
-        <button
-          type="button"
-          className="icon-btn"
-          aria-label={t("nav.settings")}
-          onClick={() => open("settings")}
-        >
-          <Icon name="gear" />
-        </button>
-        {/* 語言切換排喺主題切換之前 */}
-        <LocaleSwitch />
-        <ThemeToggle />
-      </div>
     </aside>
   );
 }
