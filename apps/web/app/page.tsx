@@ -252,6 +252,10 @@ export default function Home() {
               <div className="it">{t("intro.f3t")}<Icon name="chev" small /></div>
               <p>{t("intro.f3d")}</p>
             </Link>
+            <Link href="/yijing/academy/hetu-luoshu" className="intro-card">
+              <div className="it">{t("intro.f4t")}<Icon name="chev" small /></div>
+              <p>{t("intro.f4d")}</p>
+            </Link>
           </div>
 
           <h3 className="intro-sub">{t("intro.stepsTitle")}</h3>

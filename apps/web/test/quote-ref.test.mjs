@@ -38,12 +38,12 @@ test("引文條目:欄位齊全、id 唯一", () => {
   for (const f of fullTexts) assert.ok(f.length > 0, "fullText 不得為空");
 });
 
-test("引文條目:URL 全部是已核實的 wikisource 周易鏈接(禁憑空編造)", () => {
+test("引文條目:URL 全部是已核實的 wikisource 鏈接(禁憑空編造)", () => {
   for (const u of urls) {
     assert.match(
       u,
-      /^https:\/\/zh\.wikisource\.org\/wiki\/周易\/[^"]+$/,
-      `URL 必須是 wikisource 周易頁: ${u}`,
+      /^https:\/\/zh\.wikisource\.org\/wiki\/(周易|論語|尚書)\/[^"]+$/,
+      `URL 必須是已核實的 wikisource 周易/論語/尚書頁: ${u}`,
     );
   }
 });

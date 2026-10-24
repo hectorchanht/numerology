@@ -18,5 +18,6 @@ export const SITE_ROUTES: SiteRoute[] = [
   { path: "/yijing/academy/reading-gua", priority: 0.7 },
   { path: "/yijing/academy/asking", priority: 0.7 },
   { path: "/yijing/academy/interpreting", priority: 0.7 },
+  { path: "/yijing/academy/hetu-luoshu", priority: 0.7 },
   { path: "/poster", priority: 0.7 },
 ];
