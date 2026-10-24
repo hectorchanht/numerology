@@ -8,10 +8,12 @@ import { Icon } from "@/components/Icon";
 import {
   PROVIDER_META,
   STATIC_MODELS,
+  RECOMMENDED_MODELS,
   FILTER_LABEL_KEYS,
   COST_LABEL_KEYS,
   filterProviders,
   filterModels,
+  filterRecommended,
   staticModelEntries,
   type ProviderFilter,
 } from "@/lib/providerMeta";
@@ -55,13 +57,19 @@ export function SettingsPanel() {
   const [filter, setFilter] = useState<ProviderFilter>("all");
   const [models, setModels] = useState<ModelOption[]>([]);
   const [modelsSource, setModelsSource] = useState<string>("static");
+  const [modelFilter, setModelFilter] = useState<"all" | "recommended">("all");
 
   useEffect(() => {
     setValue(loadAi());
   }, []);
 
   // 顶部 filter 同时是模型 filter:免费/付费作用于模型下拉。
-  const visibleModels = useMemo(() => filterModels(models, filter), [models, filter]);
+  // 模型推荐 filter:只留实测可用的推荐模型。
+  const visibleModels = useMemo(() => {
+    const base = filterModels(models, filter);
+    return modelFilter === "recommended" ? filterRecommended(base, value.provider) : base;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [models, filter, modelFilter, value.provider]);
 
   // 当前选中的 model 若被 filter 滤掉(或已不在列表中) → 自动切到第一个可见。
   useEffect(() => {
@@ -244,6 +252,18 @@ export function SettingsPanel() {
               {t("settings.model")}
               <span className="sub">{sourceLabel}</span>
             </span>
+            {(RECOMMENDED_MODELS[value.provider]?.length ?? 0) > 0 ? (
+              <span className="strip" style={{ margin: "2px 0 6px" }}>
+                <button
+                  type="button"
+                  className={`chip${modelFilter === "recommended" ? " on" : ""}`}
+                  aria-pressed={modelFilter === "recommended"}
+                  onClick={() => setModelFilter(modelFilter === "recommended" ? "all" : "recommended")}
+                >
+                  ★ {t("settings.filter.recommended")}
+                </button>
+              </span>
+            ) : null}
             <select
               id="model2"
               value={value.model || visibleModels[0]!.id}

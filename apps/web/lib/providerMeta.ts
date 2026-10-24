@@ -92,6 +92,36 @@ export function staticModelEntries(ids: string[]): FreeFlaggedModel[] {
   return ids.map((id) => (id.endsWith(":free") ? { id, free: true } : { id }));
 }
 
+/**
+ * 推荐模型(2026-10-23 用 Hector 的 key 实测验证过可用):
+ * - gemini: gemini-3.8-flash(旧 2.0 已被 Google 下架)
+ * - openrouter: 三个 :free 模型(实测 200;注意免费额度是按 key 按天限的,超限会 429)
+ * - anthropic: 两个有效 id(该 key 需先充值,余额为 0)
+ * 推荐只做减法:filter 芯片「推荐」把模型下拉过滤到这个表。
+ */
+export const RECOMMENDED_MODELS: Record<string, string[]> = {
+  gemini: ["gemini-3.8-flash"],
+  openrouter: [
+    "google/gemma-4-31b-it:free",
+    "google/gemma-4-26b-a4b-it:free",
+    "nvidia/nemotron-3.5-lightning:free",
+  ],
+  anthropic: ["claude-sonnet-4-6", "claude-opus-4-8"],
+};
+
+/** 该 provider 下此模型是否在推荐表里。 */
+export function isRecommended(provider: string, id: string): boolean {
+  return (RECOMMENDED_MODELS[provider] ?? []).includes(id);
+}
+
+/** 模型列表只留推荐(结果为空时回落为全列表,保证下拉永远有可选项)。 */
+export function filterRecommended<T extends { id: string }>(models: T[], provider: string): T[] {
+  const rec = RECOMMENDED_MODELS[provider];
+  if (!rec || rec.length === 0) return models;
+  const filtered = models.filter((m) => rec.includes(m.id));
+  return filtered.length > 0 ? filtered : models;
+}
+
 /** 静态模型备选(动态拉取失败/未缓存时的回落;workers-ai 用核验表,见 models.ts)。 */
 export const STATIC_MODELS: Record<string, string[]> = {
   "workers-ai": [

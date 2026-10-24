@@ -50,3 +50,9 @@ test("i18n:report.retrySection 三語齊備", () => {
   assert.equal(STRINGS.zhs["report.retrySection"], "重试本节");
   assert.equal(STRINGS.en["report.retrySection"], "Retry this section");
 });
+
+test("i18n:settings.filter.recommended 三语齐备", () => {
+  assert.equal(STRINGS.zht["settings.filter.recommended"], "推薦");
+  assert.equal(STRINGS.zhs["settings.filter.recommended"], "推荐");
+  assert.equal(STRINGS.en["settings.filter.recommended"], "Recommended");
+});

@@ -132,3 +132,19 @@ test("staticModelEntries::free 后缀标 free:true", () => {
     { id: "glm-4-flash" },
   ]);
 });
+
+test("recommend:isRecommended 按 provider 判定", async () => {
+  const { isRecommended } = await import("../test-dist/providerMeta.js");
+  assert.equal(isRecommended("gemini", "gemini-3.8-flash"), true);
+  assert.equal(isRecommended("gemini", "gemini-2.0-flash"), false);
+  assert.equal(isRecommended("openrouter", "google/gemma-4-26b-a4b-it:free"), true);
+  assert.equal(isRecommended("workers-ai", "@cf/mistralai/mistral-small-3.1-24b-instruct"), false);
+});
+
+test("recommend:filterRecommended 只留推荐,无交集时回落全列表", async () => {
+  const { filterRecommended } = await import("../test-dist/providerMeta.js");
+  const ms = [{ id: "gemini-3.8-flash" }, { id: "gemini-2.0-flash" }, { id: "gemini-flash-latest" }];
+  assert.deepEqual(filterRecommended(ms, "gemini").map((m) => m.id), ["gemini-3.8-flash"]);
+  assert.deepEqual(filterRecommended([{ id: "xxx-unknown" }], "gemini"), [{ id: "xxx-unknown" }]);
+  assert.deepEqual(filterRecommended(ms, "workers-ai"), ms);
+});
