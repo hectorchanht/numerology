@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { YijingNav } from "@/components/YijingNav";
 import { SelectionToolbar } from "@/components/SelectionToolbar";
 import { TabBar } from "@/components/TabBar";
 import { SideNav } from "@/components/SideNav";
@@ -89,7 +88,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <SideNav />
         <div className="app">
-          <YijingNav />
           {children}
         </div>
         <TabBar />

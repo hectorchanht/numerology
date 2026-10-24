@@ -601,6 +601,28 @@ textarea.prompt:focus-visible { outline: 2px solid var(--accent); }
 .tabbar button.on { color: var(--accent); }
 .tabbar svg.i { width: 24px; height: 24px; }
 
+/* ---------- 更多 sheet(手機全站工具導航) ---------- */
+.more-wrap { position: fixed; inset: 0; z-index: 60; }
+.more-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.5); }
+.more-sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 80vh; overflow-y: auto;
+  background: var(--bg); border-top: 0.5px solid var(--sep); border-radius: 18px 18px 0 0;
+  padding: 0.4rem var(--pad) calc(var(--safe-b) + 0.9rem); animation: more-up 0.22s ease-out; }
+@keyframes more-up { from { transform: translateY(24px); opacity: 0.4; } to { transform: none; opacity: 1; } }
+.more-head { display: flex; align-items: center; justify-content: space-between;
+  font-weight: 800; font-size: 1.02rem; padding: 0.5rem 0 0.3rem; }
+.more-rows { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0.4rem 0 0.2rem; }
+.more-row { display: flex; align-items: center; gap: 8px; padding: 0.65rem 0.7rem; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 0.94rem; font-weight: 600; cursor: pointer; }
+.more-row.on { color: var(--accent); border-color: var(--accent); }
+.more-group { margin-top: 0.7rem; }
+.more-group-label { font-size: 0.78rem; font-weight: 700; color: var(--muted); margin: 0 0 0.45rem; }
+.more-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.more-item { display: flex; align-items: center; gap: 8px; padding: 0.65rem 0.7rem; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 0.94rem; font-weight: 600; text-decoration: none; }
+.more-item.on { color: var(--accent); border-color: var(--accent); }
+.more-foot { display: flex; align-items: center; gap: 10px; margin-top: 0.9rem; }
+@media (min-width: 1024px) { .more-wrap { display: none; } }
+
 /* 大手機 / 細平板(600–1023):保持單欄,加安靜邊框 */
 @media (min-width: 600px) {
   body { background: var(--desk-bg); }

@@ -7,7 +7,7 @@ import { go, useNav, type Screen } from "@/lib/nav";
 import { yjT } from "@/lib/yijingStrings";
 import { Icon } from "@/components/Icon";
 import { TAB_ITEMS } from "@/components/TabBar";
-import { SUB_GROUPS } from "@/components/YijingNav";
+import { SUB_GROUPS } from "@/lib/navGroups";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 /**
