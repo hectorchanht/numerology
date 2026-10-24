@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { type AiSettings, DEFAULT_AI, loadAi, saveAi } from "@/lib/aiSettings";
+import { type AiSettings, DEFAULT_AI, loadAi, saveAi, AI_SETTINGS_EVENT } from "@/lib/aiSettings";
 import { useLocale, LocaleSwitch, type TKey } from "@/lib/i18n";
 import { go } from "@/lib/nav";
 import { Icon } from "@/components/Icon";
@@ -32,9 +32,20 @@ export function SettingsPanel() {
   const [filter, setFilter] = useState<ProviderFilter>("all");
   const [models, setModels] = useState<ModelOption[]>([]);
   const [modelsSource, setModelsSource] = useState<string>("static");
+  /** models 呢個列表屬於邊個 provider(同 models 一齊更新,唔好分開)。 */
+  const [modelsProvider, setModelsProvider] = useState<string>("");
 
+  // SettingsPanel 成日 mount 住(切 screen 只係隱藏),經 pills 改完設定要即時跟到,
+  // 否則設定頁顯示舊值,一改嘢就會用舊值覆寫 pills 嘅改動。
   useEffect(() => {
     setValue(loadAi());
+    const refresh = () => setValue(loadAi());
+    window.addEventListener(AI_SETTINGS_EVENT, refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener(AI_SETTINGS_EVENT, refresh);
+      window.removeEventListener("storage", refresh);
+    };
   }, []);
 
   // 顶部 filter 同时是模型 filter:免费/付费作用于模型下拉;推荐只留实测可用的高性价比模型。
@@ -50,13 +61,17 @@ export function SettingsPanel() {
   );
 
   // 当前选中的 model 若被 filter 滤掉(或已不在列表中) → 自动切到第一个可见。
+  // 注意:SettingsPanel 成日 mount 住,reload 時 value 先由 DEFAULT_AI 載入真值,
+  // models 有一 render 仲係舊 provider 嘅表——唔對齊就唔好判斷,否則會誤殺
+  // 用戶啱啱經 pills 揀好嘅 model(先錯切去舊 provider 首個,再錯切去新 provider 首個)。
   useEffect(() => {
     if (value.provider === "custom" || visibleModels.length === 0) return;
+    if (modelsProvider !== value.provider) return;
     if (value.model && visibleModels.some((m) => m.id === value.model)) return;
     const first = visibleModels[0]!.id;
     if (value.model !== first) set({ model: first });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleModels, value.provider]);
+  }, [visibleModels, value.provider, modelsProvider]);
 
   // 模型列表:缓存(24h) → /api/models 动态拉取 → 静态备选。
   useEffect(() => {
@@ -67,10 +82,12 @@ export function SettingsPanel() {
       // 旧缓存可能含已下架模型,读出即过滤(下次拉取后缓存自然干净)。
       setModels(filterRetired(cached.models));
       setModelsSource(cached.source);
+      setModelsProvider(provider);
       return;
     }
     setModels(statics);
     setModelsSource("static");
+    setModelsProvider(provider);
     let cancelled = false;
     (async () => {
       try {
@@ -85,6 +102,7 @@ export function SettingsPanel() {
         setModels(data.models);
         const src = data.source === "live" ? "live" : data.source === "verified-static" ? "verified-static" : "static";
         setModelsSource(src);
+        setModelsProvider(provider);
         writeModelsCache(provider, data.models, src);
       } catch {
         /* 保持静态备选 */
