@@ -10,8 +10,8 @@ import { THEME_INIT_SCRIPT } from "@/lib/theme";
 export const metadata: Metadata = {
   metadataBase: new URL("https://numerology.dawnstudio.app"),
   title: {
-    default: "命理 · 八字紫微合參",
-    template: "%s · 命理",
+    default: "洛書命理 · 八字紫微合參",
+    template: "%s · 洛書命理",
   },
   description:
     "AI 輔助的中國命理工具:八字四柱 + 紫微斗數,動靜結合解讀人生格局與大運走向。另有易經占卦、六十四卦庫、六爻納甲與命理學院。文化與自我反思工具,非宿命預測。",
@@ -21,8 +21,8 @@ export const metadata: Metadata = {
     locale: "zh_Hant",
     alternateLocale: ["zh_Hans", "en"],
     url: "/",
-    siteName: "命理 · 八字紫微合參",
-    title: "命理 · 八字紫微合參",
+    siteName: "洛書命理 · 八字紫微合參",
+    title: "洛書命理 · 八字紫微合參",
     description:
       "同一出生時刻,排出八字同紫微兩個盤,再由 AI 合參解讀。另有易經占卦、六十四卦庫與命理學院,免費使用。",
     images: [
@@ -30,13 +30,13 @@ export const metadata: Metadata = {
         url: "/og.png",
         width: 1200,
         height: 630,
-        alt: "命理 · 八字紫微合參 — AI 輔助的中國命理工具",
+        alt: "洛書命理 · 八字紫微合參 — AI 輔助的中國命理工具",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "命理 · 八字紫微合參",
+    title: "洛書命理 · 八字紫微合參",
     description: "同一出生時刻,排出八字同紫微兩個盤,再由 AI 合參解讀。免費使用。",
     images: ["/og.png"],
   },
@@ -46,14 +46,15 @@ export const metadata: Metadata = {
     icon: "/favicon.png",
     apple: "/apple-touch-icon.png",
   },
+  manifest: "/manifest.webmanifest",
 };
 
 // SEO:結構化資料(WebSite + 出品方),幫搜尋引擎理解個站。
 const SITE_JSONLD = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "命理 · 八字紫微合參",
-  alternateName: "Numerology · BaZi & Zi Wei",
+  name: "洛書命理 · 八字紫微合參",
+  alternateName: "Luo Shu · BaZi & Zi Wei",
   url: "https://numerology.dawnstudio.app",
   inLanguage: ["zh-Hant", "zh-Hans", "en"],
   description:

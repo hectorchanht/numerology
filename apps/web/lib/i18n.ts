@@ -16,7 +16,7 @@ const LS_KEY = "numerology-locale";
  */
 const zht = {
   "app.seal": "命",
-  "app.title": "命 理",
+  "app.title": "洛 書 命 理",
   "app.subtitle": "八 字 · 紫 微 · 合 參",
   "app.disclaimer1": "本工具為傳統文化與自我反思用途,所有結論均為傾向性參考,非宿命預測,決策權始終在你自己手中。",
   "app.disclaimer2": "涉及健康請以專業醫療意見為準;涉及財務請自行評估,不構成投資建議。",
@@ -386,7 +386,7 @@ export type TKey = keyof typeof zht;
 /** 简体中文:沿用原有文案。 */
 const zhs: Record<TKey, string> = {
   "app.seal": "命",
-  "app.title": "命 理",
+  "app.title": "洛 书 命 理",
   "app.subtitle": "八 字 · 紫 微 · 合 参",
   "app.disclaimer1": "本工具为传统文化与自我反思用途,所有结论均为倾向性参考,非宿命预测,决策权始终在你自己手中。",
   "app.disclaimer2": "涉及健康请以专业医疗意见为准;涉及财务请自行评估,不构成投资建议。",
@@ -754,7 +754,7 @@ const zhs: Record<TKey, string> = {
 /** 英文:自然英文翻译。 */
 const en: Record<TKey, string> = {
   "app.seal": "命",
-  "app.title": "Ming Li",
+  "app.title": "Luo Shu",
   "app.subtitle": "BaZi · Zi Wei · Combined",
   "app.disclaimer1": "This tool is for traditional-culture learning and self-reflection. All readings are tendencies for reference, not fate predictions — the decisions are always yours.",
   "app.disclaimer2": "For health matters, consult professionals; for finances, assess yourself — nothing here is investment advice.",

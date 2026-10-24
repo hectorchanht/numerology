@@ -202,7 +202,7 @@ export default function Home() {
     <>
       {/* ============ 起盤 ============ */}
       <section {...show("home")} aria-label={t("tab.home")}>
-        <ScreenNav eyebrow={t("app.subtitle")} />
+        <ScreenNav />
         <div className="split split-home">
           <div className="split-a">
             <h1 className="large">{t("form.title")}</h1>
