@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Fragment, useState } from "react";
-import { ACADEMY_LESSONS, ACADEMY_QUOTE_REFS, getLesson } from "../lessons";
+import { ACADEMY_LESSONS, ACADEMY_QUOTE_REFS, getLesson, getTrack } from "../lessons";
 import { Quiz } from "../Quiz";
 import { PalmDiagram } from "../PalmDiagram";
 import { BaguaFamilyGrid } from "../BaguaFamilyGrid";
@@ -37,6 +37,7 @@ export function LessonView({ lessonId }: { lessonId: string }) {
     <>
       <div className="masthead" style={{ paddingTop: "1.2rem" }}>
         <div className="sub">
+          {zT(`${getTrack(lesson.track).no} · ${getTrack(lesson.track).title}`)} ·{" "}
           {yjT("academy.lessonNo", loc).replace("{n}", String(lesson.index))}
         </div>
         <h1 style={{ letterSpacing: "0.2em" }}>{zT(lesson.title)}</h1>
