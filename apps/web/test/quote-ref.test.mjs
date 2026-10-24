@@ -42,8 +42,8 @@ test("引文條目:URL 全部是已核實的 wikisource 鏈接(禁憑空編造)"
   for (const u of urls) {
     assert.match(
       u,
-      /^https:\/\/zh\.wikisource\.org\/wiki\/(周易|論語|尚書)\/[^"]+$/,
-      `URL 必須是已核實的 wikisource 周易/論語/尚書頁: ${u}`,
+      /^https:\/\/zh\.wikisource\.org\/wiki\/(周易|論語|尚書|荀子)\/[^"]+$/,
+      `URL 必須是已核實的 wikisource 周易/論語/尚書/荀子頁: ${u}`,
     );
   }
 });
