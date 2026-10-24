@@ -219,6 +219,41 @@ export function StreamedReport({
     if (live()) generating.current = false;
   };
 
+  /**
+   * 單節重試:只重跑指定章節,其他章節原樣保留。
+   * 用每節獨立嘅 retry id 做作廢判斷,唔干擾整輪 generate 嘅 run id,
+   * 所以可以喺其他節仲串流緊嗰陣重試(亦支援多節同時重試)。
+   * 命盤一換(run.current 變)就作廢,唔會寫落新命盤。
+   */
+  const retryIds = useRef(new Map<number, number>());
+  const retrySection = async (index: number) => {
+    const seg = segments[index];
+    if (!seg || !slots) return;
+    const useLens = shownLens ?? lens;
+    const baseRun = run.current;
+    const myId = (retryIds.current.get(index) ?? 0) + 1;
+    retryIds.current.set(index, myId);
+    const live = () => retryIds.current.get(index) === myId && run.current === baseRun;
+    setSlots((prev) => (prev ? prev.map((s, i) => (i === index ? { text: "", status: "streaming", err: "" } : s)) : prev));
+    try {
+      let full = "";
+      await streamPost(endpoint, postBody({ section: seg.key, lens: useLens }, locale), (text) => {
+        full = text;
+        if (!live()) return;
+        setSlots((prev) => (prev ? prev.map((s, i) => (i === index ? { ...s, text } : s)) : prev));
+      });
+      if (!live()) return;
+      setSlots((prev) => (prev ? prev.map((s, i) => (i === index ? { ...s, status: "done" } : s)) : prev));
+      if (full.trim()) onSectionDone?.(seg.key, full, useLens);
+    } catch (e: unknown) {
+      if (!live()) return;
+      const errMsg = e instanceof Error ? e.message : t("report.segFailShort");
+      setSlots((prev) => (prev ? prev.map((s, i) => (i === index ? { ...s, status: "error", err: errMsg } : s)) : prev));
+    } finally {
+      if (retryIds.current.get(index) === myId) retryIds.current.delete(index);
+    }
+  };
+
   const exportPdf = () => {
     const html = secRef.current?.innerHTML;
     if (!html) return;
@@ -407,7 +442,13 @@ export function StreamedReport({
                           <div className="skel" /><div className="skel w80" /><div className="skel w60" />
                         </div>
                       ) : s.status === "error" ? (
-                        <p className="notice">{t("report.segFail", { err: s.err })}</p>
+                        <div className="sec-error">
+                          <p className="notice">{t("report.segFail", { err: s.err })}</p>
+                          <button type="button" className="btn secondary small" onClick={() => retrySection(i)}>
+                            <Icon name="refresh" />
+                            {t("report.retrySection")}
+                          </button>
+                        </div>
                       ) : (
                         <p className="note">{t("report.segEmpty")}</p>
                       )}

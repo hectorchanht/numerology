@@ -44,3 +44,9 @@ test("i18n:setLocale 无浏览器环境不抛错", () => {
   assert.doesNotThrow(() => setLocale("en"));
   setLocale("zht");
 });
+
+test("i18n:report.retrySection 三語齊備", () => {
+  assert.equal(STRINGS.zht["report.retrySection"], "重試本節");
+  assert.equal(STRINGS.zhs["report.retrySection"], "重试本节");
+  assert.equal(STRINGS.en["report.retrySection"], "Retry this section");
+});
