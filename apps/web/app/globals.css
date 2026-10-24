@@ -282,6 +282,18 @@ label.row { cursor: pointer; }
 .ai-pills .pill.model { color: var(--accent); border-color: var(--accent-line); background: var(--accent-soft); }
 .ai-pills .pill.ok { color: var(--ok); border-color: rgba(48, 209, 88, 0.5); background: var(--ok-soft); }
 .ai-pills .pill.warn { color: #ff8a80; border-color: rgba(255, 138, 128, 0.5); background: rgba(255, 138, 128, 0.12); }
+/* pills 係按鈕(撳開 picker):hover 微亮提示可撳 */
+.ai-pills button.pill:hover { filter: brightness(1.2); }
+/* pill picker 內容(用 FloatingCard 定位,點別處 / Escape 即關) */
+.ai-picker { display: flex; flex-direction: column; gap: 2px; }
+.ai-picker .hd { font-size: 11px; font-weight: 600; color: var(--label-2); padding: 2px 4px 6px; }
+.ai-picker .opt { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 6px;
+  border-radius: 8px; color: var(--label); font-size: 13px; text-align: left; }
+.ai-picker .opt:hover { background: var(--fill); }
+.ai-picker .opt.on { color: var(--accent); font-weight: 600; }
+.ai-picker .opt .mk { margin-left: auto; }
+.ai-picker input[type="text"] { width: 100%; background: var(--card); border: 1px solid var(--sep);
+  border-radius: 8px; padding: 8px 10px; color: var(--label); font-size: 13px; }
 
 /* 首頁 hero:河圖洛書特色卡(九宮格視覺,桌面左欄唔留白) */
 .hero-hetu { display: flex; gap: 14px; align-items: center; margin-top: 20px;
