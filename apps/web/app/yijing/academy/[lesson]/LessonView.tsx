@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { ACADEMY_LESSONS, ACADEMY_QUOTE_REFS, getLesson } from "../lessons";
 import { Quiz } from "../Quiz";
+import { PalmDiagram } from "../PalmDiagram";
 import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { withTermHighlights } from "@/lib/highlightTerms";
@@ -43,14 +44,17 @@ export function LessonView({ lessonId }: { lessonId: string }) {
 
       <div className="card" key={refresh}>
         {lesson.sections.map((s, si) => (
-          <section key={si} style={{ marginBottom: si < lesson.sections.length - 1 ? "1.4rem" : 0 }}>
-            <h2 className="section-title">{zT(s.heading)}</h2>
-            {s.body.map((p, pi) => (
-              <p key={pi} style={{ lineHeight: 1.9, marginBottom: "0.8rem" }}>
-                {withTermHighlights(withQuoteRefs(p, ACADEMY_QUOTE_REFS), zT)}
-              </p>
-            ))}
-          </section>
+          <Fragment key={si}>
+            <section style={{ marginBottom: si < lesson.sections.length - 1 ? "1.4rem" : 0 }}>
+              <h2 className="section-title">{zT(s.heading)}</h2>
+              {s.body.map((p, pi) => (
+                <p key={pi} style={{ lineHeight: 1.9, marginBottom: "0.8rem" }}>
+                  {withTermHighlights(withQuoteRefs(p, ACADEMY_QUOTE_REFS), zT)}
+                </p>
+              ))}
+            </section>
+            {lesson.widget === "palm" && lesson.widgetAfter === si && <PalmDiagram />}
+          </Fragment>
         ))}
       </div>
 
