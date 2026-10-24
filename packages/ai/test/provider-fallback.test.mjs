@@ -126,3 +126,48 @@ test("provider:流式默认模型 404 → 回落后续流正常", async () => {
     server.close();
   }
 });
+
+// —— Gemini SSE 挂起 → chatStream 改走非流式(2026-10-23 实测 Google 兼容层 stream:true 60s 无首字节)。
+test("provider:gemini chatStream 不用 SSE,直接非流式取全文", async () => {
+  const seen = { stream: 0, nonStream: 0 };
+  const server = http.createServer((req, res) => {
+    let body = "";
+    req.on("data", (c) => (body += c));
+    req.on("end", () => {
+      const parsed = JSON.parse(body || "{}");
+      if (parsed.stream) {
+        seen.stream++;
+        // 模拟挂起的 SSE:直接 500,若代码走了流式就会失败
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: { message: "hung" } }));
+        return;
+      }
+      seen.nonStream++;
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          choices: [{ message: { content: "GEMINI_OK" } }],
+          usage: { prompt_tokens: 1, completion_tokens: 1 },
+        }),
+      );
+    });
+  });
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  try {
+    const tag = `gemini-${server.address().port}`;
+    const { chatStream } = await import(`../dist/provider.js?${tag}`);
+    const stream = chatStream(
+      { kind: "chat", maxTokens: 50, system: sys, messages: msgs },
+      { provider: "gemini", apiKey: "test-key", baseURL: `http://127.0.0.1:${server.address().port}` },
+    );
+    let text = "";
+    stream.on("text", (d) => (text += d));
+    const final = await stream.finalMessage();
+    assert.equal(final.text, "GEMINI_OK");
+    assert.equal(text, "GEMINI_OK");
+    assert.equal(seen.stream, 0);
+    assert.equal(seen.nonStream, 1);
+  } finally {
+    server.close();
+  }
+});

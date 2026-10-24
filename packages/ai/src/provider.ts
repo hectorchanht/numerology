@@ -417,6 +417,44 @@ class OpenAITextStream implements TextStream {
   }
 }
 
+/**
+ * 非流式补全包成 TextStream(给 SSE 挂起的 provider 用,如 Gemini OpenAI 兼容层)。
+ * 懒启动:首次 finalMessage() 才真正请求;全文一次性 emit,接口与流式一致。
+ */
+class CompleteTextStream implements TextStream {
+  private textListeners: ((d: string) => void)[] = [];
+  private errorListeners: ((e: unknown) => void)[] = [];
+  private done: Promise<{ text: string }> | null = null;
+
+  constructor(private readonly complete: () => Promise<string>) {}
+
+  on(event: "text" | "error", listener: (arg: never) => void): this {
+    if (event === "text") this.textListeners.push(listener as (d: string) => void);
+    else this.errorListeners.push(listener as (e: unknown) => void);
+    return this;
+  }
+
+  finalMessage(): Promise<{ text: string }> {
+    if (!this.done) this.done = this.run();
+    return this.done;
+  }
+
+  private async run(): Promise<{ text: string }> {
+    try {
+      const text = await this.complete();
+      for (const l of this.textListeners) l(text);
+      return { text };
+    } catch (err) {
+      for (const l of this.errorListeners) l(err);
+      throw err;
+    }
+  }
+
+  abort(): void {
+    // 非流式请求无可中断的流,best-effort:已发出的请求完成后会被忽略。
+  }
+}
+
 // ── Workers AI(binding)适配 ───────────────────────────────────────────────
 
 /**
@@ -692,6 +730,11 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
       system: toAnthropicSystem(system),
       messages: req.messages.map((m) => ({ role: m.role, content: m.content })),
     }) as unknown as TextStream;
+  }
+  if (name === "gemini") {
+    // Gemini OpenAI 兼容层的 SSE 流式会挂起(2026-10-23 实测:60s 无首字节,三次复现;
+    // 非流式同一 endpoint 同一 key 正常 200)。改走非流式再包成 TextStream,文本一次性 emit。
+    return new CompleteTextStream(async () => (await chatComplete(req, opts)).text);
   }
   const client = makeOpenAI(apiKey, def.baseURL);
   const messages = toOpenAIMessages(system, req.messages);
