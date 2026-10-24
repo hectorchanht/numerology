@@ -67,6 +67,8 @@ export async function fetchProviderModels(
     fetchImpl?: FetchLike;
     /** 服务端 KV(读动态下架登记用);缺省则只滤 hardcode seed。 */
     kv?: unknown;
+    /** 服务端注入的额外请求头(如 mac-llm 的 Access service token)。 */
+    accessHeaders?: Record<string, string>;
   } = {},
 ): Promise<ModelsResult> {
   const name = provider.trim().toLowerCase();
@@ -92,6 +94,7 @@ export async function fetchProviderModels(
 
   const headers: Record<string, string> = {};
   if (opts.key?.trim()) headers.Authorization = `Bearer ${opts.key.trim()}`;
+  if (opts.accessHeaders) Object.assign(headers, opts.accessHeaders);
   let res: Response;
   try {
     res = await fetchImpl(`${baseURL}/models`, { headers });

@@ -1,5 +1,5 @@
 import { fetchProviderModels } from "@/lib/models";
-import { getServerAiBindings } from "@/lib/aiBinding";
+import { getServerAiBindings, getMacLlmAccessHeaders } from "@/lib/aiBinding";
 import { listProviders } from "@numerology/ai";
 
 export const runtime = "edge";
@@ -40,6 +40,7 @@ export async function GET(req: Request): Promise<Response> {
       key,
       baseUrl,
       kv: getServerAiBindings()?.kv ?? undefined,
+      accessHeaders: provider === "mac-llm" ? getMacLlmAccessHeaders() : undefined,
     });
     return Response.json(result, {
       headers: { "Cache-Control": "public, max-age=300" },

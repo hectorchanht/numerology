@@ -126,3 +126,19 @@ test("models:KV 动态登记 + hardcode seed 在 live 列表中取并集过滤",
   assert.equal(r.source, "live");
   assert.deepEqual(r.models.map((m) => m.id), ["models/gemini-3.8-flash"]);
 });
+
+// —— accessHeaders 合并进模型列表请求头 ——
+test("models:accessHeaders 合并进 /models 请求头", async () => {
+  let gotHeaders = null;
+  const fetchImpl = stubFetch(async (url, init) => {
+    gotHeaders = init?.headers ?? {};
+    return jsonResponse(200, { data: [{ id: "m1" }] });
+  });
+  const r = await fetchProviderModels("mac-llm", {
+    fetchImpl,
+    accessHeaders: { "CF-Access-Client-Id": "id-x", "CF-Access-Client-Secret": "sec-x" },
+  });
+  assert.equal(r.source, "live");
+  assert.equal(gotHeaders["CF-Access-Client-Id"], "id-x");
+  assert.equal(gotHeaders["CF-Access-Client-Secret"], "sec-x");
+});

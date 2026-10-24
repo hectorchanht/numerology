@@ -62,6 +62,12 @@ export interface ProviderOptions {
    */
   aiBinding?: { ai?: unknown; kv?: unknown };
   /**
+   * 服务端注入的额外请求头(仅服务端设置,绝不来自客户端请求体):
+   * 目前唯一用途是 mac-llm 的 Cloudflare Access service token
+   * (CF-Access-Client-Id/Secret),由 resolveServerAi 从 Pages env 注入。
+   */
+  extraHeaders?: Record<string, string>;
+  /**
    * 用户自定义的 AI 人设 / 系统提示(可空)。若非空,追加为 system 的**最后**一块
    * (在 locale 语言指令之后),优先级最高,用户可覆盖默认人设。
    */
@@ -317,8 +323,22 @@ const TIMEOUT = 15 * 60 * 1000;
 function makeAnthropic(apiKey: string): Anthropic {
   return new Anthropic({ apiKey, timeout: TIMEOUT, maxRetries: 2 });
 }
-function makeOpenAI(apiKey: string, baseURL?: string): OpenAI {
-  return new OpenAI({ apiKey, baseURL, timeout: TIMEOUT, maxRetries: 2 });
+function makeOpenAI(apiKey: string, baseURL?: string, defaultHeaders?: Record<string, string>): OpenAI {
+  return new OpenAI({ apiKey, baseURL, timeout: TIMEOUT, maxRetries: 2, defaultHeaders });
+}
+
+/**
+ * mac-llm 的 Cloudflare Access service token headers。
+ * 优先用 opts.extraHeaders(web 侧 resolveServerAi 从 Pages env 注入,生产环境可靠路径);
+ * 其次读进程 env(CLI/本地开发用)。其它 provider 一律不带。
+ */
+function accessHeadersFor(name: string, opts?: ProviderOptions): Record<string, string> | undefined {
+  if (name !== "mac-llm") return undefined;
+  if (opts?.extraHeaders && Object.keys(opts.extraHeaders).length > 0) return opts.extraHeaders;
+  const id = process.env.AI_MAC_LLM_ACCESS_CLIENT_ID;
+  const secret = process.env.AI_MAC_LLM_ACCESS_CLIENT_SECRET;
+  if (id && secret) return { "CF-Access-Client-Id": id, "CF-Access-Client-Secret": secret };
+  return undefined;
 }
 
 // ── Anthropic 适配 ────────────────────────────────────────────────────────
@@ -700,7 +720,7 @@ export async function chatComplete(
       .join("");
     return { text, usage: fromAnthropicUsage(res.usage) };
   }
-  const client = makeOpenAI(apiKey, def.baseURL);
+  const client = makeOpenAI(apiKey, def.baseURL, accessHeadersFor(name, opts));
   const messages = toOpenAIMessages(system, req.messages);
   const preferred = resolvePreferredModel(def, req.kind, opts);
   const complete = (model: string) =>
@@ -763,7 +783,7 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
     // 非流式同一 endpoint 同一 key 正常 200)。改走非流式再包成 TextStream,文本一次性 emit。
     return new CompleteTextStream(async () => (await chatComplete(req, opts)).text);
   }
-  const client = makeOpenAI(apiKey, def.baseURL);
+  const client = makeOpenAI(apiKey, def.baseURL, accessHeadersFor(name, opts));
   const messages = toOpenAIMessages(system, req.messages);
   const preferred = resolvePreferredModel(def, req.kind, opts);
   const explicit = isModelExplicit(req.kind, opts);

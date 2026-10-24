@@ -89,3 +89,43 @@ test("provider:mac-llm 请求带 reasoning_effort none(关思考),其它 provide
   assert.equal(seen[0].reasoning_effort, "none");
   assert.equal("reasoning_effort" in seen[1], false);
 });
+
+test("provider:mac-llm 带 Access headers(opts 优先,env 兜底),其它 provider 不带", async () => {
+  const { chatComplete } = await import("../dist/provider.js");
+  const http = await import("node:http");
+  const seen = [];
+  const server = http.createServer((req, res) => {
+    seen.push({ ...req.headers });
+    let body = "";
+    req.on("data", (c) => (body += c));
+    req.on("end", () => {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ choices: [{ message: { content: "ok" } }], usage: {} }));
+    });
+  });
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const baseURL = `http://127.0.0.1:${server.address().port}`;
+  const req = { kind: "chat", maxTokens: 10, system: [], messages: [{ role: "user", content: "hi" }] };
+  try {
+    // opts.extraHeaders 优先。
+    await chatComplete(req, {
+      provider: "mac-llm", model: "qwen3:8b", baseURL,
+      extraHeaders: { "CF-Access-Client-Id": "id-opts", "CF-Access-Client-Secret": "sec-opts" },
+    });
+    // env 兜底。
+    process.env.AI_MAC_LLM_ACCESS_CLIENT_ID = "id-env";
+    process.env.AI_MAC_LLM_ACCESS_CLIENT_SECRET = "sec-env";
+    await chatComplete(req, { provider: "mac-llm", model: "qwen3:8b", baseURL });
+    // 其它 provider 不带。
+    await chatComplete(req, { provider: "openrouter", apiKey: "t", model: "x", baseURL });
+  } finally {
+    delete process.env.AI_MAC_LLM_ACCESS_CLIENT_ID;
+    delete process.env.AI_MAC_LLM_ACCESS_CLIENT_SECRET;
+    server.close();
+  }
+  assert.equal(seen[0]["cf-access-client-id"], "id-opts");
+  assert.equal(seen[0]["cf-access-client-secret"], "sec-opts");
+  assert.equal(seen[1]["cf-access-client-id"], "id-env");
+  assert.equal(seen[1]["cf-access-client-secret"], "sec-env");
+  assert.equal("cf-access-client-id" in seen[2], false);
+});
