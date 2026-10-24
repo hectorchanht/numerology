@@ -27,7 +27,8 @@ export function getServerAiBindings(): ServerAiBindings | null {
 
 /**
  * Mac LLM 的 Cloudflare Access service token headers(仅服务端从 Pages env 读)。
- * 非 Pages 环境(getRequestContext 抛错)或未配置时返回 undefined(保持旧行为)。
+ * 主路径:getRequestContext().env;兜底:部分 edge runtime 同步进 globalThis.process.env。
+ * 非 Pages 环境或未配置时返回 undefined(保持旧行为)。
  * secret 绝不进日志、不进响应,只随服务端请求发往 ollama.hectorchan.com。
  */
 export function getMacLlmAccessHeaders(): Record<string, string> | undefined {
@@ -39,10 +40,18 @@ export function getMacLlmAccessHeaders(): Record<string, string> | undefined {
     if (typeof id === "string" && id && typeof secret === "string" && secret) {
       return { "CF-Access-Client-Id": id, "CF-Access-Client-Secret": secret };
     }
-    return undefined;
   } catch {
-    return undefined;
+    // fall through to process.env fallback
   }
+  try {
+    const pe = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env;
+    const id = pe?.AI_MAC_LLM_ACCESS_CLIENT_ID;
+    const secret = pe?.AI_MAC_LLM_ACCESS_CLIENT_SECRET;
+    if (id && secret) return { "CF-Access-Client-Id": id, "CF-Access-Client-Secret": secret };
+  } catch {
+    // ignore
+  }
+  return undefined;
 }
 
 /**
