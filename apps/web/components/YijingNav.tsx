@@ -30,6 +30,7 @@ export const SUB_GROUPS: SubGroup[] = [
       { href: "/yijing/meihua", id: "nav.meihua", icon: "hourglass" },
       { href: "/yijing/liuyao", id: "nav.liuyao", icon: "grid" },
       { href: "/qimen", id: "nav.qimen", icon: "compass" },
+      { href: "/yijing/history", id: "nav.yijingHistory", icon: "rewind" },
     ],
   },
   {
@@ -51,10 +52,7 @@ export const SUB_GROUPS: SubGroup[] = [
   },
   {
     labelId: null,
-    links: [
-      { href: "/yijing/history", id: "nav.yijingHistory", icon: "rewind" },
-      { href: "/poster", id: "nav.poster", icon: "image" },
-    ],
+    links: [{ href: "/poster", id: "nav.poster", icon: "image" }],
   },
 ];
 
