@@ -8,6 +8,8 @@ import { PalmDiagram } from "../PalmDiagram";
 import { BaguaFamilyGrid } from "../BaguaFamilyGrid";
 import { JiugongMnemonic } from "../JiugongMnemonic";
 import { BaxingPan } from "../BaxingPan";
+import { ShoujiBaxing } from "../ShoujiBaxing";
+import { AbcdeSteps } from "../AbcdeSteps";
 import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { withTermHighlights } from "@/lib/highlightTerms";
@@ -61,6 +63,8 @@ export function LessonView({ lessonId }: { lessonId: string }) {
             {lesson.widget === "bagua" && lesson.widgetAfter === si && <BaguaFamilyGrid />}
             {lesson.widget === "jiugong" && lesson.widgetAfter === si && <JiugongMnemonic />}
             {lesson.widget === "baxing" && lesson.widgetAfter === si && <BaxingPan />}
+            {lesson.widget === "shouji" && lesson.widgetAfter === si && <ShoujiBaxing />}
+            {lesson.widget === "abcde" && lesson.widgetAfter === si && <AbcdeSteps />}
           </Fragment>
         ))}
       </div>

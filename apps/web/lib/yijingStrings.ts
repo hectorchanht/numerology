@@ -73,9 +73,9 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "academy.title": S("易經學院", "易经学院", "Yi Jing Academy"),
   "academy.sub": S("從零學懂易經 · 四課入門", "从零学懂易经 · 四课入门", "Learn the Yi Jing from zero · 4 lessons"),
   "academy.intro": S(
-    "五十五課分六卷:由河圖洛書與易學源流出發,先立根基,次學占卦實務,再入風水、相法、姓名三門應用。全部以正式文字講解,每課附自我檢測,循序漸進,由初學走向精通。",
-    "五十五课分六卷:由河图洛书与易学源流出发,先立根基,次学占卦实务,再入风水、相法、姓名三门应用。全部以正式文字讲解,每课附自我检测,循序渐进,由初学走向精通。",
-    "Fifty-five lessons in six volumes: from the Hetu and Luoshu at the source, through foundations and divination practice, to feng shui, physiognomy and name studies. Formal written guides with quizzes — from beginner to practitioner.",
+    "七十八課分九卷:由河圖洛書與易學源流立根基,次學占卦實務,再入風水、相法、姓名、生活應用與心理心法,末卷道醫養生只講原理。全部以正式文字講解,每課附自我檢測,循序漸進,由初學走向精通。",
+    "七十八课分九卷:由河图洛书与易学源流立根基,次学占卦实务,再入风水、相法、姓名、生活应用与心理心法,末卷道医养生只讲原理。全部以正式文字讲解,每课附自我检测,循序渐进,由初学走向精通。",
+    "Seventy-eight lessons in nine volumes: from the Hetu and Luoshu at the source, through foundations and divination practice, to feng shui, physiognomy, name studies, everyday applications and the psychology of practice — closing with traditional health frameworks, principles only. Formal written guides with quizzes — from beginner to practitioner.",
   ),
   "academy.progress": S("已完成 {d} / {t} 課", "已完成 {d} / {t} 课", "{d} of {t} lessons done"),
   "academy.minutes": S("約 {n} 分鐘", "约 {n} 分钟", "~{n} min"),
