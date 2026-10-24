@@ -47,3 +47,26 @@ test("aiNote:pollinations 免 key → 免費", () => {
   const s = { ...base, provider: "pollinations" };
   assert.equal(aiNoteText(s, L, "Pollinations"), "Pollinations（預設） · 免費");
 });
+
+test("aiNoteParts:拆出 provider/model/key 三 pill", async () => {
+  const { aiNoteParts } = await import("../test-dist/aiNote.js");
+  const s = { provider: "openrouter", keys: { openrouter: "sk-xxx" }, model: "google/gemma-4-26b-a4b-it:free", baseURL: "", systemPrompt: "" };
+  assert.deepEqual(aiNoteParts(s, L, "OpenRouter"), {
+    provider: "OpenRouter",
+    model: "gemma-4-26b-a4b-it:free",
+    key: "你的 key",
+    keyTone: "ok",
+  });
+});
+
+test("aiNoteParts:未填 key → warn;免 key → dim", async () => {
+  const { aiNoteParts } = await import("../test-dist/aiNote.js");
+  const base2 = { provider: "workers-ai", keys: {}, model: "", baseURL: "", systemPrompt: "" };
+  const noKey = aiNoteParts({ ...base2, provider: "gemini", model: "gemini-3.8-flash" }, L, "Gemini");
+  assert.equal(noKey.key, "未填 key");
+  assert.equal(noKey.keyTone, "warn");
+  const siteFree = aiNoteParts(base2, L, "Workers AI");
+  assert.equal(siteFree.key, "本站免費 AI（有限額）");
+  assert.equal(siteFree.keyTone, "dim");
+  assert.equal(siteFree.model, "Workers AI（預設）");
+});

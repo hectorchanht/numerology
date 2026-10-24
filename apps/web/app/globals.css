@@ -271,6 +271,14 @@ label.row { cursor: pointer; }
 .faq summary::-webkit-details-marker { display: none; }
 .faq details p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.7; color: var(--label-2); }
 
+/* AI 狀態 pills:provider / model / key 來源(取代舊嘅 dimmed 註腳文字) */
+.ai-pills { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0.5rem 0 0; }
+.ai-pills .pill { font-size: 12px; line-height: 1; padding: 7px 11px; border-radius: 999px;
+  border: 1px solid var(--sep); color: var(--label-2); background: var(--card-2); white-space: nowrap; }
+.ai-pills .pill.model { color: var(--accent); border-color: var(--accent-line); background: var(--accent-soft); }
+.ai-pills .pill.ok { color: var(--ok); border-color: rgba(48, 209, 88, 0.5); background: var(--ok-soft); }
+.ai-pills .pill.warn { color: #ff8a80; border-color: rgba(255, 138, 128, 0.5); background: rgba(255, 138, 128, 0.12); }
+
 /* 首頁 hero:河圖洛書特色卡(九宮格視覺,桌面左欄唔留白) */
 .hero-hetu { display: flex; gap: 14px; align-items: center; margin-top: 20px;
   background: linear-gradient(135deg, var(--accent-soft), transparent 75%), var(--card);

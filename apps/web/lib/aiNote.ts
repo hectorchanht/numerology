@@ -34,17 +34,40 @@ export interface AiNoteLabels {
  *   workers-ai(本站) → siteFree;其他免 key → free。
  */
 export function aiNoteText(s: AiSettings, labels: AiNoteLabels, providerLabel: string): string {
+  const p = aiNoteParts(s, labels, providerLabel);
+  return `${p.model} · ${p.key}`;
+}
+
+/** key 來源 pill 色調:ok=用緊你的 key,warn=要 key 但未填,dim=免 key/本站免費。 */
+export type KeyTone = "ok" | "warn" | "dim";
+
+export interface AiNoteParts {
+  provider: string;
+  model: string;
+  key: string;
+  keyTone: KeyTone;
+}
+
+/** 拆出 provider / model / key 三個 pill 嘅內容(純函數,方便測試)。 */
+export function aiNoteParts(s: AiSettings, labels: AiNoteLabels, providerLabel: string): AiNoteParts {
   const model = s.model.trim();
   const meta = PROVIDER_META.find((p) => p.name === s.provider);
   const keyed = currentKey(s) !== "";
   const modelPart = model ? shortModelName(model) : `${providerLabel}${labels.defaultSuffix}`;
-  let sourcePart: string;
+  let keyPart: string;
+  let keyTone: KeyTone;
   if (keyed) {
-    sourcePart = labels.yourKey;
+    keyPart = labels.yourKey;
+    keyTone = "ok";
   } else if (meta?.needsKey) {
-    sourcePart = labels.noKey;
+    keyPart = labels.noKey;
+    keyTone = "warn";
+  } else if (s.provider === "workers-ai") {
+    keyPart = labels.siteFree;
+    keyTone = "dim";
   } else {
-    sourcePart = s.provider === "workers-ai" ? labels.siteFree : labels.free;
+    keyPart = labels.free;
+    keyTone = "dim";
   }
-  return `${modelPart} · ${sourcePart}`;
+  return { provider: providerLabel, model: modelPart, key: keyPart, keyTone };
 }

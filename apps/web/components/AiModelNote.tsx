@@ -4,11 +4,11 @@ import { useEffect, useState, type CSSProperties } from "react";
 import { useLocale } from "@/lib/i18n";
 import { loadAi, AI_SETTINGS_EVENT, type AiSettings } from "@/lib/aiSettings";
 import { PROVIDER_META } from "@/lib/providerMeta";
-import { aiNoteText } from "@/lib/aiNote";
+import { aiNoteParts, shortModelName } from "@/lib/aiNote";
 
 /**
- * AI 按鈕旁邊嘅 dimmed 註腳:而家用緊邊個 model + key 狀態。
- * 例如:`mistral-small-3.1-24b · 本站免費 AI（有限額）` / `gpt-4o-mini · 你的 key`。
+ * AI 按鈕旁邊嘅狀態 pills:provider / model / key 來源。
+ * 例如:[OpenRouter] [gemma-4-26b-a4b-it:free] [你的 key]。
  * Settings 改完會經 ai-settings-changed 事件即時更新,唔使 refresh。
  */
 export function AiModelNote({ style }: { style?: CSSProperties }) {
@@ -27,7 +27,7 @@ export function AiModelNote({ style }: { style?: CSSProperties }) {
 
   const meta = PROVIDER_META.find((p) => p.name === s.provider);
   const providerLabel = meta ? t(meta.shortKey) : s.provider;
-  const text = aiNoteText(
+  const parts = aiNoteParts(
     s,
     {
       siteFree: t("aiNote.siteFree"),
@@ -38,10 +38,16 @@ export function AiModelNote({ style }: { style?: CSSProperties }) {
     },
     providerLabel,
   );
+  // model pill:冇自選就顯示「預設」(去括號,乾淨啲)
+  const modelLabel = s.model.trim()
+    ? shortModelName(s.model.trim())
+    : t("aiNote.defaultSuffix").replace(/[（）()]/g, "");
 
   return (
-    <p className="muted" style={{ fontSize: "0.75rem", margin: "0.5rem 0 0", ...style }}>
-      {text}
-    </p>
+    <div className="ai-pills" style={style} aria-label={`${parts.provider} ${parts.model} ${parts.key}`}>
+      <span className="pill">{parts.provider}</span>
+      <span className="pill model">{modelLabel}</span>
+      <span className={`pill ${parts.keyTone}`}>{parts.key}</span>
+    </div>
   );
 }
