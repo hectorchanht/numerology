@@ -5,6 +5,7 @@ import { Fragment, useState } from "react";
 import { ACADEMY_LESSONS, ACADEMY_QUOTE_REFS, getLesson } from "../lessons";
 import { Quiz } from "../Quiz";
 import { PalmDiagram } from "../PalmDiagram";
+import { BaguaFamilyGrid } from "../BaguaFamilyGrid";
 import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { withTermHighlights } from "@/lib/highlightTerms";
@@ -54,6 +55,7 @@ export function LessonView({ lessonId }: { lessonId: string }) {
               ))}
             </section>
             {lesson.widget === "palm" && lesson.widgetAfter === si && <PalmDiagram />}
+            {lesson.widget === "bagua" && lesson.widgetAfter === si && <BaguaFamilyGrid />}
           </Fragment>
         ))}
       </div>
