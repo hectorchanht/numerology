@@ -25,13 +25,14 @@ export interface ProviderMeta {
 }
 
 /** 顶部 filter chips:全部 / 免 key / 免費 / 付費。免費=免 key ∪ 免费额度。 */
-export type ProviderFilter = "all" | "nokey" | "free" | "paid";
+export type ProviderFilter = "all" | "nokey" | "free" | "paid" | "recommended";
 
 export const FILTER_LABEL_KEYS: Record<ProviderFilter, TKey> = {
   all: "settings.filter.all",
   nokey: "settings.filter.nokey",
   free: "settings.filter.free",
   paid: "settings.filter.paid",
+  recommended: "settings.filter.recommended",
 };
 
 export const COST_LABEL_KEYS: Record<ProviderCost, TKey> = {
@@ -80,7 +81,12 @@ export interface FreeFlaggedModel {
  * - all/nokey: 不过滤模型(免 key 已在 provider 层过滤)。
  * 结果为空时回落为全列表,保证下拉永远有可选项。
  */
-export function filterModels<T extends FreeFlaggedModel>(models: T[], filter: ProviderFilter): T[] {
+export function filterModels<T extends FreeFlaggedModel>(
+  models: T[],
+  filter: ProviderFilter,
+  provider?: string,
+): T[] {
+  if (filter === "recommended") return provider ? filterRecommended(models, provider) : models;
   if (filter !== "free" && filter !== "paid") return models;
   const filtered =
     filter === "free" ? models.filter((m) => m.free === true) : models.filter((m) => m.free !== true);
@@ -111,15 +117,23 @@ export const RECOMMENDED_MODELS: Record<string, string[]> = {
 
 /** 该 provider 下此模型是否在推荐表里。 */
 export function isRecommended(provider: string, id: string): boolean {
-  return (RECOMMENDED_MODELS[provider] ?? []).includes(id);
+  return (RECOMMENDED_MODELS[provider] ?? []).includes(normModelId(id));
 }
 
 /** 模型列表只留推荐(结果为空时回落为全列表,保证下拉永远有可选项)。 */
 export function filterRecommended<T extends { id: string }>(models: T[], provider: string): T[] {
   const rec = RECOMMENDED_MODELS[provider];
   if (!rec || rec.length === 0) return models;
-  const filtered = models.filter((m) => rec.includes(m.id));
+  const filtered = models.filter((m) => rec.includes(normModelId(m.id)));
   return filtered.length > 0 ? filtered : models;
+}
+
+/**
+ * 规范化模型 id:Gemini 实时列表返回 `models/gemini-3.8-flash` 形式,
+ * 与推荐表里的裸 id 对齐(两种形式发请求都有效,见 provider.ts)。
+ */
+export function normModelId(id: string): string {
+  return id.startsWith("models/") ? id.slice("models/".length) : id;
 }
 
 /** 静态模型备选(动态拉取失败/未缓存时的回落;workers-ai 用核验表,见 models.ts)。 */

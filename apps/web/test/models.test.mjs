@@ -86,7 +86,7 @@ test("models:PROVIDER_META 分组与 ai 包一致(workers-ai 首位)", () => {
   assert.equal(groups["pollinations"], "nokey");
   assert.equal(groups["openrouter"], "freekey");
   assert.equal(groups["custom"], "paid");
-  assert.deepEqual(Object.keys(FILTER_LABEL_KEYS).sort(), ["all", "free", "nokey", "paid"]);
+  assert.deepEqual(Object.keys(FILTER_LABEL_KEYS).sort(), ["all", "free", "nokey", "paid", "recommended"]);
   for (const p of PROVIDER_META) {
     assert.ok((STATIC_MODELS[p.name] ?? []).length > 0 || p.name === "custom", `${p.name} 应有静态备选`);
   }

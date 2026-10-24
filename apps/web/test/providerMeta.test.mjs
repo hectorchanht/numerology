@@ -148,3 +148,18 @@ test("recommend:filterRecommended 只留推荐,无交集时回落全列表", asy
   assert.deepEqual(filterRecommended([{ id: "xxx-unknown" }], "gemini"), [{ id: "xxx-unknown" }]);
   assert.deepEqual(filterRecommended(ms, "workers-ai"), ms);
 });
+
+test("recommend:filterModels(recommended) 按 provider 过滤,models/ 前缀对齐", async () => {
+  const { filterModels } = await import("../test-dist/providerMeta.js");
+  const live = [{ id: "models/gemini-2.5-flash" }, { id: "models/gemini-3.8-flash" }, { id: "models/gemini-flash-latest" }];
+  assert.deepEqual(filterModels(live, "recommended", "gemini").map((m) => m.id), ["models/gemini-3.8-flash"]);
+  // 无推荐表的 provider → 不过滤
+  assert.deepEqual(filterModels(live, "recommended", "workers-ai"), live);
+  // 无 provider 参数 → 不过滤
+  assert.deepEqual(filterModels(live, "recommended"), live);
+});
+
+test("recommend:filterProviders(recommended) 不隐藏 provider(只过滤模型)", async () => {
+  const { filterProviders } = await import("../test-dist/providerMeta.js");
+  assert.equal(filterProviders("recommended").length, 8);
+});
