@@ -7,6 +7,7 @@ import { Quiz } from "../Quiz";
 import { PalmDiagram } from "../PalmDiagram";
 import { BaguaFamilyGrid } from "../BaguaFamilyGrid";
 import { JiugongMnemonic } from "../JiugongMnemonic";
+import { BaxingPan } from "../BaxingPan";
 import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { withTermHighlights } from "@/lib/highlightTerms";
@@ -59,6 +60,7 @@ export function LessonView({ lessonId }: { lessonId: string }) {
             {lesson.widget === "palm" && lesson.widgetAfter === si && <PalmDiagram />}
             {lesson.widget === "bagua" && lesson.widgetAfter === si && <BaguaFamilyGrid />}
             {lesson.widget === "jiugong" && lesson.widgetAfter === si && <JiugongMnemonic />}
+            {lesson.widget === "baxing" && lesson.widgetAfter === si && <BaxingPan />}
           </Fragment>
         ))}
       </div>

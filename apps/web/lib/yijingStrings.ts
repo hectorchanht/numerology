@@ -73,9 +73,9 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "academy.title": S("易經學院", "易经学院", "Yi Jing Academy"),
   "academy.sub": S("從零學懂易經 · 四課入門", "从零学懂易经 · 四课入门", "Learn the Yi Jing from zero · 4 lessons"),
   "academy.intro": S(
-    "二十四課分三卷:由河圖洛書的源頭出發,打好陰陽八卦根基,再讀到點問卦、點解卦,最後入隨身工具與專題。全部白話講解,每課附自我檢測,學完可以直接去占卦頁實戰。",
-    "二十四课分三卷:由河图洛书的源头出发,打好阴阳八卦根基,再读到点问卦、点解卦,最后入随身工具与专题。全部白话讲解,每课附自我检测,学完可以直接去占卦页实战。",
-    "Twenty-four lessons in three volumes: from the Hetu and Luoshu at the source, through yin-yang and trigram foundations, to asking and interpreting — then pocket tools and special topics. Plain-language guides with quizzes — then try the divination tool.",
+    "五十五課分六卷:由河圖洛書與易學源流出發,先立根基,次學占卦實務,再入風水、相法、姓名三門應用。全部以正式文字講解,每課附自我檢測,循序漸進,由初學走向精通。",
+    "五十五课分六卷:由河图洛书与易学源流出发,先立根基,次学占卦实务,再入风水、相法、姓名三门应用。全部以正式文字讲解,每课附自我检测,循序渐进,由初学走向精通。",
+    "Fifty-five lessons in six volumes: from the Hetu and Luoshu at the source, through foundations and divination practice, to feng shui, physiognomy and name studies. Formal written guides with quizzes — from beginner to practitioner.",
   ),
   "academy.progress": S("已完成 {d} / {t} 課", "已完成 {d} / {t} 课", "{d} of {t} lessons done"),
   "academy.minutes": S("約 {n} 分鐘", "约 {n} 分钟", "~{n} min"),
