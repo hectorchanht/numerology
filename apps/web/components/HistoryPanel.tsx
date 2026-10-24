@@ -5,8 +5,10 @@ import {
   listReadings,
   deleteReading,
   clearReadings,
+  renameReading,
   onHistoryChanged,
   summarizeInput,
+  displayName,
   type Reading,
 } from "@/lib/history";
 import { useLocale, useScript } from "@/lib/i18n";
@@ -31,6 +33,8 @@ export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void })
   const { z } = useScript();
   const [items, setItems] = useState<Reading[]>([]);
   const [q, setQ] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
 
   const refresh = () => {
     listReadings()
@@ -48,6 +52,17 @@ export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void })
     refresh();
   };
 
+  const startRename = (r: Reading) => {
+    setEditingId(r.id);
+    setEditValue(r.name ?? "");
+  };
+
+  const saveRename = async (id: string) => {
+    await renameReading(id, editValue).catch(() => {});
+    setEditingId(null);
+    refresh();
+  };
+
   const handleClear = async () => {
     if (!window.confirm(t("history.clearConfirm"))) return;
     await clearReadings().catch(() => {});
@@ -56,7 +71,7 @@ export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void })
 
   const needle = q.trim().toLowerCase();
   const shown = needle
-    ? items.filter((r) => `${summarizeInput(r.input)} ${r.chart?.bazi?.lunarDate ?? ""}`.toLowerCase().includes(needle))
+    ? items.filter((r) => `${r.name ?? ""} ${summarizeInput(r.input)} ${r.chart?.bazi?.lunarDate ?? ""}`.toLowerCase().includes(needle))
     : items;
 
   // .split:手機 display:contents(版面不變);桌面左欄搜尋/說明、右欄列表。
@@ -82,30 +97,68 @@ export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void })
             {shown.map((r) => {
               const rep = countSections(r, "report:");
               const fot = countSections(r, "fortune:");
+              const named = Boolean(r.name?.trim());
+              const editing = editingId === r.id;
               return (
                 <div className="row hist-row" key={r.id}>
-                  <button type="button" className="hist-main" onClick={() => onRestore(r)}>
-                    <span className="avatar" aria-hidden="true">{r.input.gender}</span>
-                    <span className="lbl">
-                      {summarizeInput(r.input)}
-                      <span className="sub">{z(r.chart?.bazi?.lunarDate)}</span>
-                      {rep || fot ? (
-                        <span className="badges">
-                          {rep ? <span className="tag">{t("history.reportBadge", { n: rep })}</span> : null}
-                          {fot ? <span className="tag">{t("history.fortuneBadge", { n: fot })}</span> : null}
+                  {editing ? (
+                    <>
+                      <input
+                        className="input"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") void saveRename(r.id);
+                          if (e.key === "Escape") setEditingId(null);
+                        }}
+                        placeholder={t("history.namePh")}
+                        maxLength={20}
+                        autoFocus
+                        style={{ flex: 1, minWidth: 0 }}
+                      />
+                      <button type="button" className="btn-primary" onClick={() => void saveRename(r.id)}>
+                        {t("history.save")}
+                      </button>
+                      <button type="button" className="btn" onClick={() => setEditingId(null)}>
+                        {t("history.cancel")}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button type="button" className="hist-main" onClick={() => onRestore(r)}>
+                        <span className="avatar" aria-hidden="true">{r.input.gender}</span>
+                        <span className="lbl">
+                          {displayName(r)}
+                          <span className="sub">
+                            {named ? `${summarizeInput(r.input)} · ` : ""}{z(r.chart?.bazi?.lunarDate)}
+                          </span>
+                          {rep || fot ? (
+                            <span className="badges">
+                              {rep ? <span className="tag">{t("history.reportBadge", { n: rep })}</span> : null}
+                              {fot ? <span className="tag">{t("history.fortuneBadge", { n: fot })}</span> : null}
+                            </span>
+                          ) : null}
                         </span>
-                      ) : null}
-                    </span>
-                    <span className="when">{fmtTime(r.updatedAt)}</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="icon-btn danger"
-                    onClick={() => handleDelete(r.id)}
-                    aria-label={t("history.delete")}
-                  >
-                    <Icon name="trash" small />
-                  </button>
+                        <span className="when">{fmtTime(r.updatedAt)}</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="icon-btn"
+                        onClick={() => startRename(r)}
+                        aria-label={t("history.rename")}
+                      >
+                        <Icon name="edit" small />
+                      </button>
+                      <button
+                        type="button"
+                        className="icon-btn danger"
+                        onClick={() => handleDelete(r.id)}
+                        aria-label={t("history.delete")}
+                      >
+                        <Icon name="trash" small />
+                      </button>
+                    </>
+                  )}
                 </div>
               );
             })}

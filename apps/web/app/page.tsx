@@ -112,10 +112,12 @@ export default function Home() {
     setLoading(true);
     setError("");
     try {
+      // 名只係本機歷史用,不入 POST body。
+      const { name, ...postBody } = birth;
       const res = await fetch("/api/chart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(birth),
+        body: JSON.stringify(postBody),
       });
       const data = (await res.json()) as { chart?: ChartResult; error?: string };
       if (!res.ok || !data.chart) throw new Error(data.error ?? t("chart.errorFallback"));
@@ -123,8 +125,8 @@ export default function Home() {
       // 用服务端解析后的阳历输入(农历已转换),供后续报告/对话复用
       setInput(data.chart.input);
       setRestored(null);
-      // 存入本机历史(保留已有章节,只更新命盘/时间)。
-      upsertReading({ input: data.chart.input, locale, chart: data.chart }).catch(() => {});
+      // 存入本机历史(保留已有章节,只更新命盘/时间;有名就寫入,留空保留舊名)。
+      upsertReading({ input: data.chart.input, locale, chart: data.chart, name }).catch(() => {});
       go("chart");
     } catch (e) {
       setError(e instanceof Error ? e.message : t("chart.errorFallback"));

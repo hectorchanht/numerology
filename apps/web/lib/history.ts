@@ -24,6 +24,8 @@ export interface Reading {
   input: BirthInput;
   locale: Locale;
   chart: ChartResult;
+  /** 用戶自定名稱(選填)。刻意唔入 id hash:改名唔會分裂記錄,舊記錄無痛兼容。 */
+  name?: string;
   /** key: "report:<sectionKey>" | "fortune:<sectionKey>" */
   sections: Record<string, HistorySection>;
 }
@@ -94,28 +96,49 @@ export function summarizeInput(input: BirthInput): string {
 
 /**
  * 新增或更新一条记录:已存在则保留旧章节,只更新命盘/输入/时间。
+ * name:有非空值就寫入;空/undefined 就保留舊名(還原/重排都唔會靜靜洗走名)。
  * 返回保存后的记录。
  */
 export async function upsertReading(input: {
   input: BirthInput;
   locale: Locale;
   chart: ChartResult;
+  name?: string;
 }): Promise<Reading> {
   const id = await readingId(input.input);
   const now = Date.now();
-  const existing = await tx("readonly", (s) => s.get(id)).catch(() => null);
+  const existing = (await tx("readonly", (s) => s.get(id)).catch(() => null)) as Reading | null;
+  const trimmed = input.name?.trim();
   const rec: Reading = {
     id,
-    createdAt: (existing as Reading | null)?.createdAt ?? now,
+    createdAt: existing?.createdAt ?? now,
     updatedAt: now,
     input: input.input,
     locale: input.locale,
     chart: input.chart,
-    sections: (existing as Reading | null)?.sections ?? {},
+    ...(trimmed ? { name: trimmed } : existing?.name ? { name: existing.name } : {}),
+    sections: existing?.sections ?? {},
   };
   await tx("readwrite", (s) => s.put(rec));
   notifyHistoryChanged();
   return rec;
+}
+
+/** 改名(改做空字串 = 清除名,之後顯示生日摘要)。記錄不存在則靜默返回。 */
+export async function renameReading(id: string, name: string): Promise<void> {
+  const existing = (await tx("readonly", (s) => s.get(id)).catch(() => null)) as Reading | null;
+  if (!existing) return;
+  const trimmed = name.trim();
+  const rec: Reading = { ...existing, updatedAt: Date.now() };
+  if (trimmed) rec.name = trimmed;
+  else delete rec.name;
+  await tx("readwrite", (s) => s.put(rec));
+  notifyHistoryChanged();
+}
+
+/** 列表顯示名:有名顯示名,無名顯示生日摘要。 */
+export function displayName(r: Reading): string {
+  return r.name?.trim() ? r.name.trim() : summarizeInput(r.input);
 }
 
 /** 保存一节(merge 进已有记录;记录不存在则跳过)。 */

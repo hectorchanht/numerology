@@ -6,4 +6,6 @@ export type Calendar = "solar" | "lunar";
 export type BirthFormValue = BirthInput & {
   calendar?: Calendar;
   isLeapMonth?: boolean;
+  /** 用戶自定命盤名稱(選填,本機歷史用,不入 POST body)。 */
+  name?: string;
 };

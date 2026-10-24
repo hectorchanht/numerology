@@ -31,6 +31,7 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
     hour: str(defaults?.hour), minute: str(defaults?.minute),
   });
   const [gender, setGender] = useState<"男" | "女">(defaults?.gender ?? "男");
+  const [name, setName] = useState("");
   const [calendar, setCalendar] = useState<Calendar>("solar");
   const [isLeapMonth, setIsLeapMonth] = useState(false);
   const [longitude, setLongitude] = useState<string>(
@@ -66,6 +67,7 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
       hour: nums.hour!, minute, gender,
       calendar,
       ...(calendar === "lunar" && isLeapMonth ? { isLeapMonth: true } : {}),
+      ...(name.trim() ? { name: name.trim() } : {}),
     };
     if (trueSolar && longitude !== "") out.longitude = Number(longitude);
     onSubmit(out);
@@ -125,6 +127,17 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
         <div className="form-col">
           <h2 className="group-title">{t("form.groupPerson")}</h2>
           <div className="list">
+            <label className="row" htmlFor="chart-name">
+              <Icon name="user" className="ic" />
+              <span className="lbl">{t("form.name")}</span>
+              <input
+                id="chart-name" type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={t("form.namePh")}
+                maxLength={20}
+              />
+            </label>
             <div className="row">
               <Icon name="user" className="ic" />
               <span className="lbl">{t("form.gender")}</span>
