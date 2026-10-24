@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import ChartPoster from "./poster";
-import { PageShell } from "@/components/PageShell";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/poster" },
@@ -11,8 +10,6 @@ export const metadata: Metadata = {
 
 export default function PosterPage() {
   return (
-    <PageShell>
       <ChartPoster />
-    </PageShell>
   );
 }

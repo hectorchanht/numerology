@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { PageShell } from "@/components/PageShell";
 import NameTool from "./name";
 
 export const metadata: Metadata = {
@@ -15,10 +14,8 @@ export const metadata: Metadata = {
 
 export default function NamePage() {
   return (
-    <PageShell>
       <Suspense>
         <NameTool />
       </Suspense>
-    </PageShell>
   );
 }

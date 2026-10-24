@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { PageShell } from "@/components/PageShell";
 import DailyTool from "./daily";
 
 export const metadata: Metadata = {
@@ -14,8 +13,6 @@ export const metadata: Metadata = {
 
 export default function DailyPage() {
   return (
-    <PageShell>
       <DailyTool />
-    </PageShell>
   );
 }

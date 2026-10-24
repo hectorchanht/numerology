@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { SelectionToolbar } from "@/components/SelectionToolbar";
 import { TabBar } from "@/components/TabBar";
+import { AppShell } from "@/components/AppShell";
 import { SideNav } from "@/components/SideNav";
 import { DragScroll } from "@/components/DragScroll";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
@@ -88,7 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <SideNav />
         <div className="app">
-          {children}
+          <AppShell>{children}</AppShell>
         </div>
         <TabBar />
         <DragScroll />

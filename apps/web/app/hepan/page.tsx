@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { PageShell } from "@/components/PageShell";
 import HepanTool from "./hepan";
 
 export const metadata: Metadata = {
@@ -14,8 +13,6 @@ export const metadata: Metadata = {
 
 export default function HepanPage() {
   return (
-    <PageShell>
       <HepanTool />
-    </PageShell>
   );
 }
