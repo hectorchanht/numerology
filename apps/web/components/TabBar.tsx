@@ -12,7 +12,7 @@ export const TAB_ITEMS: { tab: Tab; icon: IconName; labelKey: TKey }[] = [
   { tab: "chart", icon: "grid", labelKey: "tab.chart" },
   { tab: "report", icon: "file", labelKey: "tab.report" },
   { tab: "fortune", icon: "trend", labelKey: "tab.fortune" },
-  { tab: "more", icon: "dots", labelKey: "tab.more" },
+  { tab: "history", icon: "history", labelKey: "tab.history" },
 ];
 
 /** 底部 tab bar(全站):首頁內切畫面;子路由(/yijing 等)撳 tab 會返首頁對應畫面。 */

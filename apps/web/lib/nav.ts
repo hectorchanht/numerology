@@ -2,12 +2,12 @@
 
 import { useSyncExternalStore } from "react";
 
-/** 底部 tab(最多 5 個):起盤 / 命盤 / 報告 / 大運 / 更多。歷史改為更多內嘅子畫面。 */
-export type Tab = "home" | "chart" | "report" | "fortune" | "more";
-export const TABS: readonly Tab[] = ["home", "chart", "report", "fortune", "more"];
+/** 底部 tab(最多 5 個):起盤 / 命盤 / 報告 / 大運 / 歷史。工具一律放下層(SUB_LINKS),唔佔 tab 位。 */
+export type Tab = "home" | "chart" | "report" | "fortune" | "history";
+export const TABS: readonly Tab[] = ["home", "chart", "report", "fortune", "history"];
 
-/** 非 tab 的子畫面:設定(右上齒輪)、命盤對話、歷史(更多內)。返回時回到打開前的畫面。 */
-export type Screen = Tab | "settings" | "chat" | "history";
+/** 非 tab 的子畫面:設定(右上齒輪)、命盤對話。返回時回到打開前的畫面。 */
+export type Screen = Tab | "settings" | "chat";
 
 interface NavState {
   screen: Screen;

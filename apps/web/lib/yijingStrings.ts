@@ -19,6 +19,15 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "nav.academy": S("易經學院", "易经学院", "Yi Jing Academy"),
   "nav.liuyao": S("六爻納甲", "六爻纳甲", "Six Lines"),
   "nav.yijingHistory": S("占卦歷史", "占卦历史", "Cast history"),
+  "nav.daily": S("今日運勢", "今日运势", "Daily Fortune"),
+  "nav.name": S("姓名測分", "姓名测分", "Name Reading"),
+  "nav.hepan": S("紫微合盤", "紫微合盘", "Synastry"),
+  "nav.qimen": S("奇門遁甲", "奇门遁甲", "Qimen Dunjia"),
+  "nav.fengshui": S("玄空飛星", "玄空飞星", "Flying Stars"),
+  /* —— 側欄工具分組 —— */
+  "nav.group.divine": S("問卜", "问卜", "Divination"),
+  "nav.group.destiny": S("命理", "命理", "Destiny"),
+  "nav.group.study": S("學苑", "学苑", "Academy"),
 
   /* —— 占卦頁 —— */
   "yijing.title": S("易經占卦", "易经占卦", "Yi Jing Divination"),

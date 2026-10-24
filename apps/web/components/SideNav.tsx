@@ -7,7 +7,7 @@ import { go, useNav, type Screen } from "@/lib/nav";
 import { yjT } from "@/lib/yijingStrings";
 import { Icon } from "@/components/Icon";
 import { TAB_ITEMS } from "@/components/TabBar";
-import { SUB_LINKS } from "@/components/YijingNav";
+import { SUB_GROUPS } from "@/components/YijingNav";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 /**
@@ -56,20 +56,25 @@ export function SideNav() {
 
         <div className="side-sep" role="separator" />
 
-        {SUB_LINKS.map((l) => {
-          const on = pathname === l.href;
-          return (
-            <Link
-              key={l.href}
-              href={l.href}
-              className={`side-item${on ? " on" : ""}`}
-              aria-current={on ? "page" : undefined}
-            >
-              <Icon name={l.icon} />
-              {yjT(l.id, locale)}
-            </Link>
-          );
-        })}
+        {SUB_GROUPS.map((g, gi) => (
+          <div key={g.labelId ?? `tail-${gi}`}>
+            {g.labelId && <div className="side-group">{yjT(g.labelId, locale)}</div>}
+            {g.links.map((l) => {
+              const on = pathname === l.href;
+              return (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className={`side-item${on ? " on" : ""}`}
+                  aria-current={on ? "page" : undefined}
+                >
+                  <Icon name={l.icon} />
+                  {yjT(l.id, locale)}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       <div className="side-foot">
