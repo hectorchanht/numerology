@@ -163,3 +163,12 @@ test("recommend:filterProviders(recommended) 不隐藏 provider(只过滤模型)
   const { filterProviders } = await import("../test-dist/providerMeta.js");
   assert.equal(filterProviders("recommended").length, 8);
 });
+
+test("retired:filterRetired 移除下架模型(models/ 前缀对齐),空结果回落", async () => {
+  const { filterRetired } = await import("../test-dist/providerMeta.js");
+  const ms = [{ id: "models/gemini-2.5-flash" }, { id: "gemini-2.0-flash" }, { id: "models/gemini-3.8-flash" }];
+  assert.deepEqual(filterRetired(ms).map((m) => m.id), ["models/gemini-3.8-flash"]);
+  const allDead = [{ id: "gemini-2.0-flash" }];
+  assert.deepEqual(filterRetired(allDead), allDead);
+  assert.deepEqual(filterRetired([]), []);
+});

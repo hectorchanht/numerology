@@ -1,4 +1,5 @@
 import { WORKERS_AI_MODELS, WORKERS_AI_VERIFIED_AT } from "@numerology/ai";
+import { filterRetired } from "./providerMeta.js";
 
 export interface ModelEntry {
   id: string;
@@ -106,7 +107,8 @@ export async function fetchProviderModels(
       const p = raw?.pricing?.prompt;
       return p === "0" || p === 0 ? { id, free: true } : { id };
     });
-  return { provider: name, source: "live", models };
+  // 下架模型直接移除(选了必 404),不让用户选到。
+  return { provider: name, source: "live", models: filterRetired(models) };
 }
 
 /** 静态备选表(前端 24h 缓存失效/拉取失败时的回落,也供路由复用)。 */

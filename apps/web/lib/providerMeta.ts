@@ -136,6 +136,20 @@ export function normModelId(id: string): string {
   return id.startsWith("models/") ? id.slice("models/".length) : id;
 }
 
+/**
+ * 已下架模型(实测 404,选中必失败):从列表里直接移除,不让用户选到。
+ * - gemini-2.0-flash: Google 已下架("no longer available")
+ * - gemini-2.5-flash: 新用户不可用("no longer available to new users")
+ * 用裸 id 存,比对经 normModelId 对齐 `models/` 前缀形式。
+ */
+export const RETIRED_MODEL_IDS: string[] = ["gemini-2.0-flash", "gemini-2.5-flash"];
+
+/** 滤掉已下架模型(空结果则回落原列表,避免下拉被清空)。 */
+export function filterRetired<T extends { id: string }>(models: T[]): T[] {
+  const filtered = models.filter((m) => !RETIRED_MODEL_IDS.includes(normModelId(m.id)));
+  return filtered.length > 0 ? filtered : models;
+}
+
 /** 静态模型备选(动态拉取失败/未缓存时的回落;workers-ai 用核验表,见 models.ts)。 */
 export const STATIC_MODELS: Record<string, string[]> = {
   "workers-ai": [

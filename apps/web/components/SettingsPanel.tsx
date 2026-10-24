@@ -12,6 +12,7 @@ import {
   COST_LABEL_KEYS,
   filterProviders,
   filterModels,
+  filterRetired,
   staticModelEntries,
   type ProviderFilter,
 } from "@/lib/providerMeta";
@@ -82,7 +83,8 @@ export function SettingsPanel() {
     const statics = staticModelEntries(STATIC_MODELS[provider] ?? []);
     const cached = readModelsCache(provider);
     if (cached && cached.models.length > 0) {
-      setModels(cached.models);
+      // 旧缓存可能含已下架模型,读出即过滤(下次拉取后缓存自然干净)。
+      setModels(filterRetired(cached.models));
       setModelsSource(cached.source);
       return;
     }
