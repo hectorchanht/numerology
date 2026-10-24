@@ -13,12 +13,12 @@ import { STRINGS, LOCALES } from "../test-dist/i18n.js";
 const names = (ps) => ps.map((p) => p.name);
 
 // —— filter chips 分组 ——
-test("filter:all=8, nokey=2, free=6(免key∪免费额度), paid=2", () => {
+test("filter:all=9, nokey=3, free=7(免key∪免费额度), paid=2", () => {
   assert.deepEqual(names(filterProviders("all")),
-    ["workers-ai", "pollinations", "glm", "gemini", "groq", "openrouter", "anthropic", "custom"]);
-  assert.deepEqual(names(filterProviders("nokey")), ["workers-ai", "pollinations"]);
+    ["workers-ai", "pollinations", "mac-llm", "glm", "gemini", "groq", "openrouter", "anthropic", "custom"]);
+  assert.deepEqual(names(filterProviders("nokey")), ["workers-ai", "pollinations", "mac-llm"]);
   assert.deepEqual(names(filterProviders("free")),
-    ["workers-ai", "pollinations", "glm", "gemini", "groq", "openrouter"]);
+    ["workers-ai", "pollinations", "mac-llm", "glm", "gemini", "groq", "openrouter"]);
   assert.deepEqual(names(filterProviders("paid")), ["anthropic", "custom"]);
 });
 
@@ -56,6 +56,7 @@ test("providerMeta:cost 分档", () => {
   assert.deepEqual(cost, {
     "workers-ai": "free",
     pollinations: "free",
+    "mac-llm": "free",
     glm: "freetier",
     gemini: "freetier",
     groq: "freetier",
@@ -161,7 +162,7 @@ test("recommend:filterModels(recommended) 按 provider 过滤,models/ 前缀对�
 
 test("recommend:filterProviders(recommended) 不隐藏 provider(只过滤模型)", async () => {
   const { filterProviders } = await import("../test-dist/providerMeta.js");
-  assert.equal(filterProviders("recommended").length, 8);
+  assert.equal(filterProviders("recommended").length, 9);
 });
 
 test("retired:filterRetired 移除下架模型(models/ 前缀对齐),空结果回落", async () => {
@@ -171,4 +172,16 @@ test("retired:filterRetired 移除下架模型(models/ 前缀对齐),空结果�
   const allDead = [{ id: "gemini-2.0-flash" }];
   assert.deepEqual(filterRetired(allDead), allDead);
   assert.deepEqual(filterRetired([]), []);
+});
+
+test("providerMeta:mac-llm 免 key 免费组,推荐含 qwen3:30b/8b", async () => {
+  const { PROVIDER_META, RECOMMENDED_MODELS, STATIC_MODELS } = await import("../test-dist/providerMeta.js");
+  const m = PROVIDER_META.find((p) => p.name === "mac-llm");
+  assert.ok(m, "mac-llm in PROVIDER_META");
+  assert.equal(m.group, "nokey");
+  assert.equal(m.cost, "free");
+  assert.equal(m.needsKey, false);
+  assert.deepEqual(RECOMMENDED_MODELS["mac-llm"], ["qwen3:30b", "qwen3:8b"]);
+  assert.ok(STATIC_MODELS["mac-llm"].includes("qwen3:30b"));
+  assert.ok(STATIC_MODELS["mac-llm"].includes("qwen3:32b"));
 });

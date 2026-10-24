@@ -54,3 +54,38 @@ test("provider:实验模型不做默认(繁体稳定性待真机验证)", () => 
   assert.ok(exp.some((m) => m.id === "@cf/meta/llama-3.3-70b-instruct-fp8-fast"));
   for (const m of exp) assert.notEqual(m.id, WORKERS_AI_DEFAULT_MODEL, "实验模型不得为默认");
 });
+
+test("provider:mac-llm 在册,走 tunnel baseURL,免 key", () => {
+  const list = listProviders();
+  const byName = Object.fromEntries(list.map((p) => [p.name, p]));
+  assert.equal(byName["mac-llm"].group, "nokey");
+  assert.equal(byName["mac-llm"].needsKey, false);
+  assert.equal(providerBaseUrl("mac-llm"), "https://ollama.hectorchan.com/v1");
+  assert.equal(providerNeedsKey("mac-llm"), false);
+});
+
+test("provider:mac-llm 请求带 reasoning_effort none(关思考),其它 provider 不带", async () => {
+  const { chatComplete } = await import("../dist/provider.js");
+  const http = await import("node:http");
+  const seen = [];
+  const server = http.createServer((req, res) => {
+    let body = "";
+    req.on("data", (c) => (body += c));
+    req.on("end", () => {
+      seen.push(JSON.parse(body || "{}"));
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ choices: [{ message: { content: "ok" } }], usage: {} }));
+    });
+  });
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const baseURL = `http://127.0.0.1:${server.address().port}`;
+  const req = { kind: "chat", maxTokens: 10, system: [], messages: [{ role: "user", content: "hi" }] };
+  try {
+    await chatComplete(req, { provider: "mac-llm", model: "qwen3:8b", baseURL });
+    await chatComplete(req, { provider: "openrouter", apiKey: "t", model: "x", baseURL });
+  } finally {
+    server.close();
+  }
+  assert.equal(seen[0].reasoning_effort, "none");
+  assert.equal("reasoning_effort" in seen[1], false);
+});

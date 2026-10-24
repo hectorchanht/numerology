@@ -11,5 +11,7 @@ import { activeProviderName } from "@numerology/ai";
  */
 export function primeTimeoutMs(opts: ProviderOptions | undefined): number {
   const name = activeProviderName(opts);
+  // mac-llm:Mac 本地模型冷启动(18-20GB 模型由磁盘载入)+qwen 思考,首 token 可能远超 60s。
+  if (name === "mac-llm") return 120_000;
   return name === "workers-ai" || name === "gemini" ? 60_000 : 20_000;
 }

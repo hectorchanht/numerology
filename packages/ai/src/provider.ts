@@ -121,6 +121,15 @@ const PROVIDERS: Record<string, ProviderDef> = {
     free: true,
     noKey: true,
   },
+  "mac-llm": {
+    kind: "openai",
+    label: "Mac LLM(Ollama·免费·headless Mac,无 key)",
+    keys: [],
+    baseURL: "https://ollama.hectorchan.com/v1",
+    models: { report: "qwen3:30b", chat: "qwen3:8b" },
+    free: true,
+    noKey: true,
+  },
   glm: {
     kind: "openai",
     label: "智谱 GLM-4-Flash(免费)",
@@ -489,6 +498,20 @@ function baseDecodeParams(): { temperature: number; top_p: number } {
   };
 }
 
+/**
+ * mac-llm 专用参数:Ollama 上的 qwen3/deepseek 系默认先输出思考链,
+ * 会吃掉 maxTokens 导致正文为空(实测 max_tokens=120 全被思考占满)。
+ * reasoning_effort:"none" 关掉思考(本 app 不展示思考过程),正文直接出、更快。
+ * 仅 mac-llm 加此参数,其它 OpenAI 兼容 provider 不受影响。
+ * 注意:Ollama 实测接受 "none",但当前 OpenAI SDK 的 ReasoningEffort 未含它,故 cast;
+ * 运行时序列化值仍为 "none",Ollama 认。
+ */
+function macLlmParams(name: string): { reasoning_effort?: OpenAI.ReasoningEffort } {
+  return name === "mac-llm"
+    ? { reasoning_effort: "none" as unknown as OpenAI.ReasoningEffort }
+    : {};
+}
+
 /** env.AI binding 的最小接口(实际为 Cloudflare 的 Ai binding)。 */
 interface AiBindingLike {
   run(model: string, input: Record<string, unknown>): Promise<unknown>;
@@ -685,6 +708,7 @@ export async function chatComplete(
       model,
       max_tokens: req.maxTokens,
       ...baseDecodeParams(),
+      ...macLlmParams(name),
       messages,
     });
   try {
@@ -746,7 +770,7 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
   return new OpenAITextStream(async (signal) => {
     const open = (model: string) =>
       client.chat.completions.create(
-        { model, max_tokens: req.maxTokens, stream: true, ...baseDecodeParams(), messages },
+        { model, max_tokens: req.maxTokens, stream: true, ...baseDecodeParams(), ...macLlmParams(name), messages },
         { signal },
       );
     try {
@@ -806,6 +830,7 @@ export function listProviders(): ProviderMeta[] {
   return [
     { name: "workers-ai", labelKey: "settings.prov.workersai", group: "nokey", needsKey: false },
     { name: "pollinations", labelKey: "settings.prov.pollinations", group: "nokey", needsKey: false, signup: "https://pollinations.ai/" },
+    { name: "mac-llm", labelKey: "settings.prov.macllm", group: "nokey", needsKey: false },
     { name: "glm", labelKey: "settings.prov.glm", group: "freekey", needsKey: true, signup: "https://open.bigmodel.cn/" },
     { name: "gemini", labelKey: "settings.prov.gemini", group: "freekey", needsKey: true, signup: "https://aistudio.google.com/apikey" },
     { name: "groq", labelKey: "settings.prov.groq", group: "freekey", needsKey: true, signup: "https://console.groq.com/keys" },

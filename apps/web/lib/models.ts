@@ -26,6 +26,7 @@ export interface ModelsResult {
 /** 各 provider 的 OpenAI 兼容 /models 端点(anthropic/custom 无标准端点 → 走静态)。 */
 const MODELS_BASE_URL: Record<string, string> = {
   pollinations: "https://text.pollinations.ai/openai",
+  "mac-llm": "https://ollama.hectorchan.com/v1",
   openrouter: "https://openrouter.ai/api/v1",
   glm: "https://open.bigmodel.cn/api/paas/v4",
   gemini: "https://generativelanguage.googleapis.com/v1beta/openai",
@@ -41,6 +42,7 @@ const STATIC_MODELS: Record<string, string[]> = {
   groq: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it", "deepseek-r1-distill-llama-70b"],
   openrouter: ["google/gemma-4-31b-it:free", "google/gemma-4-26b-a4b-it:free", "nvidia/nemotron-3.5-lightning:free"],
   pollinations: ["openai"],
+  "mac-llm": ["qwen3:30b", "qwen3:8b", "qwen3:32b"],
 };
 
 type FetchLike = (url: string, init?: RequestInit) => Promise<Response>;

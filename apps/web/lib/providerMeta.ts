@@ -44,6 +44,7 @@ export const COST_LABEL_KEYS: Record<ProviderCost, TKey> = {
 export const PROVIDER_META: ProviderMeta[] = [
   { name: "workers-ai", shortKey: "settings.tab.workersai", noteKey: "settings.note.workersai", group: "nokey", cost: "free", needsKey: false },
   { name: "pollinations", shortKey: "settings.tab.pollinations", noteKey: "settings.note.pollinations", group: "nokey", cost: "free", needsKey: false, optionalKey: true, signup: "https://pollinations.ai/" },
+  { name: "mac-llm", shortKey: "settings.tab.macllm", noteKey: "settings.note.macllm", group: "nokey", cost: "free", needsKey: false },
   { name: "glm", shortKey: "settings.tab.glm", noteKey: "settings.note.glm", group: "freekey", cost: "freetier", needsKey: true, signup: "https://open.bigmodel.cn/" },
   { name: "gemini", shortKey: "settings.tab.gemini", noteKey: "settings.note.gemini", group: "freekey", cost: "freetier", needsKey: true, signup: "https://aistudio.google.com/apikey" },
   { name: "groq", shortKey: "settings.tab.groq", noteKey: "settings.note.groq", group: "freekey", cost: "freetier", needsKey: true, signup: "https://console.groq.com/keys" },
@@ -107,6 +108,7 @@ export function staticModelEntries(ids: string[]): FreeFlaggedModel[] {
  */
 export const RECOMMENDED_MODELS: Record<string, string[]> = {
   gemini: ["gemini-3.8-flash"],
+  "mac-llm": ["qwen3:30b", "qwen3:8b"],
   openrouter: [
     "google/gemma-4-31b-it:free",
     "google/gemma-4-26b-a4b-it:free",
@@ -158,6 +160,7 @@ export const STATIC_MODELS: Record<string, string[]> = {
     "@cf/meta/llama-3.2-3b-instruct",
   ],
   pollinations: ["openai"],
+  "mac-llm": ["qwen3:30b", "qwen3:8b", "qwen3:32b"],
   glm: ["glm-4-flash", "glm-4-flashx", "glm-4-air", "glm-4-plus", "glm-4-long"],
   gemini: ["gemini-3.8-flash", "gemini-flash-latest", "gemini-flash-lite-latest"],
   groq: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it", "deepseek-r1-distill-llama-70b"],
