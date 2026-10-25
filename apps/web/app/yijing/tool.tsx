@@ -13,6 +13,8 @@ import { AiInterpret } from "./AiInterpret";
 import { Term, withTermHighlights } from "@/lib/highlightTerms";
 import { saveYijingCast, getYijingCast } from "@/lib/yijingHistory";
 import Link from "next/link";
+import { GroupTabs } from "@/components/GroupTabs";
+import { CASTING_TABS } from "@/lib/navGroups";
 
 interface TossedLine {
   value: CoinLine;
@@ -200,6 +202,8 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
         .yj-line-row:last-child { border-bottom: none; }
         .yj-glyph { font-size: 1.5rem; min-width: 3.2em; text-align: center; letter-spacing: 0.1em; }
       `}</style>
+
+      <GroupTabs links={CASTING_TABS} label={yjT("nav.group.divine", loc)} />
 
       <div className="masthead">
         <h1>{yjT("yijing.title", loc)}</h1>

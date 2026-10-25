@@ -530,11 +530,17 @@ button.sec-h { min-height: 44px; margin: -8px 0; }
 .search input::placeholder { color: var(--label-2); }
 .hist .hist-row { padding: 0 4px 0 0; gap: 0; }
 .hist .row + .row::before { left: 76px; }
-.hist-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; min-height: 72px; padding: 10px 8px 10px 16px; text-align: left; color: var(--label); }
+.hist-main { flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: 12px; min-height: 72px; padding: 10px 8px 10px 16px; text-align: left; color: var(--label); }
 .hist-main:active { background: var(--card-2); }
-.hist .avatar { width: 44px; height: 44px; font-size: 18px; }
-.hist .badges { display: flex; gap: 6px; margin-top: 6px; flex-wrap: nowrap; }
-.hist .when { font-size: 11px; color: var(--label-3); align-self: flex-start; padding-top: 4px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hist .avatar { width: 44px; height: 44px; font-size: 18px; flex: none; }
+/* 文字欄攞晒剩餘闊度:舊版時間戳以 flex 兄弟身份(nowrap ~100px)+ avatar + 兩個 icon 掣
+   喺手機窄卡夾到文字欄剩返一兩隻字寬;而家時間戳搬入文字欄入面嘅 meta 行,唔再搶位。 */
+.hist .hist-text { flex: 1 1 auto; min-width: 0; }
+.hist .hist-name { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hist .hist-text .sub { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.hist .hist-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.hist .badges { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.hist .when { font-size: 11px; color: var(--label-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
 /* ---------- 設定 ---------- */
 .prov-card { margin-top: 12px; }
@@ -572,6 +578,10 @@ textarea.prompt:focus-visible { outline: 2px solid var(--accent); }
   background: var(--bar-bg); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); }
 .subnav .strip { flex: 1; margin: 0 calc(var(--pad) * -1) 0 0; padding-left: 0; }
 .subnav + .shell { padding-top: 4px; }
+/* 同組頁面分頁 strip(GroupTabs:占卦三法 / 學苑三頁共用) */
+.group-tabs { margin: 2px 0 10px; padding: 2px 0; }
+.group-tabs .chip { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+h1.large + .seg { margin-bottom: 12px; }
 .masthead { padding: 8px 0 12px; }
 .masthead h1 { font-size: 34px; line-height: 1.15; font-weight: 700; margin: 4px 0 6px; letter-spacing: 0.01em; }
 .masthead .sub { color: var(--label-2); font-size: 15px; }

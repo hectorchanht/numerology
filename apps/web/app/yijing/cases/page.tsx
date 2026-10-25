@@ -12,6 +12,8 @@ import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { withQuoteRefs, type QuoteRefEntry } from "@/lib/quoteRef";
 import { useQueryParam, useSetQueryParams, useDetailCloser } from "@/lib/useQueryParams";
 import { withTermHighlights } from "@/lib/highlightTerms";
+import { GroupTabs } from "@/components/GroupTabs";
+import { STUDY_TABS } from "@/lib/navGroups";
 
 /** 經典卦形:陽爻一橫,陰爻兩截(由下而上)。 */
 function HexFigure({ bits }: { bits: number[] }) {
@@ -235,6 +237,8 @@ function CasesInner() {
 
   return (
     <>
+      <GroupTabs links={STUDY_TABS} label={yjT("nav.group.study", loc)} />
+
       <div className="masthead">
         <h1>{yjT("cases.title", loc)}</h1>
         <div className="sub">{yjT("cases.sub", loc)}</div>

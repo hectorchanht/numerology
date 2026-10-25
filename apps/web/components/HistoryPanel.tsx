@@ -127,19 +127,21 @@ export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void })
                     <>
                       <button type="button" className="hist-main" onClick={() => onRestore(r)}>
                         <span className="avatar" aria-hidden="true">{r.input.gender}</span>
-                        <span className="lbl">
-                          {displayName(r)}
+                        <span className="lbl hist-text">
+                          <span className="hist-name">{displayName(r)}</span>
                           <span className="sub">
                             {named ? `${summarizeInput(r.input)} · ` : ""}{z(r.chart?.bazi?.lunarDate)}
                           </span>
-                          {rep || fot ? (
-                            <span className="badges">
-                              {rep ? <span className="tag">{t("history.reportBadge", { n: rep })}</span> : null}
-                              {fot ? <span className="tag">{t("history.fortuneBadge", { n: fot })}</span> : null}
-                            </span>
-                          ) : null}
+                          <span className="hist-meta">
+                            <span className="when">{fmtTime(r.updatedAt)}</span>
+                            {rep || fot ? (
+                              <span className="badges">
+                                {rep ? <span className="tag">{t("history.reportBadge", { n: rep })}</span> : null}
+                                {fot ? <span className="tag">{t("history.fortuneBadge", { n: fot })}</span> : null}
+                              </span>
+                            ) : null}
+                          </span>
                         </span>
-                        <span className="when">{fmtTime(r.updatedAt)}</span>
                       </button>
                       <button
                         type="button"

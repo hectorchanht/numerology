@@ -18,6 +18,7 @@ import { ChatPanel } from "@/components/ChatPanel";
 import { TimeInferPanel } from "@/components/TimeInferPanel";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { HistoryPanel } from "@/components/HistoryPanel";
+import { YijingHistoryPanel } from "@/components/YijingHistoryPanel";
 import { FortuneTimeline } from "@/components/FortuneTimeline";
 import { FortuneDayun, FortuneYears, FortuneRhythm } from "@/components/FortuneSections";
 import { ChartSummary, WuxingChart } from "@/components/Charts";
@@ -68,6 +69,8 @@ export default function Home() {
   const { screen } = useNav();
   const aiView = useAiView();
   const [mode, setMode] = useState<Mode>("known");
+  /** 歷史版分頁:命盤歷史 / 占卦歷史(兩 panel 保持 mounted,切換唔丟搜尋狀態)。 */
+  const [histTab, setHistTab] = useState<"chart" | "yijing">("chart");
   const [sys, setSys] = useState<Sys>("bazi");
   const [input, setInput] = useState<BirthInput | null>(() => kept?.input ?? null);
   const [chart, setChart] = useState<ChartResult | null>(() => kept?.chart ?? null);
@@ -514,7 +517,21 @@ export default function Home() {
           </button>
         </ScreenNav>
         <h1 className="large">{t("history.title")}</h1>
-        <HistoryPanel onRestore={handleRestore} />
+        <Seg
+          value={histTab}
+          onChange={setHistTab}
+          label={t("history.title")}
+          options={[
+            { value: "chart", label: t("history.chartTab") },
+            { value: "yijing", label: t("history.yijingTab") },
+          ]}
+        />
+        <div hidden={histTab !== "chart"}>
+          <HistoryPanel onRestore={handleRestore} />
+        </div>
+        <div hidden={histTab !== "yijing"}>
+          <YijingHistoryPanel />
+        </div>
       </section>
 
       {/* ============ 設定(齒輪) ============ */}

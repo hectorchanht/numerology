@@ -24,7 +24,6 @@ export const SUB_GROUPS: SubGroup[] = [
       { href: "/yijing/meihua", id: "nav.meihua", icon: "hourglass" },
       { href: "/yijing/liuyao", id: "nav.liuyao", icon: "grid" },
       { href: "/qimen", id: "nav.qimen", icon: "compass" },
-      { href: "/yijing/history", id: "nav.yijingHistory", icon: "rewind" },
     ],
   },
   {
@@ -52,3 +51,18 @@ export const SUB_GROUPS: SubGroup[] = [
 
 /** 平鋪版。 */
 export const SUB_LINKS: SubLink[] = SUB_GROUPS.flatMap((g) => g.links);
+
+const groupLinks = (labelId: string): SubLink[] =>
+  SUB_GROUPS.find((g) => g.labelId === labelId)?.links ?? [];
+
+/**
+ * 占卦三法分頁 strip(GroupTabs 用):銅錢 / 梅花 / 六爻 — 同一目的(起卦得本卦)的三種起卦法。
+ * 奇門遁甲係另一套排盤系統(唔起卦、唔入占卦歷史),刻意唔入呢條 strip。
+ * 占卦歷史已併入首頁「歷史」版,亦唔喺呢度出現。
+ */
+export const CASTING_TABS: SubLink[] = groupLinks("nav.group.divine").filter((l) =>
+  ["/yijing", "/yijing/meihua", "/yijing/liuyao"].includes(l.href),
+);
+
+/** 學苑分頁 strip(GroupTabs 用):學院 / 六十四卦 / 佔例庫。 */
+export const STUDY_TABS: SubLink[] = groupLinks("nav.group.study");

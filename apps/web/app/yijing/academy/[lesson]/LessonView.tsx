@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { GroupTabs } from "@/components/GroupTabs";
+import { STUDY_TABS } from "@/lib/navGroups";
 import { Fragment, useState } from "react";
 import { ACADEMY_LESSONS, ACADEMY_QUOTE_REFS, getLesson, getTrack } from "../lessons";
 import { Quiz } from "../Quiz";
@@ -39,6 +41,8 @@ export function LessonView({ lessonId }: { lessonId: string }) {
 
   return (
     <>
+      <GroupTabs links={STUDY_TABS} label={yjT("nav.group.study", loc)} />
+
       <div className="masthead" style={{ paddingTop: "1.2rem" }}>
         <div className="sub">
           {zT(`${getTrack(lesson.track).no} · ${getTrack(lesson.track).title}`)} ·{" "}

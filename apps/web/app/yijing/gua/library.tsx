@@ -17,6 +17,8 @@ import { DualPronounce } from "@/lib/DualPronounce";
 import { yjT, type YijingLocale as YL } from "@/lib/yijingStrings";
 import { Term, withTermHighlights } from "@/lib/highlightTerms";
 import { useQueryParam, useSetQueryParams, useDetailCloser } from "@/lib/useQueryParams";
+import { GroupTabs } from "@/components/GroupTabs";
+import { STUDY_TABS } from "@/lib/navGroups";
 
 const TABS = ["coreMeaning", "career", "love", "wealth", "health", "advice"] as const;
 const TAB_IDS: Record<(typeof TABS)[number], string> = {
@@ -204,6 +206,8 @@ export default function GuaLibrary() {
 
   return (
     <>
+      <GroupTabs links={STUDY_TABS} label={yjT("nav.group.study", loc)} />
+
       <div className="masthead">
         <h1>{yjT("gua.title", loc)}</h1>
         <div className="sub">{yjT("gua.sub", loc)}</div>

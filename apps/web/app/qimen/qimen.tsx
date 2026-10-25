@@ -1,11 +1,14 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useLocale, useScript } from "@/lib/i18n";
 import { castQimen, isWuBuYuShi, type QimenResult } from "@numerology/engine";
 import { renderShareCardPng, savePosterPng } from "@/lib/posterExport";
 import { type ShareCardModel } from "@/lib/shareCard";
 import { SITE_BASE } from "@/lib/yijingSite";
+import { saveYijingCast, getYijingCast } from "@/lib/yijingHistory";
+import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 
 /** 九宮格顯示序(洛書方位) */
 const GRID = [4, 9, 2, 3, 5, 7, 8, 1, 6];
@@ -14,12 +17,25 @@ function toInput(y: number, m: number, d: number, h: number, mi: number) {
   return { year: y, month: m, day: d, hour: h, minute: mi };
 }
 
-export default function QimenTool() {
-  const { t } = useLocale();
+/** "YYYY-MM-DDTHH:mm" → castQimen 輸入(解析失敗回 null)。 */
+function parseDt(dt: string) {
+  const m = dt.match(/(\d+)-(\d+)-(\d+)T(\d+):(\d+)/);
+  if (!m) return null;
+  return toInput(Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4]), Number(m[5]));
+}
+
+export default function QimenTool({ historyId }: { historyId?: string }) {
+  const { t, locale } = useLocale();
   const { z } = useScript();
+  const loc = locale as YijingLocale;
   const cardRef = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
+  /** 歷史回顧模式:由 ?h=<id> 入嚟,唔再存檔 */
+  const reviewMode = useRef(false);
+  const [reviewAt, setReviewAt] = useState<number | null>(null);
+  /** 已存檔的輸入 key(同一 dt+問題重撳唔重複存) */
+  const savedKey = useRef<string | null>(null);
 
   const now = useMemo(() => new Date(), []);
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -29,10 +45,42 @@ export default function QimenTool() {
   const [question, setQuestion] = useState("");
   const [result, setResult] = useState<QimenResult | null>(null);
 
+  // 歷史回顧:還原起局時間 + 問題,castQimen 純函數原樣重現成盤
+  useEffect(() => {
+    if (!historyId) return;
+    let alive = true;
+    getYijingCast(historyId)
+      .then((rec) => {
+        if (!alive || !rec || rec.kind !== "qimen" || !rec.datetime) return;
+        const input = parseDt(rec.datetime);
+        if (!input) return;
+        reviewMode.current = true;
+        setReviewAt(rec.at);
+        setDt(rec.datetime);
+        setQuestion(rec.question ?? "");
+        setResult(castQimen(input));
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [historyId]);
+
   const start = () => {
-    const m = dt.match(/(\d+)-(\d+)-(\d+)T(\d+):(\d+)/);
-    if (!m) return;
-    setResult(castQimen(toInput(Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4]), Number(m[5]))));
+    const input = parseDt(dt);
+    if (!input) return;
+    setResult(castQimen(input));
+    // 起局自動存入占卦歷史(同一輸入只存一次;回顧模式唔存)
+    if (reviewMode.current) return;
+    const key = `${dt}|${question.trim()}`;
+    if (savedKey.current === key) return;
+    savedKey.current = key;
+    saveYijingCast({
+      kind: "qimen",
+      at: Date.now(),
+      datetime: dt,
+      question: question.trim() || undefined,
+    }).catch(() => {});
   };
 
   const wubuyu = result
@@ -95,6 +143,16 @@ export default function QimenTool() {
       <p className="muted" style={{ margin: "4px 0 16px", fontSize: "0.9rem" }}>
         時家轉盤 · 拆補定局
       </p>
+
+      {reviewAt !== null && (
+        <div className="card" style={{ borderColor: "var(--cinnabar-soft)", padding: 16, marginBottom: 16 }}>
+          <span className="badge">{yjT("yijing.hist.reviewing", loc)}</span>{" "}
+          <span className="muted">{new Date(reviewAt).toLocaleString()}</span>{" "}
+          <Link href="/yijing/history" style={{ marginLeft: "0.5rem" }}>
+            {yjT("yijing.hist.backToHistory", loc)}
+          </Link>
+        </div>
+      )}
 
       <div className="card" style={{ padding: 16, marginBottom: 16 }}>
         <div className="muted" style={{ fontSize: "0.85rem", marginBottom: 6 }}>{t("qimen.askTime")}</div>

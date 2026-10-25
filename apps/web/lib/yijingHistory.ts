@@ -1,25 +1,27 @@
-import { castYijing, castMeihua, type CoinLine } from "@numerology/engine";
+import { castYijing, castMeihua, castQimen } from "@numerology/engine";
+import type { CoinLine } from "@numerology/engine";
 
 /**
  * 易經占卦歷史 —— **只存本機**(IndexedDB,同 numerology DB 嘅 yijing store),不上 server。
- * 銅錢占卦 / 梅花易數 / 六爻納甲起卦完成自動存一條;歷史頁撳入去經 ?h=<id>
- * 返去原本工具睇返完整卦象(AI 解卦經 KV 緩存即出,唔使重算)。
+ * 銅錢占卦 / 梅花易數 / 六爻納甲 / 奇門遁甲起卦完成自動存一條;歷史頁撳入去經 ?h=<id>
+ * 返去原本工具睇返完整結果(AI 解卦經 KV 緩存即出,唔使重算)。
+ * 四個工具的引擎都係純函數:存低起卦輸入即可原樣重現結果,唔使存成盤。
  */
 
-export type YijingCastKind = "coin" | "meihua" | "liuyao";
+export type YijingCastKind = "coin" | "meihua" | "liuyao" | "qimen";
 
 export interface YijingCast {
   id: string;
   kind: YijingCastKind;
   /** 起卦時間戳 */
   at: number;
-  /** 銅錢占卦:用戶問題(選填) */
+  /** 銅錢占卦 / 奇門:用戶問題(選填) */
   question?: string;
   /** 銅錢/六爻:六爻爻值(6/7/8/9,由下而上) */
   lines?: number[];
   /** 銅錢:每爻三枚銅錢(字=true/花=false),還原擲錢畫面用 */
   coins?: [boolean, boolean, boolean][];
-  /** 梅花:起卦時間 "YYYY-MM-DDTHH:mm" */
+  /** 梅花 / 奇門:起卦時間 "YYYY-MM-DDTHH:mm"(奇門成盤由呢個時間純函數決定) */
   datetime?: string;
   /** 六爻:起卦日期 "YYYY-MM-DD" */
   date?: string;
@@ -55,7 +57,45 @@ export function summarizeYijingCast(r: YijingCast): YijingCastSummary | null {
         verdict: res.verdict.level,
       };
     }
+    // 奇門唔係卦象摘要,走 summarizeQimenCast;呢度回 null,列表要對 null 安全。
     return null;
+  } catch {
+    return null;
+  }
+}
+
+export interface QimenCastSummary {
+  /** 陰遁 / 陽遁 */
+  dun: string;
+  /** 局數 1-9 */
+  ju: number;
+  jieqi: string;
+  yuan: string;
+  dayGanZhi: string;
+  timeGanZhi: string;
+}
+
+/** 純函數:奇門記錄 → 盤面摘要(列表顯示用;castQimen 是純函數,由 datetime 原樣重算)。 */
+export function summarizeQimenCast(r: YijingCast): QimenCastSummary | null {
+  try {
+    if (r.kind !== "qimen") return null;
+    const m = r.datetime?.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
+    if (!m) return null;
+    const res = castQimen({
+      year: +m[1]!,
+      month: +m[2]!,
+      day: +m[3]!,
+      hour: +m[4]!,
+      minute: +m[5]!,
+    });
+    return {
+      dun: res.dun,
+      ju: res.ju,
+      jieqi: res.jieqi,
+      yuan: res.yuan,
+      dayGanZhi: res.dayGanZhi,
+      timeGanZhi: res.timeGanZhi,
+    };
   } catch {
     return null;
   }

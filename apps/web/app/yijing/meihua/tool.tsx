@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { GroupTabs } from "@/components/GroupTabs";
+import { CASTING_TABS } from "@/lib/navGroups";
 import { castMeihua, type MeihuaResult } from "@numerology/engine";
 import { getHexagram, TRIGRAM_INFO, yaoName } from "@numerology/knowledge";
 import { useLocale, useScript } from "@/lib/i18n";
@@ -146,6 +148,8 @@ export default function MeihuaTool({ historyId }: { historyId?: string }) {
 
   return (
     <>
+      <GroupTabs links={CASTING_TABS} label={yjT("nav.group.divine", loc)} />
+
       <div className="masthead">
         <h1>{yjT("meihua.title", loc)}</h1>
         <div className="sub">{yjT("meihua.sub", loc)}</div>

@@ -51,13 +51,14 @@ export const YIJING_STRINGS: Record<string, Dict> = {
 
   /* —— 占卦歷史 —— */
   "yijing.hist.title": S("占卦歷史", "占卦历史", "Divination history"),
-  "yijing.hist.sub": S("銅錢、梅花、六爻的起卦記錄,只儲存於本機", "铜钱、梅花、六爻的起卦记录,只储存于本机", "Coin, plum-blossom and liuyao casts — stored on this device only"),
+  "yijing.hist.sub": S("銅錢、梅花、六爻、奇門的起卦記錄,只儲存於本機", "铜钱、梅花、六爻、奇门的起卦记录,只储存于本机", "Coin, plum-blossom, liuyao and qimen casts — stored on this device only"),
   "yijing.hist.empty": S("還沒有占卦記錄", "还没有占卦记录", "No casts yet"),
   "yijing.hist.loading": S("載入中…", "载入中…", "Loading…"),
   "yijing.hist.emptyHint": S("起卦後會自動保存於此,隨時回來看", "起卦后会自动保存于此,随时回来查看", "Casts are saved here automatically — review them anytime"),
   "yijing.hist.kind.coin": S("銅錢占卦", "铜钱占卦", "Coin toss"),
   "yijing.hist.kind.meihua": S("梅花易數", "梅花易数", "Plum blossom"),
   "yijing.hist.kind.liuyao": S("六爻納甲", "六爻纳甲", "Six lines"),
+  "yijing.hist.kind.qimen": S("奇門遁甲", "奇门遁甲", "Qimen Dunjia"),
   "yijing.hist.review": S("查看", "查看", "Review"),
   "yijing.hist.delete": S("刪除", "删除", "Delete"),
   "yijing.hist.confirmDelete": S("確定刪除", "确定删除", "Confirm delete"),

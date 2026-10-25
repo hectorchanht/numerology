@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { GroupTabs } from "@/components/GroupTabs";
+import { STUDY_TABS } from "@/lib/navGroups";
 import { useEffect, useState } from "react";
 import { ACADEMY_LESSONS, ACADEMY_TRACKS, loadProgress, type AcademyProgress } from "./lessons";
 import { useLocale, useScript } from "@/lib/i18n";
@@ -25,6 +27,8 @@ export default function AcademyIndexPage() {
 
   return (
     <>
+      <GroupTabs links={STUDY_TABS} label={yjT("nav.group.study", loc)} />
+
       <div className="masthead" style={{ paddingTop: "1.2rem" }}>
         <h1 style={{ letterSpacing: "0.28em" }}>{yjT("academy.title", loc)}</h1>
         <div className="sub">{yjT("academy.sub", loc)}</div>

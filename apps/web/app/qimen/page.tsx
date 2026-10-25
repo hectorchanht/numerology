@@ -11,8 +11,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function QimenPage() {
-  return (
-      <QimenTool />
-  );
+// ?h=<id> 歷史回顧 → dynamic;Cloudflare Pages 要求 dynamic route 用 edge runtime
+export const runtime = "edge";
+
+export default function QimenPage({ searchParams }: { searchParams?: { h?: string } }) {
+  return <QimenTool historyId={searchParams?.h} />;
 }

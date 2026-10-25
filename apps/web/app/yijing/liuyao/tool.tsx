@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { GroupTabs } from "@/components/GroupTabs";
+import { CASTING_TABS } from "@/lib/navGroups";
 import {
   paigua,
   ganzhiForDate,
@@ -179,6 +181,8 @@ export default function LiuyaoTool({ historyId }: { historyId?: string }) {
 
   return (
     <>
+      <GroupTabs links={CASTING_TABS} label={yjT("nav.group.divine", loc)} />
+
       <div className="masthead" style={{ paddingTop: "1.2rem" }}>
         <h1 style={{ letterSpacing: "0.28em" }}>{yjT("liuyao.title", loc)}</h1>
         <div className="sub">{yjT("liuyao.sub", loc)}</div>
