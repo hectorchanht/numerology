@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { BirthInput, ChartResult, FortuneAnalysis } from "@numerology/engine";
 import type { BirthFormValue } from "@/lib/formTypes";
 import { useLocale, STRINGS, type TKey, useScript } from "@/lib/i18n";
-import { go, goBack, useNav, type Screen } from "@/lib/nav";
+import { go, goBack, goAi, setAiView, useAiView, useNav, type AiView, type Screen } from "@/lib/nav";
 import { setChatAvailable } from "@/lib/chatJump";
 import { currentLuckStep } from "@/lib/ganzhi";
 import { yjT } from "@/lib/yijingStrings";
@@ -66,6 +66,7 @@ export default function Home() {
   const { t, locale } = useLocale();
   const { z } = useScript();
   const { screen } = useNav();
+  const aiView = useAiView();
   const [mode, setMode] = useState<Mode>("known");
   const [sys, setSys] = useState<Sys>("bazi");
   const [input, setInput] = useState<BirthInput | null>(() => kept?.input ?? null);
@@ -127,7 +128,7 @@ export default function Home() {
       setRestored(null);
       // 存入本机历史(保留已有章节,只更新命盘/时间;有名就寫入,留空保留舊名)。
       upsertReading({ input: data.chart.input, locale, chart: data.chart, name }).catch(() => {});
-      go("chart");
+      goAi("chart");
     } catch (e) {
       setError(e instanceof Error ? e.message : t("chart.errorFallback"));
     } finally {
@@ -135,8 +136,8 @@ export default function Home() {
     }
   };
 
-  /** 从历史记录恢复:命盘 + 已生成的章节即时显示,零 API 调用。 */
-  const handleRestore = (r: Reading) => {
+  /** 从历史记录恢复:命盘 + 已生成的章节即时显示,零 API 调用。view = 解讀版落點 view(預設命盤)。 */
+  const handleRestore = (r: Reading, view: AiView = "chart") => {
     setMode("known");
     setError("");
     setInput(r.input);
@@ -144,7 +145,7 @@ export default function Home() {
     setRestored(sectionsOf(r));
     // 頂返做最新一條,令「命盤海報」(取最新記錄)同畫面一致;已存章節照留。
     upsertReading({ input: r.input, locale, chart: r.chart }).catch(() => {});
-    go("chart");
+    goAi(view);
   };
 
   /** 某节成功生成 → 存入本机历史(带当时的 lens/provider/model)。 */
@@ -199,6 +200,19 @@ export default function Home() {
   // narrow:桌面用窄欄(設定、對話),其餘畫面用全寬多欄。
   const show = (s: Screen, narrow?: boolean) => ({ className: narrow ? "screen narrow" : "screen", hidden: screen !== s });
 
+  /** 解讀版內三 view 切換(命盤 / 報告 / 大運),三個 view 共用同一控制。 */
+  const aiSeg = (
+    <Seg
+      value={aiView}
+      onChange={setAiView}
+      label={t("tab.ai")}
+      options={[
+        { value: "chart", label: t("tab.chart") },
+        { value: "report", label: t("tab.report") },
+        { value: "fortune", label: t("tab.fortune") },
+      ]}
+    />
+  );
   // .split / .split-*:手機 display:contents(版面不變),桌面變多欄 grid。
   return (
     <>
@@ -319,17 +333,20 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ============ 命盤 ============ */}
-      <section {...show("chart")} aria-label={t("tab.chart")}>
-        <ScreenNav eyebrow={t("tab.chart")}>
+      {/* ============ 解讀(命盤 + 報告 + 大運同一版,Seg 分三 view;三 view 保持 mounted,切換唔丟生成/串流狀態) ============ */}
+      <section {...show("ai")} aria-label={t("tab.ai")}>
+        {ready ? (
+          <>
+            <div hidden={aiView !== "chart"}>
+              <ScreenNav eyebrow={t("tab.chart")}>
           {ready ? (
             <Link href="/poster" className="icon-btn" aria-label={t("chart.posterSub")}>
               <Icon name="share" />
             </Link>
           ) : null}
         </ScreenNav>
-        {ready ? (
-          <div className="split split-chart">
+              {aiSeg}
+              <div className="split split-chart">
             <div className="split-main">
               <div className="who">
                 <div className="avatar" aria-hidden="true">{ready.input.gender}</div>
@@ -377,19 +394,6 @@ export default function Home() {
             <div className="split-a">
               <h2 className="group-title">{t("chart.readings")}</h2>
               <div className="list">
-                <button type="button" className="row" onClick={() => go("report")}>
-                  <Icon name="file" className="ic" />
-                  <span className="lbl">{t("card.chartTitle")}<span className="sub">{t("chart.reportSub")}</span></span>
-                  <Icon name="chev" small className="chev" />
-                </button>
-                <button type="button" className="row" onClick={() => go("fortune")}>
-                  <Icon name="trend" className="ic" />
-                  <span className="lbl">
-                    {t("card.fortuneTitle")}
-                    <span className="sub">{nowLuck ? t("chart.fortuneSub", { gz: nowLuck.ganZhi }) : t("chart.fortuneSubNone")}</span>
-                  </span>
-                  <Icon name="chev" small className="chev" />
-                </button>
                 <button type="button" className="row" onClick={() => go("chat")}>
                   <Icon name="msg" className="ic" />
                   <span className="lbl">{t("chat.title")}<span className="sub">{t("chat.sub")}</span></span>
@@ -430,72 +434,74 @@ export default function Home() {
               </div>
             </div>
           </div>
-        ) : (
-          <EmptyChart />
-        )}
-      </section>
+            </div>
 
-      {/* ============ 報告 ============ */}
-      <section {...show("report")} aria-label={t("tab.report")}>
-        {ready ? (
-          <StreamedReport
-            input={ready.input}
-            endpoint="/api/report"
-            title={t("card.chartTitle")}
-            description={t("card.chartDesc")}
-            segments={REPORT_SEGS}
-            onSectionDone={handleSectionDone("report")}
-            restoredSections={restored?.report ?? null}
-            onAsk={() => go("chat")}
-          />
-        ) : (
-          <>
-            <ScreenNav eyebrow={t("card.chartTitle")} />
-            <EmptyChart />
+            <div hidden={aiView !== "report"}>
+              <StreamedReport
+                input={ready.input}
+                endpoint="/api/report"
+                title={t("card.chartTitle")}
+                description={t("card.chartDesc")}
+                segments={REPORT_SEGS}
+                onSectionDone={handleSectionDone("report")}
+                restoredSections={restored?.report ?? null}
+                onAsk={() => go("chat")}
+              >
+                {aiSeg}
+              </StreamedReport>
+            </div>
+            <div hidden={aiView !== "fortune"}>
+              <StreamedReport
+                input={ready.input}
+                endpoint="/api/fortune"
+                title={t("card.fortuneTitle")}
+                description={t("card.fortuneDesc")}
+                segments={FORTUNE_SEGS}
+                onSectionDone={handleSectionDone("fortune")}
+                restoredSections={restored?.fortune ?? null}
+                onAsk={() => go("chat")}
+                collapsible
+                repairText={fortuneJson ? (md) => repairFortuneMarkdown(md, fortuneJson, locale) : undefined}
+                renderSectionBody={
+                  fortuneJson
+                    ? (segKey, md, lens) => {
+                        switch (segKey) {
+                          case "dayun":
+                            return <FortuneDayun md={md} fortune={fortuneJson} lens={lens} />;
+                          case "review":
+                            return <FortuneYears md={md} fortune={fortuneJson} lens={lens} past />;
+                          case "future":
+                            return <FortuneYears md={md} fortune={fortuneJson} lens={lens} past={false} />;
+                          case "rhythm":
+                            return <FortuneRhythm md={md} />;
+                          default:
+                            return null;
+                        }
+                      }
+                    : undefined
+                }
+              >
+                {aiSeg}
+                <FortuneTimeline chart={ready.chart} visible={screen === "ai" && aiView === "fortune"} />
+                <h2 className="group-title">{t("card.fortuneTitle")}</h2>
+              </StreamedReport>
+            </div>
           </>
-        )}
-      </section>
-
-      {/* ============ 大運 ============ */}
-      <section {...show("fortune")} aria-label={t("tab.fortune")}>
-        {ready ? (
-          <StreamedReport
-            input={ready.input}
-            endpoint="/api/fortune"
-            title={t("card.fortuneTitle")}
-            description={t("card.fortuneDesc")}
-            segments={FORTUNE_SEGS}
-            onSectionDone={handleSectionDone("fortune")}
-            restoredSections={restored?.fortune ?? null}
-            onAsk={() => go("chat")}
-            collapsible
-            repairText={fortuneJson ? (md) => repairFortuneMarkdown(md, fortuneJson, locale) : undefined}
-            renderSectionBody={
-              fortuneJson
-                ? (segKey, md, lens) => {
-                    switch (segKey) {
-                      case "dayun":
-                        return <FortuneDayun md={md} fortune={fortuneJson} lens={lens} />;
-                      case "review":
-                        return <FortuneYears md={md} fortune={fortuneJson} lens={lens} past />;
-                      case "future":
-                        return <FortuneYears md={md} fortune={fortuneJson} lens={lens} past={false} />;
-                      case "rhythm":
-                        return <FortuneRhythm md={md} />;
-                      default:
-                        return null;
-                    }
-                  }
-                : undefined
-            }
-          >
-            <FortuneTimeline chart={ready.chart} visible={screen === "fortune"} />
-            <h2 className="group-title">{t("card.fortuneTitle")}</h2>
-          </StreamedReport>
         ) : (
           <>
-            <ScreenNav eyebrow={t("card.fortuneTitle")} />
-            <EmptyChart />
+            <ScreenNav eyebrow={t("tab.ai")} />
+            <h1 className="large">{t("ai.pickTitle")}</h1>
+            <p className="lede">{t("ai.pickHint")}</p>
+            <HistoryPanel
+              onRestore={(r) => {
+                const restoredSecs = sectionsOf(r);
+                handleRestore(r, restoredSecs.report || restoredSecs.fortune ? "report" : "chart");
+              }}
+            />
+            <button type="button" className="btn block" onClick={() => go("home")}>
+              <Icon name="home" />
+              {t("chart.goHome")}
+            </button>
           </>
         )}
       </section>

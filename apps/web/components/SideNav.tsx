@@ -6,12 +6,13 @@ import { useLocale, LocaleSwitch } from "@/lib/i18n";
 import { go, useNav, type Screen } from "@/lib/nav";
 import { yjT } from "@/lib/yijingStrings";
 import { Icon } from "@/components/Icon";
-import { TAB_ITEMS } from "@/components/TabBar";
+import { NAV_ITEMS } from "@/components/TabBar";
 import { SUB_GROUPS } from "@/lib/navGroups";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 /**
- * 桌面(≥1024px)左側欄:logo + 5 個主 tab + 子頁工具 + 設定/主題。
+ * 桌面(≥1024px)左側欄:logo + 主導航(起盤/命盤/AI 解讀/學院/歷史)+ 子頁工具 + 設定/主題。
+ * 學院已升上主導航,下層 SUB_GROUPS 渲染時濾走學院連結避免重複(資料仍以 navGroups 為單一來源)。
  * 手機/平板由 CSS 隱藏(仍用底部 tab bar),所以兩邊共用同一套 nav store 同 i18n。
  */
 export function SideNav() {
@@ -52,7 +53,21 @@ export function SideNav() {
       </div>
 
       <nav className="side-nav" aria-label={t("tab.aria")}>
-        {TAB_ITEMS.map((it) => {
+        {NAV_ITEMS.map((it) => {
+          if (it.kind === "link") {
+            const on = pathname === it.href || pathname.startsWith(`${it.href}/`);
+            return (
+              <Link
+                key={it.href}
+                href={it.href}
+                className={`side-item${on ? " on" : ""}`}
+                aria-current={on ? "page" : undefined}
+              >
+                <Icon name={it.icon} />
+                {t(it.labelKey)}
+              </Link>
+            );
+          }
           const on = onHome && screen !== "settings" && tab === it.tab;
           return (
             <button
@@ -73,7 +88,7 @@ export function SideNav() {
         {SUB_GROUPS.map((g, gi) => (
           <div key={g.labelId ?? `tail-${gi}`}>
             {g.labelId && <div className="side-group">{yjT(g.labelId, locale)}</div>}
-            {g.links.map((l) => {
+            {g.links.filter((l) => l.href !== "/yijing/academy").map((l) => {
               const on = pathname === l.href;
               return (
                 <Link
