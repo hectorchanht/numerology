@@ -17,23 +17,38 @@ interface TrigramInfo {
   suo: string;
   /** 先天八卦相對的對卦(說卦傳:天地定位、山澤通氣、雷風相薄、水火不相射) */
   opposite: string;
+  /** 卦德(說卦傳:乾健、坤順、震動、巽入、坎陷、離麗、艮止、兌說) */
+  de: string;
+  /** 季節(說卦「帝出乎震」歲時之序,按後天方位) */
+  season: string;
+  /** 節氣(八卦配八節:二分二至四立) */
+  term: string;
+  /** 時辰(後天方位配地支) */
+  hour: string;
+  /** 天氣(卦象占候:梅花易數占天氣常用) */
+  weather: string;
+  /** 身體部位(說卦傳:乾首、坤腹、震足、巽股、坎耳、離目、艮手、兌口) */
+  body: string;
+  /** 動物(說卦傳:乾馬、坤牛、震龍、巽雞、坎豕、離雉、艮狗、兌羊) */
+  animal: string;
 }
 
 /**
- * 八卦本體資料:卦形/自然象/五行/家族,據《說卦傳》核實。
+ * 八卦本體資料:卦形/自然象/五行/家族/卦德/身體/動物,據《說卦傳》核實;
+ * 季節/節氣/時辰按後天方位之序(帝出乎震一歲之環 + 地支配位);天氣為卦象占候。
  * 先天方位:乾南坤北、離東坎西、震東北、兌東南、巽西南、艮西北
  * (相對之卦陰陽互補,此為驗圖準則)。
  * 後天方位即洛書九宮:巽4東南、離9南、坤2西南、震3東、兌7西、艮8東北、坎1北、乾6西北。
  */
 const TRIGRAMS: Record<string, TrigramInfo> = {
-  乾: { name: "乾", symbol: "☰", lines: [true, true, true], nature: "天", element: "金", family: "父", suo: "純陽", opposite: "坤" },
-  坤: { name: "坤", symbol: "☷", lines: [false, false, false], nature: "地", element: "土", family: "母", suo: "純陰", opposite: "乾" },
-  震: { name: "震", symbol: "☳", lines: [true, false, false], nature: "雷", element: "木", family: "長男", suo: "一索", opposite: "巽" },
-  巽: { name: "巽", symbol: "☴", lines: [false, true, true], nature: "風", element: "木", family: "長女", suo: "一索", opposite: "震" },
-  坎: { name: "坎", symbol: "☵", lines: [false, true, false], nature: "水", element: "水", family: "中男", suo: "再索", opposite: "離" },
-  離: { name: "離", symbol: "☲", lines: [true, false, true], nature: "火", element: "火", family: "中女", suo: "再索", opposite: "坎" },
-  艮: { name: "艮", symbol: "☶", lines: [false, false, true], nature: "山", element: "土", family: "少男", suo: "三索", opposite: "兌" },
-  兌: { name: "兌", symbol: "☱", lines: [true, true, false], nature: "澤", element: "金", family: "少女", suo: "三索", opposite: "艮" },
+  乾: { name: "乾", symbol: "☰", lines: [true, true, true], nature: "天", element: "金", family: "父", suo: "純陽", opposite: "坤", de: "健", season: "秋冬之交", term: "立冬", hour: "戌亥時", weather: "晴", body: "首", animal: "馬" },
+  坤: { name: "坤", symbol: "☷", lines: [false, false, false], nature: "地", element: "土", family: "母", suo: "純陰", opposite: "乾", de: "順", season: "夏秋之交", term: "立秋", hour: "未申時", weather: "陰", body: "腹", animal: "牛" },
+  震: { name: "震", symbol: "☳", lines: [true, false, false], nature: "雷", element: "木", family: "長男", suo: "一索", opposite: "巽", de: "動", season: "春", term: "春分", hour: "卯時", weather: "雷", body: "足", animal: "龍" },
+  巽: { name: "巽", symbol: "☴", lines: [false, true, true], nature: "風", element: "木", family: "長女", suo: "一索", opposite: "震", de: "入", season: "春夏之交", term: "立夏", hour: "辰巳時", weather: "風", body: "股", animal: "雞" },
+  坎: { name: "坎", symbol: "☵", lines: [false, true, false], nature: "水", element: "水", family: "中男", suo: "再索", opposite: "離", de: "陷", season: "冬", term: "冬至", hour: "子時", weather: "雨水", body: "耳", animal: "豕" },
+  離: { name: "離", symbol: "☲", lines: [true, false, true], nature: "火", element: "火", family: "中女", suo: "再索", opposite: "坎", de: "麗", season: "夏", term: "夏至", hour: "午時", weather: "日・電", body: "目", animal: "雉" },
+  艮: { name: "艮", symbol: "☶", lines: [false, false, true], nature: "山", element: "土", family: "少男", suo: "三索", opposite: "兌", de: "止", season: "冬春之交", term: "立春", hour: "丑寅時", weather: "雲霧", body: "手", animal: "狗" },
+  兌: { name: "兌", symbol: "☱", lines: [true, true, false], nature: "澤", element: "金", family: "少女", suo: "三索", opposite: "艮", de: "說", season: "秋", term: "秋分", hour: "酉時", weather: "雨澤", body: "口", animal: "羊" },
 };
 
 /** 九宮格位(上南下北,左東右西),左至右、上至下 */
@@ -237,6 +252,9 @@ export function BaguaFamilyGrid() {
               <span style={{ fontSize: "0.66rem", opacity: 0.85 }}>
                 {zT(t.nature)} / {zT(t.element)}
               </span>
+              <span style={{ fontSize: "0.6rem", opacity: 0.75, whiteSpace: "nowrap" }}>
+                {zT(t.term)}・{zT(t.hour)}
+              </span>
             </button>
           );
         })}
@@ -288,6 +306,12 @@ export function BaguaFamilyGrid() {
                 `${zT(DIRECTIONS[HOU_TIAN.indexOf(selInfo.name)])} / ${LUOSHU[HOU_TIAN.indexOf(selInfo.name)]}`,
               ],
               [zT("先天對卦"), zT(selInfo.opposite)],
+              [zT("卦德"), zT(selInfo.de)],
+              [zT("季節 / 節氣"), `${zT(selInfo.season)} / ${zT(selInfo.term)}`],
+              [zT("時辰"), zT(selInfo.hour)],
+              [zT("天氣"), zT(selInfo.weather)],
+              [zT("身體"), zT(selInfo.body)],
+              [zT("動物"), zT(selInfo.animal)],
             ].map(([k, v]) => (
               <div
                 key={k}
@@ -312,7 +336,7 @@ export function BaguaFamilyGrid() {
         </div>
       ) : (
         <p className="muted" style={{ fontSize: "0.85rem", textAlign: "center", marginTop: "0.9rem", marginBottom: 0 }}>
-          {zT("點選任一卦,查看它的爻象、家族排行與兩個方位。")}
+          {zT("點選任一卦,查看它的爻象、家族排行、方位、季節時辰與身體動物等對應。")}
         </p>
       )}
     </div>
