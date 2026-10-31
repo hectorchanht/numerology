@@ -30,7 +30,9 @@ const PARTS: PartMark[] = [
 
 export default function BodyDiagram({ active }: { active: string | null }) {
   const ink = "var(--ink)";
-  const muted = "var(--muted)";
+  // 注意:呢個 theme 根本冇 --muted 變數(得 --ink-soft/--ink-faint),
+  // 用 var(--muted) 會成條 declaration invalid、靜靜跌返 unset。
+  const muted = "var(--ink-soft)";
   const accent = "var(--cinnabar)";
   return (
     <svg
@@ -39,9 +41,8 @@ export default function BodyDiagram({ active }: { active: string | null }) {
       aria-label="人體八卦對應圖"
       style={{ display: "block", width: "100%", maxWidth: "250px", margin: "0 auto" }}
     >
-      {/* 身軀(簡筆人形)。注意:var(--x) 唔可以放 SVG presentation attribute
-          (stroke="var(--muted)" 會俾瀏覽器當 invalid,計出 stroke:none),
-          一律要經 style 入。 */}
+      {/* 身軀(簡筆人形)。顏色一律經 style 入 var(--x)(較穩陣);
+          而且只准用 theme 真係有定義嘅變數,見上面 muted 註解。 */}
       <g style={{ stroke: muted }} strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.75">
         <circle cx="110" cy="34" r="17" />
         <rect x="88" y="54" width="44" height="78" rx="14" />
