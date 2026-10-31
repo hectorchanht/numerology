@@ -39,8 +39,10 @@ export default function BodyDiagram({ active }: { active: string | null }) {
       aria-label="人體八卦對應圖"
       style={{ display: "block", width: "100%", maxWidth: "250px", margin: "0 auto" }}
     >
-      {/* 身軀(簡筆人形) */}
-      <g stroke={muted} strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.75">
+      {/* 身軀(簡筆人形)。注意:var(--x) 唔可以放 SVG presentation attribute
+          (stroke="var(--muted)" 會俾瀏覽器當 invalid,計出 stroke:none),
+          一律要經 style 入。 */}
+      <g style={{ stroke: muted }} strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.75">
         <circle cx="110" cy="34" r="17" />
         <rect x="88" y="54" width="44" height="78" rx="14" />
         <path d="M88 62 L63 120" />
@@ -51,8 +53,8 @@ export default function BodyDiagram({ active }: { active: string | null }) {
         <path d="M122 208 L138 208" />
       </g>
       {/* 眼睛(示意) */}
-      <circle cx="104" cy="32" r="1.6" fill={muted} />
-      <circle cx="116" cy="32" r="1.6" fill={muted} />
+      <circle cx="104" cy="32" r="1.6" style={{ fill: muted }} />
+      <circle cx="116" cy="32" r="1.6" style={{ fill: muted }} />
       {PARTS.map((p) => {
         const on = active === p.part;
         return (
@@ -61,8 +63,7 @@ export default function BodyDiagram({ active }: { active: string | null }) {
               cx={p.x}
               cy={p.y}
               r={on ? 6 : 4.5}
-              fill={on ? accent : "var(--card)"}
-              stroke={on ? accent : muted}
+              style={{ fill: on ? accent : "var(--card)", stroke: on ? accent : muted }}
               strokeWidth="1.6"
             />
             <text
@@ -71,7 +72,7 @@ export default function BodyDiagram({ active }: { active: string | null }) {
               textAnchor={p.anchor}
               fontSize="11.5"
               fontWeight={on ? 800 : 600}
-              fill={on ? accent : ink}
+              style={{ fill: on ? accent : ink }}
             >
               {p.gua}・{p.part}
             </text>
