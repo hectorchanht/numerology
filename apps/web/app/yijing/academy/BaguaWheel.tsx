@@ -91,20 +91,19 @@ export default function BaguaWheel({
             borderRadius: "50%",
           }}
         />
-        {/* 太極(跟環一齊轉) */}
+        {/* 中宮本身已有 ☯,圓環唔再疊多個(免雙重影);中心點細圈標示轉軸 */}
         <span
           style={{
             position: "absolute",
             left: "50%",
             top: "50%",
             transform: "translate(-50%, -50%)",
-            fontSize: "1.9rem",
-            lineHeight: 1,
-            opacity: 0.9,
+            width: "7px",
+            height: "7px",
+            borderRadius: "50%",
+            background: "var(--ink-faint)",
           }}
-        >
-          ☯
-        </span>
+        />
         {seats.map((name, i) => {
           if (!name) return null;
           const dx = (i % 3) - 1;
