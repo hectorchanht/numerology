@@ -3,7 +3,7 @@
 import { useRef } from "react";
 
 /**
- * 八卦圓圖疊加層:圓環載住八隻卦,疊喺九宮格上面俾人拖住轉。
+ * 太極圖疊加層:太極居中、八卦環列,疊喺九宮格上面俾人拖住轉。
  * 拖拽計角度(以格心為軸),放手由 parent snap 去最近 45°;
  * 每隻卦牌 counter-rotate,轉幾多都保持正向易讀。
  */
@@ -47,7 +47,7 @@ export default function BaguaWheel({
     <div
       ref={rootRef}
       role="img"
-      aria-label="八卦圓圖(可拖拽旋轉)"
+      aria-label="太極圖(可拖拽旋轉)"
       style={{
         position: "absolute",
         inset: 0,
@@ -82,7 +82,7 @@ export default function BaguaWheel({
           transition: snapping ? "transform 0.3s ease" : "none",
         }}
       >
-        {/* 圓環 */}
+        {/* 八卦環 */}
         <div
           style={{
             position: "absolute",
@@ -91,19 +91,27 @@ export default function BaguaWheel({
             borderRadius: "50%",
           }}
         />
-        {/* 中宮本身已有 ☯,圓環唔再疊多個(免雙重影);中心點細圈標示轉軸 */}
+        {/* 太極居中:實底圓盤遮住中宮本身個 ☯,得返一個太極,跟圖一齊轉 */}
         <span
           style={{
             position: "absolute",
             left: "50%",
             top: "50%",
             transform: "translate(-50%, -50%)",
-            width: "7px",
-            height: "7px",
+            width: "46px",
+            height: "46px",
             borderRadius: "50%",
-            background: "var(--ink-faint)",
+            background: "var(--card)",
+            border: "1.5px solid var(--line-strong)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "1.55rem",
+            lineHeight: 1,
           }}
-        />
+        >
+          ☯
+        </span>
         {seats.map((name, i) => {
           if (!name) return null;
           const dx = (i % 3) - 1;

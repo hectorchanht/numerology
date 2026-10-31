@@ -83,7 +83,7 @@ const XIAN_ORDER: Record<string, string> = {
  * 五行旺衰:每個五行喺 [春, 夏, 秋, 冬, 四季月] 嘅狀態(旺相休囚死)。
  * 唔使死記,規律係:同令為旺、旺所生為相、生旺者為休、剋旺者為囚、被旺剋者為死。
  */
-/** 九宮座位次序(畫面上順時針):南→西南→西→西北→北→東北→東→東南,俾圓圖旋轉後計每卦坐邊宮 */
+/** 九宮座位次序(畫面上順時針):南→西南→西→西北→北→東北→東→東南,俾太極圖旋轉後計每卦坐邊宮 */
 const CW_ORDER = [1, 2, 5, 8, 7, 6, 3, 0];
 
 const WANG_SEASONS = ["春", "夏", "秋", "冬", "四季月"];
@@ -154,7 +154,7 @@ export function BaguaFamilyGrid() {
     setSnapping(true);
     setAngle((a) => norm360(a + d * 45));
   };
-  /** 圓圖轉咗幾多個 45°(snap 後計) */
+  /** 太極圖轉咗幾多個 45°(snap 後計) */
   const steps = ((Math.round(angle / 45) % 8) + 8) % 8;
   const seatAfter = (i: number, k: number) => CW_ORDER[(CW_ORDER.indexOf(i) + k) % 8];
 
@@ -213,7 +213,7 @@ export function BaguaFamilyGrid() {
         {zT("方位:上南下北,左東右西。同一家人,兩種座位——切換看看每卦搬到哪裡。")}
       </p>
 
-      {/* 疊圓圖開關 + 旋轉掣 */}
+      {/* 疊太極圖開關 + 旋轉掣 */}
       <div
         style={{
           display: "flex",
@@ -241,7 +241,7 @@ export function BaguaFamilyGrid() {
             cursor: "pointer",
           }}
         >
-          {zT(wheelOn ? "疊圓圖:開" : "疊圓圖")}
+          {zT(wheelOn ? "疊太極圖:開" : "疊太極圖")}
         </button>
         {wheelOn && (
           <>
@@ -266,7 +266,7 @@ export function BaguaFamilyGrid() {
 
       {/* minmax(0,1fr) 不可改回 1fr:格仔 aspectRatio:1 + 四行直排文字,內容高度(~88px)
           會經 aspect-ratio 變成欄闊下限,窄機(可用闊 ~229px)三欄撐到 281px,第三欄跌出卡外。
-          外層 relative wrapper 俾八卦圓圖 absolute 疊上去。 */}
+          外層 relative wrapper 俾太極圖 absolute 疊上去。 */}
       <div style={{ position: "relative", maxWidth: "340px", margin: "0 auto" }}>
       <div
         style={{
@@ -389,12 +389,12 @@ export function BaguaFamilyGrid() {
           style={{ fontSize: "0.82rem", textAlign: "center", margin: "0.6rem 0 0" }}
         >
           {steps === 0
-            ? zT("圓圖同九宮格對齊:八卦各坐本宮。拖住圓環轉下,睇每卦搬去邊宮。")
+            ? zT("太極圖同九宮格對齊:八卦各坐本宮。拖住圖轉下,睇每卦搬去邊宮。")
             : selInfo && selPos >= 0
               ? zT(
-                  `圓圖轉咗 ${steps * 45}°:${selInfo.name} 而家坐${DIRECTIONS[seatAfter(selPos, steps)]}宮(本宮係${DIRECTIONS[selPos]})。`
+                  `太極圖轉咗 ${steps * 45}°:${selInfo.name} 而家坐${DIRECTIONS[seatAfter(selPos, steps)]}宮(本宮係${DIRECTIONS[selPos]})。`
                 )
-              : zT(`圓圖轉咗 ${steps * 45}°:八卦各移咗 ${steps} 宮。撳「對齊本圖」返正。`)}
+              : zT(`太極圖轉咗 ${steps * 45}°:八卦各移咗 ${steps} 宮。撳「對齊本圖」返正。`)}
         </p>
       )}
 
