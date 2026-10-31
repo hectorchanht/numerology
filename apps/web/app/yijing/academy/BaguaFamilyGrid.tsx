@@ -311,7 +311,8 @@ export function BaguaFamilyGrid() {
                     {LUOSHU[i]}
                   </span>
                 )}
-                <span style={{ fontSize: "1.35rem" }}>☯</span>
+                {/* 疊太極圖嗰陣,中宮 ☯ 由圓盤嗰個取代,隱藏格入面呢個免錯位雙影 */}
+                <span style={{ fontSize: "1.35rem", opacity: wheelOn ? 0 : 1 }}>☯</span>
                 <span style={{ fontSize: "0.78rem", fontWeight: 700 }}>{zT("中宮")}</span>
                 <span style={{ fontSize: "0.68rem", color: "var(--muted)" }}>{zT("土")}</span>
               </div>
