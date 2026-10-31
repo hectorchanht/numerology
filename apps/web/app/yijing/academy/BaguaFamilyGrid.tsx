@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useScript } from "@/lib/i18n";
+import BodyDiagram from "./BodyDiagram";
 
 type Element5 = "木" | "火" | "金" | "水" | "土";
 
@@ -75,6 +76,19 @@ const XIAN_ORDER: Record<string, string> = {
   坎: "六",
   艮: "七",
   坤: "八",
+};
+
+/**
+ * 五行旺衰:每個五行喺 [春, 夏, 秋, 冬, 四季月] 嘅狀態(旺相休囚死)。
+ * 唔使死記,規律係:同令為旺、旺所生為相、生旺者為休、剋旺者為囚、被旺剋者為死。
+ */
+const WANG_SEASONS = ["春", "夏", "秋", "冬", "四季月"];
+const WANG_SHUAI: Record<Element5, string[]> = {
+  木: ["旺", "休", "死", "相", "囚"],
+  火: ["相", "旺", "囚", "死", "休"],
+  土: ["死", "相", "休", "囚", "旺"],
+  金: ["囚", "死", "旺", "休", "相"],
+  水: ["休", "囚", "相", "旺", "死"],
 };
 
 const ELEMENT_STYLE: Record<Element5, { bg: string; fg: string; bd: string }> = {
@@ -260,6 +274,17 @@ export function BaguaFamilyGrid() {
         })}
       </div>
 
+      {/* 人體外觀圖:常駐圖示,選中邊卦,佢管嗰個部位就亮起 */}
+      <div style={{ marginTop: "1rem" }}>
+        <BodyDiagram active={selInfo ? selInfo.body : null} />
+        <p
+          className="muted"
+          style={{ fontSize: "0.8rem", textAlign: "center", margin: "0.35rem 0 0" }}
+        >
+          {zT("記法:企喺度由頭數落腳——乾首、離目、坎耳、兌口、艮手、坤腹、巽股、震足。天在上,乾係頭;雷行於下,震係足。")}
+        </p>
+      </div>
+
       {selInfo ? (
         <div style={{ marginTop: "0.95rem" }}>
           {/* 爻象:上而下繪出,惟爻序自下而上讀;獨特爻朱砂標示 */}
@@ -328,6 +353,48 @@ export function BaguaFamilyGrid() {
               </div>
             ))}
           </dl>
+          {/* 五行旺衰:五格睇晒五季狀態,旺字朱砂標示 */}
+          <div style={{ marginTop: "0.85rem" }}>
+            <div style={{ display: "flex", gap: "0.4rem" }}>
+              {WANG_SEASONS.map((s, si) => {
+                const st = WANG_SHUAI[selInfo.element][si];
+                const strong = st === "旺";
+                return (
+                  <div
+                    key={s}
+                    style={{
+                      flex: 1,
+                      textAlign: "center",
+                      border: `1.5px solid ${strong ? "var(--cinnabar)" : "var(--line)"}`,
+                      background: strong ? "var(--cinnabar)" : "var(--card)",
+                      color: strong ? "#fff" : undefined,
+                      borderRadius: "10px",
+                      padding: "0.35rem 0.1rem",
+                      opacity: st === "死" ? 0.55 : 1,
+                    }}
+                  >
+                    <div style={{ fontSize: "0.68rem", color: strong ? "#fff" : "var(--muted)" }}>
+                      {zT(s)}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "1rem",
+                        fontWeight: 800,
+                        color: !strong && st === "相" ? "var(--cinnabar)" : undefined,
+                      }}
+                    >
+                      {zT(st)}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="muted" style={{ fontSize: "0.8rem", margin: "0.45rem 0 0" }}>
+              {zT(
+                `${selInfo.element}行旺衰:邊個當令就睇關係——同黨係旺,阿媽(生我)當令我係相,仔女(我生)當令我退休(休),我去犯當令嗰個俾人困(囚),仇人(剋我)當令我最弱(死)。`
+              )}
+            </p>
+          </div>
           <p className="muted" style={{ fontSize: "0.8rem", marginTop: "0.7rem", marginBottom: 0 }}>
             {mode === "xian"
               ? zT("現看先天圖:格內左上角數字為先天卦序(非洛書數);切換「後天八卦」,看它搬到哪一宮。")
