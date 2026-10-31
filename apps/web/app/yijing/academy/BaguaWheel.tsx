@@ -3,21 +3,21 @@
 import { useRef } from "react";
 
 /**
- * 太極圖疊加層:太極居中、八卦環列,疊喺九宮格上面俾人拖住轉。
- * 拖拽計角度(以格心為軸),放手由 parent snap 去最近 45°;
- * 每隻卦牌 counter-rotate,轉幾多都保持正向易讀。
+ * 太極圖(陰陽魚)疊加層:半透明陰陽魚蓋住成個九宮格,用嚟切割/演示
+ * 課文 §4 嗰條太極線——上陰下陽、陰陽交合;拖住轉就見到
+ * 陰魚游入陽位、陽魚游入陰位(陰極轉陽、陽極轉陰)。
+ * (前身係八卦環,Hector 指正:要疊嘅係陰陽魚,唔係八卦環。)
+ * 正位(角度 0):SVG 內部預轉 -90°,令陰魚喺上、陽魚喺下。
+ * 外層 borderRadius 50% + overflow hidden 裁成正圓:旋轉嗰陣
+ * 唔會有角黐出嚟撐爆版面;九宮格每格方形,成格係正方形,魚先係正圓。
  */
-export default function BaguaWheel({
-  seats,
-  symbols,
+export default function TaijiOverlay({
   angle,
   snapping,
   onRotate,
   onDragStart,
   onRelease,
 }: {
-  seats: (string | null)[];
-  symbols: Record<string, string>;
   angle: number;
   snapping: boolean;
   onRotate: (deg: number) => void;
@@ -46,11 +46,11 @@ export default function BaguaWheel({
   return (
     <div
       ref={rootRef}
-      role="img"
-      aria-label="太極圖(可拖拽旋轉)"
       style={{
         position: "absolute",
         inset: 0,
+        borderRadius: "50%",
+        overflow: "hidden",
         touchAction: "none",
         cursor: "grab",
         zIndex: 3,
@@ -82,66 +82,27 @@ export default function BaguaWheel({
           transition: snapping ? "transform 0.3s ease" : "none",
         }}
       >
-        {/* 八卦環 */}
-        <div
-          style={{
-            position: "absolute",
-            inset: "3.5%",
-            border: "1.5px dashed var(--ink-faint)",
-            borderRadius: "50%",
-          }}
-        />
-        {/* 太極居中:實底圓盤遮住中宮本身個 ☯,得返一個太極,跟圖一齊轉 */}
-        <span
-          style={{
-            position: "absolute",
-            left: "50%",
-            top: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "46px",
-            height: "46px",
-            borderRadius: "50%",
-            background: "var(--card)",
-            border: "1.5px solid var(--line-strong)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "1.55rem",
-            lineHeight: 1,
-          }}
+        <svg
+          viewBox="0 0 100 100"
+          role="img"
+          aria-label="太極圖(陰陽魚,可拖拽旋轉)"
+          style={{ display: "block", width: "100%", height: "100%" }}
         >
-          ☯
-        </span>
-        {seats.map((name, i) => {
-          if (!name) return null;
-          const dx = (i % 3) - 1;
-          const dy = Math.floor(i / 3) - 1;
-          const a = Math.atan2(dy, dx);
-          const x = 50 + 33.5 * Math.cos(a);
-          const y = 50 + 33.5 * Math.sin(a);
-          return (
-            <span
-              key={i}
-              style={{
-                position: "absolute",
-                left: `${x}%`,
-                top: `${y}%`,
-                transform: `translate(-50%, -50%) rotate(${-angle}deg)`,
-                transition: snapping ? "transform 0.3s ease" : "none",
-                background: "var(--card)",
-                border: "1.5px solid var(--line-strong)",
-                borderRadius: "999px",
-                padding: "0.14rem 0.5rem",
-                fontSize: "0.8rem",
-                fontWeight: 800,
-                whiteSpace: "nowrap",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
-              }}
-            >
-              {name} {symbols[name]}
-            </span>
-          );
-        })}
+          {/* 預轉 -90°:呢條 path 本身陽在左、陰在右;轉完陰在上、陽在下(上陰下陽) */}
+          <g transform="rotate(-90 50 50)">
+            {/* 陽魚(淺) */}
+            <circle cx="50" cy="50" r="49" fill="rgba(245,245,240,0.55)" />
+            {/* 陰魚(深) */}
+            <path
+              d="M50,1 a49,49 0 0,1 0,98 a24.5,24.5 0 0,1 0,-49 a24.5,24.5 0 0,0 0,-49 Z"
+              fill="rgba(12,12,16,0.62)"
+            />
+            {/* 魚眼:陽中陰種、陰中陽種 */}
+            <circle cx="50" cy="25.5" r="6" fill="rgba(12,12,16,0.85)" />
+            <circle cx="50" cy="74.5" r="6" fill="rgba(245,245,240,0.9)" />
+          </g>
+          <circle cx="50" cy="50" r="49" fill="none" stroke="var(--ink-faint)" strokeWidth="0.8" />
+        </svg>
       </div>
     </div>
   );

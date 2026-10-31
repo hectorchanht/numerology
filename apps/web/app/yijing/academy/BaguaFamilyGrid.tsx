@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useScript } from "@/lib/i18n";
 import BodyMaps from "./BodyMaps";
-import BaguaWheel from "./BaguaWheel";
+import TaijiOverlay from "./BaguaWheel";
 
 type Element5 = "木" | "火" | "金" | "水" | "土";
 
@@ -83,9 +83,6 @@ const XIAN_ORDER: Record<string, string> = {
  * 五行旺衰:每個五行喺 [春, 夏, 秋, 冬, 四季月] 嘅狀態(旺相休囚死)。
  * 唔使死記,規律係:同令為旺、旺所生為相、生旺者為休、剋旺者為囚、被旺剋者為死。
  */
-/** 九宮座位次序(畫面上順時針):南→西南→西→西北→北→東北→東→東南,俾太極圖旋轉後計每卦坐邊宮 */
-const CW_ORDER = [1, 2, 5, 8, 7, 6, 3, 0];
-
 const WANG_SEASONS = ["春", "夏", "秋", "冬", "四季月"];
 const WANG_SHUAI: Record<Element5, string[]> = {
   木: ["旺", "休", "死", "相", "囚"],
@@ -139,11 +136,7 @@ export function BaguaFamilyGrid() {
 
   const seats = mode === "xian" ? XIAN_TIAN : HOU_TIAN;
   const selInfo = sel ? TRIGRAMS[sel] : null;
-  const selPos = sel ? seats.indexOf(sel) : -1;
   const selUnique = selInfo ? uniqueLineIndex(selInfo) : -1;
-
-  const symbols: Record<string, string> = {};
-  for (const [k, v] of Object.entries(TRIGRAMS)) symbols[k] = v.symbol;
 
   const norm360 = (d: number) => ((d % 360) + 360) % 360;
   const snapNow = () => {
@@ -156,7 +149,6 @@ export function BaguaFamilyGrid() {
   };
   /** 太極圖轉咗幾多個 45°(snap 後計) */
   const steps = ((Math.round(angle / 45) % 8) + 8) % 8;
-  const seatAfter = (i: number, k: number) => CW_ORDER[(CW_ORDER.indexOf(i) + k) % 8];
 
   const tabBtn = (active: boolean): React.CSSProperties => ({
     flex: 1,
@@ -311,8 +303,7 @@ export function BaguaFamilyGrid() {
                     {LUOSHU[i]}
                   </span>
                 )}
-                {/* 疊太極圖嗰陣,中宮 ☯ 由圓盤嗰個取代,隱藏格入面呢個免錯位雙影 */}
-                <span style={{ fontSize: "1.35rem", opacity: wheelOn ? 0 : 1 }}>☯</span>
+                <span style={{ fontSize: "1.35rem" }}>☯</span>
                 <span style={{ fontSize: "0.78rem", fontWeight: 700 }}>{zT("中宮")}</span>
                 <span style={{ fontSize: "0.68rem", color: "var(--muted)" }}>{zT("土")}</span>
               </div>
@@ -339,7 +330,7 @@ export function BaguaFamilyGrid() {
                 alignItems: "center",
                 justifyContent: "center",
                 gap: "1px",
-                padding: "4px",
+                padding: "3px 2px",
                 position: "relative",
               }}
             >
@@ -355,15 +346,17 @@ export function BaguaFamilyGrid() {
               >
                 {mode === "hou" ? LUOSHU[i] : XIAN_ORDER[t.name]}
               </span>
-              <span style={{ fontSize: "0.66rem", opacity: 0.85 }}>{zT(DIRECTIONS[i])}</span>
-              <span style={{ fontSize: "1.45rem", fontWeight: 800, lineHeight: 1.15 }}>
-                {t.name} <span style={{ fontSize: "1.05rem" }}>{t.symbol}</span>
+              {/* 字體/行高收緊過:五行的總高度要細過格闊,aspectRatio:1 先真係出到正方形
+                  (內容高過格闊嗰陣,aspect-ratio 會讓步俾內容,格變長方形,疊上去嘅太極魚變橢圓) */}
+              <span style={{ fontSize: "0.62rem", lineHeight: 1.1, opacity: 0.85 }}>{zT(DIRECTIONS[i])}</span>
+              <span style={{ fontSize: "1.3rem", fontWeight: 800, lineHeight: 1.08 }}>
+                {t.name} <span style={{ fontSize: "0.95rem" }}>{t.symbol}</span>
               </span>
-              <span style={{ fontSize: "0.78rem", fontWeight: 700 }}>{zT(t.family)}</span>
-              <span style={{ fontSize: "0.66rem", opacity: 0.85 }}>
+              <span style={{ fontSize: "0.74rem", fontWeight: 700, lineHeight: 1.15 }}>{zT(t.family)}</span>
+              <span style={{ fontSize: "0.63rem", lineHeight: 1.15, opacity: 0.85 }}>
                 {zT(t.nature)} / {zT(t.element)}
               </span>
-              <span style={{ fontSize: "0.6rem", opacity: 0.75, whiteSpace: "nowrap" }}>
+              <span style={{ fontSize: "0.58rem", lineHeight: 1.15, opacity: 0.75, whiteSpace: "nowrap" }}>
                 {zT(t.term)}・{zT(t.hour)}
               </span>
             </button>
@@ -372,9 +365,7 @@ export function BaguaFamilyGrid() {
       </div>
 
         {wheelOn && (
-          <BaguaWheel
-            seats={seats}
-            symbols={symbols}
+          <TaijiOverlay
             angle={angle}
             snapping={snapping}
             onRotate={(d) => setAngle(d)}
@@ -390,12 +381,12 @@ export function BaguaFamilyGrid() {
           style={{ fontSize: "0.82rem", textAlign: "center", margin: "0.6rem 0 0" }}
         >
           {steps === 0
-            ? zT("太極圖同九宮格對齊:八卦各坐本宮。拖住圖轉下,睇每卦搬去邊宮。")
-            : selInfo && selPos >= 0
-              ? zT(
-                  `太極圖轉咗 ${steps * 45}°:${selInfo.name} 而家坐${DIRECTIONS[seatAfter(selPos, steps)]}宮(本宮係${DIRECTIONS[selPos]})。`
-                )
-              : zT(`太極圖轉咗 ${steps * 45}°:八卦各移咗 ${steps} 宮。撳「對齊本圖」返正。`)}
+            ? mode === "hou"
+              ? zT("太極圖正位:上陰下陽——陰魚蓋住上行同西宮(女卦・陰),陽魚蓋住下行同東宮(男卦・陽),就係課文嗰條太極線。拖住幅圖轉,睇陰陽點互轉。")
+              : zT("太極圖正位:上陰下陽。拖住幅圖轉——陰魚游入陽位、陽魚游入陰位,就係陰極轉陽、陽極轉陰。")
+            : steps === 4
+              ? zT("太極圖轉咗 180°:上下陰陽完全對調——陰極生陽、陽極生陰,物極必反。")
+              : zT(`太極圖轉咗 ${steps * 45}°:陰陽魚正喺度互轉——陰位漸生陽、陽位漸生陰。轉到 180° 就完全對調。`)}
         </p>
       )}
 
