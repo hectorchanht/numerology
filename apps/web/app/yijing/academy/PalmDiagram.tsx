@@ -192,7 +192,7 @@ export function PalmDiagram() {
             <dl
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
                 gap: "0.5rem",
                 marginTop: "0.9rem",
                 marginBottom: 0,
@@ -233,8 +233,9 @@ export function PalmDiagram() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
               gap: "8px",
+              width: "100%",
               maxWidth: "300px",
               margin: "0 auto",
             }}
@@ -248,6 +249,7 @@ export function PalmDiagram() {
                   onClick={() => setSelMagic(c)}
                   style={{
                     aspectRatio: "1",
+                    minWidth: 0,
                     borderRadius: "12px",
                     border: active ? "3px solid var(--cinnabar)" : `1.5px solid ${st.bd}`,
                     background: st.bg,
@@ -278,7 +280,7 @@ export function PalmDiagram() {
             <dl
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
                 gap: "0.5rem",
                 marginTop: "0.8rem",
                 marginBottom: 0,

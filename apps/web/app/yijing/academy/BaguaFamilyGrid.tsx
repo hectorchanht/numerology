@@ -123,11 +123,14 @@ export function BaguaFamilyGrid() {
         {zT("方位:上南下北,左東右西。同一家人,兩種座位——切換看看每卦搬到哪裡。")}
       </p>
 
+      {/* minmax(0,1fr) 不可改回 1fr:格仔 aspectRatio:1 + 四行直排文字,內容高度(~88px)
+          會經 aspect-ratio 變成欄闊下限,窄機(可用闊 ~229px)三欄撐到 281px,第三欄跌出卡外。 */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
+          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
           gap: "8px",
+          width: "100%",
           maxWidth: "340px",
           margin: "0 auto",
         }}
@@ -139,6 +142,7 @@ export function BaguaFamilyGrid() {
                 key={i}
                 style={{
                   aspectRatio: "1",
+                  minWidth: 0,
                   borderRadius: "12px",
                   border: "1.5px dashed var(--line)",
                   background: "var(--card)",
@@ -168,6 +172,7 @@ export function BaguaFamilyGrid() {
               aria-label={`${t.name} ${t.family} ${DIRECTIONS[i]}`}
               style={{
                 aspectRatio: "1",
+                minWidth: 0,
                 borderRadius: "12px",
                 border: active ? "3px solid var(--cinnabar)" : `1.5px solid ${st.bd}`,
                 background: st.bg,
@@ -236,7 +241,7 @@ export function BaguaFamilyGrid() {
           <dl
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
               gap: "0.5rem",
               marginTop: "0.8rem",
               marginBottom: 0,

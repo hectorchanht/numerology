@@ -116,11 +116,13 @@ export function JiugongMnemonic() {
         {zT("春天木、夏天火、秋季金、冬天水,四季土。點選任一宮,看它的五行與生剋。")}
       </p>
 
+      {/* minmax(0,1fr):同 BaguaFamilyGrid——aspectRatio 格仔內容高度會變欄闊下限,窄機撐爆 */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
+          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
           gap: "8px",
+          width: "100%",
           maxWidth: "340px",
           margin: "0 auto",
         }}
@@ -135,6 +137,7 @@ export function JiugongMnemonic() {
               aria-label={`${cell.gua} ${cell.num}宮 ${cell.dir} ${cell.element}`}
               style={{
                 aspectRatio: "1",
+                minWidth: 0,
                 borderRadius: "12px",
                 border: active ? "3px solid var(--cinnabar)" : `1.5px solid ${st.bd}`,
                 background: st.bg,
@@ -173,7 +176,7 @@ export function JiugongMnemonic() {
         <dl
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
+            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
             gap: "0.5rem",
             marginTop: "0.85rem",
             marginBottom: 0,
