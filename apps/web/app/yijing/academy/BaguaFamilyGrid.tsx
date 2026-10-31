@@ -46,6 +46,22 @@ const XIAN_TIAN: (string | null)[] = ["兌", "乾", "巽", "離", null, "坎", "
 const HOU_TIAN: (string | null)[] = ["巽", "離", "坤", "震", null, "兌", "艮", "坎", "乾"];
 const LUOSHU: (number | null)[] = [4, 9, 2, 3, 5, 7, 8, 1, 6];
 
+/**
+ * 先天卦序(伏羲次序,同洛書數係兩套系統,唔好混填):
+ * 乾一、兌二、離三、震四、巽五、坎六、艮七、坤八。
+ * 格仔 badge 用中文數字,同後天洛書數嘅阿拉伯數字一眼區分。
+ */
+const XIAN_ORDER: Record<string, string> = {
+  乾: "一",
+  兌: "二",
+  離: "三",
+  震: "四",
+  巽: "五",
+  坎: "六",
+  艮: "七",
+  坤: "八",
+};
+
 const ELEMENT_STYLE: Record<Element5, { bg: string; fg: string; bd: string }> = {
   木: { bg: "#2e933c", fg: "#ffffff", bd: "#1e6b28" },
   火: { bg: "#e03131", fg: "#ffffff", bd: "#a61e1e" },
@@ -201,20 +217,18 @@ export function BaguaFamilyGrid() {
                 position: "relative",
               }}
             >
-              {mode === "hou" && (
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "4px",
-                    left: "7px",
-                    fontSize: "0.72rem",
-                    fontWeight: 800,
-                    opacity: 0.85,
-                  }}
-                >
-                  {LUOSHU[i]}
-                </span>
-              )}
+              <span
+                style={{
+                  position: "absolute",
+                  top: "4px",
+                  left: "7px",
+                  fontSize: "0.72rem",
+                  fontWeight: 800,
+                  opacity: 0.85,
+                }}
+              >
+                {mode === "hou" ? LUOSHU[i] : XIAN_ORDER[t.name]}
+              </span>
               <span style={{ fontSize: "0.66rem", opacity: 0.85 }}>{zT(DIRECTIONS[i])}</span>
               <span style={{ fontSize: "1.45rem", fontWeight: 800, lineHeight: 1.15 }}>
                 {t.name} <span style={{ fontSize: "1.05rem" }}>{t.symbol}</span>
@@ -265,7 +279,10 @@ export function BaguaFamilyGrid() {
               [zT("卦名"), `${selInfo.name} ${selInfo.symbol}`],
               [zT("家族"), zT(selInfo.family)],
               [zT("自然象 / 五行"), `${zT(selInfo.nature)} / ${zT(selInfo.element)}`],
-              [zT("先天方位"), zT(DIRECTIONS[XIAN_TIAN.indexOf(selInfo.name)])],
+              [
+                zT("先天方位 / 卦序"),
+                `${zT(DIRECTIONS[XIAN_TIAN.indexOf(selInfo.name)])} / ${XIAN_ORDER[selInfo.name]}`,
+              ],
               [
                 zT("後天方位 / 洛書數"),
                 `${zT(DIRECTIONS[HOU_TIAN.indexOf(selInfo.name)])} / ${LUOSHU[HOU_TIAN.indexOf(selInfo.name)]}`,
@@ -289,7 +306,7 @@ export function BaguaFamilyGrid() {
           </dl>
           <p className="muted" style={{ fontSize: "0.8rem", marginTop: "0.7rem", marginBottom: 0 }}>
             {mode === "xian"
-              ? zT("現看先天圖:此卦正坐在先天方位;切換「後天八卦」,看它搬到哪一宮。")
+              ? zT("現看先天圖:格內左上角數字為先天卦序(非洛書數);切換「後天八卦」,看它搬到哪一宮。")
               : zT("現看後天圖:格內左上角數字為洛書數;切換「先天八卦」,看它回到哪個方位。")}
           </p>
         </div>
