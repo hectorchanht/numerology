@@ -141,7 +141,9 @@ export function BaguaFamilyGrid() {
               <div
                 key={i}
                 style={{
-                  aspectRatio: "1",
+                  // 唔好加 aspectRatio:中宮內容矮,aspect-ratio 會頂住佢唔俾 stretch,
+                  // 同行卦格俾內容撐高時佢會矮一截。用 height:100% 跟返行高。
+                  height: "100%",
                   minWidth: 0,
                   borderRadius: "12px",
                   border: "1.5px dashed var(--line)",
@@ -151,14 +153,26 @@ export function BaguaFamilyGrid() {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "2px",
+                  position: "relative",
                 }}
               >
+                {mode === "hou" && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "4px",
+                      left: "7px",
+                      fontSize: "0.72rem",
+                      fontWeight: 800,
+                      opacity: 0.85,
+                    }}
+                  >
+                    {LUOSHU[i]}
+                  </span>
+                )}
                 <span style={{ fontSize: "1.35rem" }}>☯</span>
                 <span style={{ fontSize: "0.78rem", fontWeight: 700 }}>{zT("中宮")}</span>
-                <span style={{ fontSize: "0.68rem", color: "var(--muted)" }}>
-                  {mode === "hou" ? "5 · " : ""}
-                  {zT("土")}
-                </span>
+                <span style={{ fontSize: "0.68rem", color: "var(--muted)" }}>{zT("土")}</span>
               </div>
             );
           }
