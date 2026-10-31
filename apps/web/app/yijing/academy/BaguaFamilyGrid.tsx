@@ -172,15 +172,7 @@ export function BaguaFamilyGrid() {
   };
 
   return (
-    <div
-      style={{
-        border: "1px solid var(--line)",
-        borderRadius: "14px",
-        padding: "1rem",
-        margin: "1.2rem 0",
-        background: "var(--bg-soft)",
-      }}
-    >
+    <div className="academy-widget-card">
       <div style={{ display: "flex", gap: "0.6rem", marginBottom: "0.7rem" }}>
         <button
           style={tabBtn(mode === "xian")}
@@ -349,14 +341,14 @@ export function BaguaFamilyGrid() {
               {/* 字體/行高收緊過:五行的總高度要細過格闊,aspectRatio:1 先真係出到正方形
                   (內容高過格闊嗰陣,aspect-ratio 會讓步俾內容,格變長方形,疊上去嘅太極魚變橢圓) */}
               <span style={{ fontSize: "0.62rem", lineHeight: 1.1, opacity: 0.85 }}>{zT(DIRECTIONS[i])}</span>
-              <span style={{ fontSize: "1.3rem", fontWeight: 800, lineHeight: 1.08 }}>
+              <span style={{ fontSize: "1.24rem", fontWeight: 800, lineHeight: 1.05 }}>
                 {t.name} <span style={{ fontSize: "0.95rem" }}>{t.symbol}</span>
               </span>
-              <span style={{ fontSize: "0.74rem", fontWeight: 700, lineHeight: 1.15 }}>{zT(t.family)}</span>
-              <span style={{ fontSize: "0.63rem", lineHeight: 1.15, opacity: 0.85 }}>
+              <span style={{ fontSize: "0.74rem", fontWeight: 700, lineHeight: 1.12 }}>{zT(t.family)}</span>
+              <span style={{ fontSize: "0.63rem", lineHeight: 1.12, opacity: 0.85 }}>
                 {zT(t.nature)} / {zT(t.element)}
               </span>
-              <span style={{ fontSize: "0.58rem", lineHeight: 1.15, opacity: 0.75, whiteSpace: "nowrap" }}>
+              <span style={{ fontSize: "0.58rem", lineHeight: 1.12, opacity: 0.75, whiteSpace: "nowrap" }}>
                 {zT(t.term)}・{zT(t.hour)}
               </span>
             </button>

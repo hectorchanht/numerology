@@ -884,3 +884,10 @@ h1.large + .seg { margin-bottom: 12px; }
 .case-row .case-meta { display: block; margin-top: 3px; font-size: 12px; color: var(--label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .case-row .case-side { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .case-row .case-chev { color: var(--label-3); font-size: 18px; line-height: 1; }
+
+/* Academy widget card(BaguaFamilyGrid):桌面係有框卡;手機唔要額外 card padding——
+   bleed 到課文卡邊緣,俾返啲闊度俾內容(Hector 2026-10-31)。 */
+.academy-widget-card { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; margin: 1.2rem 0; background: var(--bg-soft); }
+@media (max-width: 640px) {
+  .academy-widget-card { margin: -18px -18px 1rem; padding: 0.7rem 0.5rem; border-left: none; border-right: none; border-radius: 0; }
+}
