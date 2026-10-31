@@ -226,7 +226,7 @@ export interface AcademyLesson {
   quiz: AcademyQuizQ[];
   /** 延伸出處:每課 2–4 個已核實的公有領域原文鏈接。 */
   sources: AcademySource[];
-  /** 互動組件:在 widgetAfter 指定的 section 之後渲染。 */
+  /** 互動組件:在 widgetAfter 指定的 section 之後渲染;-1 = 放在第一節之前(圖先行,先看圖再讀字)。 */
   widget?: "palm" | "bagua" | "jiugong" | "baxing" | "shouji" | "abcde";
   widgetAfter?: number;
 }
@@ -424,7 +424,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     sub: "一家八口的兩種座位表",
     minutes: 10,
     widget: "bagua",
-    widgetAfter: 1,
+    widgetAfter: -1,
     sections: [
       {
         heading: "八卦是一家人:獨爻定性別,爻位定排行",

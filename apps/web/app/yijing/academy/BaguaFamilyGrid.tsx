@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useScript } from "@/lib/i18n";
-import BodyDiagram from "./BodyDiagram";
+import BodyMaps from "./BodyMaps";
+import BaguaWheel from "./BaguaWheel";
 
 type Element5 = "木" | "火" | "金" | "水" | "土";
 
@@ -82,6 +83,9 @@ const XIAN_ORDER: Record<string, string> = {
  * 五行旺衰:每個五行喺 [春, 夏, 秋, 冬, 四季月] 嘅狀態(旺相休囚死)。
  * 唔使死記,規律係:同令為旺、旺所生為相、生旺者為休、剋旺者為囚、被旺剋者為死。
  */
+/** 九宮座位次序(畫面上順時針):南→西南→西→西北→北→東北→東→東南,俾圓圖旋轉後計每卦坐邊宮 */
+const CW_ORDER = [1, 2, 5, 8, 7, 6, 3, 0];
+
 const WANG_SEASONS = ["春", "夏", "秋", "冬", "四季月"];
 const WANG_SHUAI: Record<Element5, string[]> = {
   木: ["旺", "休", "死", "相", "囚"],
@@ -129,11 +133,30 @@ export function BaguaFamilyGrid() {
   const { zT } = useScript();
   const [mode, setMode] = useState<"xian" | "hou">("xian");
   const [sel, setSel] = useState<string | null>(null);
+  const [wheelOn, setWheelOn] = useState(false);
+  const [angle, setAngle] = useState(0);
+  const [snapping, setSnapping] = useState(false);
 
   const seats = mode === "xian" ? XIAN_TIAN : HOU_TIAN;
   const selInfo = sel ? TRIGRAMS[sel] : null;
   const selPos = sel ? seats.indexOf(sel) : -1;
   const selUnique = selInfo ? uniqueLineIndex(selInfo) : -1;
+
+  const symbols: Record<string, string> = {};
+  for (const [k, v] of Object.entries(TRIGRAMS)) symbols[k] = v.symbol;
+
+  const norm360 = (d: number) => ((d % 360) + 360) % 360;
+  const snapNow = () => {
+    setSnapping(true);
+    setAngle((a) => norm360(Math.round(a / 45) * 45));
+  };
+  const stepWheel = (d: number) => {
+    setSnapping(true);
+    setAngle((a) => norm360(a + d * 45));
+  };
+  /** 圓圖轉咗幾多個 45°(snap 後計) */
+  const steps = ((Math.round(angle / 45) % 8) + 8) % 8;
+  const seatAfter = (i: number, k: number) => CW_ORDER[(CW_ORDER.indexOf(i) + k) % 8];
 
   const tabBtn = (active: boolean): React.CSSProperties => ({
     flex: 1,
@@ -146,6 +169,16 @@ export function BaguaFamilyGrid() {
     cursor: "pointer",
   });
 
+  const stepBtn: React.CSSProperties = {
+    border: "1.5px solid var(--line)",
+    background: "var(--card)",
+    borderRadius: "999px",
+    padding: "0.28rem 0.7rem",
+    fontSize: "0.82rem",
+    fontWeight: 700,
+    cursor: "pointer",
+  };
+
   return (
     <div
       style={{
@@ -157,10 +190,22 @@ export function BaguaFamilyGrid() {
       }}
     >
       <div style={{ display: "flex", gap: "0.6rem", marginBottom: "0.7rem" }}>
-        <button style={tabBtn(mode === "xian")} onClick={() => setMode("xian")}>
+        <button
+          style={tabBtn(mode === "xian")}
+          onClick={() => {
+            setMode("xian");
+            setAngle(0);
+          }}
+        >
           {zT("先天八卦")}
         </button>
-        <button style={tabBtn(mode === "hou")} onClick={() => setMode("hou")}>
+        <button
+          style={tabBtn(mode === "hou")}
+          onClick={() => {
+            setMode("hou");
+            setAngle(0);
+          }}
+        >
           {zT("後天八卦")}
         </button>
       </div>
@@ -168,16 +213,67 @@ export function BaguaFamilyGrid() {
         {zT("方位:上南下北,左東右西。同一家人,兩種座位——切換看看每卦搬到哪裡。")}
       </p>
 
+      {/* 疊圓圖開關 + 旋轉掣 */}
+      <div
+        style={{
+          display: "flex",
+          gap: "0.45rem",
+          justifyContent: "center",
+          alignItems: "center",
+          margin: "0 0 0.7rem",
+          flexWrap: "wrap",
+        }}
+      >
+        <button
+          onClick={() => {
+            setWheelOn((w) => !w);
+            setAngle(0);
+          }}
+          aria-pressed={wheelOn}
+          style={{
+            border: `1.5px solid ${wheelOn ? "var(--cinnabar)" : "var(--line)"}`,
+            background: wheelOn ? "var(--cinnabar)" : "var(--card)",
+            color: wheelOn ? "#fff" : undefined,
+            borderRadius: "999px",
+            padding: "0.28rem 0.85rem",
+            fontSize: "0.82rem",
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          {zT(wheelOn ? "疊圓圖:開" : "疊圓圖")}
+        </button>
+        {wheelOn && (
+          <>
+            <button onClick={() => stepWheel(-1)} style={stepBtn} aria-label={zT("逆時針轉45度")}>
+              ⟲ 45°
+            </button>
+            <button onClick={() => stepWheel(1)} style={stepBtn} aria-label={zT("順時針轉45度")}>
+              ⟳ 45°
+            </button>
+            <button
+              onClick={() => {
+                setSnapping(true);
+                setAngle(0);
+              }}
+              style={stepBtn}
+            >
+              {zT("對齊本圖")}
+            </button>
+          </>
+        )}
+      </div>
+
       {/* minmax(0,1fr) 不可改回 1fr:格仔 aspectRatio:1 + 四行直排文字,內容高度(~88px)
-          會經 aspect-ratio 變成欄闊下限,窄機(可用闊 ~229px)三欄撐到 281px,第三欄跌出卡外。 */}
+          會經 aspect-ratio 變成欄闊下限,窄機(可用闊 ~229px)三欄撐到 281px,第三欄跌出卡外。
+          外層 relative wrapper 俾八卦圓圖 absolute 疊上去。 */}
+      <div style={{ position: "relative", maxWidth: "340px", margin: "0 auto" }}>
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
           gap: "8px",
           width: "100%",
-          maxWidth: "340px",
-          margin: "0 auto",
         }}
       >
         {seats.map((name, i) => {
@@ -274,15 +370,41 @@ export function BaguaFamilyGrid() {
         })}
       </div>
 
-      {/* 人體外觀圖:常駐圖示,選中邊卦,佢管嗰個部位就亮起 */}
-      <div style={{ marginTop: "1rem" }}>
-        <BodyDiagram active={selInfo ? selInfo.body : null} />
+        {wheelOn && (
+          <BaguaWheel
+            seats={seats}
+            symbols={symbols}
+            angle={angle}
+            snapping={snapping}
+            onRotate={(d) => setAngle(d)}
+            onDragStart={() => setSnapping(false)}
+            onRelease={snapNow}
+          />
+        )}
+      </div>
+
+      {wheelOn && (
         <p
           className="muted"
-          style={{ fontSize: "0.8rem", textAlign: "center", margin: "0.35rem 0 0" }}
+          style={{ fontSize: "0.82rem", textAlign: "center", margin: "0.6rem 0 0" }}
         >
-          {zT("記法:企喺度由頭數落腳——乾首、離目、坎耳、兌口、艮手、坤腹、巽股、震足。天在上,乾係頭;雷行於下,震係足。")}
+          {steps === 0
+            ? zT("圓圖同九宮格對齊:八卦各坐本宮。拖住圓環轉下,睇每卦搬去邊宮。")
+            : selInfo && selPos >= 0
+              ? zT(
+                  `圓圖轉咗 ${steps * 45}°:${selInfo.name} 而家坐${DIRECTIONS[seatAfter(selPos, steps)]}宮(本宮係${DIRECTIONS[selPos]})。`
+                )
+              : zT(`圓圖轉咗 ${steps * 45}°:八卦各移咗 ${steps} 宮。撳「對齊本圖」返正。`)}
         </p>
+      )}
+
+      {/* 人體對應圖組:外觀(說卦部位)/內臟(五行五臟)一掣切換,選中卦亮起對應位 */}
+      <div style={{ marginTop: "1rem" }}>
+        <BodyMaps
+          activeBody={selInfo ? selInfo.body : null}
+          selName={selInfo ? selInfo.name : null}
+          selElement={selInfo ? selInfo.element : null}
+        />
       </div>
 
       {selInfo ? (

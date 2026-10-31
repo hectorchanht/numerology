@@ -39,6 +39,17 @@ export function LessonView({ lessonId }: { lessonId: string }) {
   const prev = ACADEMY_LESSONS[idx - 1];
   const next = ACADEMY_LESSONS[idx + 1];
 
+  const widgetAt = (si: number) => (
+    <>
+      {lesson.widget === "palm" && lesson.widgetAfter === si && <PalmDiagram />}
+      {lesson.widget === "bagua" && lesson.widgetAfter === si && <BaguaFamilyGrid />}
+      {lesson.widget === "jiugong" && lesson.widgetAfter === si && <JiugongMnemonic />}
+      {lesson.widget === "baxing" && lesson.widgetAfter === si && <BaxingPan />}
+      {lesson.widget === "shouji" && lesson.widgetAfter === si && <ShoujiBaxing />}
+      {lesson.widget === "abcde" && lesson.widgetAfter === si && <AbcdeSteps />}
+    </>
+  );
+
   return (
     <>
       <GroupTabs links={STUDY_TABS} label={yjT("nav.group.study", loc)} />
@@ -53,6 +64,8 @@ export function LessonView({ lessonId }: { lessonId: string }) {
       </div>
 
       <div className="card" key={refresh}>
+        {/* widgetAfter: -1 = 圖先行,組件放在第一節之前,先看圖再讀字 */}
+        {lesson.widgetAfter === -1 && <div style={{ marginBottom: "1.2rem" }}>{widgetAt(-1)}</div>}
         {lesson.sections.map((s, si) => (
           <Fragment key={si}>
             <section style={{ marginBottom: si < lesson.sections.length - 1 ? "1.4rem" : 0 }}>
@@ -63,12 +76,7 @@ export function LessonView({ lessonId }: { lessonId: string }) {
                 </p>
               ))}
             </section>
-            {lesson.widget === "palm" && lesson.widgetAfter === si && <PalmDiagram />}
-            {lesson.widget === "bagua" && lesson.widgetAfter === si && <BaguaFamilyGrid />}
-            {lesson.widget === "jiugong" && lesson.widgetAfter === si && <JiugongMnemonic />}
-            {lesson.widget === "baxing" && lesson.widgetAfter === si && <BaxingPan />}
-            {lesson.widget === "shouji" && lesson.widgetAfter === si && <ShoujiBaxing />}
-            {lesson.widget === "abcde" && lesson.widgetAfter === si && <AbcdeSteps />}
+            {widgetAt(si)}
           </Fragment>
         ))}
       </div>

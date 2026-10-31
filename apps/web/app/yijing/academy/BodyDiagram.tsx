@@ -28,12 +28,32 @@ const PARTS: PartMark[] = [
   { part: "足", gua: "震", x: 131, y: 208, tx: 142, ty: 212, anchor: "start" },
 ];
 
+const INK = "var(--ink)";
+// 注意:呢個 theme 根本冇 --muted 變數(得 --ink-soft/--ink-faint),
+// 用 var(--muted) 會成條 declaration invalid、靜靜跌返 unset。
+const MUTED = "var(--ink-soft)";
+const ACCENT = "var(--cinnabar)";
+
+/** 簡筆人形輪廓(外觀圖/內臟圖共用)。顏色一律經 style 入 var(--x)。 */
+export function FigureOutline() {
+  return (
+    <g style={{ stroke: MUTED }} strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.75">
+      <circle cx="110" cy="34" r="17" />
+      <rect x="88" y="54" width="44" height="78" rx="14" />
+      <path d="M88 62 L63 120" />
+      <path d="M132 62 L157 120" />
+      <path d="M97 132 L91 202" />
+      <path d="M123 132 L129 202" />
+      <path d="M82 208 L98 208" />
+      <path d="M122 208 L138 208" />
+    </g>
+  );
+}
+
 export default function BodyDiagram({ active }: { active: string | null }) {
-  const ink = "var(--ink)";
-  // 注意:呢個 theme 根本冇 --muted 變數(得 --ink-soft/--ink-faint),
-  // 用 var(--muted) 會成條 declaration invalid、靜靜跌返 unset。
-  const muted = "var(--ink-soft)";
-  const accent = "var(--cinnabar)";
+  const ink = INK;
+  const muted = MUTED;
+  const accent = ACCENT;
   return (
     <svg
       viewBox="0 0 220 226"
@@ -41,18 +61,7 @@ export default function BodyDiagram({ active }: { active: string | null }) {
       aria-label="人體八卦對應圖"
       style={{ display: "block", width: "100%", maxWidth: "250px", margin: "0 auto" }}
     >
-      {/* 身軀(簡筆人形)。顏色一律經 style 入 var(--x)(較穩陣);
-          而且只准用 theme 真係有定義嘅變數,見上面 muted 註解。 */}
-      <g style={{ stroke: muted }} strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.75">
-        <circle cx="110" cy="34" r="17" />
-        <rect x="88" y="54" width="44" height="78" rx="14" />
-        <path d="M88 62 L63 120" />
-        <path d="M132 62 L157 120" />
-        <path d="M97 132 L91 202" />
-        <path d="M123 132 L129 202" />
-        <path d="M82 208 L98 208" />
-        <path d="M122 208 L138 208" />
-      </g>
+      <FigureOutline />
       {/* 眼睛(示意) */}
       <circle cx="104" cy="32" r="1.6" style={{ fill: muted }} />
       <circle cx="116" cy="32" r="1.6" style={{ fill: muted }} />
