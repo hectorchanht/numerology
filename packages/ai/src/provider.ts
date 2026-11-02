@@ -72,6 +72,16 @@ export interface ProviderOptions {
    * (在 locale 语言指令之后),优先级最高,用户可覆盖默认人设。
    */
   customSystemPrompt?: string;
+  /**
+   * 捕捉思考過程(僅服務端 route 注入,絕不來自客戶端請求體;預設 off)。
+   * 目前只有 report / fortune 兩條 route 開啟;chat 等其它 route 不開,維持壓制。
+   * 開啟後:
+   * - Mac route 不再送 reasoning_effort:"none",讓模型正常思考;
+   * - OpenAI 兼容流的結構化 reasoning delta 與 content 內嵌的 <think>…</think> 段,
+   *   統一正規化為文本流中的 <think>…</think> 段,由前端分拆後預設折疊展示。
+   * 關閉(預設):reasoning 通道丟棄、content 內嵌 think 段剝除(即原有壓制行為)。
+   */
+  captureThinking?: boolean;
 }
 
 /**
@@ -475,6 +485,113 @@ export interface TextStream {
   abort(): void;
 }
 
+const THINK_OPEN = "<think>";
+const THINK_CLOSE = "</think>";
+
+/** s 的最長後綴同時是 tag 的真前綴的長度(跨 chunk 標籤切分時要保留的尾巴)。 */
+function suffixPrefixLen(s: string, tag: string): number {
+  const max = Math.min(s.length, tag.length - 1);
+  for (let k = max; k > 0; k--) if (tag.startsWith(s.slice(s.length - k))) return k;
+  return 0;
+}
+
+/**
+ * 思考正規化器(增量,供流式逐 chunk 餵入):
+ * 把「結構化 reasoning delta」與「content 內嵌 <think>…</think> 段」統一成
+ * 文本流中的 <think>…</think> 段——傳輸協議維持純文字不變,前端用 splitThinking 分拆。
+ * - capture=true:思考原樣保留(以標籤包住);reasoning 開的 think 塊在第一段 content
+ *   到達時自動閉合;finish() 會補上未閉合的 </think>,保證落檔文本形狀完整。
+ * - capture=false(預設/壓制):reasoning 丟棄,content 內的 think 段整段剝除,
+ *   其餘文本逐字不變(無標籤文本零影響)。
+ * 標籤可跨 chunk 切分:掃描時保留可能是標籤前綴的尾巴(≤7 字),不漏不重。
+ */
+export class ThinkStreamNormalizer {
+  private insideThink = false;
+  private thinkFromReasoning = false;
+  private held = "";
+
+  constructor(private readonly capture: boolean) {}
+
+  /** 結構化 reasoning delta(Ollama/MLX 的 delta.reasoning)。壓制模式直接丟棄。 */
+  pushReasoning(delta: string): string {
+    if (!delta || !this.capture) return "";
+    let out = "";
+    if (!this.insideThink) {
+      out += THINK_OPEN;
+      this.insideThink = true;
+      this.thinkFromReasoning = true;
+    }
+    return out + delta;
+  }
+
+  /** content delta:掃描內嵌標籤,思考段按 capture 保留或剝除。 */
+  pushContent(delta: string): string {
+    if (!delta) return "";
+    let out = "";
+    // reasoning 開的 think 塊:正文一到就先閉合,之後按普通 content 掃描。
+    if (this.insideThink && this.thinkFromReasoning) {
+      out += THINK_CLOSE;
+      this.insideThink = false;
+      this.thinkFromReasoning = false;
+    }
+    this.held += delta;
+    for (;;) {
+      if (!this.insideThink) {
+        const idx = this.held.indexOf(THINK_OPEN);
+        if (idx < 0) {
+          const keep = suffixPrefixLen(this.held, THINK_OPEN);
+          out += this.held.slice(0, this.held.length - keep);
+          this.held = this.held.slice(this.held.length - keep);
+          break;
+        }
+        out += this.held.slice(0, idx);
+        if (this.capture) out += THINK_OPEN;
+        this.insideThink = true;
+        this.thinkFromReasoning = false;
+        this.held = this.held.slice(idx + THINK_OPEN.length);
+      } else {
+        const idx = this.held.indexOf(THINK_CLOSE);
+        if (idx < 0) {
+          const keep = suffixPrefixLen(this.held, THINK_CLOSE);
+          if (this.capture) out += this.held.slice(0, this.held.length - keep);
+          this.held = this.held.slice(this.held.length - keep);
+          break;
+        }
+        if (this.capture) out += this.held.slice(0, idx) + THINK_CLOSE;
+        this.insideThink = false;
+        this.held = this.held.slice(idx + THINK_CLOSE.length);
+      }
+    }
+    return out;
+  }
+
+  /** 流結束:沖出保留尾巴;未閉合的 think 在 capture 模式補 </think>。 */
+  finish(): string {
+    let out = "";
+    if (this.held) {
+      if (this.capture || !this.insideThink) out += this.held;
+      this.held = "";
+    }
+    if (this.insideThink && this.capture) out += THINK_CLOSE;
+    this.insideThink = false;
+    this.thinkFromReasoning = false;
+    return out;
+  }
+}
+
+/** 非流式版正規化(供 chatComplete):reasoning 欄 + content 一併處理,語意與流式版一致。 */
+export function normalizeThinkText(content: string, reasoning: string | undefined, capture: boolean): string {
+  const n = new ThinkStreamNormalizer(capture);
+  return n.pushReasoning(reasoning ?? "") + n.pushContent(content) + n.finish();
+}
+
+/** OpenAI 兼容補全結果的 message 附加欄(Ollama/MLX 的結構化 reasoning,不在 SDK 類型內)。 */
+function messageReasoning(res: OpenAI.Chat.Completions.ChatCompletion): string | undefined {
+  const m = res.choices?.[0]?.message as { reasoning?: unknown; reasoning_content?: unknown } | undefined;
+  const v = m?.reasoning ?? m?.reasoning_content;
+  return typeof v === "string" && v ? v : undefined;
+}
+
 type OpenAIChunkStream = AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
 
 /** 把 OpenAI 兼容的流式响应包成 Anthropic 风格的事件流。懒启动:首次 finalMessage() 才真正请求。 */
@@ -486,7 +603,14 @@ class OpenAITextStream implements TextStream {
   private done: Promise<{ text: string }> | null = null;
   private aborter = new AbortController();
 
-  constructor(private readonly open: (signal: AbortSignal) => Promise<OpenAIChunkStream>) {}
+  private readonly normalizer: ThinkStreamNormalizer;
+
+  constructor(
+    private readonly open: (signal: AbortSignal) => Promise<OpenAIChunkStream>,
+    captureThinking = false,
+  ) {
+    this.normalizer = new ThinkStreamNormalizer(captureThinking);
+  }
 
   on(event: "text" | "error", listener: (arg: never) => void): this {
     if (event === "text") {
@@ -519,9 +643,18 @@ class OpenAITextStream implements TextStream {
     try {
       const stream = await this.open(this.aborter.signal);
       for await (const chunk of stream) {
-        const delta = chunk.choices?.[0]?.delta?.content;
-        if (delta) this.emitText(delta);
+        const d = chunk.choices?.[0]?.delta as
+          | { content?: string; reasoning?: string; reasoning_content?: string }
+          | undefined;
+        if (!d) continue;
+        // 結構化 reasoning 先行(時間上先於正文),再到 content;兩者經正規化器合流。
+        const out =
+          this.normalizer.pushReasoning(d.reasoning ?? d.reasoning_content ?? "") +
+          this.normalizer.pushContent(d.content ?? "");
+        if (out) this.emitText(out);
       }
+      const tail = this.normalizer.finish();
+      if (tail) this.emitText(tail);
       return { text: this.fullText };
     } catch (err) {
       for (const l of this.errorListeners) l(err);
@@ -608,13 +741,21 @@ function baseDecodeParams(): { temperature: number; top_p: number } {
 /**
  * Mac Ollama 端点专用参数:Ollama 上的 qwen3/deepseek 系默认先输出思考链,
  * 会吃掉 maxTokens 导致正文为空(实测 max_tokens=120 全被思考占满)。
- * reasoning_effort:"none" 关掉思考(本 app 不展示思考过程),正文直接出、更快。
+ * reasoning_effort:"none" 关掉思考,正文直接出、更快——但思考被压制时,个别模型
+ * 会把规划写进 content 做正文独白(2026-11-02 截圖實證,qwen3:30b)。
+ * 故 captureThinking 开启时(仅 report/fortune route)不送此参数:让模型正常思考,
+ * 思考走独立 reasoning 通道,由 ThinkStreamNormalizer 正规化后前端折叠展示。
  * 只在**实际行 Ollama 端点**时送(见 macRuntimeFor):分流到 MLX 的请求不送——
  * mlx_lm server 把 reasoning 分到独立字段回传、不占 content,且未证实它接受此参数。
  * 注意:Ollama 实测接受 "none",但当前 OpenAI SDK 的 ReasoningEffort 未含它,故 cast;
  * 运行时序列化值仍为 "none",Ollama 认。
  */
-function macRouteParams(name: string, model: string): { reasoning_effort?: OpenAI.ReasoningEffort } {
+function macRouteParams(
+  name: string,
+  model: string,
+  captureThinking = false,
+): { reasoning_effort?: OpenAI.ReasoningEffort } {
+  if (captureThinking) return {};
   return macRuntimeFor(name, model) === "ollama"
     ? { reasoning_effort: "none" as unknown as OpenAI.ReasoningEffort }
     : {};
@@ -827,20 +968,22 @@ export async function chatComplete(
   const messages = toOpenAIMessages(system, req.messages);
   const preferred = resolvePreferredModel(def, req.kind, opts);
   // 每个模型各自建 client:Mac 合并分流下同一请求的不同模型可能落不同端点。
+  const capture = opts?.captureThinking ?? false;
   const complete = (model: string) =>
     makeOpenAI(apiKey, routeBaseFor(name, def, model, opts), accessHeaders).chat.completions.create({
       model,
       max_tokens: req.maxTokens,
       ...baseDecodeParams(),
-      ...macRouteParams(name, model),
+      ...macRouteParams(name, model, capture),
       messages,
     });
+  const resultOf = (res: OpenAI.Chat.Completions.ChatCompletion) => ({
+    text: normalizeThinkText(res.choices?.[0]?.message?.content ?? "", messageReasoning(res), capture),
+    usage: fromOpenAIUsage(res.usage),
+  });
   try {
     const res = await complete(preferred);
-    return {
-      text: res.choices?.[0]?.message?.content ?? "",
-      usage: fromOpenAIUsage(res.usage),
-    };
+    return resultOf(res);
   } catch (err) {
     // 默认模型被下架(404) → 动态回落到实时列表首个模型重试一次;
     // 显式指定的模型 404 → 直接抛真实错误(用户去设置里换)。
@@ -851,10 +994,7 @@ export async function chatComplete(
     const res = await complete(
       await fallbackModel(routeBaseFor(name, def, preferred, opts), apiKey, err, accessHeaders),
     );
-    return {
-      text: res.choices?.[0]?.message?.content ?? "",
-      usage: fromOpenAIUsage(res.usage),
-    };
+    return resultOf(res);
   }
 }
 
@@ -894,11 +1034,12 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
   const messages = toOpenAIMessages(system, req.messages);
   const preferred = resolvePreferredModel(def, req.kind, opts);
   const explicit = isModelExplicit(req.kind, opts);
+  const capture = opts?.captureThinking ?? false;
   return new OpenAITextStream(async (signal) => {
     // 每个模型各自建 client:Mac 合并分流下同一请求的不同模型可能落不同端点。
     const open = (model: string) =>
       makeOpenAI(apiKey, routeBaseFor(name, def, model, opts), accessHeaders).chat.completions.create(
-        { model, max_tokens: req.maxTokens, stream: true, ...baseDecodeParams(), ...macRouteParams(name, model), messages },
+        { model, max_tokens: req.maxTokens, stream: true, ...baseDecodeParams(), ...macRouteParams(name, model, capture), messages },
         { signal },
       );
     try {
@@ -911,7 +1052,7 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
       if (!isModelNotFoundError(err) || explicit) throw err;
       return open(await fallbackModel(routeBaseFor(name, def, preferred, opts), apiKey, err, accessHeaders));
     }
-  });
+  }, capture);
 }
 
 /**

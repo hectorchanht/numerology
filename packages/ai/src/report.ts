@@ -161,7 +161,15 @@ export function streamFortuneReport(chart: ChartResult, opts: ReportOptions = {}
  * 故上限留到 1800,使其自然篇幅(~1400 字)在撞顶前就以句号收尾,不被 max_tokens 切半句;
  * 而 ~1400 字在 Opus ~32 字/秒下约 ~48s,仍稳在 Vercel 60s 内。上限须高于自然篇幅,切勿压到其下。
  */
-const SECTION_MAX_TOKENS = 1800;
+/**
+ * 每節輸出上限。2026-11-02 由 1800 提高到 6000:report/fortune 路徑開啟
+ * captureThinking 後,同一個 budget 要同時裝思考 + 完整正文——實測
+ * qwen3:30b 單係規劃/思考已超過 1800 tokens(舊 suppression 時代佢將規劃
+ * 寫入正文,2323 字仍未寫完就撞頂截斷)。Hector 準則 Accuracy >>> Speed:
+ * 俾足 budget 唔好餓死正文;呢個只係天花板,實際篇幅由 prompt 決定,
+ * 模型自然收尾唔會寫滿。chat 路徑(CHAT_MAX_TOKENS)唔跟,不受影響。
+ */
+const SECTION_MAX_TOKENS = 6000;
 
 /**
  * 分节生成时动态运势的作用域映射(2026-10-23 context-trim):

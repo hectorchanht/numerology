@@ -27,6 +27,7 @@ import { EmptyChart, ScreenNav, Seg } from "@/components/ui";
 import { loadAi } from "@/lib/aiSettings";
 import { repairFortuneMarkdown } from "@/lib/fortuneRepair";
 import { upsertReading, saveSection, getReading, readingId, type Reading } from "@/lib/history";
+import { joinThinking } from "@/lib/thinking";
 
 type Mode = "known" | "infer";
 type Sys = "bazi" | "ziwei";
@@ -40,8 +41,10 @@ function sectionsOf(r: Reading): Restored {
   const report: Record<string, string> = {};
   const fortune: Record<string, string> = {};
   for (const [k, s] of Object.entries(r.sections)) {
-    if (k.startsWith("report:")) report[k.slice("report:".length)] = s.markdown;
-    else if (k.startsWith("fortune:")) fortune[k.slice("fortune:".length)] = s.markdown;
+    // 思考同正文分開存;還原顯示嗰陣併返埋俾 SectionBody 重新分拆(折疊置頂)。
+    // 舊記錄冇 thinking → joinThinking 原樣返正文,零影響。
+    if (k.startsWith("report:")) report[k.slice("report:".length)] = joinThinking(s.thinking, s.markdown);
+    else if (k.startsWith("fortune:")) fortune[k.slice("fortune:".length)] = joinThinking(s.thinking, s.markdown);
   }
   return {
     report: Object.keys(report).length ? report : null,
@@ -154,11 +157,12 @@ export default function Home() {
   /** 某节成功生成 → 存入本机历史(带当时的 lens/provider/model)。 */
   const handleSectionDone =
     (endpoint: "report" | "fortune") =>
-    (segKey: string, markdown: string, lens: string) => {
+    (segKey: string, markdown: string, lens: string, thinking?: string) => {
       if (!input) return;
       const s = loadAi();
       saveSection(input, `${endpoint}:${segKey}`, {
         markdown,
+        thinking,
         lens,
         provider: s.provider,
         model: s.model.trim(),

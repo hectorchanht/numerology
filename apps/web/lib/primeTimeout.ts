@@ -11,7 +11,11 @@ import { activeProviderName, isMacProvider } from "@numerology/ai";
  */
 export function primeTimeoutMs(opts: ProviderOptions | undefined): number {
   const name = activeProviderName(opts);
-  // Mac provider:本地模型冷启动(大模型由磁盘载入)+思考,首 token 可能远超 60s。
-  if (isMacProvider(name)) return 120_000;
+  // Mac provider:本地大模型冷启动(由磁盘载入 16–20GB)+ 长 prompt prefill,
+  // 首 token 实测可达 75s(qwen3:32b 冷载,2026-11-02 矩阵);思考开启后
+  // reasoning 首块同样要等载入+prefill。AI 解读是低频用户主动动作、
+  // 本地模型免费(Hector 准则 Accuracy >>> Speed),给 240s(约实测峰值 3 倍,
+  // 仍有上限防真卡死)。注意这只管首块到达,流开始后不设总时长上限。
+  if (isMacProvider(name)) return 240_000;
   return name === "workers-ai" || name === "gemini" ? 60_000 : 20_000;
 }

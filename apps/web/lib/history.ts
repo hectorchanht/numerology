@@ -10,6 +10,11 @@ import { stableInputHash } from "./hash.js";
 export interface HistorySection {
   /** 该节正文 markdown(不含 ## 标题,恢复时按当前语言重拼标题)。 */
   markdown: string;
+  /**
+   * 該次生成嘅思考過程(2026-11-02 起,同 markdown 分開存)。
+   * 舊記錄冇呢個欄 → 查看時唔顯示思考塊;新記錄有就以折疊塊置於正文之上。
+   */
+  thinking?: string;
   lens: string;
   provider: string;
   model: string;

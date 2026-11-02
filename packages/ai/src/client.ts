@@ -9,6 +9,8 @@ export type { AiLocale };
 export {
   chatComplete,
   chatStream,
+  ThinkStreamNormalizer,
+  normalizeThinkText,
   activeProviderName,
   isMacProvider,
   MAC_PROVIDER_NAMES,

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import ThinkingFold from "./ThinkingFold";
 import {
   listReadings,
   deleteReading,
@@ -280,10 +281,14 @@ export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void })
                                       </span>
                                     </div>
                                     {viewing ? (
-                                      <div className="prose hist-ver-body">
-                                        <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownTermComponents}>
-                                          {v.markdown}
-                                        </ReactMarkdown>
+                                      <div className="hist-ver-body">
+                                        {/* 同正文版面:思考折疊置頂(舊版本冇 thinking 就唔顯示)。 */}
+                                        <ThinkingFold thinking={v.thinking ?? ""} />
+                                        <div className="prose">
+                                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownTermComponents}>
+                                            {v.markdown}
+                                          </ReactMarkdown>
+                                        </div>
                                       </div>
                                     ) : null}
                                   </div>

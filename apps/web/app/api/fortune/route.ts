@@ -21,8 +21,10 @@ export const dynamic = "force-dynamic";
  * v5 = 2026-10-23 context-trim:分节生成按 FortuneScope 只喂该节需要的动态数据
  * (overview/action→current, dayun/rhythm→dayun+信号digest, review→已过年, future→未来年),
  * 整份 fortune 不再每节重倒;prompt 指令文字不变。
+ * v6 = 2026-11-02 思考捕捉:与 report/v6 同步开启 captureThinking——生成行为变了,
+ * v5 缓存里可能有压制下写进正文的规划独白(无标记、无法可靠分拆),整体失效。
  */
-const PROMPT_VERSION = "fortune/v5";
+const PROMPT_VERSION = "fortune/v6";
 
 /** 流式生成《大运流年深析》(八字 × 紫微合参,逐步逐年)。首 token 前失败 → JSON 错误(502),而非截断流。 */
 export async function POST(req: Request): Promise<Response> {
@@ -32,7 +34,8 @@ export async function POST(req: Request): Promise<Response> {
     const input = parseBirthInput(body.input);
     const chart = castChart(input);
     const fortune = analyzeFortune(input, { yearsBack: 5, yearsAhead: 8 });
-    const ai = resolveServerAi(body);
+    // 深析路径同报告开启思考捕捉(Hector 2026-11-02):思考分流折叠呈现,不压制。
+    const ai = { ...resolveServerAi(body), captureThinking: true };
     const section = typeof body.section === "string" && body.section.trim() ? body.section.trim() : undefined;
     const lens = body.lens === "bazi" || body.lens === "ziwei" ? body.lens : "both";
     const locale = body.locale === "zhs" || body.locale === "en" ? body.locale : "zht";

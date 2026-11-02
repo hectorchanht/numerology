@@ -793,6 +793,37 @@ h1.large + .seg { margin-bottom: 12px; }
 }
 .tldr-card p { margin: 0; }
 
+/* 思考過程折疊塊:置於每節最頂(TL;DR 之上),預設折疊,次要樣式唔搶正文 */
+.think-fold {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin: 0 0 12px;
+}
+.think-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink-soft);
+  text-align: left;
+}
+.think-chevron { font-size: 11px; }
+.think-body {
+  padding: 0 12px 10px 30px;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
 /* 定性 headline:每步/每年嘅一句話特徵 */
 .verdict { font-size: 16.5px; font-weight: 600; line-height: 1.6; margin: 2px 0 10px; color: var(--label-1); }
 .verdict p { margin: 0; }

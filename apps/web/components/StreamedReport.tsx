@@ -12,6 +12,8 @@ import { useLocale, HTML_LANG, type Locale, type TKey } from "@/lib/i18n";
 import { stripLeadingHeading } from "@/lib/sectionIcons";
 import { markdownTermComponents, withTermHighlights } from "@/lib/highlightTerms";
 import { splitTldr } from "@/lib/tldr";
+import { splitThinking } from "@/lib/thinking";
+import ThinkingFold from "@/components/ThinkingFold";
 import { parseEvidenceBlock } from "@/lib/fortuneBlocks";
 import { Icon, SECTION_ICON } from "@/components/Icon";
 import { AiModelNote } from "@/components/AiModelNote";
@@ -40,8 +42,8 @@ interface Props {
   description: string;
   /** 分段并行:各节并发请求、各自就位,绕开函数时长上限。 */
   segments: readonly ReportSeg[];
-  /** 某节成功生成后回调(供历史记录保存):(sectionKey, 正文 markdown, lens)。 */
-  onSectionDone?: (segKey: string, markdown: string, lens: string) => void;
+  /** 某节成功生成后回调(供历史记录保存):(sectionKey, 正文 markdown, lens, 思考过程)。 */
+  onSectionDone?: (segKey: string, markdown: string, lens: string, thinking?: string) => void;
   /** 从历史记录恢复:sectionKey → 正文 markdown(不含 ## 标题,按当前语言重拼)。 */
   restoredSections?: Record<string, string> | null;
   /** 章節可摺疊(大運深析用);預設首節展開。 */
@@ -98,12 +100,16 @@ function SectionBody({
   ) => React.ReactNode | null;
 }) {
   const { t } = useLocale();
-  // TL;DR 先抽出做摘要卡(所有章節通用),再交自訂渲染或預設正文。
-  const { tldr, body } = splitTldr(md);
+  // 版面次序(Hector 2026-11-02 定死):折疊思考 → TL;DR → 全文。
+  // 思考先分流(流式未閉合嗰陣 content 為空,只顯示折疊塊「思考中…」);
+  // TL;DR 再抽出做摘要卡(所有章節通用),最後交自訂渲染或預設正文。
+  const { thinking, content, open: thinkOpen } = splitThinking(md);
+  const { tldr, body } = splitTldr(content);
   const custom = renderSectionBody?.(segKey, body, lens);
   const { body: main, evidence } = parseEvidenceBlock(body);
   return (
     <>
+      <ThinkingFold thinking={thinking} active={streaming && thinkOpen} />
       {tldr ? (
         <div className="tldr-card">
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownTermComponents}>
@@ -207,7 +213,11 @@ export function StreamedReport({
           .then(() => {
             local[i] = { ...local[i]!, status: "done" };
             // 成功且有正文 → 通知父组件存入本机历史(失败/吐空/已作廢的不存)。
-            if (live() && local[i]!.text.trim()) onSectionDone?.(seg.key, local[i]!.text, useLens);
+            // 思考同正文分開存:正文為空(思考食晒)嗰節唔好當成功歸檔。
+            if (live() && local[i]!.text.trim()) {
+              const sp = splitThinking(local[i]!.text);
+              if (sp.content) onSectionDone?.(seg.key, sp.content, useLens, sp.thinking || undefined);
+            }
           })
           .catch((e: unknown) => {
             // 模型下架 → 清模型缓存,下次打开设置时重新拉取(已滤走下架模型)。
@@ -247,7 +257,10 @@ export function StreamedReport({
       });
       if (!live()) return;
       setSlots((prev) => (prev ? prev.map((s, i) => (i === index ? { ...s, status: "done" } : s)) : prev));
-      if (full.trim()) onSectionDone?.(seg.key, full, useLens);
+      if (full.trim()) {
+        const sp = splitThinking(full);
+        if (sp.content) onSectionDone?.(seg.key, sp.content, useLens, sp.thinking || undefined);
+      }
     } catch (e: unknown) {
       if (!live()) return;
       // 模型下架 → 清模型缓存,下次打开设置时重新拉取(已滤走下架模型)。

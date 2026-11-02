@@ -45,6 +45,7 @@
     "lib/DualPronounce.tsx",
     "lib/quoteRef.tsx",
     "lib/tldr.ts",
+    "lib/thinking.ts",
     "lib/dragScroll.ts",
     "lib/fortuneBlocks.ts",
     "lib/script.ts",

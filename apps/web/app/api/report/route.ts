@@ -19,8 +19,11 @@ export const dynamic = "force-dynamic";
  * v4 = 2026-10-23 v3.1 targeted fixes:TL;DR 禁列岁数年份干支、陳腔 ban list 擴充(與 fortune/v4 同步)。
  * v5 = 2026-10-23 context-trim:分节生成各节只喂当前运一行(原来整份 fortune),
  * 整篇模式保持 full;prompt 指令文字不变。
+ * v6 = 2026-11-02 思考捕捉:开启 captureThinking(思考分流呈现,不再压制)——
+ * 生成行为变了,且 v5 缓存里有 qwen3:30b 等模型在压制下写进正文的规划独白
+ * (无标记、事后无法可靠分拆),必须靠版本号整体失效。
  */
-const PROMPT_VERSION = "report/v5";
+const PROMPT_VERSION = "report/v6";
 
 /** 流式生成命盘解读报告(动静结合)。首 token 前失败 → JSON 错误(502),而非截断流。 */
 export async function POST(req: Request): Promise<Response> {
@@ -30,7 +33,9 @@ export async function POST(req: Request): Promise<Response> {
     const input = parseBirthInput(body.input);
     const chart = castChart(input);
     const fortune = analyzeFortune(input, { yearsBack: 5, yearsAhead: 8 });
-    const ai = resolveServerAi(body);
+    // 报告路径开启思考捕捉(Hector 2026-11-02):思考过程分流到 <think> 段
+    // 供前端折叠呈现,不再压制 reasoning。chat 等其它路径不开,维持原行为。
+    const ai = { ...resolveServerAi(body), captureThinking: true };
     const section = typeof body.section === "string" && body.section.trim() ? body.section.trim() : undefined;
     const lens = body.lens === "bazi" || body.lens === "ziwei" ? body.lens : "both";
     const locale = body.locale === "zhs" || body.locale === "en" ? body.locale : "zht";
