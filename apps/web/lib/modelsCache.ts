@@ -11,13 +11,18 @@ export interface CachedModels {
 
 const MODELS_CACHE_PREFIX = "numerology-models-";
 const MODELS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const MAC_LLM_CACHE_TTL_MS = 60 * 1000;
+
+function ttlFor(provider: string): number {
+  return provider.trim().toLowerCase() === "mac-llm" ? MAC_LLM_CACHE_TTL_MS : MODELS_CACHE_TTL_MS;
+}
 
 export function readModelsCache(provider: string): CachedModels | null {
   try {
     const raw = window.localStorage.getItem(MODELS_CACHE_PREFIX + provider);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as { at: number; models: CachedModels["models"]; source: string };
-    if (Date.now() - parsed.at > MODELS_CACHE_TTL_MS) return null;
+    if (Date.now() - parsed.at > ttlFor(provider)) return null;
     return { models: parsed.models, source: parsed.source };
   } catch {
     return null;

@@ -43,7 +43,9 @@ export async function GET(req: Request): Promise<Response> {
       accessHeaders: provider === "mac-llm" ? getMacLlmAccessHeaders() : undefined,
     });
     return Response.json(result, {
-      headers: { "Cache-Control": "public, max-age=300" },
+      headers: {
+        "Cache-Control": provider === "mac-llm" ? "no-store" : "public, max-age=300",
+      },
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "模型列表获取失败";

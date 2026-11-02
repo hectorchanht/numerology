@@ -294,6 +294,10 @@ label.row { cursor: pointer; }
 .ai-picker .opt .mk { margin-left: auto; }
 .ai-picker input[type="text"] { width: 100%; background: var(--card); border: 1px solid var(--sep);
   border-radius: 8px; padding: 8px 10px; color: var(--label); font-size: 13px; }
+.ai-picker-status { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--label-2); padding: 0 4px 6px; }
+.ai-picker-spinner { width: 12px; height: 12px; flex: none; border-radius: 50%;
+  border: 2px solid var(--sep); border-top-color: var(--accent); animation: ai-picker-spin 0.7s linear infinite; }
+@keyframes ai-picker-spin { to { transform: rotate(360deg); } }
 
 /* 首頁 hero:河圖洛書特色卡(九宮格視覺,桌面左欄唔留白) */
 .hero-hetu { display: flex; gap: 14px; align-items: center; margin-top: 20px;

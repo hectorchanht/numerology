@@ -59,6 +59,40 @@ test("models:网络异常抛错(由路由转 502)", async () => {
   await assert.rejects(fetchProviderModels("glm", { fetchImpl }), /模型列表请求失败/);
 });
 
+test("models:mac-llm live 回传 5 个全数保留", async () => {
+  const ids = ["gpt-oss:20b", "qwen3:14b", "qwen3:8b", "qwen3:30b", "qwen3:32b"];
+  const fetchImpl = stubFetch(async () => jsonResponse(200, { data: ids.map((id) => ({ id })) }));
+  const r = await fetchProviderModels("mac-llm", { fetchImpl });
+  assert.equal(r.source, "live");
+  assert.equal(r.offline, undefined);
+  assert.deepEqual(r.models.map((m) => m.id), ids);
+});
+
+test("models:mac-llm 网络失败回 offline+静态 5 个而唔 throw", async () => {
+  const fetchImpl = stubFetch(async () => { throw new Error("down"); });
+  const r = await fetchProviderModels("mac-llm", { fetchImpl });
+  assert.equal(r.source, "static");
+  assert.equal(r.offline, true);
+  assert.deepEqual(r.models.map((m) => m.id), ["qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b"]);
+});
+
+test("models:mac-llm HTTP 失败回 offline+静态而唔 throw", async () => {
+  const fetchImpl = stubFetch(async () => jsonResponse(502, { error: "bad gateway" }));
+  const r = await fetchProviderModels("mac-llm", { fetchImpl });
+  assert.equal(r.offline, true);
+  assert.equal(r.models.length, 5);
+});
+
+test("models:其它 provider HTTP 失败仍然抛错", async () => {
+  const fetchImpl = stubFetch(async () => jsonResponse(500, { error: "oops" }));
+  await assert.rejects(fetchProviderModels("glm", { fetchImpl }), /HTTP 500/);
+});
+
+test("models:mac-llm 静态表为核实 5 个(次序)", () => {
+  assert.deepEqual(staticModelsFor("mac-llm"), ["qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b"]);
+  assert.deepEqual(STATIC_MODELS["mac-llm"], ["qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b"]);
+});
+
 test("models:openrouter 标记 free 模型", async () => {
   const fetchImpl = stubFetch(async () =>
     jsonResponse(200, {

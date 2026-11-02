@@ -73,21 +73,24 @@ export function SettingsPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleModels, value.provider, modelsProvider]);
 
-  // 模型列表:缓存(24h) → /api/models 动态拉取 → 静态备选。
+  // 模型列表:缓存 → /api/models 动态拉取 → 静态备选。
+  // mac-llm 缓存 TTL 只有 60s,且即使有缓存都 background revalidate(SWR),保持即时。
   useEffect(() => {
     const provider = value.provider;
     const statics = staticModelEntries(STATIC_MODELS[provider] ?? []);
     const cached = readModelsCache(provider);
+    const isMac = provider === "mac-llm";
     if (cached && cached.models.length > 0) {
       // 旧缓存可能含已下架模型,读出即过滤(下次拉取后缓存自然干净)。
       setModels(filterRetired(cached.models));
       setModelsSource(cached.source);
       setModelsProvider(provider);
-      return;
+      if (!isMac) return;
+    } else {
+      setModels(statics);
+      setModelsSource("static");
+      setModelsProvider(provider);
     }
-    setModels(statics);
-    setModelsSource("static");
-    setModelsProvider(provider);
     let cancelled = false;
     (async () => {
       try {
@@ -95,15 +98,24 @@ export function SettingsPanel() {
         // 取当前 provider 名下的 key(没填 → 不带头,不拿别的 provider 的 key 顶替)。
         const k = (value.keys[value.provider] ?? "").trim();
         if (k) headers["X-AI-Key"] = k;
-        const res = await fetch(`/api/models?provider=${encodeURIComponent(provider)}`, { headers });
+        const res = await fetch(`/api/models?provider=${encodeURIComponent(provider)}`, {
+          headers,
+          ...(isMac ? { cache: "no-store" as const } : {}),
+        });
         if (!res.ok) return;
-        const data = (await res.json()) as { models?: ModelOption[]; source?: string };
+        const data = (await res.json()) as { models?: ModelOption[]; source?: string; offline?: boolean };
         if (cancelled || !Array.isArray(data.models) || data.models.length === 0) return;
         setModels(data.models);
-        const src = data.source === "live" ? "live" : data.source === "verified-static" ? "verified-static" : "static";
+        const src = data.offline
+          ? "offline"
+          : data.source === "live"
+            ? "live"
+            : data.source === "verified-static"
+              ? "verified-static"
+              : "static";
         setModelsSource(src);
         setModelsProvider(provider);
-        writeModelsCache(provider, data.models, src);
+        writeModelsCache(provider, data.models, src === "offline" ? "static" : src);
       } catch {
         /* 保持静态备选 */
       }
@@ -145,9 +157,11 @@ export function SettingsPanel() {
   const sourceLabel =
     modelsSource === "live"
       ? t("settings.models.live")
-      : modelsSource === "verified-static"
-        ? t("settings.models.verified")
-        : t("settings.models.static");
+      : modelsSource === "offline"
+        ? t("settings.models.offline")
+        : modelsSource === "verified-static"
+          ? t("settings.models.verified")
+          : t("settings.models.static");
 
   return (
     <>

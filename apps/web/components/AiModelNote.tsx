@@ -9,11 +9,12 @@ import {
   STATIC_MODELS,
   filterRecommended,
   filterRetired,
+  isRecommended,
   normModelId,
   staticModelEntries,
 } from "@/lib/providerMeta";
 import { aiNoteParts, shortModelName } from "@/lib/aiNote";
-import { readModelsCache } from "@/lib/modelsCache";
+import { readModelsCache, writeModelsCache } from "@/lib/modelsCache";
 import { FloatingCard, useFloatPopup } from "@/lib/floatPopup";
 import { go } from "@/lib/nav";
 
@@ -32,6 +33,30 @@ function modelOptions(provider: string, currentModel: string): ModelOption[] {
   const base =
     cached && cached.length > 0 ? cached : staticModelEntries(STATIC_MODELS[provider] ?? []);
   const list = filterRetired(filterRecommended(base, provider));
+  if (currentModel && !list.some((m) => normModelId(m.id) === normModelId(currentModel))) {
+    return [{ id: currentModel }, ...list];
+  }
+  return list;
+}
+
+/** mac-llm 專用:唔用推薦過濾,只濾下架;推薦(30b/8b)排最前,其餘保持 live 原序。 */
+function macModelOptions(
+  currentModel: string,
+  liveModels: ModelOption[] | null,
+): ModelOption[] {
+  const base =
+    liveModels && liveModels.length > 0
+      ? liveModels
+      : (() => {
+          const cached = readModelsCache("mac-llm")?.models;
+          return cached && cached.length > 0
+            ? cached
+            : staticModelEntries(STATIC_MODELS["mac-llm"] ?? []);
+        })();
+  const list = [...filterRetired(base)].sort(
+    (a, b) =>
+      Number(isRecommended("mac-llm", b.id)) - Number(isRecommended("mac-llm", a.id)),
+  );
   if (currentModel && !list.some((m) => normModelId(m.id) === normModelId(currentModel))) {
     return [{ id: currentModel }, ...list];
   }
@@ -67,6 +92,43 @@ export function AiModelNote({ style }: { style?: CSSProperties }) {
   const providerPopup = useFloatPopup(providerRef);
   const modelPopup = useFloatPopup(modelRef);
 
+  // mac-llm:開 picker 即刻 live fetch 全部模型,唔靠 cache/靜態推薦表。
+  const [macLiveModels, setMacLiveModels] = useState<ModelOption[] | null>(null);
+  const [macState, setMacState] = useState<"loading" | "online" | "offline" | null>(null);
+  const isMac = s.provider === "mac-llm";
+  const modelPopupOpen = modelPopup.open;
+  useEffect(() => {
+    if (!modelPopupOpen || !isMac) return;
+    let cancelled = false;
+    setMacState("loading");
+    (async () => {
+      try {
+        const res = await fetch(`/api/models?provider=mac-llm`, { cache: "no-store" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = (await res.json()) as {
+          models?: ModelOption[];
+          source?: string;
+          offline?: boolean;
+        };
+        if (cancelled) return;
+        if (!Array.isArray(data.models) || data.models.length === 0) {
+          setMacState("offline");
+          return;
+        }
+        const filtered = filterRetired(data.models);
+        setMacLiveModels(filtered);
+        const offline = Boolean(data.offline) || data.source !== "live";
+        setMacState(offline ? "offline" : "online");
+        writeModelsCache("mac-llm", filtered, offline ? "static" : "live");
+      } catch {
+        if (!cancelled) setMacState("offline");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [modelPopupOpen, isMac]);
+
   const meta = PROVIDER_META.find((p) => p.name === s.provider);
   const providerLabel = meta ? t(meta.shortKey) : s.provider;
   const parts = aiNoteParts(
@@ -87,7 +149,11 @@ export function AiModelNote({ style }: { style?: CSSProperties }) {
 
   // 模型表只喺 picker 打開嗰陣讀(快取新鮮,唔使 memo)。
   const models =
-    modelPopup.open && s.provider !== "custom" ? modelOptions(s.provider, s.model.trim()) : [];
+    modelPopup.open && s.provider !== "custom"
+      ? isMac
+        ? macModelOptions(s.model.trim(), macLiveModels)
+        : modelOptions(s.provider, s.model.trim())
+      : [];
   const effectiveModel = s.model.trim() || models[0]?.id || "";
 
   const set = (patch: Partial<AiSettings>) => saveAi({ ...s, ...patch });
@@ -172,6 +238,20 @@ export function AiModelNote({ style }: { style?: CSSProperties }) {
         <FloatingCard floatingRef={modelPopup.floatingRef} floatingStyles={modelPopup.floatingStyles}>
           <div className="ai-picker">
             <div className="hd">{t("settings.model")}</div>
+            {isMac ? (
+              <div className="ai-picker-status" role="status">
+                {macState === "loading" ? (
+                  <>
+                    <span className="ai-picker-spinner" aria-hidden="true" />
+                    <span>{t("aiNote.macLoading")}</span>
+                  </>
+                ) : macState === "offline" ? (
+                  <span>{t("aiNote.macOffline")}</span>
+                ) : (
+                  <span>{t("aiNote.macOnline")}</span>
+                )}
+              </div>
+            ) : null}
             {s.provider === "custom" ? (
               <input
                 type="text"

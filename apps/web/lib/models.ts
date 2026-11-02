@@ -20,6 +20,8 @@ export interface ModelsResult {
   models: ModelEntry[];
   /** 需要 key 才能拉取(如 401),前端回落到静态表并提示填 key。 */
   needsKey?: boolean;
+  /** mac-llm 上游离线/失败时的软回落标记:仍回静态表,但前端可显示离线状态。 */
+  offline?: boolean;
   verifiedAt?: string;
 }
 
@@ -42,7 +44,7 @@ const STATIC_MODELS: Record<string, string[]> = {
   groq: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it", "deepseek-r1-distill-llama-70b"],
   openrouter: ["google/gemma-4-31b-it:free", "google/gemma-4-26b-a4b-it:free", "nvidia/nemotron-3.5-lightning:free"],
   pollinations: ["openai"],
-  "mac-llm": ["qwen3:30b", "qwen3:8b", "qwen3:32b"],
+  "mac-llm": ["qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b"],
 };
 
 type FetchLike = (url: string, init?: RequestInit) => Promise<Response>;
@@ -95,10 +97,22 @@ export async function fetchProviderModels(
   const headers: Record<string, string> = {};
   if (opts.key?.trim()) headers.Authorization = `Bearer ${opts.key.trim()}`;
   if (opts.accessHeaders) Object.assign(headers, opts.accessHeaders);
+  const isMac = name === "mac-llm";
+  const offlineFallback = (): ModelsResult => ({
+    provider: name,
+    source: "static",
+    offline: true,
+    models: toEntries(STATIC_MODELS[name] ?? []),
+  });
   let res: Response;
   try {
-    res = await fetchImpl(`${baseURL}/models`, { headers });
+    const init: RequestInit & { signal?: AbortSignal } = { headers };
+    if (isMac && typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function") {
+      init.signal = AbortSignal.timeout(8000);
+    }
+    res = await fetchImpl(`${baseURL}/models`, init);
   } catch (err) {
+    if (isMac) return offlineFallback();
     throw new Error(`模型列表请求失败:${err instanceof Error ? err.message : String(err)}`);
   }
   if (res.status === 401 || res.status === 403) {
@@ -110,6 +124,7 @@ export async function fetchProviderModels(
     };
   }
   if (!res.ok) {
+    if (isMac) return offlineFallback();
     throw new Error(`模型列表请求失败(HTTP ${res.status})`);
   }
   const data = (await res.json()) as { data?: { id?: string; pricing?: { prompt?: string | number } }[] };
