@@ -32,6 +32,8 @@ export const AI_SETTINGS_EVENT = "ai-settings-changed";
 /**
  * 纯函数:把 localStorage 里读到的旧对象迁移到新结构(不碰 window,可测试)。
  * - 旧版单 `apiKey` 非空 且 新版 `keys` 为空 → 归到当时选中的 provider 名下。
+ * - provider="mac-mlx"(已合并的旧名)→ 映射到 "mac-llm";model 原样保留
+ *   (mlx-community/* 模型 id 本身会触发服务端按模型分流到 MLX 端点)。
  */
 export function migrateAiSettings(raw: unknown): AiSettings {
   if (!raw || typeof raw !== "object") return { ...DEFAULT_AI };
@@ -43,6 +45,7 @@ export function migrateAiSettings(raw: unknown): AiSettings {
     baseURL: typeof r.baseURL === "string" ? r.baseURL : "",
     systemPrompt: typeof r.systemPrompt === "string" ? r.systemPrompt : "",
   };
+  if (out.provider.trim().toLowerCase() === "mac-mlx") out.provider = "mac-llm";
   if (r.keys && typeof r.keys === "object") {
     for (const [k, v] of Object.entries(r.keys as Record<string, unknown>)) {
       if (typeof k === "string" && typeof v === "string" && v.trim()) out.keys[k] = v.trim();

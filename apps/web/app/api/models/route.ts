@@ -1,7 +1,7 @@
 import { fetchProviderModels } from "@/lib/models";
 import { getServerAiBindings, getMacLlmAccessHeaders } from "@/lib/aiBinding";
 import { isMacProvider } from "@/lib/providerMeta";
-import { listProviders } from "@numerology/ai";
+import { listProviders, providerBaseUrl } from "@numerology/ai";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -30,7 +30,13 @@ export async function GET(req: Request): Promise<Response> {
     });
   }
 
-  if (provider !== "custom" && !listProviders().some((p) => p.name === provider)) {
+  // 已知 provider:展示列表(listProviders)之外,还要认得已合并的旧名 mac-mlx——
+  // 它不再出现在 UI 列表,但其 def 仍在册(providerBaseUrl 有值),直拉要保持可用。
+  const known =
+    provider === "custom" ||
+    listProviders().some((p) => p.name === provider) ||
+    providerBaseUrl(provider) !== undefined;
+  if (!known) {
     return Response.json({ error: `未知 AI provider="${provider}"` }, { status: 400 });
   }
 

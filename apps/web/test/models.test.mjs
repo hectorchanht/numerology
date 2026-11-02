@@ -59,28 +59,68 @@ test("models:网络异常抛错(由路由转 502)", async () => {
   await assert.rejects(fetchProviderModels("glm", { fetchImpl }), /模型列表请求失败/);
 });
 
-test("models:mac-llm live 回传 7 个全数保留", async () => {
-  const ids = ["gemma3:12b", "deepseek-r1:14b", "gpt-oss:20b", "qwen3:14b", "qwen3:8b", "qwen3:30b", "qwen3:32b"];
-  const fetchImpl = stubFetch(async () => jsonResponse(200, { data: ids.map((id) => ({ id })) }));
-  const r = await fetchProviderModels("mac-llm", { fetchImpl });
+// —— mac-llm 合并列表:并行拉 Ollama + MLX 两端点 ——
+const OLLAMA_IDS = ["gemma3:12b", "deepseek-r1:14b", "gpt-oss:20b", "qwen3:14b", "qwen3:8b", "qwen3:30b", "qwen3:32b"];
+const MLX_IDS = ["mlx-community/gpt-oss-20b-MXFP4-Q8", "mlx-community/Qwen3-14B-4bit"];
+const STATIC9 = [
+  "qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b", "deepseek-r1:14b", "gemma3:12b",
+  "mlx-community/Qwen3-14B-4bit", "mlx-community/gpt-oss-20b-MXFP4-Q8",
+];
+
+/** 按 URL 分发两端点的 stub fetch(可分别指定 throw / 状态码 / 列表)。 */
+function macFetch({ ollamaIds = OLLAMA_IDS, mlxIds = MLX_IDS, ollamaStatus = 200, mlxStatus = 200, ollamaThrow = false, mlxThrow = false } = {}) {
+  return stubFetch(async (url) => {
+    if (url.includes("ollama.hectorchan.com")) {
+      if (ollamaThrow) throw new Error("ollama down");
+      return jsonResponse(ollamaStatus, { data: ollamaIds.map((id) => ({ id })) });
+    }
+    if (url.includes("mlx.hectorchan.com")) {
+      if (mlxThrow) throw new Error("mlx down");
+      return jsonResponse(mlxStatus, { data: mlxIds.map((id) => ({ id })) });
+    }
+    throw new Error(`unexpected url ${url}`);
+  });
+}
+
+test("models:mac-llm 合并两端点 live 清单(Ollama 先、MLX 后,共 9 个)", async () => {
+  const r = await fetchProviderModels("mac-llm", { fetchImpl: macFetch() });
   assert.equal(r.source, "live");
   assert.equal(r.offline, undefined);
-  assert.deepEqual(r.models.map((m) => m.id), ids);
+  assert.deepEqual(r.models.map((m) => m.id), [...OLLAMA_IDS, ...MLX_IDS]);
 });
 
-test("models:mac-llm 网络失败回 offline+静态 7 个而唔 throw", async () => {
-  const fetchImpl = stubFetch(async () => { throw new Error("down"); });
+test("models:mac-llm 合并去重(两端同 id 只留一份)", async () => {
+  const fetchImpl = macFetch({ mlxIds: ["gpt-oss:20b", "mlx-community/Qwen3-14B-4bit"] });
   const r = await fetchProviderModels("mac-llm", { fetchImpl });
+  assert.equal(r.source, "live");
+  assert.deepEqual(r.models.map((m) => m.id), [...OLLAMA_IDS, "mlx-community/Qwen3-14B-4bit"]);
+});
+
+test("models:mac-llm MLX 一边失败仍 live,只剩 Ollama 7 个", async () => {
+  const r = await fetchProviderModels("mac-llm", { fetchImpl: macFetch({ mlxThrow: true }) });
+  assert.equal(r.source, "live");
+  assert.equal(r.offline, undefined);
+  assert.deepEqual(r.models.map((m) => m.id), OLLAMA_IDS);
+});
+
+test("models:mac-llm Ollama 一边失败仍 live,只剩 MLX 2 个", async () => {
+  const r = await fetchProviderModels("mac-llm", { fetchImpl: macFetch({ ollamaStatus: 502 }) });
+  assert.equal(r.source, "live");
+  assert.equal(r.offline, undefined);
+  assert.deepEqual(r.models.map((m) => m.id), MLX_IDS);
+});
+
+test("models:mac-llm 两边都失败回 offline+静态合并 9 个而唔 throw", async () => {
+  const r = await fetchProviderModels("mac-llm", { fetchImpl: macFetch({ ollamaThrow: true, mlxThrow: true }) });
   assert.equal(r.source, "static");
   assert.equal(r.offline, true);
-  assert.deepEqual(r.models.map((m) => m.id), ["qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b", "deepseek-r1:14b", "gemma3:12b"]);
+  assert.deepEqual(r.models.map((m) => m.id), STATIC9);
 });
 
-test("models:mac-llm HTTP 失败回 offline+静态而唔 throw", async () => {
-  const fetchImpl = stubFetch(async () => jsonResponse(502, { error: "bad gateway" }));
-  const r = await fetchProviderModels("mac-llm", { fetchImpl });
+test("models:mac-llm 两边 HTTP 失败回 offline+静态而唔 throw", async () => {
+  const r = await fetchProviderModels("mac-llm", { fetchImpl: macFetch({ ollamaStatus: 502, mlxStatus: 502 }) });
   assert.equal(r.offline, true);
-  assert.equal(r.models.length, 7);
+  assert.equal(r.models.length, 9);
 });
 
 test("models:其它 provider HTTP 失败仍然抛错", async () => {
@@ -88,9 +128,9 @@ test("models:其它 provider HTTP 失败仍然抛错", async () => {
   await assert.rejects(fetchProviderModels("glm", { fetchImpl }), /HTTP 500/);
 });
 
-test("models:mac-llm 静态表为核实 7 个(次序)", () => {
-  assert.deepEqual(staticModelsFor("mac-llm"), ["qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b", "deepseek-r1:14b", "gemma3:12b"]);
-  assert.deepEqual(STATIC_MODELS["mac-llm"], ["qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b", "deepseek-r1:14b", "gemma3:12b"]);
+test("models:mac-llm 静态表为合并 9 个(次序,两处一致)", () => {
+  assert.deepEqual(staticModelsFor("mac-llm"), STATIC9);
+  assert.deepEqual(STATIC_MODELS["mac-llm"], STATIC9);
 });
 
 test("models:mac-mlx live 透传 mlx server 实报 model id", async () => {
@@ -123,12 +163,14 @@ test("models:mac-mlx HTTP 失败回 offline 而唔 throw", async () => {
   assert.equal(r.models.length, 2);
 });
 
-test("models:mac-mlx 静态表与 providerMeta 一致", () => {
+test("models:mac-mlx(旧名 back-compat)静态表保留 MLX 2 个", () => {
+  // providerMeta 已合并、不再有 mac-mlx 条目;models.ts 的服务端静态表保留,
+  // 供 ?provider=mac-mlx 直拉时的离线回落。
   assert.deepEqual(staticModelsFor("mac-mlx"), [
     "mlx-community/Qwen3-14B-4bit",
     "mlx-community/gpt-oss-20b-MXFP4-Q8",
   ]);
-  assert.deepEqual(STATIC_MODELS["mac-mlx"], staticModelsFor("mac-mlx"));
+  assert.equal(STATIC_MODELS["mac-mlx"], undefined);
 });
 
 test("models:openrouter 标记 free 模型", async () => {

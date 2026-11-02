@@ -64,16 +64,92 @@ test("provider:mac-llm 在册,走 tunnel baseURL,免 key", () => {
   assert.equal(providerNeedsKey("mac-llm"), false);
 });
 
-test("provider:mac-mlx 在册(mac-llm 之后),走 mlx tunnel baseURL,免 key,预设为 MLX 实报模型", () => {
+test("provider:mac-mlx 已合并:不再出现在 listProviders,但 def 保留作内部分流/兼容目标", () => {
   const list = listProviders();
-  const byName = Object.fromEntries(list.map((p) => [p.name, p]));
-  assert.equal(byName["mac-mlx"].group, "nokey");
-  assert.equal(byName["mac-mlx"].needsKey, false);
-  assert.equal(byName["mac-mlx"].labelKey, "settings.prov.macmlx");
-  const order = list.map((p) => p.name);
-  assert.equal(order.indexOf("mac-mlx"), order.indexOf("mac-llm") + 1);
+  const names = list.map((p) => p.name);
+  assert.ok(!names.includes("mac-mlx"), "UI 列表不应再有 mac-mlx(已并入 mac-llm)");
+  assert.ok(names.includes("mac-llm"));
+  // def 保留:旧名直呼仍解析到 MLX 端点、免 key,不会断路。
   assert.equal(providerBaseUrl("mac-mlx"), "https://mlx.hectorchan.com/v1");
   assert.equal(providerNeedsKey("mac-mlx"), false);
+});
+
+test("provider:macRouteBaseUrl 按模型分流(纯函数)", async () => {
+  const { macRouteBaseUrl, macRuntimeFor, isMlxModelId, MLX_BASE_URL } = await import("../dist/provider.js");
+  const OLLAMA = "https://ollama.hectorchan.com/v1";
+  // mac-llm:MLX 模型 → MLX 端点;Ollama 模型 → 自身端点。
+  assert.equal(macRouteBaseUrl("mac-llm", "mlx-community/Qwen3-14B-4bit", OLLAMA), MLX_BASE_URL);
+  assert.equal(macRouteBaseUrl("mac-llm", "mlx-community/gpt-oss-20b-MXFP4-Q8", OLLAMA), MLX_BASE_URL);
+  assert.equal(macRouteBaseUrl("mac-llm", "qwen3:30b", OLLAMA), OLLAMA);
+  assert.equal(macRouteBaseUrl("mac-llm", "gemma3:12b", OLLAMA), OLLAMA);
+  // 旧名 mac-mlx:全部 → MLX(维持合并前行为)。
+  assert.equal(macRouteBaseUrl("mac-mlx", "qwen3:8b", MLX_BASE_URL), MLX_BASE_URL);
+  assert.equal(macRouteBaseUrl("mac-mlx", "mlx-community/Qwen3-14B-4bit", MLX_BASE_URL), MLX_BASE_URL);
+  // 其它 provider:不分流。
+  assert.equal(macRouteBaseUrl("glm", "mlx-community/Qwen3-14B-4bit", "https://glm.example/v1"), "https://glm.example/v1");
+  assert.equal(macRouteBaseUrl("custom", "qwen3:8b", undefined), undefined);
+  // runtime 判定与 reasoning 参数挂钩。
+  assert.equal(macRuntimeFor("mac-llm", "mlx-community/Qwen3-14B-4bit"), "mlx");
+  assert.equal(macRuntimeFor("mac-llm", "qwen3:8b"), "ollama");
+  assert.equal(macRuntimeFor("mac-mlx", "qwen3:8b"), "mlx");
+  assert.equal(macRuntimeFor("glm", "qwen3:8b"), null);
+  assert.equal(isMlxModelId("mlx-community/Qwen3-14B-4bit"), true);
+  assert.equal(isMlxModelId("qwen3:8b"), false);
+});
+
+test("provider:mac-llm 选中 MLX 模型时不带 reasoning_effort(按 route 而非 provider 名)", async () => {
+  const { chatComplete } = await import("../dist/provider.js");
+  const http = await import("node:http");
+  const seen = [];
+  const server = http.createServer((req, res) => {
+    let body = "";
+    req.on("data", (c) => (body += c));
+    req.on("end", () => {
+      seen.push(JSON.parse(body || "{}"));
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ choices: [{ message: { content: "ok" } }], usage: {} }));
+    });
+  });
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const baseURL = `http://127.0.0.1:${server.address().port}`;
+  const req = { kind: "chat", maxTokens: 10, system: [], messages: [{ role: "user", content: "hi" }] };
+  try {
+    // baseURL 显式覆盖时不分流(请求落到本地替身),但参数必须按目标 runtime 决定:
+    // MLX 模型 → 不送 reasoning_effort;Ollama 模型 → 送 "none"。
+    await chatComplete(req, { provider: "mac-llm", model: "mlx-community/Qwen3-14B-4bit", baseURL });
+    await chatComplete(req, { provider: "mac-llm", model: "qwen3:8b", baseURL });
+  } finally {
+    server.close();
+  }
+  assert.equal("reasoning_effort" in seen[0], false);
+  assert.equal(seen[1].reasoning_effort, "none");
+});
+
+test("provider:mac-llm 流式选中 MLX 模型时同样不带 reasoning_effort", async () => {
+  const { chatStream } = await import("../dist/provider.js");
+  const http = await import("node:http");
+  const seen = [];
+  const server = http.createServer((req, res) => {
+    let body = "";
+    req.on("data", (c) => (body += c));
+    req.on("end", () => {
+      seen.push(JSON.parse(body || "{}"));
+      res.writeHead(200, { "Content-Type": "text/event-stream" });
+      res.end('data: {"choices":[{"delta":{"content":"ok"}}]}\n\ndata: [DONE]\n\n');
+    });
+  });
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const baseURL = `http://127.0.0.1:${server.address().port}`;
+  const req = { kind: "chat", maxTokens: 10, system: [], messages: [{ role: "user", content: "hi" }] };
+  try {
+    const s = chatStream(req, { provider: "mac-llm", model: "mlx-community/Qwen3-14B-4bit", baseURL });
+    const out = await s.finalMessage();
+    assert.equal(out.text, "ok");
+  } finally {
+    server.close();
+  }
+  assert.equal(seen.length, 1);
+  assert.equal("reasoning_effort" in seen[0], false);
 });
 
 test("provider:mac-mlx 不带 reasoning_effort,但带 Access headers", async () => {

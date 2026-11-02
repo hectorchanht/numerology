@@ -45,7 +45,12 @@ const STATIC_MODELS: Record<string, string[]> = {
   groq: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it", "deepseek-r1-distill-llama-70b"],
   openrouter: ["google/gemma-4-31b-it:free", "google/gemma-4-26b-a4b-it:free", "nvidia/nemotron-3.5-lightning:free"],
   pollinations: ["openai"],
-  "mac-llm": ["qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b", "deepseek-r1:14b", "gemma3:12b"],
+  // 合并表:Ollama 7 个在前、MLX 2 个在后(与 fetchMacMergedModels 的合并次序一致)。
+  "mac-llm": [
+    "qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b", "deepseek-r1:14b", "gemma3:12b",
+    "mlx-community/Qwen3-14B-4bit", "mlx-community/gpt-oss-20b-MXFP4-Q8",
+  ],
+  // 旧名 back-compat:?provider=mac-mlx 直拉时仍用它做离线回落。
   "mac-mlx": ["mlx-community/Qwen3-14B-4bit", "mlx-community/gpt-oss-20b-MXFP4-Q8"],
 };
 
@@ -56,24 +61,110 @@ function toEntries(ids: string[]): ModelEntry[] {
   return ids.map((id) => (id.endsWith(":free") ? { id, free: true } : { id }));
 }
 
+type ModelsPayload = { data?: { id?: string; pricing?: { prompt?: string | number } }[] };
+
+/** 解析 OpenAI 兼容 /models 响应为模型项(pricing.prompt 为 0 → free:true)。 */
+function parseModelEntries(data: ModelsPayload): ModelEntry[] {
+  const list = Array.isArray(data?.data) ? data.data : [];
+  return list
+    .map((m) => m?.id)
+    .filter((id): id is string => typeof id === "string" && id.length > 0)
+    .slice(0, 300)
+    .map((id) => {
+      const raw = list.find((m) => m?.id === id);
+      const p = raw?.pricing?.prompt;
+      return p === "0" || p === 0 ? { id, free: true } : { id };
+    });
+}
+
+export interface FetchProviderModelsOpts {
+  key?: string;
+  baseUrl?: string;
+  fetchImpl?: FetchLike;
+  /** 服务端 KV(读动态下架登记用);缺省则只滤 hardcode seed。 */
+  kv?: unknown;
+  /** 服务端注入的额外请求头(如 Mac provider 的 Access service token)。 */
+  accessHeaders?: Record<string, string>;
+}
+
+/** 拉单个 OpenAI 兼容端点的模型项(8s 超时);任何失败(网络/非 2xx/坏 JSON)返回 null。 */
+async function fetchEndpointEntries(
+  baseURL: string,
+  opts: FetchProviderModelsOpts,
+): Promise<ModelEntry[] | null> {
+  const fetchImpl = opts.fetchImpl ?? fetch;
+  const headers: Record<string, string> = {};
+  if (opts.key?.trim()) headers.Authorization = `Bearer ${opts.key.trim()}`;
+  if (opts.accessHeaders) Object.assign(headers, opts.accessHeaders);
+  let res: Response;
+  try {
+    const init: RequestInit & { signal?: AbortSignal } = { headers };
+    if (typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function") {
+      init.signal = AbortSignal.timeout(8000);
+    }
+    res = await fetchImpl(`${baseURL.replace(/\/+$/, "")}/models`, init);
+  } catch {
+    return null;
+  }
+  if (!res.ok) return null;
+  const data = (await res.json().catch(() => null)) as ModelsPayload | null;
+  return data ? parseModelEntries(data) : null;
+}
+
+/**
+ * mac-llm 合并列表:同一部 Mac 上 Ollama 与 MLX 两个 runtime 并行拉取后合并
+ * (Ollama 在前、MLX 在后,同 id 去重)。任一端成功 → source:"live"(死掉那边的
+ * 模型自然不出现,本身就是可用性信号,不另加旗标);两端都失败(或合并为空)
+ * → 离线软回落静态合并表。
+ */
+async function fetchMacMergedModels(opts: FetchProviderModelsOpts): Promise<ModelsResult> {
+  const urls = [MODELS_BASE_URL["mac-llm"]!, MODELS_BASE_URL["mac-mlx"]!];
+  const per = await Promise.all(urls.map((u) => fetchEndpointEntries(u, opts)));
+  const seen = new Set<string>();
+  const merged: ModelEntry[] = [];
+  let anyOk = false;
+  for (const entries of per) {
+    if (!entries) continue;
+    anyOk = true;
+    for (const e of entries) {
+      if (seen.has(e.id)) continue;
+      seen.add(e.id);
+      merged.push(e);
+    }
+  }
+  if (!anyOk || merged.length === 0) {
+    return {
+      provider: "mac-llm",
+      source: "static",
+      offline: true,
+      models: toEntries(STATIC_MODELS["mac-llm"] ?? []),
+    };
+  }
+  // 下架过滤:新登记统一归 mac-llm 名下(见 @numerology/ai 的 deadRegistryName);
+  // 合并前 mac-mlx 名下的历史登记也读出取并集,避免漏滤。
+  const dead = new Set<string>();
+  if (opts.kv) {
+    const map = await readDeadModels(opts.kv);
+    for (const id of deadModelIds(map, "mac-llm")) dead.add(id);
+    for (const id of deadModelIds(map, "mac-mlx")) dead.add(id);
+  }
+  const filtered = filterRetired(merged).filter((m) => !dead.has(normDeadModelId(m.id)));
+  return { provider: "mac-llm", source: "live", models: filtered.length > 0 ? filtered : merged };
+}
+
 /**
  * 拉取某 provider 的模型列表。纯函数(fetch 可注入,便于测试)。
  * - workers-ai:binding 无 list 接口,返回构建时核验表(verified-static)。
  * - OpenAI 兼容:代理 {baseURL}/models;401 → needsKey。
  * - anthropic/custom:静态表(无标准端点)。
+ * - mac-llm:UI 合并后的单一 Mac provider → 并行合并 Ollama + MLX 两端点
+ *   (见 fetchMacMergedModels);显式传 baseUrl 时不合并,按单端点走既有流程。
+ * - mac-mlx(旧名):back-compat,仍按 MLX 单端点拉取。
  * key 只经 Authorization 头发送,绝不出现在返回值/日志中。
  */
 export async function fetchProviderModels(
   provider: string,
-  opts: {
-    key?: string;
-    baseUrl?: string;
-    fetchImpl?: FetchLike;
-    /** 服务端 KV(读动态下架登记用);缺省则只滤 hardcode seed。 */
-    kv?: unknown;
-    /** 服务端注入的额外请求头(如 Mac provider 的 Access service token)。 */
-    accessHeaders?: Record<string, string>;
-  } = {},
+  opts: FetchProviderModelsOpts = {},
 ): Promise<ModelsResult> {
   const name = provider.trim().toLowerCase();
   const fetchImpl = opts.fetchImpl ?? fetch;
@@ -89,6 +180,10 @@ export async function fetchProviderModels(
 
   if (name === "anthropic" || name === "custom") {
     return { provider: name, source: "static", models: toEntries(STATIC_MODELS[name] ?? []) };
+  }
+
+  if (name === "mac-llm" && !(opts.baseUrl && opts.baseUrl.trim())) {
+    return fetchMacMergedModels(opts);
   }
 
   const baseURL = (opts.baseUrl?.trim() || MODELS_BASE_URL[name] || "").replace(/\/+$/, "");
@@ -129,17 +224,8 @@ export async function fetchProviderModels(
     if (isMac) return offlineFallback();
     throw new Error(`模型列表请求失败(HTTP ${res.status})`);
   }
-  const data = (await res.json()) as { data?: { id?: string; pricing?: { prompt?: string | number } }[] };
-  const list = Array.isArray(data.data) ? data.data : [];
-  const models: ModelEntry[] = list
-    .map((m) => m?.id)
-    .filter((id): id is string => typeof id === "string" && id.length > 0)
-    .slice(0, 300)
-    .map((id) => {
-      const raw = list.find((m) => m?.id === id);
-      const p = raw?.pricing?.prompt;
-      return p === "0" || p === 0 ? { id, free: true } : { id };
-    });
+  const data = (await res.json()) as ModelsPayload;
+  const models = parseModelEntries(data);
   // 下架模型直接移除(选了必 404),不让用户选到:hardcode seed + KV 动态登记取并集。
   // 若过滤后为空则回落原列表(避免下拉被清空,属于异常状态)。
   const dead = opts.kv ? deadModelIds(await readDeadModels(opts.kv), name) : new Set<string>();

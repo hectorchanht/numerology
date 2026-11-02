@@ -41,6 +41,15 @@ test("migrateAiSettings:空输入/非法输入 → 默认", () => {
   assert.equal(migrateAiSettings({}).systemPrompt, "");
 });
 
+test("migrateAiSettings:旧名 mac-mlx 映射到 mac-llm,model 原样保留(触发 MLX 分流)", () => {
+  const out = migrateAiSettings({ provider: "mac-mlx", model: "mlx-community/Qwen3-14B-4bit" });
+  assert.equal(out.provider, "mac-llm");
+  assert.equal(out.model, "mlx-community/Qwen3-14B-4bit");
+  // 已是新名/其它 provider 不受影响。
+  assert.equal(migrateAiSettings({ provider: "mac-llm", model: "qwen3:8b" }).provider, "mac-llm");
+  assert.equal(migrateAiSettings({ provider: "glm" }).provider, "glm");
+});
+
 test("currentKey:只取当前 provider 的 key,没填 → 空(不拿别的顶替)", () => {
   const s = { ...DEFAULT_AI, provider: "glm", keys: { openrouter: "or-key" } };
   assert.equal(currentKey(s), "");
