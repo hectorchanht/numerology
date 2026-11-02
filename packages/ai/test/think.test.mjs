@@ -124,3 +124,37 @@ test("think:chatStream capture 關(預設)——reasoning 丟棄,且送 reasonin
     server.close();
   }
 });
+
+function feedAll(capture, raw) {
+  return runNorm(capture, [["c", raw]]);
+}
+
+test("harmony:capture 開——analysis channel 歸 think,final 係正文,標記全清", () => {
+  const raw =
+    "<|channel|>analysis<|message|>諗緊點寫呢節。<|end|><|start|>assistant<|channel|>final<|message|>## 性格特質\n正文。<|end|>";
+  assert.equal(
+    feedAll(true, raw),
+    "<think>諗緊點寫呢節。</think>## 性格特質\n正文。",
+  );
+});
+
+test("harmony:capture 關——analysis 整段剝除,只剩 final 正文", () => {
+  const raw =
+    "<|channel|>analysis<|message|>諗緊點寫呢節。<|end|><|start|>assistant<|channel|>final<|message|>## 性格特質\n正文。<|end|>";
+  assert.equal(feedAll(false, raw), "## 性格特質\n正文。");
+});
+
+test("harmony:標記跨 chunk 切分(逐字餵)結果不變", () => {
+  const raw =
+    "<|channel|>analysis<|message|>諗嘢<|end|><|start|>assistant<|channel|>final<|message|>正文";
+  const n = new ThinkStreamNormalizer(true);
+  let out = "";
+  for (const ch of raw) out += n.pushContent(ch);
+  out += n.finish();
+  assert.equal(out, "<think>諗嘢</think>正文");
+});
+
+test("harmony:流尾未成形標記碎片丟棄,唔漏入正文", () => {
+  assert.equal(feedAll(true, "正文完。<|en"), "正文完。");
+  assert.equal(feedAll(false, "正文完。<|channel|>ana"), "正文完。");
+});

@@ -487,6 +487,22 @@ export interface TextStream {
 
 const THINK_OPEN = "<think>";
 const THINK_CLOSE = "</think>";
+/**
+ * gpt-oss harmony 標記:Ollama 自己會拆 channel(走 reasoning 欄),但 mlx-lm
+ * 唔 parse——原始標記直入 content(2026-11-02 MLX gpt-oss 覆測實證:
+ * analysis 全文 + 標記混喺正文,真答案喺 final channel 尾段)。所以一併正規化:
+ * analysis/commentary channel → think 段;final channel → 正文;<|end|> 收尾;
+ * <|start|>assistant 頭銜直接丟棄。呢啲係特殊 token 字面,正常文本唔會出現,零誤傷。
+ */
+const HARMONY_OPENERS = ["<|channel|>analysis<|message|>", "<|channel|>commentary<|message|>"];
+const HARMONY_FINAL = "<|channel|>final<|message|>";
+const HARMONY_END = "<|end|>";
+const HARMONY_START = "<|start|>assistant";
+/** 正文模式要攔截的標記(開思考 / 切 final / 丟棄)。 */
+const CONTENT_TOKENS = [THINK_OPEN, ...HARMONY_OPENERS, HARMONY_FINAL, HARMONY_END, HARMONY_START];
+/** 思考模式要攔截的標記(閉合思考;final 標記一樣閉合,之後係正文)。 */
+const THINK_TOKENS = [THINK_CLOSE, HARMONY_END, HARMONY_FINAL];
+const ALL_TOKENS = [...CONTENT_TOKENS, THINK_CLOSE];
 
 /** s 的最長後綴同時是 tag 的真前綴的長度(跨 chunk 標籤切分時要保留的尾巴)。 */
 function suffixPrefixLen(s: string, tag: string): number {
@@ -495,15 +511,30 @@ function suffixPrefixLen(s: string, tag: string): number {
   return 0;
 }
 
+/** 在 s 入面搵最早出現的任一 token(同位取最長嗰個)。 */
+function findToken(s: string, tokens: readonly string[]): { idx: number; token: string } | null {
+  let best: { idx: number; token: string } | null = null;
+  for (const token of tokens) {
+    const idx = s.indexOf(token);
+    if (idx < 0) continue;
+    if (!best || idx < best.idx || (idx === best.idx && token.length > best.token.length)) {
+      best = { idx, token };
+    }
+  }
+  return best;
+}
+
 /**
  * 思考正規化器(增量,供流式逐 chunk 餵入):
- * 把「結構化 reasoning delta」與「content 內嵌 <think>…</think> 段」統一成
- * 文本流中的 <think>…</think> 段——傳輸協議維持純文字不變,前端用 splitThinking 分拆。
+ * 把「結構化 reasoning delta」、「content 內嵌 <think>…</think> 段」與
+ * 「gpt-oss harmony 原始 channel 標記」統一成文本流中的 <think>…</think> 段
+ * ——傳輸協議維持純文字不變,前端用 splitThinking 分拆。
  * - capture=true:思考原樣保留(以標籤包住);reasoning 開的 think 塊在第一段 content
  *   到達時自動閉合;finish() 會補上未閉合的 </think>,保證落檔文本形狀完整。
- * - capture=false(預設/壓制):reasoning 丟棄,content 內的 think 段整段剝除,
+ * - capture=false(預設/壓制):reasoning 丟棄,思考段整段剝除,
  *   其餘文本逐字不變(無標籤文本零影響)。
- * 標籤可跨 chunk 切分:掃描時保留可能是標籤前綴的尾巴(≤7 字),不漏不重。
+ * 標記可跨 chunk 切分:掃描時保留可能是標記前綴的尾巴,不漏不重;
+ * finish() 會丟棄流尾未成形的標記碎片。
  */
 export class ThinkStreamNormalizer {
   private insideThink = false;
@@ -524,6 +555,40 @@ export class ThinkStreamNormalizer {
     return out + delta;
   }
 
+  /** 按目前模式(思考/正文)沖出 held;final=true 時連尾巴碎片都清埋。 */
+  private drain(final: boolean): string {
+    let out = "";
+    for (;;) {
+      const hit = findToken(this.held, this.insideThink ? THINK_TOKENS : CONTENT_TOKENS);
+      if (!hit) {
+        const keep = ALL_TOKENS.reduce((m, t) => Math.max(m, suffixPrefixLen(this.held, t)), 0);
+        const emitLen = this.held.length - keep;
+        if (!this.insideThink || this.capture) out += this.held.slice(0, emitLen);
+        this.held = this.held.slice(emitLen);
+        // final:淨返嘅 held 只可能係未成形標記碎片 → 丟棄,唔好漏入正文。
+        if (final) this.held = "";
+        break;
+      }
+      const seg = this.held.slice(0, hit.idx);
+      if (!this.insideThink || this.capture) out += seg;
+      this.held = this.held.slice(hit.idx + hit.token.length);
+      if (hit.token === THINK_OPEN || HARMONY_OPENERS.includes(hit.token)) {
+        this.insideThink = true;
+        this.thinkFromReasoning = false;
+        if (this.capture) out += THINK_OPEN;
+      } else if (hit.token === HARMONY_START) {
+        // 頭銜標記:直接丟棄,模式不變。
+      } else {
+        // THINK_CLOSE / HARMONY_END / HARMONY_FINAL:閉合思考(final 之後即正文)。
+        if (this.insideThink) {
+          this.insideThink = false;
+          if (this.capture) out += THINK_CLOSE;
+        }
+      }
+    }
+    return out;
+  }
+
   /** content delta:掃描內嵌標籤,思考段按 capture 保留或剝除。 */
   pushContent(delta: string): string {
     if (!delta) return "";
@@ -535,46 +600,16 @@ export class ThinkStreamNormalizer {
       this.thinkFromReasoning = false;
     }
     this.held += delta;
-    for (;;) {
-      if (!this.insideThink) {
-        const idx = this.held.indexOf(THINK_OPEN);
-        if (idx < 0) {
-          const keep = suffixPrefixLen(this.held, THINK_OPEN);
-          out += this.held.slice(0, this.held.length - keep);
-          this.held = this.held.slice(this.held.length - keep);
-          break;
-        }
-        out += this.held.slice(0, idx);
-        if (this.capture) out += THINK_OPEN;
-        this.insideThink = true;
-        this.thinkFromReasoning = false;
-        this.held = this.held.slice(idx + THINK_OPEN.length);
-      } else {
-        const idx = this.held.indexOf(THINK_CLOSE);
-        if (idx < 0) {
-          const keep = suffixPrefixLen(this.held, THINK_CLOSE);
-          if (this.capture) out += this.held.slice(0, this.held.length - keep);
-          this.held = this.held.slice(this.held.length - keep);
-          break;
-        }
-        if (this.capture) out += this.held.slice(0, idx) + THINK_CLOSE;
-        this.insideThink = false;
-        this.held = this.held.slice(idx + THINK_CLOSE.length);
-      }
-    }
-    return out;
+    return out + this.drain(false);
   }
 
   /** 流結束:沖出保留尾巴;未閉合的 think 在 capture 模式補 </think>。 */
   finish(): string {
-    let out = "";
-    if (this.held) {
-      if (this.capture || !this.insideThink) out += this.held;
-      this.held = "";
-    }
+    let out = this.drain(true);
     if (this.insideThink && this.capture) out += THINK_CLOSE;
     this.insideThink = false;
     this.thinkFromReasoning = false;
+    this.held = "";
     return out;
   }
 }
