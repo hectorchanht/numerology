@@ -30,10 +30,30 @@ const LS_KEY = "mingli.ai.v1";
 export const AI_SETTINGS_EVENT = "ai-settings-changed";
 
 /**
+ * MLX 停用(2026-11-02)后的模型救济:已存设置若选中 mlx-community/* 模型 id,
+ * 映射到 Ollama 同级模型;未知的 mlx-community/* → mac-llm 默认推荐(qwen3:30b)。
+ * 只在 Mac provider 下由 migrateAiSettings 调用,其它 provider 的 model 不受影响。
+ */
+const MLX_MODEL_RESCUE: Record<string, string> = {
+  "mlx-community/qwen3-14b-4bit": "qwen3:14b",
+  "mlx-community/gpt-oss-20b-mxfp4-q8": "gpt-oss:20b",
+};
+
+/** 把已退役的 MLX 模型 id 映射到 Ollama 同级;非 MLX id 原样返回。 */
+export function rescueMacModel(model: string): string {
+  const m = model.trim();
+  const hit = MLX_MODEL_RESCUE[m.toLowerCase()];
+  if (hit) return hit;
+  if (m.toLowerCase().startsWith("mlx-community/")) return "qwen3:30b";
+  return model;
+}
+
+/**
  * 纯函数:把 localStorage 里读到的旧对象迁移到新结构(不碰 window,可测试)。
  * - 旧版单 `apiKey` 非空 且 新版 `keys` 为空 → 归到当时选中的 provider 名下。
- * - provider="mac-mlx"(已合并的旧名)→ 映射到 "mac-llm";model 原样保留
- *   (mlx-community/* 模型 id 本身会触发服务端按模型分流到 MLX 端点)。
+ * - provider="mac-mlx"(已退役的旧名)→ 映射到 "mac-llm"。
+ * - Mac provider 下选了 mlx-community/* 模型 → 救济映射到 Ollama 同级
+ *   (见 rescueMacModel;MLX 已停用,原样保留会打到死端点)。
  */
 export function migrateAiSettings(raw: unknown): AiSettings {
   if (!raw || typeof raw !== "object") return { ...DEFAULT_AI };
@@ -46,6 +66,7 @@ export function migrateAiSettings(raw: unknown): AiSettings {
     systemPrompt: typeof r.systemPrompt === "string" ? r.systemPrompt : "",
   };
   if (out.provider.trim().toLowerCase() === "mac-mlx") out.provider = "mac-llm";
+  if (out.provider === "mac-llm" && out.model) out.model = rescueMacModel(out.model);
   if (r.keys && typeof r.keys === "object") {
     for (const [k, v] of Object.entries(r.keys as Record<string, unknown>)) {
       if (typeof k === "string" && typeof v === "string" && v.trim()) out.keys[k] = v.trim();

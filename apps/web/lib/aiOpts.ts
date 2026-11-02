@@ -37,7 +37,7 @@ export function resolveServerAi(body: unknown): ProviderOptions | undefined {
   const opts: ProviderOptions = parseAi(body) ?? {};
   const bindings = getServerAiBindings();
   if (bindings) opts.aiBinding = bindings;
-  // Mac provider(mac-llm / mac-mlx 共用同一 Access app):附上 Cloudflare Access
+  // Mac provider(mac-llm;旧名 mac-mlx 亦认):附上 Cloudflare Access
   // service token headers(仅服务端 env,绝不来自请求体)。
   if (opts.provider && isMacProvider(opts.provider)) {
     const h = getMacLlmAccessHeaders();

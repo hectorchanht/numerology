@@ -63,7 +63,7 @@ export interface ProviderOptions {
   aiBinding?: { ai?: unknown; kv?: unknown };
   /**
    * 服务端注入的额外请求头(仅服务端设置,绝不来自客户端请求体):
-   * 目前唯一用途是 Mac provider(mac-llm / mac-mlx)的 Cloudflare Access service token
+   * 目前唯一用途是 Mac provider(mac-llm;旧名 mac-mlx 会先正规化)的 Cloudflare Access service token
    * (CF-Access-Client-Id/Secret),由 resolveServerAi 从 Pages env 注入。
    */
   extraHeaders?: Record<string, string>;
@@ -146,19 +146,6 @@ const PROVIDERS: Record<string, ProviderDef> = {
     free: true,
     noKey: true,
   },
-  // 已与 mac-llm 合并呈现(UI 只剩 Mac LLM 一个 provider,见 listProviders)。
-  // 此 def 保留作内部分流/兼容目标:旧设置或 API 直呼 provider="mac-mlx" 时,
-  // 全部模型照旧直达 MLX 端点(见 macRouteBaseUrl),不会断路。
-  "mac-mlx": {
-    kind: "openai",
-    label: "Mac MLX(MLX·免费·headless Mac,无 key)",
-    keys: [],
-    baseURL: "https://mlx.hectorchan.com/v1",
-    // mlx_lm server 实报的 model id 原文(多模型:按请求加载,此为预设)。
-    models: { report: "mlx-community/Qwen3-14B-4bit", chat: "mlx-community/Qwen3-14B-4bit" },
-    free: true,
-    noKey: true,
-  },
   glm: {
     kind: "openai",
     label: "智谱 GLM-4-Flash(免费)",
@@ -207,17 +194,26 @@ const PROVIDERS: Record<string, ProviderDef> = {
 
 /**
  * 屋企 Mac 上的本地 provider:同一部 headless Mac、同一个 Cloudflare Access
- * application + service token(ollama/mlx 两个 subdomain 同 app),
- * 共用 token 注入路径与即时模型列表行为。
- * UI 已合并为单一 mac-llm(Ollama + MLX 两 runtime 按模型分流,见 macRouteBaseUrl);
- * mac-mlx 是已合并的旧名,只作 back-compat alias 保留 Mac 待遇,新 UI 永不产生它。
+ * application + service token,共用 token 注入路径与即时模型列表行为。
+ * 2026-11-02 起 Mac 只行 Ollama 一个 runtime(MLX 已停用:disable 唔 delete,
+ * Mac 上的 LaunchAgent 只是 bootout + plist 改名 .disabled,日后可复活):
+ * 32GB RAM 两边大模型互抢、MLX 线程死过两次,而 MLX 的 2 个模型与 Ollama 重复。
+ * mac-mlx 是已退役的旧名,只作 alias:所有入口先正规化到 mac-llm(见
+ * normalizeProviderName),新 UI 永不产生它;已存设置里的 mlx-community/* 模型 id
+ * 由 web 侧 migrateAiSettings 映射到 Ollama 同级模型。
  */
 export const MAC_PROVIDER_NAMES = ["mac-llm"] as const;
 
-/** 已合并的旧 provider 名(仅兼容:旧设置 / API 直呼仍按 Mac provider 对待)。 */
+/** 已退役的旧 provider 名(仅兼容:正规化到 mac-llm,仍按 Mac provider 对待)。 */
 export const MAC_PROVIDER_ALIASES = ["mac-mlx"] as const;
 
-/** 是否为屋企 Mac 本地 provider(mac-llm,或旧名 mac-mlx)。 */
+/** provider 名正规化:退役 alias mac-mlx → mac-llm;其它原样(小写去空白)。 */
+export function normalizeProviderName(name: string): string {
+  const n = name.trim().toLowerCase();
+  return (MAC_PROVIDER_ALIASES as readonly string[]).includes(n) ? "mac-llm" : n;
+}
+
+/** 是否为屋企 Mac 本地 provider(mac-llm,或退役旧名 mac-mlx)。 */
 export function isMacProvider(name: string): boolean {
   const n = name.trim().toLowerCase();
   return (
@@ -226,42 +222,7 @@ export function isMacProvider(name: string): boolean {
   );
 }
 
-/** MLX runtime 的 OpenAI 兼容端点(与 mac-llm 的 Ollama 端点同机、不同进程)。 */
-export const MLX_BASE_URL = "https://mlx.hectorchan.com/v1";
-
-/** 是否为 MLX 模型 id(mlx_lm server 实报的 HF repo id,统一 `mlx-community/` 前缀)。 */
-export function isMlxModelId(model: string): boolean {
-  return model.trim().toLowerCase().startsWith("mlx-community/");
-}
-
-/**
- * Mac 合并分流(纯函数,可测):UI 只剩 mac-llm 一个 provider,但同一部 Mac 上
- * 有 Ollama 与 MLX 两个 runtime,按选中模型决定实际端点:
- * - provider="mac-llm":`mlx-community/*` 模型 → MLX 端点;其它 → ownBaseUrl(Ollama)。
- * - provider="mac-mlx"(旧名直入):全部 → MLX 端点(维持合并前的行为)。
- * - 其它 provider:不分流,原样返回 ownBaseUrl。
- * 调用方注意:用户显式指定了 baseURL(opts.baseURL)时不要用本函数覆盖。
- */
-export function macRouteBaseUrl(
-  name: string,
-  model: string,
-  ownBaseUrl?: string,
-): string | undefined {
-  const n = name.trim().toLowerCase();
-  if (n === "mac-mlx") return MLX_BASE_URL;
-  if (n === "mac-llm" && isMlxModelId(model)) return MLX_BASE_URL;
-  return ownBaseUrl;
-}
-
-/** 本次请求实际行哪个 Mac runtime(决定解码参数):非 Mac provider 返回 null。 */
-export function macRuntimeFor(name: string, model: string): "mlx" | "ollama" | null {
-  const n = name.trim().toLowerCase();
-  if (n === "mac-mlx") return "mlx";
-  if (n === "mac-llm") return isMlxModelId(model) ? "mlx" : "ollama";
-  return null;
-}
-
-/** 死模型登记的归属名:Mac 合并后统一记到 mac-llm 名下(模型列表按 mac-llm 过滤)。 */
+/** 死模型登记的归属名:Mac 统一记到 mac-llm 名下(模型列表按 mac-llm 过滤)。 */
 function deadRegistryName(name: string): string {
   return isMacProvider(name) ? "mac-llm" : name;
 }
@@ -271,9 +232,9 @@ function deadRegistryName(name: string): string {
 // binding 缺失(本地开发)时 provider 层会给出明确报错,届时切其它 provider 即可。
 const DEFAULT_PROVIDER = "workers-ai";
 
-/** 当前生效的 provider 名(小写)。opts 可按请求覆盖(BYOK)。 */
+/** 当前生效的 provider 名(小写,退役 alias 已正规化)。opts 可按请求覆盖(BYOK)。 */
 export function activeProviderName(opts?: ProviderOptions): string {
-  const name = (opts?.provider || process.env.AI_PROVIDER || DEFAULT_PROVIDER).trim().toLowerCase();
+  const name = normalizeProviderName(opts?.provider || process.env.AI_PROVIDER || DEFAULT_PROVIDER);
   if (name !== "custom" && !PROVIDERS[name]) {
     throw new Error(`未知 AI provider="${name}"。可选:${Object.keys(PROVIDERS).join(" / ")} / custom`);
   }
@@ -383,8 +344,7 @@ async function fetchLiveModelIds(
 
 /**
  * 404 回落:清掉可能已失效的缓存,拉实时列表取首个模型记入缓存并返回。
- * baseURL 传**本次失败请求实际用的端点**(Mac 分流后可能是 MLX 端点),
- * 不要写死 def.baseURL,否则分流场景会拉错 runtime 的列表。
+ * baseURL 传本次失败请求实际用的端点(即 def.baseURL,已折入用户覆盖)。
  * 列表拉取失败或为空 → 抛原始 404 错误(真实消息透出,供用户换模型)。
  */
 async function fallbackModel(
@@ -424,7 +384,7 @@ function makeOpenAI(apiKey: string, baseURL?: string, defaultHeaders?: Record<st
 }
 
 /**
- * Mac provider(mac-llm / mac-mlx,共用同一 Access app)的 Cloudflare Access
+ * Mac provider(mac-llm;旧名 mac-mlx 已正规化,共用同一 Access app)的 Cloudflare Access
  * service token headers。
  * 优先用 opts.extraHeaders(web 侧 resolveServerAi 从 Pages env 注入,生产环境可靠路径);
  * 其次读进程 env(CLI/本地开发用)。其它 provider 一律不带。
@@ -780,35 +740,19 @@ function baseDecodeParams(): { temperature: number; top_p: number } {
  * 会把规划写进 content 做正文独白(2026-11-02 截圖實證,qwen3:30b)。
  * 故 captureThinking 开启时(仅 report/fortune route)不送此参数:让模型正常思考,
  * 思考走独立 reasoning 通道,由 ThinkStreamNormalizer 正规化后前端折叠展示。
- * 只在**实际行 Ollama 端点**时送(见 macRuntimeFor):分流到 MLX 的请求不送——
- * mlx_lm server 把 reasoning 分到独立字段回传、不占 content,且未证实它接受此参数。
+ * Mac 自 MLX 停用后只剩 Ollama 一个 runtime,故凡 Mac provider 都送(旧名 mac-mlx
+ * 已在 activeProviderName 正规化为 mac-llm,待遇一致)。
  * 注意:Ollama 实测接受 "none",但当前 OpenAI SDK 的 ReasoningEffort 未含它,故 cast;
  * 运行时序列化值仍为 "none",Ollama 认。
  */
 function macRouteParams(
   name: string,
-  model: string,
   captureThinking = false,
 ): { reasoning_effort?: OpenAI.ReasoningEffort } {
   if (captureThinking) return {};
-  return macRuntimeFor(name, model) === "ollama"
+  return isMacProvider(name)
     ? { reasoning_effort: "none" as unknown as OpenAI.ReasoningEffort }
     : {};
-}
-
-/**
- * 某模型本次实际用的端点:Mac 合并分流按模型决定(见 macRouteBaseUrl);
- * 用户显式指定了 baseURL(opts.baseURL,已被 resolveDef 折入 def.baseURL)时
- * 不分流,尊重覆盖(本地测试/自架端点也走这条路)。
- */
-function routeBaseFor(
-  name: string,
-  def: ProviderDef,
-  model: string,
-  opts?: ProviderOptions,
-): string | undefined {
-  if (opts?.baseURL) return def.baseURL;
-  return macRouteBaseUrl(name, model, def.baseURL);
 }
 
 /** env.AI binding 的最小接口(实际为 Cloudflare 的 Ai binding)。 */
@@ -1002,14 +946,13 @@ export async function chatComplete(
   const accessHeaders = accessHeadersFor(name, opts);
   const messages = toOpenAIMessages(system, req.messages);
   const preferred = resolvePreferredModel(def, req.kind, opts);
-  // 每个模型各自建 client:Mac 合并分流下同一请求的不同模型可能落不同端点。
   const capture = opts?.captureThinking ?? false;
   const complete = (model: string) =>
-    makeOpenAI(apiKey, routeBaseFor(name, def, model, opts), accessHeaders).chat.completions.create({
+    makeOpenAI(apiKey, def.baseURL, accessHeaders).chat.completions.create({
       model,
       max_tokens: req.maxTokens,
       ...baseDecodeParams(),
-      ...macRouteParams(name, model, capture),
+      ...macRouteParams(name, capture),
       messages,
     });
   const resultOf = (res: OpenAI.Chat.Completions.ChatCompletion) => ({
@@ -1023,11 +966,11 @@ export async function chatComplete(
     // 默认模型被下架(404) → 动态回落到实时列表首个模型重试一次;
     // 显式指定的模型 404 → 直接抛真实错误(用户去设置里换)。
     // 无论哪种,先把下架模型记入 KV:下次拉模型列表时自动滤走(动态下架)。
-    // Mac 合并后登记统一归 mac-llm 名下(列表按 mac-llm 过滤,见 deadRegistryName)。
+    // Mac 登记统一归 mac-llm 名下(列表按 mac-llm 过滤,见 deadRegistryName)。
     if (isModelNotFoundError(err)) await recordDeadModel(opts?.aiBinding?.kv, deadRegistryName(name), preferred);
     if (!isModelNotFoundError(err) || isModelExplicit(req.kind, opts)) throw err;
     const res = await complete(
-      await fallbackModel(routeBaseFor(name, def, preferred, opts), apiKey, err, accessHeaders),
+      await fallbackModel(def.baseURL, apiKey, err, accessHeaders),
     );
     return resultOf(res);
   }
@@ -1071,10 +1014,9 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
   const explicit = isModelExplicit(req.kind, opts);
   const capture = opts?.captureThinking ?? false;
   return new OpenAITextStream(async (signal) => {
-    // 每个模型各自建 client:Mac 合并分流下同一请求的不同模型可能落不同端点。
     const open = (model: string) =>
-      makeOpenAI(apiKey, routeBaseFor(name, def, model, opts), accessHeaders).chat.completions.create(
-        { model, max_tokens: req.maxTokens, stream: true, ...baseDecodeParams(), ...macRouteParams(name, model, capture), messages },
+      makeOpenAI(apiKey, def.baseURL, accessHeaders).chat.completions.create(
+        { model, max_tokens: req.maxTokens, stream: true, ...baseDecodeParams(), ...macRouteParams(name, capture), messages },
         { signal },
       );
     try {
@@ -1085,7 +1027,7 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
       // 无论哪种,先把下架模型记入 KV:下次拉模型列表时自动滤走(动态下架)。
       if (isModelNotFoundError(err)) await recordDeadModel(opts?.aiBinding?.kv, deadRegistryName(name), preferred);
       if (!isModelNotFoundError(err) || explicit) throw err;
-      return open(await fallbackModel(routeBaseFor(name, def, preferred, opts), apiKey, err, accessHeaders));
+      return open(await fallbackModel(def.baseURL, apiKey, err, accessHeaders));
     }
   }, capture);
 }
@@ -1144,17 +1086,18 @@ export function listProviders(): ProviderMeta[] {
   ];
 }
 
-/** 给 /api/models 用的 baseURL 查询(anthropic/custom 无标准 /models 端点 → undefined)。 */
+/** 给 /api/models 用的 baseURL 查询(anthropic/custom 无标准 /models 端点 → undefined)。退役 alias 先正规化。 */
 export function providerBaseUrl(name: string): string | undefined {
-  const def = PROVIDERS[name];
+  const def = PROVIDERS[normalizeProviderName(name)];
   if (!def || def.kind !== "openai") return undefined;
   return def.baseURL;
 }
 
-/** 该 provider 的 /models 是否需要 key(按注册表判断)。 */
+/** 该 provider 的 /models 是否需要 key(按注册表判断)。退役 alias 先正规化。 */
 export function providerNeedsKey(name: string): boolean {
-  if (name === "custom") return true;
-  const def = PROVIDERS[name];
+  const n = normalizeProviderName(name);
+  if (n === "custom") return true;
+  const def = PROVIDERS[n];
   if (!def) return true;
   return !def.noKey;
 }

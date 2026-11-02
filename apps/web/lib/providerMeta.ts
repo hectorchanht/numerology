@@ -57,16 +57,16 @@ export const PROVIDER_META: ProviderMeta[] = [
  * 屋企 Mac 本地 provider 集合:同一部 headless Mac、同一个 Cloudflare Access app,
  * 共用即时模型列表 / 离线软回落 / 60s 缓存行为(与 @numerology/ai 的同名集合保持一致,
  * 两处增减时同步改)。
- * UI 已合并为单一 mac-llm(Ollama + MLX 两 runtime 在服务端合并列表、按模型分流);
- * mac-mlx 是已合并的旧名,只作 back-compat alias 保留 Mac 待遇,新 UI 永不产生它
- * (旧设置载入时由 aiSettings 迁移映射到 mac-llm)。
+ * Mac 只行 Ollama 一个 runtime(MLX 2026-11-02 停用);mac-mlx 是已退役的旧名,
+ * 只作 alias 保留 Mac 待遇并在各入口正规化到 mac-llm,新 UI 永不产生它
+ * (旧设置载入时由 aiSettings 迁移映射,连同 mlx-community/* 模型 id 一并救济)。
  */
 export const MAC_PROVIDER_NAMES = ["mac-llm"] as const;
 
-/** 已合并的旧 provider 名(仅兼容:旧名入到嚟仍按 Mac provider 对待)。 */
+/** 已退役的旧 provider 名(仅兼容:旧名入到嚟仍按 Mac provider 对待)。 */
 export const MAC_PROVIDER_ALIASES = ["mac-mlx"] as const;
 
-/** 是否为屋企 Mac 本地 provider(mac-llm,或旧名 mac-mlx)。 */
+/** 是否为屋企 Mac 本地 provider(mac-llm,或退役旧名 mac-mlx)。 */
 export function isMacProvider(name: string): boolean {
   const n = name.trim().toLowerCase();
   return (
@@ -182,10 +182,9 @@ export const STATIC_MODELS: Record<string, string[]> = {
     "@cf/meta/llama-3.2-3b-instruct",
   ],
   pollinations: ["openai"],
-  // 合并表:Ollama 7 个在前、MLX 2 个在后(与服务端合并列表的次序一致)。
+  // Mac 只行 Ollama(MLX 已停用):静态表就是 Ollama 的 7 个(与服务端一致)。
   "mac-llm": [
     "qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b", "deepseek-r1:14b", "gemma3:12b",
-    "mlx-community/Qwen3-14B-4bit", "mlx-community/gpt-oss-20b-MXFP4-Q8",
   ],
   glm: ["glm-4-flash", "glm-4-flashx", "glm-4-air", "glm-4-plus", "glm-4-long"],
   gemini: ["gemini-3.8-flash", "gemini-flash-latest", "gemini-flash-lite-latest"],

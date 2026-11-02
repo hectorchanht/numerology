@@ -64,40 +64,25 @@ test("provider:mac-llm 在册,走 tunnel baseURL,免 key", () => {
   assert.equal(providerNeedsKey("mac-llm"), false);
 });
 
-test("provider:mac-mlx 已合并:不再出现在 listProviders,但 def 保留作内部分流/兼容目标", () => {
+test("provider:mac-mlx 已退役:不在 listProviders,旧名在各入口正规化为 mac-llm", async () => {
+  const { activeProviderName, normalizeProviderName, isMacProvider } = await import("../dist/provider.js");
   const list = listProviders();
   const names = list.map((p) => p.name);
-  assert.ok(!names.includes("mac-mlx"), "UI 列表不应再有 mac-mlx(已并入 mac-llm)");
+  assert.ok(!names.includes("mac-mlx"), "UI 列表不应再有 mac-mlx(MLX 已停用)");
   assert.ok(names.includes("mac-llm"));
-  // def 保留:旧名直呼仍解析到 MLX 端点、免 key,不会断路。
-  assert.equal(providerBaseUrl("mac-mlx"), "https://mlx.hectorchan.com/v1");
+  // def 已删:旧名经正规化后解析到 mac-llm 的 Ollama 端点,绝不再是 MLX 端点。
+  assert.equal(providerBaseUrl("mac-mlx"), "https://ollama.hectorchan.com/v1");
   assert.equal(providerNeedsKey("mac-mlx"), false);
+  assert.equal(normalizeProviderName("mac-mlx"), "mac-llm");
+  assert.equal(normalizeProviderName(" Mac-LLM "), "mac-llm");
+  assert.equal(normalizeProviderName("glm"), "glm");
+  assert.equal(activeProviderName({ provider: "mac-mlx" }), "mac-llm");
+  assert.equal(activeProviderName({ provider: "mac-llm" }), "mac-llm");
+  // alias 仍按 Mac provider 对待(Access 头/超时等待遇不丢)。
+  assert.equal(isMacProvider("mac-mlx"), true);
 });
 
-test("provider:macRouteBaseUrl 按模型分流(纯函数)", async () => {
-  const { macRouteBaseUrl, macRuntimeFor, isMlxModelId, MLX_BASE_URL } = await import("../dist/provider.js");
-  const OLLAMA = "https://ollama.hectorchan.com/v1";
-  // mac-llm:MLX 模型 → MLX 端点;Ollama 模型 → 自身端点。
-  assert.equal(macRouteBaseUrl("mac-llm", "mlx-community/Qwen3-14B-4bit", OLLAMA), MLX_BASE_URL);
-  assert.equal(macRouteBaseUrl("mac-llm", "mlx-community/gpt-oss-20b-MXFP4-Q8", OLLAMA), MLX_BASE_URL);
-  assert.equal(macRouteBaseUrl("mac-llm", "qwen3:30b", OLLAMA), OLLAMA);
-  assert.equal(macRouteBaseUrl("mac-llm", "gemma3:12b", OLLAMA), OLLAMA);
-  // 旧名 mac-mlx:全部 → MLX(维持合并前行为)。
-  assert.equal(macRouteBaseUrl("mac-mlx", "qwen3:8b", MLX_BASE_URL), MLX_BASE_URL);
-  assert.equal(macRouteBaseUrl("mac-mlx", "mlx-community/Qwen3-14B-4bit", MLX_BASE_URL), MLX_BASE_URL);
-  // 其它 provider:不分流。
-  assert.equal(macRouteBaseUrl("glm", "mlx-community/Qwen3-14B-4bit", "https://glm.example/v1"), "https://glm.example/v1");
-  assert.equal(macRouteBaseUrl("custom", "qwen3:8b", undefined), undefined);
-  // runtime 判定与 reasoning 参数挂钩。
-  assert.equal(macRuntimeFor("mac-llm", "mlx-community/Qwen3-14B-4bit"), "mlx");
-  assert.equal(macRuntimeFor("mac-llm", "qwen3:8b"), "ollama");
-  assert.equal(macRuntimeFor("mac-mlx", "qwen3:8b"), "mlx");
-  assert.equal(macRuntimeFor("glm", "qwen3:8b"), null);
-  assert.equal(isMlxModelId("mlx-community/Qwen3-14B-4bit"), true);
-  assert.equal(isMlxModelId("qwen3:8b"), false);
-});
-
-test("provider:mac-llm 选中 MLX 模型时不带 reasoning_effort(按 route 而非 provider 名)", async () => {
+test("provider:MLX 分流已退役:mac-llm 选任何模型都行 Ollama 待遇(reasoning_effort none)", async () => {
   const { chatComplete } = await import("../dist/provider.js");
   const http = await import("node:http");
   const seen = [];
@@ -114,18 +99,19 @@ test("provider:mac-llm 选中 MLX 模型时不带 reasoning_effort(按 route 而
   const baseURL = `http://127.0.0.1:${server.address().port}`;
   const req = { kind: "chat", maxTokens: 10, system: [], messages: [{ role: "user", content: "hi" }] };
   try {
-    // baseURL 显式覆盖时不分流(请求落到本地替身),但参数必须按目标 runtime 决定:
-    // MLX 模型 → 不送 reasoning_effort;Ollama 模型 → 送 "none"。
+    // 就算请求里还带着退役的 mlx-community/* 模型 id,也只会落到 def 端点(Ollama,
+    // 这里被 baseURL 覆盖到本地替身),并按 Ollama 待遇送 reasoning_effort——
+    // 代码里已不存在任何去 MLX 端点的路径。
     await chatComplete(req, { provider: "mac-llm", model: "mlx-community/Qwen3-14B-4bit", baseURL });
     await chatComplete(req, { provider: "mac-llm", model: "qwen3:8b", baseURL });
   } finally {
     server.close();
   }
-  assert.equal("reasoning_effort" in seen[0], false);
+  assert.equal(seen[0].reasoning_effort, "none");
   assert.equal(seen[1].reasoning_effort, "none");
 });
 
-test("provider:mac-llm 流式选中 MLX 模型时同样不带 reasoning_effort", async () => {
+test("provider:mac-llm 流式同样只行 Ollama 待遇(带 reasoning_effort none)", async () => {
   const { chatStream } = await import("../dist/provider.js");
   const http = await import("node:http");
   const seen = [];
@@ -149,10 +135,10 @@ test("provider:mac-llm 流式选中 MLX 模型时同样不带 reasoning_effort",
     server.close();
   }
   assert.equal(seen.length, 1);
-  assert.equal("reasoning_effort" in seen[0], false);
+  assert.equal(seen[0].reasoning_effort, "none");
 });
 
-test("provider:mac-mlx 不带 reasoning_effort,但带 Access headers", async () => {
+test("provider:mac-mlx 旧名与 mac-llm 完全一致:带 reasoning_effort + Access headers", async () => {
   const { chatComplete } = await import("../dist/provider.js");
   const http = await import("node:http");
   const seen = [];
@@ -170,13 +156,13 @@ test("provider:mac-mlx 不带 reasoning_effort,但带 Access headers", async () 
   const req = { kind: "chat", maxTokens: 10, system: [], messages: [{ role: "user", content: "hi" }] };
   try {
     await chatComplete(req, {
-      provider: "mac-mlx", model: "mlx-community/Qwen3-14B-4bit", baseURL,
+      provider: "mac-mlx", model: "qwen3:8b", baseURL,
       extraHeaders: { "CF-Access-Client-Id": "id-mlx", "CF-Access-Client-Secret": "sec-mlx" },
     });
   } finally {
     server.close();
   }
-  assert.equal("reasoning_effort" in seen[0].body, false);
+  assert.equal(seen[0].body.reasoning_effort, "none");
   assert.equal(seen[0].headers["cf-access-client-id"], "id-mlx");
   assert.equal(seen[0].headers["cf-access-client-secret"], "sec-mlx");
 });

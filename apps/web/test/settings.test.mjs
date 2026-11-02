@@ -41,13 +41,41 @@ test("migrateAiSettings:空输入/非法输入 → 默认", () => {
   assert.equal(migrateAiSettings({}).systemPrompt, "");
 });
 
-test("migrateAiSettings:旧名 mac-mlx 映射到 mac-llm,model 原样保留(触发 MLX 分流)", () => {
+test("migrateAiSettings:旧名 mac-mlx 映射到 mac-llm,MLX 模型 id 救济到 Ollama 同级", () => {
   const out = migrateAiSettings({ provider: "mac-mlx", model: "mlx-community/Qwen3-14B-4bit" });
   assert.equal(out.provider, "mac-llm");
-  assert.equal(out.model, "mlx-community/Qwen3-14B-4bit");
+  assert.equal(out.model, "qwen3:14b");
+  const out2 = migrateAiSettings({ provider: "mac-mlx", model: "mlx-community/gpt-oss-20b-MXFP4-Q8" });
+  assert.equal(out2.provider, "mac-llm");
+  assert.equal(out2.model, "gpt-oss:20b");
   // 已是新名/其它 provider 不受影响。
   assert.equal(migrateAiSettings({ provider: "mac-llm", model: "qwen3:8b" }).provider, "mac-llm");
   assert.equal(migrateAiSettings({ provider: "glm" }).provider, "glm");
+});
+
+test("migrateAiSettings:mac-llm 下的 MLX 模型同样救济;未知 MLX 模型回默认推荐", () => {
+  // provider 已是 mac-llm、但 model 是合并时期选下的 MLX id → 一样映射。
+  assert.equal(
+    migrateAiSettings({ provider: "mac-llm", model: "mlx-community/Qwen3-14B-4bit" }).model,
+    "qwen3:14b",
+  );
+  assert.equal(
+    migrateAiSettings({ provider: "mac-llm", model: "mlx-community/gpt-oss-20b-MXFP4-Q8" }).model,
+    "gpt-oss:20b",
+  );
+  // 未知 mlx-community/* → mac-llm 默认推荐 qwen3:30b,不会打到死端点。
+  assert.equal(
+    migrateAiSettings({ provider: "mac-llm", model: "mlx-community/SomeOther-7B" }).model,
+    "qwen3:30b",
+  );
+  // Ollama 模型原样保留;非 Mac provider 的 model 就算长得像也不动。
+  assert.equal(migrateAiSettings({ provider: "mac-llm", model: "qwen3:32b" }).model, "qwen3:32b");
+  assert.equal(
+    migrateAiSettings({ provider: "openrouter", model: "mlx-community/Qwen3-14B-4bit" }).model,
+    "mlx-community/Qwen3-14B-4bit",
+  );
+  // 空 model 不受影响。
+  assert.equal(migrateAiSettings({ provider: "mac-mlx", model: "" }).model, "");
 });
 
 test("currentKey:只取当前 provider 的 key,没填 → 空(不拿别的顶替)", () => {

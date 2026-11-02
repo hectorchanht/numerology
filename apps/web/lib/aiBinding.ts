@@ -26,12 +26,11 @@ export function getServerAiBindings(): ServerAiBindings | null {
 }
 
 /**
- * Mac provider(mac-llm / mac-mlx 共用同一 Access application)的 Cloudflare Access
- * service token headers(仅服务端从 Pages env 读;两个 subdomain 同属一个 Access app,
- * 故同一对 env 变量通用)。
+ * Mac provider(mac-llm;旧名 mac-mlx 已正规化)的 Cloudflare Access
+ * service token headers(仅服务端从 Pages env 读)。
  * 主路径:getRequestContext().env;兜底:部分 edge runtime 同步进 globalThis.process.env。
  * 非 Pages 环境或未配置时返回 undefined(保持旧行为)。
- * secret 绝不进日志、不进响应,只随服务端请求发往 ollama/mlx.hectorchan.com。
+ * secret 绝不进日志、不进响应,只随服务端请求发往 ollama.hectorchan.com。
  */
 export function getMacLlmAccessHeaders(): Record<string, string> | undefined {
   try {

@@ -174,7 +174,7 @@ test("retired:filterRetired 移除下架模型(models/ 前缀对齐),空结果�
   assert.deepEqual(filterRetired([]), []);
 });
 
-test("providerMeta:mac-mlx 已合并:PROVIDER_META 无此条目,isMacProvider 仍认旧名(alias)", async () => {
+test("providerMeta:mac-mlx 已退役:PROVIDER_META 无此条目,isMacProvider 仍认旧名(alias)", async () => {
   const { PROVIDER_META, RECOMMENDED_MODELS, STATIC_MODELS, isMacProvider } = await import("../test-dist/providerMeta.js");
   assert.equal(PROVIDER_META.find((p) => p.name === "mac-mlx"), undefined);
   assert.equal(RECOMMENDED_MODELS["mac-mlx"], undefined);
@@ -185,7 +185,7 @@ test("providerMeta:mac-mlx 已合并:PROVIDER_META 无此条目,isMacProvider �
   assert.equal(isMacProvider("glm"), false);
 });
 
-test("providerMeta:mac-llm 免 key 免费组,推荐含 qwen3:30b/8b,静态为合并 9 个", async () => {
+test("providerMeta:mac-llm 免 key 免费组,推荐含 qwen3:30b/8b,静态为 Ollama 7 个", async () => {
   const { PROVIDER_META, RECOMMENDED_MODELS, STATIC_MODELS } = await import("../test-dist/providerMeta.js");
   const m = PROVIDER_META.find((p) => p.name === "mac-llm");
   assert.ok(m, "mac-llm in PROVIDER_META");
@@ -195,6 +195,5 @@ test("providerMeta:mac-llm 免 key 免费组,推荐含 qwen3:30b/8b,静态为合
   assert.deepEqual(RECOMMENDED_MODELS["mac-llm"], ["qwen3:30b", "qwen3:8b"]);
   assert.deepEqual(STATIC_MODELS["mac-llm"], [
     "qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b", "deepseek-r1:14b", "gemma3:12b",
-    "mlx-community/Qwen3-14B-4bit", "mlx-community/gpt-oss-20b-MXFP4-Q8",
   ]);
 });

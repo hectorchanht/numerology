@@ -29,7 +29,6 @@ export interface ModelsResult {
 const MODELS_BASE_URL: Record<string, string> = {
   pollinations: "https://text.pollinations.ai/openai",
   "mac-llm": "https://ollama.hectorchan.com/v1",
-  "mac-mlx": "https://mlx.hectorchan.com/v1",
   openrouter: "https://openrouter.ai/api/v1",
   glm: "https://open.bigmodel.cn/api/paas/v4",
   gemini: "https://generativelanguage.googleapis.com/v1beta/openai",
@@ -45,13 +44,10 @@ const STATIC_MODELS: Record<string, string[]> = {
   groq: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it", "deepseek-r1-distill-llama-70b"],
   openrouter: ["google/gemma-4-31b-it:free", "google/gemma-4-26b-a4b-it:free", "nvidia/nemotron-3.5-lightning:free"],
   pollinations: ["openai"],
-  // 合并表:Ollama 7 个在前、MLX 2 个在后(与 fetchMacMergedModels 的合并次序一致)。
+  // Mac 只行 Ollama(MLX 2026-11-02 停用):静态回落就是 Ollama 的 7 个模型。
   "mac-llm": [
     "qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b", "deepseek-r1:14b", "gemma3:12b",
-    "mlx-community/Qwen3-14B-4bit", "mlx-community/gpt-oss-20b-MXFP4-Q8",
   ],
-  // 旧名 back-compat:?provider=mac-mlx 直拉时仍用它做离线回落。
-  "mac-mlx": ["mlx-community/Qwen3-14B-4bit", "mlx-community/gpt-oss-20b-MXFP4-Q8"],
 };
 
 type FetchLike = (url: string, init?: RequestInit) => Promise<Response>;
@@ -112,27 +108,12 @@ async function fetchEndpointEntries(
 }
 
 /**
- * mac-llm 合并列表:同一部 Mac 上 Ollama 与 MLX 两个 runtime 并行拉取后合并
- * (Ollama 在前、MLX 在后,同 id 去重)。任一端成功 → source:"live"(死掉那边的
- * 模型自然不出现,本身就是可用性信号,不另加旗标);两端都失败(或合并为空)
- * → 离线软回落静态合并表。
+ * mac-llm 列表:只拉 Ollama 一个端点(MLX 已停用,不再有合并)。
+ * 成功 → source:"live";失败(或列表为空) → 离线软回落静态 7 个。
  */
-async function fetchMacMergedModels(opts: FetchProviderModelsOpts): Promise<ModelsResult> {
-  const urls = [MODELS_BASE_URL["mac-llm"]!, MODELS_BASE_URL["mac-mlx"]!];
-  const per = await Promise.all(urls.map((u) => fetchEndpointEntries(u, opts)));
-  const seen = new Set<string>();
-  const merged: ModelEntry[] = [];
-  let anyOk = false;
-  for (const entries of per) {
-    if (!entries) continue;
-    anyOk = true;
-    for (const e of entries) {
-      if (seen.has(e.id)) continue;
-      seen.add(e.id);
-      merged.push(e);
-    }
-  }
-  if (!anyOk || merged.length === 0) {
+async function fetchMacModels(opts: FetchProviderModelsOpts): Promise<ModelsResult> {
+  const entries = await fetchEndpointEntries(MODELS_BASE_URL["mac-llm"]!, opts);
+  if (!entries || entries.length === 0) {
     return {
       provider: "mac-llm",
       source: "static",
@@ -140,16 +121,10 @@ async function fetchMacMergedModels(opts: FetchProviderModelsOpts): Promise<Mode
       models: toEntries(STATIC_MODELS["mac-llm"] ?? []),
     };
   }
-  // 下架过滤:新登记统一归 mac-llm 名下(见 @numerology/ai 的 deadRegistryName);
-  // 合并前 mac-mlx 名下的历史登记也读出取并集,避免漏滤。
-  const dead = new Set<string>();
-  if (opts.kv) {
-    const map = await readDeadModels(opts.kv);
-    for (const id of deadModelIds(map, "mac-llm")) dead.add(id);
-    for (const id of deadModelIds(map, "mac-mlx")) dead.add(id);
-  }
-  const filtered = filterRetired(merged).filter((m) => !dead.has(normDeadModelId(m.id)));
-  return { provider: "mac-llm", source: "live", models: filtered.length > 0 ? filtered : merged };
+  // 下架过滤:登记统一归 mac-llm 名下(见 @numerology/ai 的 deadRegistryName)。
+  const dead = opts.kv ? deadModelIds(await readDeadModels(opts.kv), "mac-llm") : new Set<string>();
+  const filtered = filterRetired(entries).filter((m) => !dead.has(normDeadModelId(m.id)));
+  return { provider: "mac-llm", source: "live", models: filtered.length > 0 ? filtered : entries };
 }
 
 /**
@@ -157,16 +132,16 @@ async function fetchMacMergedModels(opts: FetchProviderModelsOpts): Promise<Mode
  * - workers-ai:binding 无 list 接口,返回构建时核验表(verified-static)。
  * - OpenAI 兼容:代理 {baseURL}/models;401 → needsKey。
  * - anthropic/custom:静态表(无标准端点)。
- * - mac-llm:UI 合并后的单一 Mac provider → 并行合并 Ollama + MLX 两端点
- *   (见 fetchMacMergedModels);显式传 baseUrl 时不合并,按单端点走既有流程。
- * - mac-mlx(旧名):back-compat,仍按 MLX 单端点拉取。
+ * - mac-llm:单一 Mac provider → 只拉 Ollama 端点(见 fetchMacModels);
+ *   显式传 baseUrl 时按单端点走既有流程。
+ * - mac-mlx(退役旧名):入口先正规化为 mac-llm,行为与 mac-llm 完全一致。
  * key 只经 Authorization 头发送,绝不出现在返回值/日志中。
  */
 export async function fetchProviderModels(
   provider: string,
   opts: FetchProviderModelsOpts = {},
 ): Promise<ModelsResult> {
-  const name = provider.trim().toLowerCase();
+  const name = normProviderAlias(provider);
   const fetchImpl = opts.fetchImpl ?? fetch;
 
   if (name === "workers-ai") {
@@ -183,7 +158,7 @@ export async function fetchProviderModels(
   }
 
   if (name === "mac-llm" && !(opts.baseUrl && opts.baseUrl.trim())) {
-    return fetchMacMergedModels(opts);
+    return fetchMacModels(opts);
   }
 
   const baseURL = (opts.baseUrl?.trim() || MODELS_BASE_URL[name] || "").replace(/\/+$/, "");
@@ -235,7 +210,13 @@ export async function fetchProviderModels(
   return { provider: name, source: "live", models: filtered.length > 0 ? filtered : models };
 }
 
+/** 退役 alias 正规化:mac-mlx(MLX 停用前的旧名) → mac-llm;其它小写去空白原样。 */
+function normProviderAlias(provider: string): string {
+  const n = provider.trim().toLowerCase();
+  return n === "mac-mlx" ? "mac-llm" : n;
+}
+
 /** 静态备选表(前端 24h 缓存失效/拉取失败时的回落,也供路由复用)。 */
 export function staticModelsFor(provider: string): string[] {
-  return STATIC_MODELS[provider.trim().toLowerCase()] ?? [];
+  return STATIC_MODELS[normProviderAlias(provider)] ?? [];
 }

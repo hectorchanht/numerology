@@ -16,7 +16,9 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(req: Request): Promise<Response> {
   const url = new URL(req.url);
-  const provider = (url.searchParams.get("provider") || "").trim().toLowerCase();
+  const rawProvider = (url.searchParams.get("provider") || "").trim().toLowerCase();
+  // 退役旧名正规化:mac-mlx(MLX 停用) → mac-llm,以下全部按 mac-llm 处理。
+  const provider = rawProvider === "mac-mlx" ? "mac-llm" : rawProvider;
 
   if (!provider) {
     return Response.json({
@@ -30,8 +32,8 @@ export async function GET(req: Request): Promise<Response> {
     });
   }
 
-  // 已知 provider:展示列表(listProviders)之外,还要认得已合并的旧名 mac-mlx——
-  // 它不再出现在 UI 列表,但其 def 仍在册(providerBaseUrl 有值),直拉要保持可用。
+  // 已知 provider:展示列表(listProviders)之内的名字,或有 def 在册的名字
+  // (退役旧名 mac-mlx 已在上面正规化为 mac-llm,不会来到这里)。
   const known =
     provider === "custom" ||
     listProviders().some((p) => p.name === provider) ||
