@@ -545,6 +545,20 @@ button.sec-h { min-height: 44px; margin: -8px 0; }
 .hist .hist-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
 .hist .badges { display: inline-flex; gap: 6px; flex-wrap: wrap; }
 .hist .when { font-size: 11px; color: var(--label-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* AI 解讀版本歷史(HistoryPanel 展開區):展開嗰陣成行換行,版本逐節分組逐版列。 */
+.hist .hist-row.open { flex-wrap: wrap; }
+.hist-vers { flex: 0 0 100%; min-width: 0; padding: 10px 12px 14px 16px; border-top: 0.5px solid var(--sep); }
+.hist-vers-title { font-size: 13px; font-weight: 600; color: var(--label-2); margin-bottom: 6px; }
+.hist-ver-group + .hist-ver-group { margin-top: 12px; }
+.hist-ver-seg { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.hist-ver { padding: 6px 0; }
+.hist-ver + .hist-ver { border-top: 0.5px solid var(--sep); }
+.hist-ver-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hist-ver-meta { flex: 1 1 auto; min-width: 0; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13.5px; color: var(--label); }
+.hist-ver-actions { display: inline-flex; gap: 6px; flex: none; }
+.hist-ver-btn { font-size: 13px; min-height: 32px; padding: 0 12px; border-radius: 999px; background: var(--fill); color: var(--accent); }
+.hist-ver-btn.danger { color: var(--label-2); }
+.hist-ver-body { margin-top: 8px; font-size: 15px; }
 
 /* ---------- 設定 ---------- */
 .prov-card { margin-top: 12px; }

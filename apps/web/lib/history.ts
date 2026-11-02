@@ -28,6 +28,12 @@ export interface Reading {
   name?: string;
   /** key: "report:<sectionKey>" | "fortune:<sectionKey>" */
   sections: Record<string, HistorySection>;
+  /**
+   * 每一節嘅全部 AI 解讀版本(最新第一,上限 20 版/節),key 同 sections 一致。
+   * sections[key] 永遠 = sectionHistory[key] 嘅第一版(現行版)。
+   * 舊記錄冇呢個字段:讀嗰陣由 versionsOf() 以現行版合成,零遷移。
+   */
+  sectionHistory?: Record<string, HistorySection[]>;
 }
 
 const DB_NAME = "numerology";
@@ -79,13 +85,79 @@ export async function readingId(input: BirthInput): Promise<string> {
   return stableInputHash(input as unknown as Record<string, unknown>);
 }
 
-/** 纯函数:把一节合并进记录(可测试,不碰 IndexedDB)。 */
+/** 每一節最多保留幾多個 AI 版本(舊版自動甩尾,避免 IndexedDB 無限膨脹)。 */
+export const MAX_SECTION_VERSIONS = 20;
+
+/** 版本同一性:時間 + 內文都一樣先算同一版(去重用)。 */
+function sameVersion(a: HistorySection, b: HistorySection): boolean {
+  return a.at === b.at && a.markdown === b.markdown;
+}
+
+/**
+ * 纯函数:某一節嘅完整版本列表(最新第一、去重、上限 20)。
+ * 現行版(sections[key])永遠排第一;舊記錄冇 sectionHistory 時就以現行版
+ * 合成單一版本回傳——所以舊記錄零遷移都睇得返佢嗰一版解讀。
+ */
+export function versionsOf(r: Reading, key: string): HistorySection[] {
+  const out: HistorySection[] = [];
+  const push = (v?: HistorySection) => {
+    if (!v || out.some((x) => sameVersion(x, v))) return;
+    out.push(v);
+  };
+  push(r.sections?.[key]);
+  for (const v of r.sectionHistory?.[key] ?? []) push(v);
+  return out.slice(0, MAX_SECTION_VERSIONS);
+}
+
+/**
+ * 纯函数:新一版 AI 解讀歸檔——新版做現行版,舊現行版唔再被覆蓋,
+ * 而係留喺版本列表畀用戶之後睇返/逐版刪除。舊記錄首次歸檔時,
+ * 原本嗰版(若內文不同)會自動做埋種子版本保留落嚟。
+ */
+export function archiveSectionInto(
+  r: Reading,
+  key: string,
+  s: HistorySection,
+): Reading {
+  const rest = versionsOf(r, key).filter((v) => !sameVersion(v, s));
+  const versions = [s, ...rest].slice(0, MAX_SECTION_VERSIONS);
+  return {
+    ...r,
+    sections: { ...r.sections, [key]: s },
+    sectionHistory: { ...(r.sectionHistory ?? {}), [key]: versions },
+    updatedAt: s.at,
+  };
+}
+
+/**
+ * 纯函数:刪走某一節嘅指定版本(at 識別)。
+ * 刪嘅係現行版 → 下一版自動升為現行版;刪埋最後一版 → 成節移除。
+ * 版本唔存在就原樣回傳。
+ */
+export function deleteVersionFrom(r: Reading, key: string, at: number): Reading {
+  const versions = versionsOf(r, key);
+  const idx = versions.findIndex((v) => v.at === at);
+  if (idx < 0) return r;
+  const rest = versions.filter((_, i) => i !== idx);
+  const sections = { ...r.sections };
+  const sectionHistory = { ...(r.sectionHistory ?? {}) };
+  if (rest.length > 0) {
+    sections[key] = rest[0]!;
+    sectionHistory[key] = rest;
+  } else {
+    delete sections[key];
+    delete sectionHistory[key];
+  }
+  return { ...r, sections, sectionHistory };
+}
+
+/** 纯函数:把一节合并进记录(可测试,不碰 IndexedDB)。等同歸檔一版(舊版保留)。 */
 export function mergeSectionInto(
   r: Reading,
   key: string,
   s: HistorySection,
 ): Reading {
-  return { ...r, sections: { ...r.sections, [key]: s }, updatedAt: s.at };
+  return archiveSectionInto(r, key, s);
 }
 
 /** 纯函数:出生摘要,如 "1990-06-15 14:00 男"。 */
@@ -118,6 +190,7 @@ export async function upsertReading(input: {
     chart: input.chart,
     ...(trimmed ? { name: trimmed } : existing?.name ? { name: existing.name } : {}),
     sections: existing?.sections ?? {},
+    ...(existing?.sectionHistory ? { sectionHistory: existing.sectionHistory } : {}),
   };
   await tx("readwrite", (s) => s.put(rec));
   notifyHistoryChanged();
@@ -141,7 +214,7 @@ export function displayName(r: Reading): string {
   return r.name?.trim() ? r.name.trim() : summarizeInput(r.input);
 }
 
-/** 保存一节(merge 进已有记录;记录不存在则跳过)。 */
+/** 保存一节(歸檔新版進已有记录,舊版保留;记录不存在则跳过)。 */
 export async function saveSection(
   input: BirthInput,
   key: string,
@@ -150,7 +223,17 @@ export async function saveSection(
   const id = await readingId(input);
   const existing = (await tx("readonly", (st) => st.get(id)).catch(() => null)) as Reading | null;
   if (!existing) return;
-  await tx("readwrite", (st) => st.put(mergeSectionInto(existing, key, s)));
+  await tx("readwrite", (st) => st.put(archiveSectionInto(existing, key, s)));
+  notifyHistoryChanged();
+}
+
+/** 刪走某一節嘅指定 AI 版本(刪現行版自動升下一版,見 deleteVersionFrom)。記錄/版本不存在則靜默返回。 */
+export async function deleteSectionVersion(id: string, key: string, at: number): Promise<void> {
+  const existing = (await tx("readonly", (s) => s.get(id)).catch(() => null)) as Reading | null;
+  if (!existing) return;
+  const next = deleteVersionFrom(existing, key, at);
+  if (next === existing) return;
+  await tx("readwrite", (s) => s.put(next));
   notifyHistoryChanged();
 }
 
