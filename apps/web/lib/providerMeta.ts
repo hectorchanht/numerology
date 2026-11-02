@@ -174,7 +174,7 @@ export const STATIC_MODELS: Record<string, string[]> = {
     "@cf/meta/llama-3.2-3b-instruct",
   ],
   pollinations: ["openai"],
-  "mac-llm": ["qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b"],
+  "mac-llm": ["qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b", "deepseek-r1:14b", "gemma3:12b"],
   "mac-mlx": ["mlx-community/Qwen3-14B-4bit", "mlx-community/gpt-oss-20b-MXFP4-Q8"],
   glm: ["glm-4-flash", "glm-4-flashx", "glm-4-air", "glm-4-plus", "glm-4-long"],
   gemini: ["gemini-3.8-flash", "gemini-flash-latest", "gemini-flash-lite-latest"],
