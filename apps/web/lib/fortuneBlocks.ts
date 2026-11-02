@@ -12,6 +12,26 @@ const GZ_RE = "[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉�
 export const VERDICT_MARK = "【定性】";
 export const ANALYSIS_MARK = "【分析】";
 export const EVIDENCE_MARK = "【依据】";
+/**
+ * 證據標記有繁簡兩形:prompt 叫模型照抄簡體【依据】,但模型出繁體正文嗰陣
+ * 幾乎必寫繁體【依據】(2026-11-02 真機實測:7 份真實輸出全部用【依據】、
+ * 【依据】零命中,舊 parser 因此永遠切唔出證據)。兩形都要認,唔好再假設單一形。
+ */
+export const EVIDENCE_MARKS = ["【依据】", "【依據】"] as const;
+
+/** 喺 text 入面搵 marks 之中最早出現嗰個(由 from 起)。 */
+function findFirstMark(
+  text: string,
+  marks: readonly string[],
+  from = 0,
+): { index: number; mark: string } | null {
+  let best: { index: number; mark: string } | null = null;
+  for (const mark of marks) {
+    const i = text.indexOf(mark, from);
+    if (i >= 0 && (best === null || i < best.index)) best = { index: i, mark };
+  }
+  return best;
+}
 
 /** 取首句(中文按 。！？/英文按 .!?/換行切)作降級定性。 */
 function firstSentence(s: string): { head: string; tail: string } {
@@ -121,21 +141,167 @@ export interface EvidenceSplit {
 }
 
 /**
- * 切出段尾【依据】塊。無標記(舊文本) → evidence 為空,正文原樣。
- * 遇到小標題即停(證據塊只取段尾連續行)。
+ * 切出段尾【依据】塊(繁簡兩形皆認)。無標記(舊文本) → evidence 為空,正文原樣。
+ * 遇到小標題或下一個定性/分析標記即停(證據塊只取段尾連續行,唔吞之後嘅正文)。
  */
 export function parseEvidenceBlock(md: string): EvidenceSplit {
-  const i = md.indexOf(EVIDENCE_MARK);
-  if (i < 0) return { body: md, evidence: [] };
-  const body = md.slice(0, i).trimEnd();
+  const hit = findFirstMark(md ?? "", EVIDENCE_MARKS);
+  if (!hit) return { body: md, evidence: [] };
+  const body = md.slice(0, hit.index).trimEnd();
   const evidence: string[] = [];
-  for (const raw of md.slice(i + EVIDENCE_MARK.length).split("\n")) {
+  for (const raw of md.slice(hit.index + hit.mark.length).split("\n")) {
     const line = raw.trim();
     if (!line) continue;
     if (/^#{1,4}\s/.test(line)) break;
+    if (line.startsWith(VERDICT_MARK) || line.startsWith(ANALYSIS_MARK)) break;
     evidence.push(line.replace(/^[-*•·\d.)\]]+\s*/, "").trim());
   }
   return { body, evidence: evidence.filter(Boolean) };
+}
+
+/* ── 全節分塊(預設正文渲染用) ───────────────────────────────────
+ * 背景(2026-11-02 真機截圖實證):報告節嘅真實模型輸出同 prompt 假設有落差——
+ * (1)【分析】多數黐喺【定性】段尾同一行/同段(inline),唔係獨立段落;
+ * (2)證據標記係繁體【依據】,唔係 prompt 寫嘅【依据】;
+ * (3)一節有 3–4 組「定性(+分析)+依據」,唔係全節得一嚿段尾證據;
+ * (4)弱模型可以全節冇定性/分析標記,只有「一段文字 + 一嚿依據」重複(實測 gpt-oss)。
+ * 舊渲染齋靠段尾 parseEvidenceBlock 一次過切,三樣全部 miss → 成節原樣
+ * markdown 一幅文字牆。parseSectionBlocks 改用標記出現位置(唔理段落邊界)
+ * 逐嚿切,標記去到邊切到邊;無標記者原樣做 plain 塊,內容一字不吞。
+ */
+
+export type SectionNode =
+  | { kind: "plain"; md: string; evidence: string[] }
+  | { kind: "va"; verdict: string; analysis: string; evidence: string[] };
+
+const SECTION_MARK_RE = /【定性】|【分析】|【依據】|【依据】/g;
+const LIST_ITEM_RE = /^(?:[-*•·]\s+|\d{1,2}[.)、]\s*)/;
+
+/**
+ * 一嚿證據文本(標記之後、下一個標記之前) → 證據條目 + 尾隨正文。
+ * - 列表行(以 -、*、• 等符號開頭)逐行一條;未見列表符號之前嘅非空行當平鋪證據逐行收;
+ * - 見過列表之後再出現嘅非列表行,或者小標題行起 → 係證據之後嘅正文
+ *   (實測:模型會喺證據後加「（全文共約1050字）」或 ### 小標題+金句),歸 trailing 交回正文,唔吞。
+ */
+function parseEvidenceText(chunk: string): { items: string[]; trailing: string } {
+  const items: string[] = [];
+  const trailing: string[] = [];
+  let sawList = false;
+  let inTrailing = false;
+  for (const raw of chunk.split("\n")) {
+    const line = raw.trim();
+    if (inTrailing) {
+      trailing.push(raw);
+      continue;
+    }
+    if (!line) continue;
+    if (/^#{1,6}\s/.test(line) || sawList) {
+      if (!LIST_ITEM_RE.test(line)) {
+        inTrailing = true;
+        trailing.push(raw);
+        continue;
+      }
+    }
+    if (LIST_ITEM_RE.test(line)) {
+      sawList = true;
+      items.push(line.replace(LIST_ITEM_RE, "").trim());
+    } else {
+      items.push(line);
+    }
+  }
+  return { items: items.filter(Boolean), trailing: trailing.join("\n").trim() };
+}
+
+/**
+ * 將一節正文(已抽走思考/TL;DR/標題)切成有序塊:
+ * 每個【定性】開新 va 塊(定性 + 分析 + 該塊證據);標記外嘅文字做 plain 塊;
+ * 【依據】無論喺段首定段中都抽出嚟掛喺當前塊,下一個塊開始即止。
+ * 無任何標記(舊文本) → 一個 plain 塊原樣,唔改一字。
+ */
+export function parseSectionBlocks(md: string): SectionNode[] {
+  const src = md ?? "";
+  type Node = SectionNode;
+  const nodes: Node[] = [];
+  let cur: Node | null = null;
+  let field: "plain" | "verdict" | "analysis" | "evidence" = "plain";
+
+  const plainNode = (): Extract<Node, { kind: "plain" }> => {
+    if (cur && cur.kind === "plain") return cur;
+    const n: Node = { kind: "plain", md: "", evidence: [] };
+    nodes.push(n);
+    cur = n;
+    return n;
+  };
+  const vaNode = (): Extract<Node, { kind: "va" }> => {
+    const n: Node = { kind: "va", verdict: "", analysis: "", evidence: [] };
+    nodes.push(n);
+    cur = n;
+    return n;
+  };
+  /** cur 若係 va 塊就回傳佢(經函數讀,避開 TS 對 closure 賦值嘅窄化誤判)。 */
+  const curVa = (): Extract<Node, { kind: "va" }> | null =>
+    cur && cur.kind === "va" ? cur : null;
+  const assign = (text: string) => {
+    if (!text) return;
+    if (field === "verdict") {
+      const n = curVa() ?? vaNode();
+      n.verdict += text;
+    } else if (field === "analysis") {
+      const n = curVa() ?? vaNode();
+      n.analysis += text;
+    } else {
+      plainNode().md += text;
+    }
+  };
+  const assignEvidence = (chunk: string) => {
+    if (!chunk.trim()) return;
+    const { items, trailing } = parseEvidenceText(chunk);
+    const host = cur ?? plainNode();
+    host.evidence.push(...items);
+    if (trailing) {
+      // 證據後嘅正文必須自成新 plain 塊:唔可以黐返去 host 度——host 嘅證據
+      // 已經收尾,trailing 係下一段正文(佢自己之後可能再有證據要掛)。
+      const n: Node = { kind: "plain", md: trailing, evidence: [] };
+      nodes.push(n);
+      cur = n;
+      field = "plain";
+    }
+  };
+  const flush = (text: string) => {
+    if (field === "evidence") assignEvidence(text);
+    else assign(text);
+  };
+
+  let last = 0;
+  for (const m of src.matchAll(SECTION_MARK_RE)) {
+    flush(src.slice(last, m.index));
+    if (m[0] === VERDICT_MARK) {
+      vaNode();
+      field = "verdict";
+    } else if (m[0] === ANALYSIS_MARK) {
+      if (!curVa()) vaNode();
+      field = "analysis";
+    } else {
+      field = "evidence";
+    }
+    last = m.index + m[0].length;
+  }
+  flush(src.slice(last));
+
+  const out: SectionNode[] = [];
+  for (const n of nodes) {
+    if (n.kind === "plain") {
+      const text = n.md.trim();
+      if (text || n.evidence.length) out.push({ kind: "plain", md: text, evidence: n.evidence });
+    } else {
+      const verdict = n.verdict.trim();
+      const analysis = n.analysis.trim();
+      if (verdict || analysis || n.evidence.length) {
+        out.push({ kind: "va", verdict, analysis, evidence: n.evidence });
+      }
+    }
+  }
+  return out;
 }
 
 export interface RhythmItem {

@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import type { BirthInput } from "@numerology/engine";
 import { streamPost } from "@/lib/streamClient";
 import { clearModelsCache } from "@/lib/modelsCache";
@@ -10,11 +8,8 @@ import { printReport } from "@/lib/exportPdf";
 import { aiRequestParts } from "@/lib/aiSettings";
 import { useLocale, HTML_LANG, type Locale, type TKey } from "@/lib/i18n";
 import { stripLeadingHeading } from "@/lib/sectionIcons";
-import { markdownTermComponents, withTermHighlights } from "@/lib/highlightTerms";
-import { splitTldr } from "@/lib/tldr";
 import { splitThinking } from "@/lib/thinking";
-import ThinkingFold from "@/components/ThinkingFold";
-import { parseEvidenceBlock } from "@/lib/fortuneBlocks";
+import { SectionBodyView } from "@/components/SectionBody";
 import { Icon, SECTION_ICON } from "@/components/Icon";
 import { AiModelNote } from "@/components/AiModelNote";
 import { Seg, ScreenNav } from "@/components/ui";
@@ -60,7 +55,7 @@ interface Props {
    */
   repairText?: (md: string) => string;
   /**
-   * 自訂章節正文渲染(傳回 null 即用預設 SectionBody)。
+   * 自訂章節正文渲染(傳回 null 即用共用 SectionBodyView 的分塊渲染)。
    * 用途:大運流年各節的結構化渲染(定性/分析/依据 pills、雙軌圖、時間線)。
    * lens 為生成該節時用的視角(歷史恢復時為 "both")。
    */
@@ -75,71 +70,6 @@ interface Slot {
   text: string;
   status: "streaming" | "done" | "error";
   err: string;
-}
-
-/**
- * 預設章節正文渲染(「結論先行,證據收納」):
- * TL;DR 切出做摘要卡 + 正文 + 段尾【依据】塊收納為次要樣式。
- * 舊緩存/舊歷史無標記 → 退化為純正文渲染,不吞內容。
- */
-function SectionBody({
-  segKey,
-  md,
-  streaming,
-  lens,
-  renderSectionBody,
-}: {
-  segKey: string;
-  md: string;
-  streaming: boolean;
-  lens: "bazi" | "ziwei" | "both";
-  renderSectionBody?: (
-    segKey: string,
-    md: string,
-    lens: "bazi" | "ziwei" | "both",
-  ) => React.ReactNode | null;
-}) {
-  const { t } = useLocale();
-  // 版面次序(Hector 2026-11-02 定死):折疊思考 → TL;DR → 全文。
-  // 思考先分流(流式未閉合嗰陣 content 為空,只顯示折疊塊「思考中…」);
-  // TL;DR 再抽出做摘要卡(所有章節通用),最後交自訂渲染或預設正文。
-  const { thinking, content, open: thinkOpen } = splitThinking(md);
-  const { tldr, body } = splitTldr(content);
-  const custom = renderSectionBody?.(segKey, body, lens);
-  const { body: main, evidence } = parseEvidenceBlock(body);
-  return (
-    <>
-      <ThinkingFold thinking={thinking} active={streaming && thinkOpen} />
-      {tldr ? (
-        <div className="tldr-card">
-          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownTermComponents}>
-            {tldr}
-          </ReactMarkdown>
-        </div>
-      ) : null}
-      {custom !== null && custom !== undefined ? (
-        <>{custom}</>
-      ) : (
-        <>
-          <div className={`prose${streaming ? " is-streaming" : ""}`}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownTermComponents}>
-              {main}
-            </ReactMarkdown>
-          </div>
-          {evidence.length > 0 ? (
-            <details className="evid">
-              <summary>{t("fortune.evidence")}</summary>
-              <ul className="evid-list">
-                {evidence.map((e, i) => (
-                  <li key={i}>{withTermHighlights(e)}</li>
-                ))}
-              </ul>
-            </details>
-          ) : null}
-        </>
-      )}
-    </>
-  );
 }
 
 /** 通用流式报告:选视角 → 各节并行调 endpoint → 每节一张卡,逐字渲染 Markdown。 */
@@ -448,12 +378,10 @@ export function StreamedReport({
                     </h3>
                     <div className="sec-b" id={`${idBase}-${seg.key}-b`} hidden={!isOpen}>
                       {has ? (
-                        <SectionBody
-                          segKey={seg.key}
+                        <SectionBodyView
                           md={repairText ? repairText(stripLeadingHeading(s.text)) : stripLeadingHeading(s.text)}
                           streaming={s.status === "streaming"}
-                          lens={shownLens ?? "both"}
-                          renderSectionBody={renderSectionBody}
+                          renderCustom={(body) => renderSectionBody?.(seg.key, body, shownLens ?? "both") ?? null}
                         />
                       ) : s.status === "streaming" ? (
                         <div aria-label={t("report.stateQueued")}>

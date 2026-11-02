@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import ThinkingFold from "./ThinkingFold";
+import { SectionBodyView } from "./SectionBody";
+import { joinThinking } from "@/lib/thinking";
 import {
   listReadings,
   deleteReading,
@@ -19,7 +18,6 @@ import {
 } from "@/lib/history";
 import { useLocale, useScript, type TKey } from "@/lib/i18n";
 import { PROVIDER_META } from "@/lib/providerMeta";
-import { markdownTermComponents } from "@/lib/highlightTerms";
 import { Icon } from "@/components/Icon";
 
 function fmtTime(ts: number): string {
@@ -282,13 +280,9 @@ export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void })
                                     </div>
                                     {viewing ? (
                                       <div className="hist-ver-body">
-                                        {/* 同正文版面:思考折疊置頂(舊版本冇 thinking 就唔顯示)。 */}
-                                        <ThinkingFold thinking={v.thinking ?? ""} />
-                                        <div className="prose">
-                                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownTermComponents}>
-                                            {v.markdown}
-                                          </ReactMarkdown>
-                                        </div>
+                                        {/* 同直播章節完全同一套版面:思考折疊 → TL;DR 卡 → 正文分塊
+                                            (SectionBodyView;舊版本冇 thinking 就冇折疊塊)。 */}
+                                        <SectionBodyView md={joinThinking(v.thinking, v.markdown)} />
                                       </div>
                                     ) : null}
                                   </div>

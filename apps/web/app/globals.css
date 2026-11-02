@@ -782,8 +782,9 @@ h1.large + .seg { margin-bottom: 12px; }
 /* TL;DR 摘要卡:每節第一眼見到嘅結論 */
 .tldr-card {
   background: var(--accent-soft);
+  border: 1px solid var(--line);
   border-left: 3px solid var(--accent);
-  border-radius: 0 var(--radius) var(--radius) 0;
+  border-radius: var(--radius);
   padding: 12px 14px;
   margin: 0 0 14px;
   font-size: 15px;
@@ -792,6 +793,18 @@ h1.large + .seg { margin-bottom: 12px; }
   color: var(--label-1);
 }
 .tldr-card p { margin: 0; }
+/* TL;DR 卡面細標籤:同正文一眼分得開 */
+.tldr-tag {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 1px 7px;
+  margin-bottom: 6px;
+}
 
 /* 思考過程折疊塊:置於每節最頂(TL;DR 之上),預設折疊,次要樣式唔搶正文 */
 .think-fold {
@@ -852,6 +865,20 @@ h1.large + .seg { margin-bottom: 12px; }
 .evid-body { margin-top: 8px; }
 .evid-list { margin: 8px 0 4px; padding-left: 18px; font-size: 13px; color: var(--label-2); }
 .evid-list li { margin: 4px 0; }
+
+/* 正文分塊(parseSectionBlocks 渲染):定性塊之間留節奏,唔再係文字牆 */
+.va-block { margin: 20px 0 24px; }
+.va-block:first-child { margin-top: 4px; }
+.va-block:last-child { margin-bottom: 4px; }
+.va-block .verdict { border-left: 3px solid var(--accent); padding-left: 10px; }
+.va-analysis { margin-top: 2px; }
+.plain-block { margin: 0 0 16px; }
+.plain-block:last-child { margin-bottom: 0; }
+/* 串流中:最後一塊尾巴的閃爍游標(同 .prose.is-streaming 同款) */
+.stream-tail > :last-child::after {
+  content: ""; display: inline-block; width: 2px; height: 1em; margin-left: 2px;
+  background: var(--accent); vertical-align: -2px; animation: blink 1s steps(1) infinite;
+}
 
 /* 術語 pills */
 .pill-grp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0; }
