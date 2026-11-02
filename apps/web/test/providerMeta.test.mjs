@@ -13,12 +13,12 @@ import { STRINGS, LOCALES } from "../test-dist/i18n.js";
 const names = (ps) => ps.map((p) => p.name);
 
 // —— filter chips 分组 ——
-test("filter:all=9, nokey=3, free=7(免key∪免费额度), paid=2", () => {
+test("filter:all=10, nokey=4, free=8(免key∪免费额度), paid=2", () => {
   assert.deepEqual(names(filterProviders("all")),
-    ["workers-ai", "pollinations", "mac-llm", "glm", "gemini", "groq", "openrouter", "anthropic", "custom"]);
-  assert.deepEqual(names(filterProviders("nokey")), ["workers-ai", "pollinations", "mac-llm"]);
+    ["workers-ai", "pollinations", "mac-llm", "mac-mlx", "glm", "gemini", "groq", "openrouter", "anthropic", "custom"]);
+  assert.deepEqual(names(filterProviders("nokey")), ["workers-ai", "pollinations", "mac-llm", "mac-mlx"]);
   assert.deepEqual(names(filterProviders("free")),
-    ["workers-ai", "pollinations", "mac-llm", "glm", "gemini", "groq", "openrouter"]);
+    ["workers-ai", "pollinations", "mac-llm", "mac-mlx", "glm", "gemini", "groq", "openrouter"]);
   assert.deepEqual(names(filterProviders("paid")), ["anthropic", "custom"]);
 });
 
@@ -57,6 +57,7 @@ test("providerMeta:cost 分档", () => {
     "workers-ai": "free",
     pollinations: "free",
     "mac-llm": "free",
+    "mac-mlx": "free",
     glm: "freetier",
     gemini: "freetier",
     groq: "freetier",
@@ -162,7 +163,7 @@ test("recommend:filterModels(recommended) 按 provider 过滤,models/ 前缀对�
 
 test("recommend:filterProviders(recommended) 不隐藏 provider(只过滤模型)", async () => {
   const { filterProviders } = await import("../test-dist/providerMeta.js");
-  assert.equal(filterProviders("recommended").length, 9);
+  assert.equal(filterProviders("recommended").length, 10);
 });
 
 test("retired:filterRetired 移除下架模型(models/ 前缀对齐),空结果回落", async () => {
@@ -172,6 +173,26 @@ test("retired:filterRetired 移除下架模型(models/ 前缀对齐),空结果�
   const allDead = [{ id: "gemini-2.0-flash" }];
   assert.deepEqual(filterRetired(allDead), allDead);
   assert.deepEqual(filterRetired([]), []);
+});
+
+test("providerMeta:mac-mlx 免 key 免费组,推荐/静态为 MLX 实报模型", async () => {
+  const { PROVIDER_META, RECOMMENDED_MODELS, STATIC_MODELS, isMacProvider } = await import("../test-dist/providerMeta.js");
+  const m = PROVIDER_META.find((p) => p.name === "mac-mlx");
+  assert.ok(m, "mac-mlx in PROVIDER_META");
+  assert.equal(m.group, "nokey");
+  assert.equal(m.cost, "free");
+  assert.equal(m.needsKey, false);
+  // 排 mac-llm 之后
+  const order = PROVIDER_META.map((p) => p.name);
+  assert.equal(order.indexOf("mac-mlx"), order.indexOf("mac-llm") + 1);
+  assert.deepEqual(RECOMMENDED_MODELS["mac-mlx"], ["mlx-community/Qwen3-14B-4bit"]);
+  assert.deepEqual(STATIC_MODELS["mac-mlx"], [
+    "mlx-community/Qwen3-14B-4bit",
+    "mlx-community/gpt-oss-20b-MXFP4-Q8",
+  ]);
+  assert.equal(isMacProvider("mac-llm"), true);
+  assert.equal(isMacProvider("mac-mlx"), true);
+  assert.equal(isMacProvider("glm"), false);
 });
 
 test("providerMeta:mac-llm 免 key 免费组,推荐含 qwen3:30b/8b", async () => {

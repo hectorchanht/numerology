@@ -13,6 +13,7 @@ import {
   filterProviders,
   filterModels,
   filterRetired,
+  isMacProvider,
   isRecommended,
   staticModelEntries,
   type ProviderFilter,
@@ -74,12 +75,12 @@ export function SettingsPanel() {
   }, [visibleModels, value.provider, modelsProvider]);
 
   // 模型列表:缓存 → /api/models 动态拉取 → 静态备选。
-  // mac-llm 缓存 TTL 只有 60s,且即使有缓存都 background revalidate(SWR),保持即时。
+  // Mac provider 缓存 TTL 只有 60s,且即使有缓存都 background revalidate(SWR),保持即时。
   useEffect(() => {
     const provider = value.provider;
     const statics = staticModelEntries(STATIC_MODELS[provider] ?? []);
     const cached = readModelsCache(provider);
-    const isMac = provider === "mac-llm";
+    const isMac = isMacProvider(provider);
     if (cached && cached.models.length > 0) {
       // 旧缓存可能含已下架模型,读出即过滤(下次拉取后缓存自然干净)。
       setModels(filterRetired(cached.models));

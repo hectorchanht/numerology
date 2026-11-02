@@ -9,12 +9,14 @@ export interface CachedModels {
   source: string;
 }
 
+import { isMacProvider } from "./providerMeta.js";
+
 const MODELS_CACHE_PREFIX = "numerology-models-";
 const MODELS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-const MAC_LLM_CACHE_TTL_MS = 60 * 1000;
+const MAC_CACHE_TTL_MS = 60 * 1000;
 
 function ttlFor(provider: string): number {
-  return provider.trim().toLowerCase() === "mac-llm" ? MAC_LLM_CACHE_TTL_MS : MODELS_CACHE_TTL_MS;
+  return isMacProvider(provider) ? MAC_CACHE_TTL_MS : MODELS_CACHE_TTL_MS;
 }
 
 export function readModelsCache(provider: string): CachedModels | null {

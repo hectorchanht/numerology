@@ -4,7 +4,7 @@ import {
   normDeadModelId,
   readDeadModels,
 } from "@numerology/ai";
-import { filterRetired } from "./providerMeta.js";
+import { filterRetired, isMacProvider } from "./providerMeta.js";
 
 export interface ModelEntry {
   id: string;
@@ -20,7 +20,7 @@ export interface ModelsResult {
   models: ModelEntry[];
   /** 需要 key 才能拉取(如 401),前端回落到静态表并提示填 key。 */
   needsKey?: boolean;
-  /** mac-llm 上游离线/失败时的软回落标记:仍回静态表,但前端可显示离线状态。 */
+  /** Mac provider 上游离线/失败时的软回落标记:仍回静态表,但前端可显示离线状态。 */
   offline?: boolean;
   verifiedAt?: string;
 }
@@ -29,6 +29,7 @@ export interface ModelsResult {
 const MODELS_BASE_URL: Record<string, string> = {
   pollinations: "https://text.pollinations.ai/openai",
   "mac-llm": "https://ollama.hectorchan.com/v1",
+  "mac-mlx": "https://mlx.hectorchan.com/v1",
   openrouter: "https://openrouter.ai/api/v1",
   glm: "https://open.bigmodel.cn/api/paas/v4",
   gemini: "https://generativelanguage.googleapis.com/v1beta/openai",
@@ -45,6 +46,7 @@ const STATIC_MODELS: Record<string, string[]> = {
   openrouter: ["google/gemma-4-31b-it:free", "google/gemma-4-26b-a4b-it:free", "nvidia/nemotron-3.5-lightning:free"],
   pollinations: ["openai"],
   "mac-llm": ["qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b"],
+  "mac-mlx": ["mlx-community/Qwen3-14B-4bit", "mlx-community/gpt-oss-20b-MXFP4-Q8"],
 };
 
 type FetchLike = (url: string, init?: RequestInit) => Promise<Response>;
@@ -69,7 +71,7 @@ export async function fetchProviderModels(
     fetchImpl?: FetchLike;
     /** 服务端 KV(读动态下架登记用);缺省则只滤 hardcode seed。 */
     kv?: unknown;
-    /** 服务端注入的额外请求头(如 mac-llm 的 Access service token)。 */
+    /** 服务端注入的额外请求头(如 Mac provider 的 Access service token)。 */
     accessHeaders?: Record<string, string>;
   } = {},
 ): Promise<ModelsResult> {
@@ -97,7 +99,7 @@ export async function fetchProviderModels(
   const headers: Record<string, string> = {};
   if (opts.key?.trim()) headers.Authorization = `Bearer ${opts.key.trim()}`;
   if (opts.accessHeaders) Object.assign(headers, opts.accessHeaders);
-  const isMac = name === "mac-llm";
+  const isMac = isMacProvider(name);
   const offlineFallback = (): ModelsResult => ({
     provider: name,
     source: "static",

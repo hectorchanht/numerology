@@ -10,6 +10,8 @@ export {
   chatComplete,
   chatStream,
   activeProviderName,
+  isMacProvider,
+  MAC_PROVIDER_NAMES,
   providerSummary,
   listProviders,
   providerBaseUrl,

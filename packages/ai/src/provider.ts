@@ -63,7 +63,7 @@ export interface ProviderOptions {
   aiBinding?: { ai?: unknown; kv?: unknown };
   /**
    * 服务端注入的额外请求头(仅服务端设置,绝不来自客户端请求体):
-   * 目前唯一用途是 mac-llm 的 Cloudflare Access service token
+   * 目前唯一用途是 Mac provider(mac-llm / mac-mlx)的 Cloudflare Access service token
    * (CF-Access-Client-Id/Secret),由 resolveServerAi 从 Pages env 注入。
    */
   extraHeaders?: Record<string, string>;
@@ -136,6 +136,16 @@ const PROVIDERS: Record<string, ProviderDef> = {
     free: true,
     noKey: true,
   },
+  "mac-mlx": {
+    kind: "openai",
+    label: "Mac MLX(MLX·免费·headless Mac,无 key)",
+    keys: [],
+    baseURL: "https://mlx.hectorchan.com/v1",
+    // mlx_lm server 实报的 model id 原文(多模型:按请求加载,此为预设)。
+    models: { report: "mlx-community/Qwen3-14B-4bit", chat: "mlx-community/Qwen3-14B-4bit" },
+    free: true,
+    noKey: true,
+  },
   glm: {
     kind: "openai",
     label: "智谱 GLM-4-Flash(免费)",
@@ -181,6 +191,18 @@ const PROVIDERS: Record<string, ProviderDef> = {
     free: false,
   },
 };
+
+/**
+ * 屋企 Mac 上的本地 provider:同一部 headless Mac、同一个 Cloudflare Access
+ * application + service token(ollama/mlx 两个 subdomain 同 app),
+ * 共用 token 注入路径与即时模型列表行为。
+ */
+export const MAC_PROVIDER_NAMES = ["mac-llm", "mac-mlx"] as const;
+
+/** 是否为屋企 Mac 本地 provider(mac-llm / mac-mlx)。 */
+export function isMacProvider(name: string): boolean {
+  return (MAC_PROVIDER_NAMES as readonly string[]).includes(name.trim().toLowerCase());
+}
 
 // 默认走 Cloudflare Workers AI binding(免 key,跑在 CF 自家网络,
 // 不受 Pollinations 免费 tier 在边缘网络的飘忽影响;每月 $2 硬预算守卫)。
@@ -328,12 +350,13 @@ function makeOpenAI(apiKey: string, baseURL?: string, defaultHeaders?: Record<st
 }
 
 /**
- * mac-llm 的 Cloudflare Access service token headers。
+ * Mac provider(mac-llm / mac-mlx,共用同一 Access app)的 Cloudflare Access
+ * service token headers。
  * 优先用 opts.extraHeaders(web 侧 resolveServerAi 从 Pages env 注入,生产环境可靠路径);
  * 其次读进程 env(CLI/本地开发用)。其它 provider 一律不带。
  */
 function accessHeadersFor(name: string, opts?: ProviderOptions): Record<string, string> | undefined {
-  if (name !== "mac-llm") return undefined;
+  if (!isMacProvider(name)) return undefined;
   if (opts?.extraHeaders && Object.keys(opts.extraHeaders).length > 0) return opts.extraHeaders;
   const id = process.env.AI_MAC_LLM_ACCESS_CLIENT_ID;
   const secret = process.env.AI_MAC_LLM_ACCESS_CLIENT_SECRET;
@@ -523,6 +546,8 @@ function baseDecodeParams(): { temperature: number; top_p: number } {
  * 会吃掉 maxTokens 导致正文为空(实测 max_tokens=120 全被思考占满)。
  * reasoning_effort:"none" 关掉思考(本 app 不展示思考过程),正文直接出、更快。
  * 仅 mac-llm 加此参数,其它 OpenAI 兼容 provider 不受影响。
+ * mac-mlx 不送此参数:mlx_lm server 把 reasoning 分到独立字段回传、不占 content,
+ * 且未证实它接受此参数,维持预设行为。
  * 注意:Ollama 实测接受 "none",但当前 OpenAI SDK 的 ReasoningEffort 未含它,故 cast;
  * 运行时序列化值仍为 "none",Ollama 认。
  */
@@ -851,6 +876,7 @@ export function listProviders(): ProviderMeta[] {
     { name: "workers-ai", labelKey: "settings.prov.workersai", group: "nokey", needsKey: false },
     { name: "pollinations", labelKey: "settings.prov.pollinations", group: "nokey", needsKey: false, signup: "https://pollinations.ai/" },
     { name: "mac-llm", labelKey: "settings.prov.macllm", group: "nokey", needsKey: false },
+    { name: "mac-mlx", labelKey: "settings.prov.macmlx", group: "nokey", needsKey: false },
     { name: "glm", labelKey: "settings.prov.glm", group: "freekey", needsKey: true, signup: "https://open.bigmodel.cn/" },
     { name: "gemini", labelKey: "settings.prov.gemini", group: "freekey", needsKey: true, signup: "https://aistudio.google.com/apikey" },
     { name: "groq", labelKey: "settings.prov.groq", group: "freekey", needsKey: true, signup: "https://console.groq.com/keys" },

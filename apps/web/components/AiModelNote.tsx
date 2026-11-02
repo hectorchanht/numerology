@@ -9,6 +9,7 @@ import {
   STATIC_MODELS,
   filterRecommended,
   filterRetired,
+  isMacProvider,
   isRecommended,
   normModelId,
   staticModelEntries,
@@ -39,8 +40,9 @@ function modelOptions(provider: string, currentModel: string): ModelOption[] {
   return list;
 }
 
-/** mac-llm 專用:唔用推薦過濾,只濾下架;推薦(30b/8b)排最前,其餘保持 live 原序。 */
+/** Mac provider 共用:唔用推薦過濾,只濾下架;推薦排最前,其餘保持 live 原序。 */
 function macModelOptions(
+  provider: string,
   currentModel: string,
   liveModels: ModelOption[] | null,
 ): ModelOption[] {
@@ -48,14 +50,14 @@ function macModelOptions(
     liveModels && liveModels.length > 0
       ? liveModels
       : (() => {
-          const cached = readModelsCache("mac-llm")?.models;
+          const cached = readModelsCache(provider)?.models;
           return cached && cached.length > 0
             ? cached
-            : staticModelEntries(STATIC_MODELS["mac-llm"] ?? []);
+            : staticModelEntries(STATIC_MODELS[provider] ?? []);
         })();
   const list = [...filterRetired(base)].sort(
     (a, b) =>
-      Number(isRecommended("mac-llm", b.id)) - Number(isRecommended("mac-llm", a.id)),
+      Number(isRecommended(provider, b.id)) - Number(isRecommended(provider, a.id)),
   );
   if (currentModel && !list.some((m) => normModelId(m.id) === normModelId(currentModel))) {
     return [{ id: currentModel }, ...list];
@@ -92,18 +94,22 @@ export function AiModelNote({ style }: { style?: CSSProperties }) {
   const providerPopup = useFloatPopup(providerRef);
   const modelPopup = useFloatPopup(modelRef);
 
-  // mac-llm:開 picker 即刻 live fetch 全部模型,唔靠 cache/靜態推薦表。
+  // Mac provider:開 picker 即刻 live fetch 全部模型,唔靠 cache/靜態推薦表。
   const [macLiveModels, setMacLiveModels] = useState<ModelOption[] | null>(null);
   const [macState, setMacState] = useState<"loading" | "online" | "offline" | null>(null);
-  const isMac = s.provider === "mac-llm";
+  const isMac = isMacProvider(s.provider);
+  const macProvider = s.provider;
   const modelPopupOpen = modelPopup.open;
   useEffect(() => {
     if (!modelPopupOpen || !isMac) return;
     let cancelled = false;
     setMacState("loading");
+    setMacLiveModels(null);
     (async () => {
       try {
-        const res = await fetch(`/api/models?provider=mac-llm`, { cache: "no-store" });
+        const res = await fetch(`/api/models?provider=${encodeURIComponent(macProvider)}`, {
+          cache: "no-store",
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = (await res.json()) as {
           models?: ModelOption[];
@@ -119,7 +125,7 @@ export function AiModelNote({ style }: { style?: CSSProperties }) {
         setMacLiveModels(filtered);
         const offline = Boolean(data.offline) || data.source !== "live";
         setMacState(offline ? "offline" : "online");
-        writeModelsCache("mac-llm", filtered, offline ? "static" : "live");
+        writeModelsCache(macProvider, filtered, offline ? "static" : "live");
       } catch {
         if (!cancelled) setMacState("offline");
       }
@@ -127,7 +133,7 @@ export function AiModelNote({ style }: { style?: CSSProperties }) {
     return () => {
       cancelled = true;
     };
-  }, [modelPopupOpen, isMac]);
+  }, [modelPopupOpen, isMac, macProvider]);
 
   const meta = PROVIDER_META.find((p) => p.name === s.provider);
   const providerLabel = meta ? t(meta.shortKey) : s.provider;
@@ -151,7 +157,7 @@ export function AiModelNote({ style }: { style?: CSSProperties }) {
   const models =
     modelPopup.open && s.provider !== "custom"
       ? isMac
-        ? macModelOptions(s.model.trim(), macLiveModels)
+        ? macModelOptions(s.provider, s.model.trim(), macLiveModels)
         : modelOptions(s.provider, s.model.trim())
       : [];
   const effectiveModel = s.model.trim() || models[0]?.id || "";

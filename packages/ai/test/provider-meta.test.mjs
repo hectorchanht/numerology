@@ -64,6 +64,47 @@ test("provider:mac-llm 在册,走 tunnel baseURL,免 key", () => {
   assert.equal(providerNeedsKey("mac-llm"), false);
 });
 
+test("provider:mac-mlx 在册(mac-llm 之后),走 mlx tunnel baseURL,免 key,预设为 MLX 实报模型", () => {
+  const list = listProviders();
+  const byName = Object.fromEntries(list.map((p) => [p.name, p]));
+  assert.equal(byName["mac-mlx"].group, "nokey");
+  assert.equal(byName["mac-mlx"].needsKey, false);
+  assert.equal(byName["mac-mlx"].labelKey, "settings.prov.macmlx");
+  const order = list.map((p) => p.name);
+  assert.equal(order.indexOf("mac-mlx"), order.indexOf("mac-llm") + 1);
+  assert.equal(providerBaseUrl("mac-mlx"), "https://mlx.hectorchan.com/v1");
+  assert.equal(providerNeedsKey("mac-mlx"), false);
+});
+
+test("provider:mac-mlx 不带 reasoning_effort,但带 Access headers", async () => {
+  const { chatComplete } = await import("../dist/provider.js");
+  const http = await import("node:http");
+  const seen = [];
+  const server = http.createServer((req, res) => {
+    let body = "";
+    req.on("data", (c) => (body += c));
+    req.on("end", () => {
+      seen.push({ headers: { ...req.headers }, body: JSON.parse(body || "{}") });
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ choices: [{ message: { content: "ok" } }], usage: {} }));
+    });
+  });
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const baseURL = `http://127.0.0.1:${server.address().port}`;
+  const req = { kind: "chat", maxTokens: 10, system: [], messages: [{ role: "user", content: "hi" }] };
+  try {
+    await chatComplete(req, {
+      provider: "mac-mlx", model: "mlx-community/Qwen3-14B-4bit", baseURL,
+      extraHeaders: { "CF-Access-Client-Id": "id-mlx", "CF-Access-Client-Secret": "sec-mlx" },
+    });
+  } finally {
+    server.close();
+  }
+  assert.equal("reasoning_effort" in seen[0].body, false);
+  assert.equal(seen[0].headers["cf-access-client-id"], "id-mlx");
+  assert.equal(seen[0].headers["cf-access-client-secret"], "sec-mlx");
+});
+
 test("provider:mac-llm 请求带 reasoning_effort none(关思考),其它 provider 不带", async () => {
   const { chatComplete } = await import("../dist/provider.js");
   const http = await import("node:http");

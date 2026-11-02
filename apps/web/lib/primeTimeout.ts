@@ -1,5 +1,5 @@
 import type { ProviderOptions } from "@numerology/ai";
-import { activeProviderName } from "@numerology/ai";
+import { activeProviderName, isMacProvider } from "@numerology/ai";
 
 /**
  * 预热超时:Workers AI 冷启动首 token 可能超过 20s(线上实测 21s+),放宽到 60s;
@@ -11,7 +11,7 @@ import { activeProviderName } from "@numerology/ai";
  */
 export function primeTimeoutMs(opts: ProviderOptions | undefined): number {
   const name = activeProviderName(opts);
-  // mac-llm:Mac 本地模型冷启动(18-20GB 模型由磁盘载入)+qwen 思考,首 token 可能远超 60s。
-  if (name === "mac-llm") return 120_000;
+  // Mac provider:本地模型冷启动(大模型由磁盘载入)+思考,首 token 可能远超 60s。
+  if (isMacProvider(name)) return 120_000;
   return name === "workers-ai" || name === "gemini" ? 60_000 : 20_000;
 }

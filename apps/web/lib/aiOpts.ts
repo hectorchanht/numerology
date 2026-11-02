@@ -1,5 +1,6 @@
 import type { ProviderOptions } from "@numerology/ai";
 import { getServerAiBindings, getMacLlmAccessHeaders } from "./aiBinding.js";
+import { isMacProvider } from "./providerMeta.js";
 
 /**
  * 从请求体解析 BYOK 设置(用户自带 provider/key)与自定义人设;仅透传、不落库、不记日志。
@@ -36,8 +37,9 @@ export function resolveServerAi(body: unknown): ProviderOptions | undefined {
   const opts: ProviderOptions = parseAi(body) ?? {};
   const bindings = getServerAiBindings();
   if (bindings) opts.aiBinding = bindings;
-  // mac-llm:附上 Cloudflare Access service token headers(仅服务端 env,绝不来自请求体)。
-  if (opts.provider === "mac-llm") {
+  // Mac provider(mac-llm / mac-mlx 共用同一 Access app):附上 Cloudflare Access
+  // service token headers(仅服务端 env,绝不来自请求体)。
+  if (opts.provider && isMacProvider(opts.provider)) {
     const h = getMacLlmAccessHeaders();
     if (h) opts.extraHeaders = h;
   }

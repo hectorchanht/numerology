@@ -93,6 +93,44 @@ test("models:mac-llm 静态表为核实 5 个(次序)", () => {
   assert.deepEqual(STATIC_MODELS["mac-llm"], ["qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b"]);
 });
 
+test("models:mac-mlx live 透传 mlx server 实报 model id", async () => {
+  const ids = ["mlx-community/gpt-oss-20b-MXFP4-Q8", "mlx-community/Qwen3-14B-4bit"];
+  const fetchImpl = stubFetch(async (url) => {
+    assert.match(url, /https:\/\/mlx\.hectorchan\.com\/v1\/models/);
+    return jsonResponse(200, { data: ids.map((id) => ({ id })) });
+  });
+  const r = await fetchProviderModels("mac-mlx", { fetchImpl });
+  assert.equal(r.source, "live");
+  assert.equal(r.offline, undefined);
+  assert.deepEqual(r.models.map((m) => m.id), ids);
+});
+
+test("models:mac-mlx 网络失败回 offline+静态而唔 throw", async () => {
+  const fetchImpl = stubFetch(async () => { throw new Error("down"); });
+  const r = await fetchProviderModels("mac-mlx", { fetchImpl });
+  assert.equal(r.source, "static");
+  assert.equal(r.offline, true);
+  assert.deepEqual(r.models.map((m) => m.id), [
+    "mlx-community/Qwen3-14B-4bit",
+    "mlx-community/gpt-oss-20b-MXFP4-Q8",
+  ]);
+});
+
+test("models:mac-mlx HTTP 失败回 offline 而唔 throw", async () => {
+  const fetchImpl = stubFetch(async () => jsonResponse(502, { error: "bad gateway" }));
+  const r = await fetchProviderModels("mac-mlx", { fetchImpl });
+  assert.equal(r.offline, true);
+  assert.equal(r.models.length, 2);
+});
+
+test("models:mac-mlx 静态表与 providerMeta 一致", () => {
+  assert.deepEqual(staticModelsFor("mac-mlx"), [
+    "mlx-community/Qwen3-14B-4bit",
+    "mlx-community/gpt-oss-20b-MXFP4-Q8",
+  ]);
+  assert.deepEqual(STATIC_MODELS["mac-mlx"], staticModelsFor("mac-mlx"));
+});
+
 test("models:openrouter 标记 free 模型", async () => {
   const fetchImpl = stubFetch(async () =>
     jsonResponse(200, {
