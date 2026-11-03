@@ -6,8 +6,9 @@ import {
   type CastResult,
   type CoinLine,
 } from "@numerology/engine";
-import { getHexagram, yaoName } from "@numerology/knowledge";
-import { useLocale, useScript } from "@/lib/i18n";
+import { getHexagram, yaoName, LEGGE, LEGGE_SOURCE } from "@numerology/knowledge";
+import { useLocale, useScript, HTML_LANG } from "@/lib/i18n";
+import { useRouter } from "next/navigation";
 import { yjT, yjFmt, type YijingLocale } from "@/lib/yijingStrings";
 import { AiInterpret } from "./AiInterpret";
 import { Term, withTermHighlights } from "@/lib/highlightTerms";
@@ -44,6 +45,7 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
   const { locale } = useLocale();
   // 卦爻辭係繁體正本 → zT(只喺 zhs 轉)
   const { zT } = useScript();
+  const router = useRouter();
   const loc = locale as YijingLocale;
   const [question, setQuestion] = useState("");
   /** AI 解卦時係咪將問題一併送去 — Hector 2026-10-23:default 開,分析要對住具體問題 */
@@ -58,6 +60,7 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
   const [rolling, setRolling] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resultRef = useRef<HTMLElement | null>(null);
+  const resultHeadRef = useRef<HTMLHeadingElement | null>(null);
   /** 讀屏通知:每擲一爻 / 六爻已成(擲錢動畫係 aria-hidden) */
   const [announce, setAnnounce] = useState("");
   /** 歷史回顧模式:由 ?h=<id> 入嚟,唔再存檔 */
@@ -125,6 +128,17 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
       <Term term={zh} />
     );
 
+  /** 英文界面:Legge 譯文做正文,古文降做下面一行;中文界面照舊只顯示古文 */
+  const classic = (zh: string, en: string | undefined) =>
+    loc === "en" && en ? (
+      <>
+        {en}
+        <span className="yj-zh">{withTermHighlights(zh, zT)}</span>
+      </>
+    ) : (
+      withTermHighlights(zh, zT)
+    );
+
   const commitLine = (line: TossedLine) => setLines((p) => [...p, line]);
 
   const tossOne = () => {
@@ -162,6 +176,12 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
     setRolling(false);
     setAnnounce("");
     savedSig.current = null;
+    // 由歷史回顧再占:退出回顧模式,新卦照常存檔
+    if (reviewMode.current) {
+      reviewMode.current = false;
+      setReviewAt(null);
+      router.replace("/yijing");
+    }
   };
 
   useEffect(() => () => {
@@ -171,8 +191,10 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
   // 六爻已成:讀屏報本卦;手機結果喺下面 → 捲到結果(回顧模式唔捲)
   useEffect(() => {
     if (!done || !ben) return;
-    setAnnounce(yjFmt(yjT("yijing.announce.done", loc), { name: zT(ben.name) }));
+    setAnnounce(yjFmt(yjT("yijing.announce.done", loc), { name: loc === "en" ? ben.nameEn : zT(ben.name) }));
     if (reviewMode.current) return;
+    // 擲爻掣已卸載 → 焦點交俾結果標題,鍵盤 / 讀屏唔會跌返去 body
+    resultHeadRef.current?.focus({ preventScroll: true });
     const el = resultRef.current;
     if (!el) return;
     const below = el.getBoundingClientRect().top > window.innerHeight * 0.55;
@@ -184,12 +206,15 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
   }, [done, ben]);
 
   const last = lines[lines.length - 1];
+  /** 「花花字 = 7 · 少陽」:錢面 + 合數 + 爻名 */
+  const lineSummary = (l: TossedLine) =>
+    `${l.coins.map((c) => coinFace(c)).join("")} = ${l.value} · ${yjT(LINE_LABEL[l.value], loc)}`;
   const nextN = Math.min(lines.length + 1, 6);
 
   // 每擲一爻讀屏報一次(第六爻由上面「六爻已成」接手)
   useEffect(() => {
     if (!last || lines.length === 6) return;
-    setAnnounce(`${posLabel(lines.length)} ${yjT(LINE_LABEL[last.value], loc)}`);
+    setAnnounce(`${posLabel(lines.length)}:${lineSummary(last)}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lines.length]);
 
@@ -205,7 +230,7 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
       {reviewAt !== null && (
         <p className="yj-review">
           <span className="tag accent">{yjT("yijing.hist.reviewing", loc)}</span>
-          <span className="muted">{new Date(reviewAt).toLocaleString()}</span>
+          <span className="muted">{new Date(reviewAt).toLocaleString(HTML_LANG[locale])}</span>
           <Link href="/yijing/history">{yjT("yijing.hist.backToHistory", loc)}</Link>
         </p>
       )}
@@ -225,22 +250,6 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
                 readOnly={done}
               />
             </div>
-          </div>
-          <div className="list yj-send">
-            <ToggleRow
-              icon="send"
-              label={yjT("yijing.sendQuestion", loc)}
-              sub={yjT(sendQ ? "yijing.sendQuestion.on" : "yijing.sendQuestion.off", loc)}
-              checked={sendQ}
-              onChange={(v) => {
-                setSendQ(v);
-                try {
-                  window.localStorage.setItem("numerology-yj-sendq", v ? "1" : "0");
-                } catch {
-                  /* ignore */
-                }
-              }}
-            />
           </div>
           <p className="note">
             {term("問卦", "yijing.wenGua")} · {yjT("yijing.askHonest", loc)}
@@ -265,22 +274,23 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
               </div>
             )}
 
+            {!done && (
+              <p className="yj-last" aria-hidden="true">
+                {!rolling && last ? lineSummary(last) : "\u00a0"}
+              </p>
+            )}
+
             {/* 主按鈕緊貼擲錢盤,手機首屏撳得到 */}
             {!done && (
-              <>
-                <button type="button" className="btn block yj-toss" onClick={tossOne} disabled={rolling}>
-                  {yjFmt(yjT("yijing.toss", loc), { n: nextN })}
-                </button>
-                <button type="button" className="text-btn yj-auto" onClick={tossAll} disabled={rolling}>
-                  {yjT("yijing.auto", loc)}
-                </button>
-              </>
+              <button type="button" className="btn block yj-toss" onClick={tossOne} disabled={rolling}>
+                {yjFmt(yjT("yijing.toss", loc), { n: nextN })}
+              </button>
             )}
 
             {lines.length === 0 && <p className="note yj-hint">{yjT("yijing.stageHint", loc)}</p>}
 
             {/* 六爻由下而上疊起:未擲嘅位留空槽 */}
-            <ol className="yj-stack">
+            <ol className={`yj-stack${done ? "" : " casting"}`}>
               {[6, 5, 4, 3, 2, 1].map((pos) => {
                 const l = lines[pos - 1];
                 const mv = l ? isMoving(l.value) : false;
@@ -317,6 +327,13 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
               })}
             </ol>
 
+            {/* 「全部自動」擺喺爻疊之下,同主掣拉開距離,免手指滑錯一次過擲晒 */}
+            {!done && (
+              <button type="button" className="text-btn yj-auto" onClick={tossAll} disabled={rolling}>
+                {yjT("yijing.auto", loc)}
+              </button>
+            )}
+
             {done && (
               <button type="button" className="btn secondary block yj-again" onClick={reset}>
                 <Icon name="refresh" />
@@ -338,9 +355,10 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
 
         {cast && ben && (
           <section className="card yj-result" ref={resultRef} aria-labelledby="yj-res-h">
-            <h2 id="yj-res-h" className="sr-only">
+            <h2 id="yj-res-h" className="sr-only" tabIndex={-1} ref={resultHeadRef}>
               {yjT("yijing.result", loc)}
             </h2>
+            {question.trim() ? <p className="yj-q-echo">{question.trim()}</p> : null}
             <div className="yj-ben">
               <span className="yj-sym" aria-hidden="true">
                 {ben.symbol}
@@ -356,7 +374,7 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
             </div>
             <p className="yj-judg">
               <span className="yj-lab">{term("卦辭", "yijing.judgment")}</span>
-              {withTermHighlights(ben.judgment, zT)}
+              {classic(ben.judgment, LEGGE[ben.number]?.judgment)}
             </p>
 
             {cast.changing.length > 0 ? (
@@ -365,7 +383,7 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
                 {cast.changing.map((p) => (
                   <div key={p} className="yj-yao">
                     <div className="yj-yao-n">{zT(yaoName(ben, p))}</div>
-                    <div>{withTermHighlights(ben.lines[p - 1] ?? "", zT)}</div>
+                    <div>{classic(ben.lines[p - 1] ?? "", LEGGE[ben.number]?.lines[p - 1])}</div>
                   </div>
                 ))}
               </div>
@@ -385,7 +403,7 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
                 </h3>
                 <p>
                   <span className="yj-lab">{term("卦辭", "yijing.judgment")}</span>
-                  {withTermHighlights(bian.judgment, zT)}
+                  {classic(bian.judgment, LEGGE[bian.number]?.judgment)}
                 </p>
               </div>
             )}
@@ -402,10 +420,32 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
                     {hu.symbol}
                   </span>
                   <span className="yj-lab">{term("卦辭", "yijing.judgment")}</span>
-                  {withTermHighlights(hu.judgment, zT)}
+                  {classic(hu.judgment, LEGGE[hu.number]?.judgment)}
                 </p>
               </details>
             )}
+
+            {loc === "en" ? <p className="note yj-src">{yjFmt(yjT("yijing.translation", loc), { src: LEGGE_SOURCE })}</p> : null}
+
+            {/* 有問題先問要唔要送;擺喺 AI 解卦掣隔籬,唔再喺起卦前要人決定 */}
+            {question.trim() ? (
+              <div className="list yj-send">
+                <ToggleRow
+                  icon="send"
+                  label={yjT("yijing.sendQuestion", loc)}
+                  sub={yjT(sendQ ? "yijing.sendQuestion.on" : "yijing.sendQuestion.off", loc)}
+                  checked={sendQ}
+                  onChange={(v) => {
+                    setSendQ(v);
+                    try {
+                      window.localStorage.setItem("numerology-yj-sendq", v ? "1" : "0");
+                    } catch {
+                      /* ignore */
+                    }
+                  }}
+                />
+              </div>
+            ) : null}
 
             <AiInterpret
               hexagram={cast.hexagram}

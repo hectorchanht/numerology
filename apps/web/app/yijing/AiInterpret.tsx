@@ -8,7 +8,7 @@ import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { useLocale } from "@/lib/i18n";
 import { AiModelNote } from "@/components/AiModelNote";
 import { Icon } from "@/components/Icon";
-import { aiRequestParts } from "@/lib/aiSettings";
+import { aiRequestParts, loadAi, DEFAULT_AI } from "@/lib/aiSettings";
 import { go } from "@/lib/nav";
 
 /**
@@ -54,6 +54,8 @@ export function AiInterpret({
     }
   };
 
+  const custom = state === "error" && loadAi().provider !== DEFAULT_AI.provider;
+
   const openSettings = () => {
     go("settings");
     if (pathname !== "/") router.push("/");
@@ -97,16 +99,19 @@ export function AiInterpret({
           ) : (
             <>
               <h3 className="yj-sub-h">{yjT("ai.failTitle", locale)}</h3>
-              <p className="note">{t("report.providerHint")}</p>
+              {/* 用緊預設免費 AI 就唔好叫人查 API key;自訂 provider 先提設定 */}
+              <p className="note">{yjT(custom ? "ai.failCustom" : "ai.failBody", locale)}</p>
               <div className="btn-row">
                 <button type="button" className="btn secondary" onClick={start}>
                   <Icon name="refresh" />
                   {yjT("ai.retry", locale)}
                 </button>
-                <button type="button" className="btn secondary" onClick={openSettings}>
-                  <Icon name="gear" />
-                  {t("report.budgetSettings")}
-                </button>
+                {custom ? (
+                  <button type="button" className="btn secondary" onClick={openSettings}>
+                    <Icon name="gear" />
+                    {t("report.budgetSettings")}
+                  </button>
+                ) : null}
               </div>
             </>
           )}
