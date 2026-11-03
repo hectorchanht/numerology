@@ -13,6 +13,7 @@ import { SectionBodyView } from "@/components/SectionBody";
 import { Icon, SECTION_ICON } from "@/components/Icon";
 import { AiModelNote } from "@/components/AiModelNote";
 import { Seg, ScreenNav } from "@/components/ui";
+import { go } from "@/lib/nav";
 import { DualPronounce } from "@/lib/DualPronounce";
 import { speechText } from "@/lib/speechText";
 
@@ -70,6 +71,8 @@ interface Slot {
   text: string;
   status: "streaming" | "done" | "error";
   err: string;
+  /** 服务端错误码(AI_BUDGET = 本月额度用尽,各节收成一张额度卡)。 */
+  code?: string;
 }
 
 /** 通用流式报告:选视角 → 各节并行调 endpoint → 每节一张卡,逐字渲染 Markdown。 */
@@ -152,7 +155,10 @@ export function StreamedReport({
           .catch((e: unknown) => {
             // 模型下架 → 清模型缓存,下次打开设置时重新拉取(已滤走下架模型)。
             if ((e as { code?: string })?.code === "MODEL_NOT_FOUND") clearModelsCache();
-            local[i] = { ...local[i]!, status: "error", err: e instanceof Error ? e.message : t("report.segFailShort") };
+            local[i] = {
+              ...local[i]!, status: "error", err: e instanceof Error ? e.message : t("report.segFailShort"),
+              code: (e as { code?: string })?.code,
+            };
           })
           .finally(() => {
             if (live()) setSlots([...local]);
@@ -196,7 +202,8 @@ export function StreamedReport({
       // 模型下架 → 清模型缓存,下次打开设置时重新拉取(已滤走下架模型)。
       if ((e as { code?: string })?.code === "MODEL_NOT_FOUND") clearModelsCache();
       const errMsg = e instanceof Error ? e.message : t("report.segFailShort");
-      setSlots((prev) => (prev ? prev.map((s, i) => (i === index ? { ...s, status: "error", err: errMsg } : s)) : prev));
+      const code = (e as { code?: string })?.code;
+      setSlots((prev) => (prev ? prev.map((s, i) => (i === index ? { ...s, status: "error", err: errMsg, code } : s)) : prev));
     } finally {
       if (retryIds.current.get(index) === myId) retryIds.current.delete(index);
     }
@@ -237,6 +244,10 @@ export function StreamedReport({
   };
 
   const anyError = !!slots?.some((s) => s.status === "error");
+  /** 額度用盡:各節同時失敗,收成一張卡,唔再逐節重試(重試都係 429)。 */
+  const budget = slots?.find((s) => s.code === "AI_BUDGET");
+  /** 非額度錯誤先提示檢查 provider 配置。 */
+  const otherError = !!slots?.some((s) => s.status === "error" && s.code !== "AI_BUDGET");
 
   // scrollspy:單一 IntersectionObserver 監聽各節 <article>;
   // 章節頂部進入視口上方帶即把 strip 高亮切過去。串流中 article 元素不變,照常生效。
@@ -308,6 +319,20 @@ export function StreamedReport({
             <div className="bar"><i style={{ width: `${(settled / segments.length) * 100}%` }} /></div>
             {shownLens ? <span className="tag accent">{lensLabel(shownLens)}</span> : null}
           </div>
+
+          {budget ? (
+            <div className="card empty" role="status">
+              <Icon name="gear" />
+              <div className="empty-t">{t("report.budgetTitle")}</div>
+              <p className="note">{t("report.budgetBody")}</p>
+              <button type="button" className="btn block" onClick={() => go("settings")}>
+                <Icon name="gear" />
+                {t("report.budgetSettings")}
+              </button>
+              {/* REAL-ERROR RULE:服務端原文照樣顯示 */}
+              <p className="note">{budget.err}</p>
+            </div>
+          ) : null}
 
           {/* 手機:頂部 sticky 章節 strip;桌面:左側 sticky 目錄 + 右側正文(.report-body grid) */}
           <div className="report-body">
@@ -387,6 +412,8 @@ export function StreamedReport({
                         <div aria-label={t("report.stateQueued")}>
                           <div className="skel" /><div className="skel w80" /><div className="skel w60" />
                         </div>
+                      ) : s.status === "error" && s.code === "AI_BUDGET" ? (
+                        <p className="note">{t("report.budgetSec")}</p>
                       ) : s.status === "error" ? (
                         <div className="sec-error">
                           <p className="notice">{t("report.segFail", { err: s.err })}</p>
@@ -405,7 +432,7 @@ export function StreamedReport({
             </div>
           </div>
 
-          {anyError ? <p className="note">{t("report.providerHint")}</p> : null}
+          {otherError ? <p className="note">{t("report.providerHint")}</p> : null}
 
           <div className="btn-row">
             {onAsk ? (

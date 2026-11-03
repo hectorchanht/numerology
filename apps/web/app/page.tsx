@@ -263,11 +263,13 @@ export default function Home() {
               ]}
             />
 
-            {mode === "infer" ? (
+            {/* 兩邊保持 mounted:切換模式唔會清走已填嘅資料 */}
+            <div hidden={mode !== "infer"}>
               <TimeInferPanel onAdopt={(birth) => { setMode("known"); onSubmit(birth); }} />
-            ) : (
+            </div>
+            <div hidden={mode !== "known"}>
               <BirthForm loading={loading} onSubmit={onSubmit} />
-            )}
+            </div>
 
             {error ? <p className="notice" role="alert">{error}</p> : null}
           </div>

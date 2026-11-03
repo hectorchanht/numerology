@@ -21,7 +21,7 @@ interface Classified {
   status: 400 | 429 | 502;
   /** 真实错误消息(不含敏感信息:key 只走请求头,从不出现在错误消息里) */
   message: string;
-  /** 机器可读错误码(目前仅模型下架);前端据此做缓存清理等动作。 */
+  /** 机器可读错误码(MODEL_NOT_FOUND / AI_BUDGET);前端据此做缓存清理、额度提示等动作。 */
   code?: string;
 }
 
@@ -63,7 +63,8 @@ export function classifyError(err: unknown, stage: ErrorStage = "input"): Classi
   if (VALIDATION_RE.test(raw)) return { status: 400, message: capMessage(raw) };
 
   // 预算耗尽 → 429(必须在 429→502 的限流映射之前),去掉内部标记。
-  if (BUDGET_RE.test(raw)) return { status: 429, message: capMessage(raw.replace(/^AI_BUDGET_EXCEEDED:/, "")) };
+  // 附 AI_BUDGET 码:前端据此把各节失败收成一张额度卡(消息仍原样透出)。
+  if (BUDGET_RE.test(raw)) return { status: 429, message: capMessage(raw.replace(/^AI_BUDGET_EXCEEDED:/, "")), code: "AI_BUDGET" };
 
   // 服务端配置缺失(binding 未配) → 502,保留原消息(它是给运维看的明确指引)。
   if (/binding 未配置/.test(raw)) return { status: 502, message: capMessage(raw) };

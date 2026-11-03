@@ -23,6 +23,9 @@ const FIELDS = [
   { key: "hour", labelKey: "form.hour" as const, min: 0, max: 23, icon: "clock" },
 ] as const;
 
+/** 十二地支:時辰標示用(23 點起子時)。 */
+const BRANCHES = "子丑寅卯辰巳午未申酉戌亥";
+
 export function BirthForm({ loading, onSubmit, defaults }: Props) {
   const { t } = useLocale();
   const str = (n: number | undefined): string => (n === undefined ? "" : String(n));
@@ -30,7 +33,8 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
     year: str(defaults?.year), month: str(defaults?.month), day: str(defaults?.day),
     hour: str(defaults?.hour), minute: str(defaults?.minute),
   });
-  const [gender, setGender] = useState<"男" | "女">(defaults?.gender ?? "男");
+  // 性別唔預設:佢決定大運順逆,要用戶自己揀。
+  const [gender, setGender] = useState<"男" | "女" | "">(defaults?.gender ?? "");
   const [name, setName] = useState("");
   const [calendar, setCalendar] = useState<Calendar>("solar");
   const [isLeapMonth, setIsLeapMonth] = useState(false);
@@ -40,27 +44,47 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
   // 真太陽時:開 = 有揀城市就帶經度校正;關 = 按時鐘時間(保留已揀城市)。
   const [trueSolar, setTrueSolar] = useState(true);
   const [error, setError] = useState<string>("");
+  /** 出錯嘅欄位 id:標 aria-invalid 並移焦點過去。 */
+  const [errField, setErrField] = useState<string>("");
+
+  const fail = (field: string, msg: string) => {
+    setError(msg);
+    setErrField(field);
+    const el = document.getElementById(field);
+    (el?.querySelector("button") ?? el)?.focus();
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setErrField("");
     const nums: Record<string, number> = {};
     for (const f of FIELDS) {
       const n = Number(v[f.key]);
       if (v[f.key] === "" || !Number.isInteger(n) || n < f.min || n > f.max) {
-        setError(t("form.invalidField", { label: t(f.labelKey) }));
+        fail(f.key, t("form.invalidField", { label: t(f.labelKey) }));
         return;
       }
       nums[f.key] = n;
+    }
+    // 日數按月份檢查:陽曆用真實月長(閏年 2 月 29),農曆月最多 30 日(閏月等細節交服務端)。
+    const maxDay = calendar === "solar" ? new Date(nums.year!, nums.month!, 0).getDate() : 30;
+    if (nums.day! > maxDay) {
+      fail("day", t("form.dayInvalid", { max: maxDay }));
+      return;
     }
     let minute = 0;
     if (v.minute !== "") {
       const m = Number(v.minute);
       if (!Number.isInteger(m) || m < 0 || m > 59) {
-        setError(t("form.minuteHint"));
+        fail("minute", t("form.minuteHint"));
         return;
       }
       minute = m;
+    }
+    if (!gender) {
+      fail("gender", t("form.genderRequired"));
+      return;
     }
     const out: BirthFormValue = {
       year: nums.year!, month: nums.month!, day: nums.day!,
@@ -74,6 +98,17 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
   };
 
   const yearLabel = calendar === "lunar" ? t("form.yearLunar") : t("form.yearSolar");
+  const hourN = Number(v.hour);
+  const hourSub =
+    v.hour !== "" && Number.isInteger(hourN) && hourN >= 0 && hourN <= 23
+      ? t("form.hourBranch", { b: BRANCHES[Math.floor((hourN + 1) / 2) % 12]! })
+      : "";
+  const invalid = (id: string) =>
+    errField === id ? { "aria-invalid": true as const, "aria-describedby": "birth-err" } : {};
+  const edit = (key: string, val: string) => {
+    setV((s) => ({ ...s, [key]: val }));
+    if (errField === key) setErrField("");
+  };
   const solarSub = !trueSolar ? t("form.trueSolarOff") : longitude === "" ? t("form.trueSolarNeedCity") : t("form.trueSolarOn");
 
   return (
@@ -103,12 +138,16 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
             {FIELDS.map((f) => (
               <label className="row" key={f.key} htmlFor={f.key}>
                 <Icon name={f.icon} className="ic" />
-                <span className="lbl">{f.key === "year" ? yearLabel : t(f.labelKey)}</span>
+                <span className="lbl">
+                  {f.key === "year" ? yearLabel : t(f.labelKey)}
+                  {f.key === "hour" && hourSub ? <span className="sub">{hourSub}</span> : null}
+                </span>
                 <input
                   id={f.key} type="number" inputMode="numeric"
                   min={f.min} max={f.max}
                   value={v[f.key]}
-                  onChange={(e) => setV((s) => ({ ...s, [f.key]: e.target.value }))}
+                  onChange={(e) => edit(f.key, e.target.value)}
+                  {...invalid(f.key)}
                 />
               </label>
             ))}
@@ -118,7 +157,8 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
               <input
                 id="minute" type="number" inputMode="numeric" min={0} max={59}
                 value={v.minute}
-                onChange={(e) => setV((s) => ({ ...s, minute: e.target.value }))}
+                onChange={(e) => edit("minute", e.target.value)}
+                {...invalid("minute")}
               />
             </label>
           </div>
@@ -138,14 +178,14 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
                 maxLength={20}
               />
             </label>
-            <div className="row">
+            <div className="row" id="gender">
               <Icon name="user" className="ic" />
               <span className="lbl">{t("form.gender")}</span>
               <Seg
                 compact
                 label={t("form.gender")}
                 value={gender}
-                onChange={setGender}
+                onChange={(g) => { setGender(g); if (errField === "gender") setErrField(""); }}
                 options={[
                   { value: "男", label: t("form.male") },
                   { value: "女", label: t("form.female") },
@@ -158,7 +198,7 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
         </div>
       </div>
 
-      {error ? <p className="notice" role="alert">{error}</p> : null}
+      {error ? <p className="notice" id="birth-err" role="alert">{error}</p> : null}
       <button className="btn block cta" type="submit" disabled={loading}>
         <Icon name="spark" />
         {loading ? t("form.submitting") : t("form.submit")}
