@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, LocaleSwitch, HTML_LANG, type TKey } from "@/lib/i18n";
@@ -97,13 +97,34 @@ function NavSheet({ kind, onClose }: { kind: SheetKind; onClose: () => void }) {
 
   const title = kind === "tools" ? t("tab.tools") : yjT("nav.academy", locale);
 
+  // 真 modal:打開時焦點入 sheet、Escape 閂、Tab 喺 sheet 入面循環、閂埋焦點返去觸發掣。
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const prev = document.activeElement as HTMLElement | null;
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.preventDefault(); onClose(); return; }
+      if (e.key !== "Tab" || !sheetRef.current) return;
+      const els = Array.from(
+        sheetRef.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled]), input, select, [tabindex]:not([tabindex='-1'])"),
+      );
+      if (!els.length) return;
+      const first = els[0]!, last = els[els.length - 1]!;
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("keydown", onKey); prev?.focus?.(); };
+  }, [onClose]);
+
   return (
     <div className="more-wrap" role="dialog" aria-modal="true" aria-label={title}>
       <div className="more-backdrop" onClick={onClose} />
-      <div className="more-sheet">
+      <div className="more-sheet" ref={sheetRef}>
         <div className="more-head">
           <span>{title}</span>
-          <button type="button" className="icon-btn" aria-label={title} onClick={onClose}>
+          <button type="button" className="icon-btn" aria-label={t("nav.close")} onClick={onClose} ref={closeRef}>
             <Icon name="chevDown" />
           </button>
         </div>

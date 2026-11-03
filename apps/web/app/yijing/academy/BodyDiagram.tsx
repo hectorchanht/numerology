@@ -1,5 +1,8 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n";
+import { yjT, type YijingLocale } from "@/lib/yijingStrings";
+
 /**
  * 人體外觀圖:八卦配人體部位(《說卦傳》:乾首、坤腹、震足、巽股、
  * 坎耳、離目、艮手、兌口)。企喺度由頭到腳嘅位置畫晒出嚟,
@@ -51,6 +54,7 @@ export function FigureOutline() {
 }
 
 export default function BodyDiagram({ active }: { active: string | null }) {
+  const { locale } = useLocale();
   const ink = INK;
   const muted = MUTED;
   const accent = ACCENT;
@@ -58,7 +62,7 @@ export default function BodyDiagram({ active }: { active: string | null }) {
     <svg
       viewBox="0 0 220 226"
       role="img"
-      aria-label="人體八卦對應圖"
+      aria-label={yjT("academy.bodyMap", locale as YijingLocale)}
       style={{ display: "block", width: "100%", maxWidth: "250px", margin: "0 auto" }}
     >
       <FigureOutline />

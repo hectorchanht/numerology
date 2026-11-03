@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import type { BirthInput } from "@numerology/engine";
 import type { BirthFormValue, Calendar } from "@/lib/formTypes";
 import { useLocale } from "@/lib/i18n";
@@ -28,6 +28,10 @@ const BRANCHES = "子丑寅卯辰巳午未申酉戌亥";
 
 export function BirthForm({ loading, onSubmit, defaults }: Props) {
   const { t } = useLocale();
+  /** 同頁可能有兩份表(合盤):所有 id 加 useId 前綴,免撞。 */
+  const uid = useId();
+  const idOf = (field: string) => `${uid}-${field}`;
+  const errId = `${uid}-birth-err`;
   const str = (n: number | undefined): string => (n === undefined ? "" : String(n));
   const [v, setV] = useState<Record<string, string>>({
     year: str(defaults?.year), month: str(defaults?.month), day: str(defaults?.day),
@@ -50,7 +54,7 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
   const fail = (field: string, msg: string) => {
     setError(msg);
     setErrField(field);
-    const el = document.getElementById(field);
+    const el = document.getElementById(idOf(field));
     (el?.querySelector("button") ?? el)?.focus();
   };
 
@@ -104,7 +108,7 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
       ? t("form.hourBranch", { b: BRANCHES[Math.floor((hourN + 1) / 2) % 12]! })
       : "";
   const invalid = (id: string) =>
-    errField === id ? { "aria-invalid": true as const, "aria-describedby": "birth-err" } : {};
+    errField === id ? { "aria-invalid": true as const, "aria-describedby": errId } : {};
   /** 改返出錯嗰格:清走錯誤(下次提交再驗)。 */
   const clearErr = (key: string) => {
     if (errField === key) { setErrField(""); setError(""); }
@@ -115,7 +119,7 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
   };
   /** 錯誤顯示喺出錯嗰行入面,手機彈鍵盤都睇到。 */
   const errSub = (id: string) =>
-    errField === id ? <span className="sub err" id="birth-err" role="alert">{error}</span> : null;
+    errField === id ? <span className="sub err" id={errId} role="alert">{error}</span> : null;
   const solarSub = !trueSolar ? t("form.trueSolarOff") : longitude === "" ? t("form.trueSolarNeedCity") : t("form.trueSolarOn");
 
   return (
@@ -143,7 +147,7 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
               <ToggleRow icon="cal" label={t("form.leap")} checked={isLeapMonth} onChange={setIsLeapMonth} />
             ) : null}
             {FIELDS.map((f) => (
-              <label className="row" key={f.key} htmlFor={f.key}>
+              <label className="row" key={f.key} htmlFor={idOf(f.key)}>
                 <Icon name={f.icon} className="ic" />
                 <span className="lbl">
                   {f.key === "year" ? yearLabel : t(f.labelKey)}
@@ -151,7 +155,7 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
                   {errSub(f.key)}
                 </span>
                 <input
-                  id={f.key} type="number" inputMode="numeric"
+                  id={idOf(f.key)} type="number" inputMode="numeric"
                   min={f.min} max={f.max}
                   value={v[f.key]}
                   onChange={(e) => edit(f.key, e.target.value)}
@@ -159,11 +163,11 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
                 />
               </label>
             ))}
-            <label className="row" htmlFor="minute">
+            <label className="row" htmlFor={idOf("minute")}>
               <Icon name="clock" className="ic dim" />
               <span className="lbl">{t("form.minute")}{errSub("minute")}</span>
               <input
-                id="minute" type="number" inputMode="numeric" min={0} max={59}
+                id={idOf("minute")} type="number" inputMode="numeric" min={0} max={59}
                 value={v.minute}
                 onChange={(e) => edit("minute", e.target.value)}
                 {...invalid("minute")}
@@ -175,18 +179,18 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
         <div className="form-col">
           <h2 className="group-title">{t("form.groupPerson")}</h2>
           <div className="list">
-            <label className="row" htmlFor="chart-name">
+            <label className="row" htmlFor={idOf("chart-name")}>
               <Icon name="user" className="ic" />
               <span className="lbl">{t("form.name")}</span>
               <input
-                id="chart-name" type="text"
+                id={idOf("chart-name")} type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t("form.namePh")}
                 maxLength={20}
               />
             </label>
-            <div className="row" id="gender">
+            <div className="row" id={idOf("gender")}>
               <Icon name="user" className="ic" />
               <span className="lbl">{t("form.gender")}{errSub("gender")}</span>
               <Seg

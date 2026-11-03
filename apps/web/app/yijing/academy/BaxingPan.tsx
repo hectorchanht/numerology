@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useScript } from "@/lib/i18n";
+import { ELEMENT_STYLE, type Element5 } from "@/lib/elementColors";
 
-type Element5 = "木" | "火" | "土" | "金" | "水";
 
 interface Star {
   name: string;
@@ -36,13 +36,6 @@ const STARS: Star[] = [
   { name: "禍害", alias: "祿存", element: "土", lucky: false, yaoChange: "變下爻", use: "無專制之星,兼用天醫與生氣化之" },
 ];
 
-const ELEMENT_STYLE: Record<Element5, { bg: string; fg: string; bd: string }> = {
-  木: { bg: "#2e933c", fg: "#ffffff", bd: "#1e6b28" },
-  火: { bg: "#e03131", fg: "#ffffff", bd: "#a61e1e" },
-  金: { bg: "#f1f3f5", fg: "#343a40", bd: "#adb5bd" },
-  水: { bg: "#212529", fg: "#ffffff", bd: "#000000" },
-  土: { bg: "#eab308", fg: "#422006", bd: "#a16207" },
-};
 
 /** 互動八星盤:點星看別名、五行、爻變由來與制化之法 */
 export function BaxingPan() {
@@ -77,7 +70,7 @@ export function BaxingPan() {
               }}
             >
               <span style={{ fontSize: "1rem", fontWeight: 800, lineHeight: 1.2 }}>{zT(star.name)}</span>
-              <span style={{ fontSize: "0.66rem", opacity: 0.85 }}>
+              <span style={{ fontSize: "0.72rem", opacity: 0.85 }}>
                 {zT(star.alias)} · {zT(star.element)}
               </span>
             </button>

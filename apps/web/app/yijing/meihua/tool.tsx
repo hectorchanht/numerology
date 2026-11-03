@@ -7,7 +7,7 @@ import { CASTING_TABS } from "@/lib/navGroups";
 import { castMeihua, type MeihuaResult } from "@numerology/engine";
 import { getHexagram, TRIGRAM_INFO, yaoName } from "@numerology/knowledge";
 import { useLocale, useScript } from "@/lib/i18n";
-import { yjT, type YijingLocale } from "@/lib/yijingStrings";
+import { yjT, yjFmt, type YijingLocale } from "@/lib/yijingStrings";
 import { AiInterpret } from "../AiInterpret";
 import { Term, withTermHighlights } from "@/lib/highlightTerms";
 import { QuoteRef, type QuoteRefEntry } from "@/lib/quoteRef";
@@ -61,11 +61,11 @@ function HexFigure({ bits, moving }: { bits: number[]; moving?: boolean[] }) {
 }
 
 const VERDICT_TONE: Record<string, string> = {
-  大吉: "var(--cinnabar)",
+  大吉: "var(--accent-text)",
   中吉: "var(--ink)",
   小吉: "var(--ink-soft)",
-  小凶: "var(--cinnabar)",
-  大凶: "var(--cinnabar)",
+  小凶: "var(--accent-text)",
+  大凶: "var(--accent-text)",
 };
 
 function toLocalInputValue(d: Date): string {
@@ -124,6 +124,28 @@ export default function MeihuaTool({ historyId }: { historyId?: string }) {
   const bian = result ? getHexagram(result.changed) : undefined;
   const hu = result ? getHexagram(result.hu) : undefined;
 
+  const resultRef = useRef<HTMLDivElement | null>(null);
+  const resultHeadRef = useRef<HTMLHeadingElement | null>(null);
+  const [announce, setAnnounce] = useState("");
+  // 起卦後:讀屏報本卦、焦點交俾結果標題、結果喺下面就捲落去(回顧模式唔捲)
+  useEffect(() => {
+    if (castKey === 0) return;
+    if (!ben) {
+      setAnnounce("");
+      return;
+    }
+    setAnnounce(yjFmt(yjT("meihua.announce.done", loc), { name: loc === "en" ? ben.nameEn : zT(ben.name) }));
+    if (reviewMode.current) return;
+    resultHeadRef.current?.focus({ preventScroll: true });
+    const el = resultRef.current;
+    if (!el) return;
+    if (el.getBoundingClientRect().top <= window.innerHeight * 0.55) return;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    // 只隨 cast 變;loc / zT 變唔重新捲
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [castKey]);
+
   const trigramCard = (name: "upper" | "lower", tri: keyof typeof TRIGRAM_INFO) => {
     const info = TRIGRAM_INFO[tri];
     const isYong = result!.yong === tri;
@@ -156,7 +178,7 @@ export default function MeihuaTool({ historyId }: { historyId?: string }) {
       </div>
 
       {reviewAt !== null && (
-        <div className="card" style={{ borderColor: "var(--cinnabar-soft)", marginBottom: "1rem" }}>
+        <div className="card" style={{ boxShadow: "inset 0 0 0 1px var(--accent-line)", marginBottom: "1rem" }}>
           <span className="badge">{yjT("yijing.hist.reviewing", loc)}</span>{" "}
           <span className="muted">{new Date(reviewAt).toLocaleString()}</span>{" "}
           <Link href="/yijing/history" style={{ marginLeft: "0.5rem" }}>
@@ -184,11 +206,21 @@ export default function MeihuaTool({ historyId }: { historyId?: string }) {
           {yjT("meihua.method", loc)}: {withTermHighlights(yjT("meihua.methodText", loc))}{" "}
           <QuoteRef entry={METHOD_QUOTE} />
         </p>
+        {castKey > 0 && !result && (
+          <p className="notice" role="alert">
+            {yjT("meihua.badTime", loc)}
+          </p>
+        )}
+        <p className="sr-only" aria-live="polite">
+          {announce}
+        </p>
       </div>
 
       {result && ben && (
-        <div className="card yj-result">
-          <h2 className="section-title">{yjT("yijing.result", loc)}</h2>
+        <div className="card yj-result" ref={resultRef}>
+          <h2 className="section-title" tabIndex={-1} ref={resultHeadRef}>
+            {yjT("yijing.result", loc)}
+          </h2>
 
           {/* 四數 */}
           <div className="muted" style={{ marginBottom: "0.8rem" }}>
@@ -208,7 +240,7 @@ export default function MeihuaTool({ historyId }: { historyId?: string }) {
           {/* 體用斷 */}
           <div
             className="card"
-            style={{ marginTop: 0, borderColor: "var(--cinnabar-soft)" }}
+            style={{ marginTop: 0, boxShadow: "inset 0 0 0 1px var(--accent-line)" }}
           >
             <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>
               {yjT("meihua.verdict", loc)} ·{" "}

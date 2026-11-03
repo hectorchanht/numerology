@@ -171,7 +171,7 @@ export function SettingsPanel() {
 
       <h2 className="group-title">{t("settings.provider")}</h2>
       {/* filter chips */}
-      <div className="strip" role="group" aria-label="provider filter">
+      <div className="strip" role="group" aria-label={t("settings.providerFilter")}>
         {FILTER_ORDER.map((f) => (
           <button
             key={f}
@@ -186,13 +186,12 @@ export function SettingsPanel() {
       </div>
 
       {/* provider tabs:只显示短名 */}
-      <div className="strip" role="tablist" aria-label="provider" style={{ marginTop: 8 }}>
+      <div className="strip" role="group" aria-label={t("settings.provider")} style={{ marginTop: 8 }}>
         {visible.map((p) => (
           <button
             key={p.name}
             type="button"
-            role="tab"
-            aria-selected={value.provider === p.name}
+            aria-pressed={value.provider === p.name}
             className={`chip${value.provider === p.name ? " on" : ""}`}
             onClick={() => selectProvider(p.name)}
           >

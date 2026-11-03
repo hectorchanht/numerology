@@ -186,8 +186,8 @@ Ink greys carry all structure; lamplight amber is the only voice.
 - **Paper White / Paper Card / Paper Card 2 / Paper Label** (#fff / #f2f2f7 / #e5e5ea / #1c1c1e): the light theme counterparts, following Apple system light. Light-theme Label 2 is 78% (not Apple's 60%) so secondary text clears 4.5:1 on Paper Card.
 
 ### Status
-- **Signal Green** (#30d158; #34c759 light): toggle on, "ok" pill only.
-- **Warn Coral** (#ff8a80): warning pill only.
+- **Signal Green** (#30d158; #34c759 light): toggle on, "ok" pill only. As text it uses `--ok-text` (#1e7b34 in light) so it stays ≥4.5:1.
+- **Warn Coral** (#ff8a80 dark; #c0131f text in light): the single warm-red for warnings. As `--warn-text` / `--warn-soft` it marks 凶 / 沖 / 死氣-type states on the tool pages, always paired with a word or tag, never colour alone. Errors are not coral: they use the neutral `.notice` block.
 
 ### Named Rules
 **The Amber Text Rule.** Text set in amber uses `--accent-text`, never `--accent` directly; fills, rings and washes use `--accent`.

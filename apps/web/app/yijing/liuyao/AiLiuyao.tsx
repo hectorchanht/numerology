@@ -1,76 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import type { YaoValue } from "@numerology/engine";
-import { streamPost } from "@/lib/streamClient";
-import { yjT, type YijingLocale } from "@/lib/yijingStrings";
-import { AiModelNote } from "@/components/AiModelNote";
-import { aiRequestParts } from "@/lib/aiSettings";
+import type { YijingLocale } from "@/lib/yijingStrings";
+import { AiInterpret } from "../AiInterpret";
 
 /**
- * 六爻納甲 AI 解讀按鈕:走 /api/yijing/liuyao-interpret。
- * 用戶 AI 設定(經 AI 設定頁揀嘅 provider/model/key/人設)由 aiRequestParts() 帶上;
- * 冇改過設定就默認 Workers AI(共用 $2/月預算守衛 + KV 緩存)。
- * 不送用戶問題,純按納甲盤解讀。預算耗盡 → 後端回乾淨 429,這裡顯示原文,不崩。
+ * 六爻納甲 AI 解讀:走 /api/yijing/liuyao-interpret,UI 狀態(讀取 / 額度卡 / 錯誤重試)同 AiInterpret 共用。
+ * 不送用戶問題,純按納甲盤解讀。
  */
-export function AiLiuyao({
-  lines,
-  date,
-  locale,
-}: {
-  lines: YaoValue[];
-  date: string;
-  locale: YijingLocale;
-}) {
-  const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
-  const [text, setText] = useState("");
-  const [err, setErr] = useState("");
-
-  const start = async () => {
-    setState("loading");
-    setText("");
-    setErr("");
-    try {
-      await streamPost("/api/yijing/liuyao-interpret", { lines, date, locale, ...aiRequestParts() }, (full) =>
-        setText(full),
-      );
-      setState("done");
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : String(e));
-      setState("error");
-    }
-  };
-
-  return (
-    <div style={{ marginTop: "1.2rem" }}>
-      {state === "idle" && (
-        <button className="btn" onClick={start}>
-          {yjT("ai.interpret", locale)}
-        </button>
-      )}
-      {state === "loading" && !text && <p className="muted">{yjT("ai.loading", locale)}</p>}
-      {text && (
-        <div className="card" style={{ marginTop: "0.8rem", borderColor: "var(--cinnabar-soft)" }}>
-          <h3 style={{ fontSize: "1rem", margin: "0 0 0.6rem" }}>
-            {yjT("ai.interpretTitle", locale)}
-          </h3>
-          <p style={{ lineHeight: 1.9, margin: 0, whiteSpace: "pre-wrap" }}>{text}</p>
-          {state === "done" && (
-            <button className="btn ghost" onClick={start} style={{ marginTop: "0.8rem" }}>
-              {yjT("ai.retry", locale)}
-            </button>
-          )}
-        </div>
-      )}
-      {state === "error" && (
-        <div className="card" style={{ marginTop: "0.8rem", borderColor: "var(--cinnabar)" }}>
-          <p style={{ margin: "0 0 0.6rem", color: "var(--accent-text)" }}>{err}</p>
-          <button className="btn ghost" onClick={start}>
-            {yjT("ai.retry", locale)}
-          </button>
-        </div>
-      )}
-      <AiModelNote />
-    </div>
-  );
+export function AiLiuyao({ lines, date, locale }: { lines: YaoValue[]; date: string; locale: YijingLocale }) {
+  return <AiInterpret endpoint="/api/yijing/liuyao-interpret" body={{ lines, date }} locale={locale} />;
 }

@@ -139,13 +139,13 @@ export default function QimenTool({ historyId }: { historyId?: string }) {
 
   return (
     <div ref={cardRef}>
-      <h1 style={{ fontSize: "1.5rem", fontWeight: 800 }}>{t("qimen.title")}</h1>
-      <p className="muted" style={{ margin: "4px 0 16px", fontSize: "0.9rem" }}>
+      <h1 className="large">{t("qimen.title")}</h1>
+      <p className="muted" style={{ margin: "4px 0 16px" }}>
         時家轉盤 · 拆補定局
       </p>
 
       {reviewAt !== null && (
-        <div className="card" style={{ borderColor: "var(--cinnabar-soft)", padding: 16, marginBottom: 16 }}>
+        <div className="card" style={{ boxShadow: "inset 0 0 0 1px var(--accent-line)", marginBottom: 16 }}>
           <span className="badge">{yjT("yijing.hist.reviewing", loc)}</span>{" "}
           <span className="muted">{new Date(reviewAt).toLocaleString()}</span>{" "}
           <Link href="/yijing/history" style={{ marginLeft: "0.5rem" }}>
@@ -154,43 +154,46 @@ export default function QimenTool({ historyId }: { historyId?: string }) {
         </div>
       )}
 
-      <div className="card" style={{ padding: 16, marginBottom: 16 }}>
-        <div className="muted" style={{ fontSize: "0.85rem", marginBottom: 6 }}>{t("qimen.askTime")}</div>
-        <input
-          type="datetime-local"
-          className="input"
-          value={dt}
-          onChange={(e) => setDt(e.target.value)}
-          style={{ width: "100%", marginBottom: 10 }}
-        />
-        <div className="muted" style={{ fontSize: "0.85rem", marginBottom: 6 }}>{t("qimen.question")}</div>
-        <input
-          className="input"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          placeholder={t("qimen.questionPh")}
-          maxLength={20}
-          style={{ width: "100%", marginBottom: 12 }}
-        />
-        <button className="btn-primary" style={{ width: "100%" }} onClick={start}>
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="field" style={{ marginBottom: 10 }}>
+          <label htmlFor="qimen-dt">{t("qimen.askTime")}</label>
+          <input
+            id="qimen-dt"
+            type="datetime-local"
+            value={dt}
+            onChange={(e) => setDt(e.target.value)}
+          />
+        </div>
+        <div className="field" style={{ marginBottom: 12 }}>
+          <label htmlFor="qimen-q">{t("qimen.question")}</label>
+          <input
+            id="qimen-q"
+            type="text"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder={t("qimen.questionPh")}
+            maxLength={20}
+          />
+        </div>
+        <button type="button" className="btn block" onClick={start}>
           {t("qimen.start")}
         </button>
       </div>
 
       {result && (
         <div>
-          <div className="card" style={{ padding: 16, marginBottom: 12, textAlign: "center" }}>
-            <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "var(--accent-text)" }}>
+          <div className="card" style={{ marginBottom: 12, textAlign: "center" }}>
+            <div style={{ fontSize: 19, fontWeight: 700, color: "var(--accent-text)" }}>
               {t("qimen.dunju", { dun: z(result.dun), ju: result.ju })}
             </div>
-            <div className="muted" style={{ marginTop: 4, fontSize: "0.9rem" }}>
+            <div className="muted" style={{ marginTop: 4 }}>
               {t("qimen.yuanju", { jieqi: z(result.jieqi), yuan: z(result.yuan) })}
               {" · "}{z(result.dayGanZhi)}日 {z(result.timeGanZhi)}時
             </div>
-            <div className="muted" style={{ marginTop: 4, fontSize: "0.9rem" }}>
+            <div className="muted" style={{ marginTop: 4 }}>
               {t("qimen.zhiFu")}{z(result.zhiFu)} · {t("qimen.zhiShi")}{z(result.zhiShi)}
               {" · "}{t("qimen.xunkong")}{z(result.xunKong)}
-              {wubuyu && <span style={{ color: "#ff453a" }}> · {t("qimen.wubuyushi")}</span>}
+              {wubuyu && <span style={{ color: "var(--warn-text)" }}> · {t("qimen.wubuyushi")}</span>}
             </div>
           </div>
 
@@ -198,21 +201,21 @@ export default function QimenTool({ historyId }: { historyId?: string }) {
             {GRID.map((g) => {
               const p = result.palaces.find((x) => x.gong === g)!;
               return (
-                <div key={g} className="card" style={{ padding: "10px 8px", minHeight: 118 }}>
-                  <div style={{ fontWeight: 700, fontSize: "0.85rem", marginBottom: 4 }}>
+                <div key={g} style={{ background: "var(--card)", borderRadius: "var(--radius)", padding: "10px 8px", minHeight: 118, fontSize: 13 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 4 }}>
                     {z(p.gongName)}{g}宮
                     {p.maXing && <span style={{ color: "var(--accent-text)" }}> 馬</span>}
-                    {p.kongWang && <span style={{ color: "#ff9f0a" }}> 空</span>}
+                    {p.kongWang && <span style={{ color: "var(--label-2)" }}> 空</span>}
                   </div>
-                  <div style={{ fontSize: "0.82rem" }}>
+                  <div>
                     <span style={{ color: "var(--accent-text)", fontWeight: 700 }}>{z(p.tianPan)}</span>
                     <span className="muted"> {z(p.star)}</span>
                   </div>
-                  <div className="muted" style={{ fontSize: "0.82rem" }}>
-                    {z(p.diPan)} <span style={{ color: "var(--text)" }}>{z(p.men)}</span>
+                  <div className="muted">
+                    {z(p.diPan)} <span style={{ color: "var(--label)" }}>{z(p.men)}</span>
                   </div>
                   {p.patterns.length > 0 && (
-                    <div style={{ fontSize: "0.72rem", color: "#ff453a", marginTop: 2 }}>
+                    <div style={{ fontSize: 11, color: "var(--warn-text)", marginTop: 2 }}>
                       {p.patterns.map((x) => z(x)).join(" ")}
                     </div>
                   )}
@@ -221,16 +224,17 @@ export default function QimenTool({ historyId }: { historyId?: string }) {
             })}
           </div>
 
-          <p className="muted" style={{ fontSize: "0.82rem", margin: "4px 2px 14px" }}>{t("qimen.disclaimer")}</p>
+          <p className="muted" style={{ margin: "4px 2px 14px" }}>{t("qimen.disclaimer")}</p>
 
-          <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
-            <button className="btn-primary" style={{ flex: 1 }} disabled={busy} onClick={onDownload}>
+          <div className="btn-row" style={{ marginBottom: 24 }}>
+            <button type="button" className="btn" disabled={busy} onClick={onDownload}>
               {busy ? t("name.downloading") : t("name.download")}
             </button>
-            <button className="btn" style={{ flex: 1 }} onClick={onCopyLink}>
+            <button type="button" className="btn secondary" onClick={onCopyLink}>
               {copied ? t("name.copied") : t("name.copyLink")}
             </button>
           </div>
+          <span className="sr-only" role="status" aria-live="polite">{copied ? t("name.copied") : ""}</span>
         </div>
       )}
     </div>

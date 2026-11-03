@@ -377,7 +377,8 @@ export default function Home() {
       <section {...show("ai")} aria-label={t("tab.ai")}>
         {ready ? (
           <>
-            <div hidden={aiView !== "chart"} data-ai-view="chart">
+            <div hidden={aiView !== "chart"} data-ai-view="chart" role="tabpanel" aria-label={t("tab.chart")}>
+              <h1 className="sr-only">{t("tab.chart")}</h1>
               <ScreenNav eyebrow={t("tab.chart")}>
           {ready ? (
             <Link href="/poster" className="icon-btn" aria-label={t("chart.posterSub")}>
@@ -488,7 +489,8 @@ export default function Home() {
           </div>
             </div>
 
-            <div hidden={aiView !== "report"} data-ai-view="report">
+            <div hidden={aiView !== "report"} data-ai-view="report" role="tabpanel" aria-label={t("tab.report")}>
+              <h1 className="sr-only">{t("card.chartTitle")}</h1>
               <StreamedReport
                 input={ready.input}
                 endpoint="/api/report"
@@ -508,7 +510,8 @@ export default function Home() {
                 {aiSeg}
               </StreamedReport>
             </div>
-            <div hidden={aiView !== "fortune"} data-ai-view="fortune">
+            <div hidden={aiView !== "fortune"} data-ai-view="fortune" role="tabpanel" aria-label={t("tab.fortune")}>
+              <h1 className="sr-only">{t("card.fortuneTitle")}</h1>
               <StreamedReport
                 input={ready.input}
                 endpoint="/api/fortune"

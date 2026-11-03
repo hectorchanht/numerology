@@ -105,27 +105,27 @@ export default function DailyTool() {
 
   return (
     <div ref={cardRef}>
-      <h1 style={{ fontSize: "1.5rem", fontWeight: 800 }}>{t("daily.title")}</h1>
+      <h1 className="large">{t("daily.title")}</h1>
       <p className="muted" style={{ margin: "4px 0 4px" }}>{dateStr} · {z(d.dayGZ)}日</p>
-      <p className="muted" style={{ margin: "0 0 16px", fontSize: "0.9rem" }}>
+      <p className="muted" style={{ margin: "0 0 16px" }}>
         {t("daily.lunar", { date: z(d.lunar.toString()) })}
       </p>
 
-      <div className="card" style={{ padding: 16, marginBottom: 12 }}>
-        <div style={{ fontWeight: 700, color: "var(--ok)", marginBottom: 8 }}>
+      <div className="card" style={{ marginBottom: 12 }}>
+        <div style={{ fontWeight: 700, color: "var(--ok-text)", marginBottom: 8 }}>
           {t("daily.yi")} · {(d.yi as string[]).map((x) => z(x)).join(" ")}
         </div>
-        <div style={{ fontWeight: 700, color: "#ff453a" }}>
+        <div style={{ fontWeight: 700, color: "var(--warn-text)" }}>
           {t("daily.ji")} · {(d.ji as string[]).map((x) => z(x)).join(" ")}
         </div>
       </div>
 
-      <div className="card" style={{ padding: 16, marginBottom: 12 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+      <div className="card" style={{ marginBottom: 12 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 6 }}>
           <span className="muted">{t("daily.chongSha")}</span>
           <span>{t("daily.clashNote", { chong: z(d.chongSx) })} · 煞{z(d.sha)}</span>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
           <span className="muted">{t("daily.jishi")}</span>
           <span>
             {d.best.map((b) => `${z(b.zhi)}時 ${b.range}`).join(" · ")}
@@ -133,36 +133,51 @@ export default function DailyTool() {
         </div>
       </div>
 
-      <div className="card" style={{ padding: 16, marginBottom: 12 }}>
+      <div className="card" style={{ marginBottom: 12 }}>
         <div style={{ fontWeight: 700, marginBottom: 10 }}>{t("daily.shengxiao")}</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
-          {SHENGXIAO.map((sx, i) => (
-            <div
-              key={sx}
-              className="card"
-              style={{
-                padding: "8px 6px",
-                textAlign: "center",
-                border: sx === d.chongSx ? "1px solid #ff453a" : undefined,
-              }}
-            >
-              <div style={{ fontWeight: 700 }}>{z(sx)}</div>
-              <div className="muted" style={{ fontSize: "0.78rem", marginTop: 2 }}>{d.tips[i]}</div>
-            </div>
-          ))}
+          {SHENGXIAO.map((sx, i) => {
+            const clash = sx === d.chongSx;
+            return (
+              <div
+                key={sx}
+                style={{
+                  padding: "8px 6px",
+                  textAlign: "center",
+                  borderRadius: 12,
+                  background: "var(--card-2)",
+                  boxShadow: clash ? "inset 0 0 0 1px var(--warn-text)" : undefined,
+                }}
+              >
+                <div style={{ fontWeight: 700 }}>
+                  {z(sx)}
+                  {clash && (
+                    <span
+                      className="tag warn"
+                      style={{ marginLeft: 6 }}
+                    >
+                      {t("daily.clashTag")}
+                    </span>
+                  )}
+                </div>
+                <div className="muted" style={{ marginTop: 2 }}>{d.tips[i]}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <p className="muted" style={{ fontSize: "0.82rem", margin: "4px 2px 14px" }}>{t("daily.disclaimer")}</p>
+      <p className="muted" style={{ margin: "4px 2px 14px" }}>{t("daily.disclaimer")}</p>
 
-      <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
-        <button className="btn-primary" style={{ flex: 1 }} disabled={busy} onClick={onDownload}>
+      <div className="btn-row" style={{ marginBottom: 24 }}>
+        <button type="button" className="btn" disabled={busy} onClick={onDownload}>
           {busy ? t("name.downloading") : t("daily.download")}
         </button>
-        <button className="btn" style={{ flex: 1 }} onClick={onCopyLink}>
+        <button type="button" className="btn secondary" onClick={onCopyLink}>
           {copied ? t("daily.copied") : t("daily.copyLink")}
         </button>
       </div>
+      <span className="sr-only" role="status" aria-live="polite">{copied ? t("daily.copied") : ""}</span>
     </div>
   );
 }

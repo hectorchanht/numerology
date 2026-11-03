@@ -85,19 +85,7 @@ function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBa
 
   return (
     <div style={{ maxWidth: 680 }}>
-      <button
-        onClick={onBack}
-        style={{
-          font: "inherit",
-          fontSize: 14,
-          color: "var(--accent-text)",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: 0,
-          marginBottom: 12,
-        }}
-      >
+      <button type="button" onClick={onBack} className="text-btn" style={{ marginBottom: 12 }}>
         ← {yjT("cases.title", loc)}
       </button>
 
@@ -157,7 +145,7 @@ function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBa
           </div>
           {bian && (
             <>
-              <span style={{ fontSize: 20, color: "var(--label-3)" }}>之</span>
+              <span style={{ fontSize: 20, color: "var(--label-2)" }}>之</span>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
                 <HexFigure bits={bian.bits} />
                 <span style={{ fontSize: 14, fontWeight: 600 }}>
@@ -170,9 +158,9 @@ function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBa
       </div>
 
       {/* 原文 */}
-      <h3 className="section-title" style={{ marginTop: "1.6rem" }}>
+      <h2 className="section-title" style={{ marginTop: "1.6rem" }}>
         {yjT("cases.original", loc)}
-      </h3>
+      </h2>
       <div className="card">
         {c.originalText.split("\n\n").map((para, i) => (
           <p
@@ -190,9 +178,9 @@ function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBa
       </div>
 
       {/* 本站白話解說 */}
-      <h3 className="section-title" style={{ marginTop: "1.6rem" }}>
+      <h2 className="section-title" style={{ marginTop: "1.6rem" }}>
         {yjT("cases.baihua", loc)}
-      </h3>
+      </h2>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {c.baihua.map((p, i) => (
           <p key={i} style={{ margin: 0, fontSize: 15, lineHeight: 1.9 }}>
@@ -202,10 +190,10 @@ function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBa
       </div>
 
       {/* 歷史應驗 */}
-      <h3 className="section-title" style={{ marginTop: "1.6rem" }}>
+      <h2 className="section-title" style={{ marginTop: "1.6rem" }}>
         {yjT("cases.history", loc)} <VerdictBadge verdict={c.outcome.verdict} loc={loc} />
-      </h3>
-      <div className="card" style={{ borderColor: "var(--accent-line)" }}>
+      </h2>
+      <div className="card" style={{ boxShadow: "inset 0 0 0 1px var(--accent-line)" }}>
         <p style={{ margin: 0, fontFamily: "var(--serif)", fontSize: 16, lineHeight: 1.9 }}>
           {zT(c.outcome.text)}
         </p>
@@ -259,7 +247,6 @@ function CasesInner() {
               key={c.id}
               onClick={() => openCase(c.id)}
               className="card case-row"
-              aria-label={zT(c.title)}
             >
               <span className="case-hex">
                 <HexFigure bits={ben.bits} />

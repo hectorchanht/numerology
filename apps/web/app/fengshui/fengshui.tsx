@@ -11,12 +11,14 @@ const GRID = [4, 9, 2, 3, 5, 7, 8, 1, 6];
 const GUAS: FeixingGua[] = ["坎", "坤", "震", "巽", "乾", "兌", "艮", "離"];
 
 const STATE_COLOR: Record<StarState, string> = {
-  當旺: "var(--ok)",
-  生氣: "var(--accent)",
-  退氣: "#ff9f0a",
-  死氣: "#ff453a",
+  當旺: "var(--ok-text)",
+  生氣: "var(--accent-text)",
+  退氣: "var(--label-2)",
+  死氣: "var(--warn-text)",
   平: "var(--label-2)",
 };
+/** 星曜狀態短字:唔淨靠顏色分(色盲 / 黑白截圖都睇得出) */
+const STATE_SHORT: Record<StarState, string> = { 當旺: "旺", 生氣: "生", 退氣: "退", 死氣: "死", 平: "平" };
 
 export default function FengshuiTool() {
   const { t } = useLocale();
@@ -79,49 +81,53 @@ export default function FengshuiTool() {
     }
   };
 
+  const star = (n: number, st: StarState) => (
+    <span style={{ color: STATE_COLOR[st] }}>
+      {n} <span style={{ fontSize: 11 }}>{z(STATE_SHORT[st])}</span>
+    </span>
+  );
+
   return (
     <div ref={cardRef}>
-      <h1 style={{ fontSize: "1.5rem", fontWeight: 800 }}>{t("fengshui.title")}</h1>
-      <p className="muted" style={{ margin: "4px 0 16px", fontSize: "0.9rem" }}>{t("fengshui.scopeNote")}</p>
+      <h1 className="large">{t("fengshui.title")}</h1>
+      <p className="muted" style={{ margin: "4px 0 16px" }}>{t("fengshui.scopeNote")}</p>
 
-      <div className="card" style={{ padding: 16, marginBottom: 16 }}>
-        <div className="muted" style={{ fontSize: "0.85rem", marginBottom: 8 }}>{t("fengshui.sit")}</div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 12 }}>
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="muted" id="fengshui-sit" style={{ marginBottom: 8 }}>{t("fengshui.sit")}</div>
+        <div role="group" aria-labelledby="fengshui-sit" style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
           {GUAS.map((g) => (
             <button
               key={g}
               type="button"
-              className="btn"
-              style={{
-                borderColor: sit === g ? "var(--accent)" : undefined,
-                color: sit === g ? "var(--accent)" : undefined,
-                fontWeight: sit === g ? 700 : 400,
-              }}
+              className={`chip${sit === g ? " on" : ""}`}
+              aria-pressed={sit === g}
               onClick={() => setSit(g)}
             >
               {t("fengshui.sitGua", { gua: z(g) })}
             </button>
           ))}
         </div>
-        <div className="muted" style={{ fontSize: "0.85rem", marginBottom: 6 }}>{t("fengshui.builtYear")}</div>
-        <input
-          type="number"
-          className="input"
-          value={year}
-          onChange={(e) => setYear(e.target.value)}
-          min={1864}
-          max={2100}
-          style={{ width: "100%", marginBottom: 12 }}
-        />
-        <button className="btn-primary" style={{ width: "100%" }} onClick={start}>
+        <div className="field" style={{ marginBottom: 12 }}>
+          <label htmlFor="fengshui-year">{t("fengshui.builtYear")}</label>
+          <input
+            id="fengshui-year"
+            type="number"
+            inputMode="numeric"
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            min={1864}
+            max={2100}
+          />
+        </div>
+        <button type="button" className="btn block" onClick={start}>
           {t("fengshui.start")}
         </button>
       </div>
 
       {result && (
         <div>
-          <div className="card" style={{ padding: 16, marginBottom: 12, textAlign: "center" }}>
-            <div style={{ fontSize: "1.3rem", fontWeight: 800 }}>
+          <div className="card" style={{ marginBottom: 12, textAlign: "center" }}>
+            <div style={{ fontSize: 19, fontWeight: 700 }}>
               {t("fengshui.sitGua", { gua: z(sit) })} · {z(result.xiangGua)}向
             </div>
             <div style={{ color: "var(--accent-text)", fontWeight: 700, marginTop: 4 }}>
@@ -133,37 +139,38 @@ export default function FengshuiTool() {
             {GRID.map((g) => {
               const p = result.palaces.find((x) => x.gong === g)!;
               return (
-                <div key={g} className="card" style={{ padding: "10px 8px", minHeight: 104 }}>
-                  <div style={{ fontWeight: 700, fontSize: "0.85rem", marginBottom: 4 }}>
+                <div key={g} style={{ background: "var(--card)", borderRadius: "var(--radius)", padding: "10px 8px", minHeight: 104, fontSize: 13 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 4 }}>
                     {z(p.gongName)}{g}宮
                   </div>
-                  <div style={{ fontSize: "0.8rem", display: "flex", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
                     <span className="muted">{t("fengshui.yunStar")}</span><span>{p.yun}</span>
                   </div>
-                  <div style={{ fontSize: "0.8rem", display: "flex", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
                     <span className="muted">{t("fengshui.shanStar")}</span>
-                    <span style={{ color: STATE_COLOR[p.shanState] }}>{p.shan}</span>
+                    {star(p.shan, p.shanState)}
                   </div>
-                  <div style={{ fontSize: "0.8rem", display: "flex", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
                     <span className="muted">{t("fengshui.xiangStar")}</span>
-                    <span style={{ color: STATE_COLOR[p.xiangState] }}>{p.xiang}</span>
+                    {star(p.xiang, p.xiangState)}
                   </div>
-                  <div style={{ fontSize: "0.72rem", color: "var(--accent-text)", marginTop: 2 }}>{z(p.note)}</div>
+                  <div style={{ fontSize: 11, color: "var(--accent-text)", marginTop: 2 }}>{z(p.note)}</div>
                 </div>
               );
             })}
           </div>
 
-          <p className="muted" style={{ fontSize: "0.82rem", margin: "4px 2px 14px" }}>{t("fengshui.disclaimer")}</p>
+          <p className="muted" style={{ margin: "4px 2px 14px" }}>{t("fengshui.disclaimer")}</p>
 
-          <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
-            <button className="btn-primary" style={{ flex: 1 }} disabled={busy} onClick={onDownload}>
+          <div className="btn-row" style={{ marginBottom: 24 }}>
+            <button type="button" className="btn" disabled={busy} onClick={onDownload}>
               {busy ? t("name.downloading") : t("name.download")}
             </button>
-            <button className="btn" style={{ flex: 1 }} onClick={onCopyLink}>
+            <button type="button" className="btn secondary" onClick={onCopyLink}>
               {copied ? t("name.copied") : t("name.copyLink")}
             </button>
           </div>
+          <span className="sr-only" role="status" aria-live="polite">{copied ? t("name.copied") : ""}</span>
         </div>
       )}
     </div>

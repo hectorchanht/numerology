@@ -1,4 +1,4 @@
-import type { GlossaryTerm } from "./yijing.js";
+import type { GlossaryTerm } from "./glossary.js";
 
 /* ── 命理術語釋義(八字 × 紫微,點按釋義共用) ────────────────────────────
  * 與 YIJING_GLOSSARY 同一 GlossaryTerm 形狀 { term, zht, zhs, en }。

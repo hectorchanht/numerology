@@ -37,7 +37,7 @@ export function Quiz({ lesson, onDone }: { lesson: AcademyLesson; onDone?: () =>
   };
 
   return (
-    <div className="card" style={{ borderColor: "var(--cinnabar-soft)" }}>
+    <div className="card" style={{ boxShadow: "inset 0 0 0 1px var(--accent-line)" }}>
       <h2 className="section-title">{yjT("academy.quiz", loc)}</h2>
       {lesson.quiz.map((q: AcademyQuizQ, qi: number) => {
         const sel = picked[qi];
@@ -45,7 +45,7 @@ export function Quiz({ lesson, onDone }: { lesson: AcademyLesson; onDone?: () =>
         const bad = checked && sel !== null && sel !== q.answer;
         return (
           <div key={qi} style={{ marginBottom: "1.1rem" }}>
-            <div style={{ fontWeight: 600, marginBottom: "0.5rem" }}>
+            <div id={`quiz-${lesson.id}-q${qi}`} style={{ fontWeight: 600, marginBottom: "0.5rem" }}>
               {qi + 1}. {withTermHighlights(q.q, zT)}{" "}
               {checked && (
                 <span className={`badge ${ok ? "badge-ok" : "badge-warn"}`}>
@@ -53,45 +53,68 @@ export function Quiz({ lesson, onDone }: { lesson: AcademyLesson; onDone?: () =>
                 </span>
               )}
             </div>
-            <div style={{ display: "grid", gap: "0.4rem" }}>
+            <div
+              role="radiogroup"
+              aria-labelledby={`quiz-${lesson.id}-q${qi}`}
+              style={{ display: "grid", gap: "0.4rem" }}
+            >
               {q.options.map((opt, oi) => {
                 const isPick = sel === oi;
                 const isAns = q.answer === oi;
+                const wrongPick = checked && isPick && !isAns;
                 return (
                   <button
                     key={oi}
-                    disabled={checked}
-                    onClick={() => setPicked((p) => p.map((v, i) => (i === qi ? oi : v)))}
+                    type="button"
+                    role="radio"
+                    aria-checked={isPick}
+                    // 對完答案唔用 disabled:全域 button:disabled 會降透明度,連正解高亮都變淡
+                    aria-disabled={checked || undefined}
+                    onClick={() => {
+                      if (checked) return;
+                      setPicked((p) => p.map((v, i) => (i === qi ? oi : v)));
+                    }}
                     style={{
                       textAlign: "left",
                       font: "inherit",
+                      minHeight: "44px",
                       padding: "0.5rem 0.75rem",
                       borderRadius: "8px",
                       cursor: checked ? "default" : "pointer",
                       border: `1px solid ${
                         checked && isAns
-                          ? "var(--cinnabar)"
-                          : // 揀緊(未對答案):reveal 正解嘅淡版 — 同色系,冇咁光
-                            !checked && isPick
-                            ? "var(--cinnabar-soft)"
-                            : isPick
-                              ? "var(--line-strong)"
+                          ? "var(--accent-line)"
+                          : wrongPick
+                            ? "var(--warn-text)"
+                            : !checked && isPick
+                              ? "var(--accent-line)"
                               : "var(--line)"
                       }`,
                       background:
                         checked && isAns
-                          ? "oklch(60% 0.14 32 / 0.07)"
-                          : !checked && isPick
-                            ? "oklch(60% 0.14 32 / 0.035)"
-                            : "transparent",
-                      color: "var(--ink)",
-                      opacity: checked && !isAns && !isPick ? 0.55 : 1,
+                          ? "var(--accent-soft)"
+                          : wrongPick
+                            ? "var(--warn-soft)"
+                            : !checked && isPick
+                              ? "var(--fill)"
+                              : "transparent",
+                      color:
+                        checked && isAns
+                          ? "var(--accent-text)"
+                          : wrongPick
+                            ? "var(--warn-text)"
+                            : checked
+                              ? "var(--label-2)"
+                              : "var(--label)",
+                      fontWeight: isPick || (checked && isAns) ? 600 : undefined,
                     }}
                   >
                     <span className="muted" style={{ marginRight: "0.5em" }}>
                       {["A", "B", "C", "D"][oi]}
                     </span>
                     {zT(opt)}
+                    {checked && isAns && <span> ✓ {yjT("academy.quizAnswer", loc)}</span>}
+                    {wrongPick && <span> ✗ {yjT("academy.quizYourPick", loc)}</span>}
                   </button>
                 );
               })}

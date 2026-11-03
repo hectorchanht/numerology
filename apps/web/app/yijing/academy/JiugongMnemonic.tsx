@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useScript } from "@/lib/i18n";
+import { ELEMENT_STYLE, type Element5 } from "@/lib/elementColors";
 
-type Element5 = "木" | "火" | "土" | "金" | "水";
 
 interface Palace {
   gua: string;
@@ -32,13 +32,6 @@ const PALACES: Palace[] = [
   { gua: "乾", symbol: "☰", num: 6, dir: "西北", element: "金", season: "秋" },
 ];
 
-const ELEMENT_STYLE: Record<Element5, { bg: string; fg: string; bd: string }> = {
-  木: { bg: "#2e933c", fg: "#ffffff", bd: "#1e6b28" },
-  火: { bg: "#e03131", fg: "#ffffff", bd: "#a61e1e" },
-  金: { bg: "#f1f3f5", fg: "#343a40", bd: "#adb5bd" },
-  水: { bg: "#212529", fg: "#ffffff", bd: "#000000" },
-  土: { bg: "#eab308", fg: "#422006", bd: "#a16207" },
-};
 
 /** 相生:木→火→土→金→水→木 */
 const SHENG: Record<Element5, Element5> = { 木: "火", 火: "土", 土: "金", 金: "水", 水: "木" };
@@ -155,7 +148,7 @@ export function JiugongMnemonic() {
               <span style={{ position: "absolute", top: "4px", left: "7px", fontSize: "0.72rem", fontWeight: 800, opacity: 0.85 }}>
                 {cell.num}
               </span>
-              <span style={{ fontSize: "0.66rem", opacity: 0.85 }}>{zT(cell.dir)}</span>
+              <span style={{ fontSize: "0.72rem", opacity: 0.85 }}>{zT(cell.dir)}</span>
               <span style={{ fontSize: "1.45rem", fontWeight: 800, lineHeight: 1.15 }}>
                 {cell.gua} <span style={{ fontSize: "1.05rem" }}>{cell.symbol}</span>
               </span>

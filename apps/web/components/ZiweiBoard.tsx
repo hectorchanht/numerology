@@ -67,7 +67,6 @@ function Palace({
       style={{ gridRow: row, gridColumn: col }}
       onClick={() => onSelect(p.earthlyBranch)}
       aria-pressed={highlight === "self"}
-      aria-label={`${z(p.name)} ${p.heavenlyStem}${p.earthlyBranch}`}
     >
       <span className="stars">
         {p.majorStars.length

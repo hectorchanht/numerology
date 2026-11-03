@@ -23,6 +23,10 @@ export interface ReportSeg {
   label: string;
 }
 
+/** 減少動態時唔平滑捲動。 */
+const scrollBehavior = (): ScrollBehavior =>
+  typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+
 /** 解读视角:纯八字 / 纯紫微 / 合参。 */
 type Lens = "bazi" | "ziwei" | "both";
 const LENSES: { key: Lens; labelKey: TKey }[] = [
@@ -269,7 +273,7 @@ export function StreamedReport({
     if (collapsible) setOpen((s) => new Set(s).add(k));
     // 等展開後先捲動。
     requestAnimationFrame(() =>
-      document.getElementById(`${idBase}-${k}`)?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      document.getElementById(`${idBase}-${k}`)?.scrollIntoView({ behavior: scrollBehavior(), block: "start" }),
     );
   };
 
@@ -283,7 +287,7 @@ export function StreamedReport({
     const l = chip.offsetLeft;
     const r = l + chip.offsetWidth;
     if (l < strip.scrollLeft || r > strip.scrollLeft + strip.clientWidth) {
-      strip.scrollTo({ left: Math.max(0, l - 16), behavior: "smooth" });
+      strip.scrollTo({ left: Math.max(0, l - 16), behavior: scrollBehavior() });
     }
   }, [active]);
 
@@ -469,7 +473,7 @@ export function StreamedReport({
                   <article className={cls} id={`${idBase}-${seg.key}`} key={seg.key}>
                     {/* 標題淨係標題(讀屏唔會讀埋狀態同朗讀掣);狀態只喺未完成先顯示 */}
                     <div className="sec-hd-row">
-                      <h3 className="sec-hd">
+                      <h2 className="sec-hd">
                         {collapsible ? (
                           <button
                             type="button"
@@ -484,7 +488,7 @@ export function StreamedReport({
                         ) : (
                           <span className="sec-h">{head}</span>
                         )}
-                      </h3>
+                      </h2>
                       {state !== "stateDone" ? <span className="sec-state">{t(`report.${state}` as TKey)}</span> : null}
                       {readText ? (
                         <span className="sec-tts" title={t("select.readSection")}>

@@ -45,7 +45,7 @@ export function SideNav() {
 
       <div className="side-brand">
         <img className="logo logo-dark" src="/logo.png" width={32} height={32} alt="" aria-hidden="true" />
-        <img className="logo logo-light" src="/logo-light.png" width={32} height={32} alt="" aria-hidden="true" />
+        <img className="logo logo-light" src="/logo-light.png" width={32} height={32} alt="" aria-hidden="true" loading="lazy" />
         <div>
           <div className="side-title">{t("app.title")}</div>
           <div className="side-sub">{t("app.subtitle")}</div>

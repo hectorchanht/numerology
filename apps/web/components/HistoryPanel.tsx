@@ -173,7 +173,8 @@ export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void })
                   {editing ? (
                     <>
                       <input
-                        className="input"
+                        type="text"
+                        aria-label={t("history.rename")}
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}
                         onKeyDown={(e) => {
@@ -185,10 +186,10 @@ export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void })
                         autoFocus
                         style={{ flex: 1, minWidth: 0 }}
                       />
-                      <button type="button" className="btn-primary" onClick={() => void saveRename(r.id)}>
+                      <button type="button" className="btn" onClick={() => void saveRename(r.id)}>
                         {t("history.save")}
                       </button>
-                      <button type="button" className="btn" onClick={() => setEditingId(null)}>
+                      <button type="button" className="btn secondary" onClick={() => setEditingId(null)}>
                         {t("history.cancel")}
                       </button>
                     </>

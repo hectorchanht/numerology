@@ -52,10 +52,12 @@ export default function AcademyIndexPage() {
         >
           <div
             style={{
-              width: `${(doneCount / ACADEMY_LESSONS.length) * 100}%`,
+              width: "100%",
               height: "100%",
               background: "var(--cinnabar)",
-              transition: "width 0.4s",
+              transform: `scaleX(${doneCount / ACADEMY_LESSONS.length})`,
+              transformOrigin: "left",
+              transition: "transform 0.4s",
             }}
           />
         </div>
@@ -107,10 +109,12 @@ export default function AcademyIndexPage() {
                   position: "absolute",
                   left: "1.28rem",
                   top: "1.6rem",
+                  bottom: "1.6rem",
                   width: "2px",
-                  height: `calc(${(trackDone / items.length) * 100}% - 1.6rem)`,
                   background: "var(--cinnabar)",
-                  transition: "height 0.4s",
+                  transform: `scaleY(${trackDone / items.length})`,
+                  transformOrigin: "top",
+                  transition: "transform 0.4s",
                 }}
               />
               {items.map(({ l, i }, j) => {
@@ -144,7 +148,7 @@ export default function AcademyIndexPage() {
                           : isCurrent
                             ? "2px solid var(--cinnabar)"
                             : "1px solid var(--line-strong)",
-                        color: done ? "var(--paper)" : isCurrent ? "var(--cinnabar)" : "var(--ink-faint)",
+                        color: done ? "var(--on-accent)" : isCurrent ? "var(--accent-text)" : "var(--label-2)",
                         background: done ? "var(--cinnabar)" : "var(--paper)",
                         fontFamily: "var(--serif)",
                         fontSize: "1.1rem",
@@ -163,7 +167,7 @@ export default function AcademyIndexPage() {
                         className="card"
                         style={{
                           margin: 0,
-                          borderColor: isCurrent ? "var(--cinnabar-soft)" : undefined,
+                          boxShadow: isCurrent ? "inset 0 0 0 1px var(--accent-line)" : undefined,
                           opacity: !done && !isCurrent ? 0.75 : 1,
                         }}
                       >

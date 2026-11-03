@@ -88,6 +88,8 @@ export function ChatPanel({ input }: { input: BirthInput }) {
           ))}
         </div>
       )}
+      {/* 串流逐字唔讀;答完先讀一次(冇 aria-live 喺 log 上) */}
+      <span className="sr-only" role="status">{!busy && log.at(-1)?.role === "assistant" ? t("chat.replyDone") : ""}</span>
 
       {error ? <p className="notice" role="alert">{error}</p> : null}
 

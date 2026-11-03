@@ -10,10 +10,10 @@ import { type ShareCardModel } from "@/lib/shareCard";
 import { SITE_BASE } from "@/lib/yijingSite";
 
 const LUCK_COLOR: Record<WugeLuck, string> = {
-  吉: "var(--ok)",
-  半吉: "var(--accent)",
-  半凶: "#ff9f0a",
-  凶: "#ff453a",
+  吉: "var(--ok-text)",
+  半吉: "var(--accent-text)",
+  半凶: "var(--label-2)",
+  凶: "var(--warn-text)",
 };
 
 const GE_KEYS = ["tian", "ren", "di", "wai", "zong"] as const;
@@ -37,10 +37,10 @@ function GeRow({ ge, geName, strokesText, z }: {
         <span style={{ fontWeight: 700 }}>{geName}</span>
         <span style={{ color: LUCK_COLOR[ge.luck], fontWeight: 700 }}>{ge.luck}</span>
       </div>
-      <div className="muted" style={{ marginTop: 4, fontSize: "0.92rem" }}>
+      <div className="muted" style={{ marginTop: 4, fontSize: 15 }}>
         {strokesText(ge.strokes)} · {z(ge.wuxing)} · {z(ge.shuliName)}
       </div>
-      <div className="muted" style={{ marginTop: 2, fontSize: "0.85rem" }}>{z(ge.text)}</div>
+      <div className="muted" style={{ marginTop: 2 }}>{z(ge.text)}</div>
     </div>
   );
 }
@@ -153,51 +153,52 @@ export default function NameTool() {
 
   return (
     <div>
-      <h1 style={{ fontSize: "1.5rem", fontWeight: 800 }}>{t("name.title")}</h1>
+      <h1 className="large">{t("name.title")}</h1>
       <p className="muted" style={{ margin: "4px 0 16px" }}>
         {t("name.subtitle")} · {t("name.kangxiNote")}
       </p>
 
-      <div className="card" style={{ padding: 16, marginBottom: 16 }}>
+      <div className="card" style={{ marginBottom: 16 }}>
         <div style={{ display: "flex", gap: 12 }}>
-          <label style={{ flex: 1 }}>
-            <div className="muted" style={{ fontSize: "0.85rem", marginBottom: 6 }}>{t("name.surname")}</div>
+          <div className="field" style={{ flex: 1, minWidth: 0 }}>
+            <label htmlFor="name-surname">{t("name.surname")}</label>
             <input
-              className="input"
+              id="name-surname"
+              type="text"
               value={surname}
               onChange={(e) => setSurname(e.target.value)}
               placeholder={t("name.surnamePh")}
               maxLength={2}
-              style={{ width: "100%" }}
             />
-          </label>
-          <label style={{ flex: 1 }}>
-            <div className="muted" style={{ fontSize: "0.85rem", marginBottom: 6 }}>{t("name.given")}</div>
+          </div>
+          <div className="field" style={{ flex: 1, minWidth: 0 }}>
+            <label htmlFor="name-given">{t("name.given")}</label>
             <input
-              className="input"
+              id="name-given"
+              type="text"
               value={given}
               onChange={(e) => setGiven(e.target.value)}
               placeholder={t("name.givenPh")}
               maxLength={2}
-              style={{ width: "100%" }}
             />
-          </label>
+          </div>
         </div>
         <button
-          className="btn-primary"
-          style={{ width: "100%", marginTop: 14 }}
+          type="button"
+          className="btn block"
+          style={{ marginTop: 14 }}
           disabled={!scriptReady}
           onClick={() => doScore(surname, given)}
         >
           {t("name.submit")}
         </button>
-        {error && <p style={{ color: "#ff453a", marginTop: 10 }}>{error}</p>}
+        {error && <p className="notice" role="alert">{error}</p>}
       </div>
 
       {result && (
         <div ref={cardRef}>
           <div className="card" style={{ padding: 20, marginBottom: 16, textAlign: "center" }}>
-            <div style={{ fontSize: "1.3rem", fontWeight: 800 }}>{z(result.surname + result.given)}</div>
+            <div style={{ fontSize: 19, fontWeight: 700 }}>{z(result.surname + result.given)}</div>
             <div style={{ margin: "8px 0" }}>
               <span style={{ fontSize: "4rem", fontWeight: 800, color: "var(--accent-text)" }}>{result.score}</span>
               <span className="muted" style={{ marginLeft: 6 }}>{t("name.scoreUnit")}</span>
@@ -205,8 +206,8 @@ export default function NameTool() {
             <div style={{ fontWeight: 700, color: LUCK_COLOR[result.zong.luck] }}>
               {t("name.heroNote", { luck: result.zong.luck, name: z(result.zong.shuliName) })}
             </div>
-            <div className="muted" style={{ marginTop: 6, fontSize: "0.9rem" }}>{z(result.zong.text)}</div>
-            <div style={{ marginTop: 8, fontSize: "0.95rem", fontWeight: 700 }}>
+            <div className="muted" style={{ marginTop: 6 }}>{z(result.zong.text)}</div>
+            <div style={{ marginTop: 8, fontSize: 15, fontWeight: 700 }}>
               {t("name.sancai")} <span style={{ color: LUCK_COLOR[result.sancai.luck] }}>{z(result.sancai.combo)} · {result.sancai.luck}</span>
             </div>
           </div>
@@ -221,16 +222,17 @@ export default function NameTool() {
             />
           ))}
 
-          <p className="muted" style={{ fontSize: "0.82rem", margin: "14px 2px" }}>{t("name.disclaimer")}</p>
+          <p className="muted" style={{ margin: "14px 2px" }}>{t("name.disclaimer")}</p>
 
-          <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
-            <button className="btn-primary" style={{ flex: 1 }} disabled={busy} onClick={onDownload}>
+          <div className="btn-row" style={{ marginBottom: 24 }}>
+            <button type="button" className="btn" disabled={busy} onClick={onDownload}>
               {busy ? t("name.downloading") : t("name.download")}
             </button>
-            <button className="btn" style={{ flex: 1 }} onClick={onCopyLink}>
+            <button type="button" className="btn secondary" onClick={onCopyLink}>
               {copied ? t("name.copied") : t("name.copyLink")}
             </button>
           </div>
+          <span className="sr-only" role="status" aria-live="polite">{copied ? t("name.copied") : ""}</span>
         </div>
       )}
       {card == null && <span style={{ display: "none" }} ref={cardRef} />}

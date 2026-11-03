@@ -13,7 +13,8 @@ import {
 } from "@numerology/engine";
 import { getHexagram } from "@numerology/knowledge";
 import { useLocale, useScript } from "@/lib/i18n";
-import { yjT, type YijingLocale } from "@/lib/yijingStrings";
+import { yjT, yjFmt, type YijingLocale } from "@/lib/yijingStrings";
+import { Seg } from "@/components/ui";
 import { Term } from "@/lib/highlightTerms";
 import { saveYijingCast, getYijingCast } from "@/lib/yijingHistory";
 import { AiLiuyao } from "./AiLiuyao";
@@ -173,6 +174,25 @@ export default function LiuyaoTool({ historyId }: { historyId?: string }) {
     setRolling(false);
     savedSig.current = null;
   };
+  const resultRef = useRef<HTMLDivElement | null>(null);
+  const resultHeadRef = useRef<HTMLHeadingElement | null>(null);
+  const [announce, setAnnounce] = useState("");
+  // 六爻已成:讀屏報本卦、焦點交俾結果標題(擲爻掣會 disabled)、結果喺下面就捲落去(回顧模式唔捲)
+  useEffect(() => {
+    if (!showResult) return;
+    const hex = getHexagram(castYijing(lines as [YaoValue, YaoValue, YaoValue, YaoValue, YaoValue, YaoValue]).hexagram);
+    if (hex) setAnnounce(yjFmt(yjT("yijing.announce.done", loc), { name: loc === "en" ? hex.nameEn : zT(hex.name) }));
+    if (reviewMode.current) return;
+    resultHeadRef.current?.focus({ preventScroll: true });
+    const el = resultRef.current;
+    if (!el) return;
+    if (el.getBoundingClientRect().top <= window.innerHeight * 0.55) return;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    // 只隨起卦結果變;loc / zT 變唔重新捲
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showResult, lines, date]);
+
   const manualReady = manual.every((v) => v !== 0);
   const castManual = () => {
     if (!manualReady) return;
@@ -189,7 +209,7 @@ export default function LiuyaoTool({ historyId }: { historyId?: string }) {
       </div>
 
       {reviewAt !== null && (
-        <div className="card" style={{ borderColor: "var(--cinnabar-soft)", marginBottom: "1rem" }}>
+        <div className="card" style={{ boxShadow: "inset 0 0 0 1px var(--accent-line)", marginBottom: "1rem" }}>
           <span className="badge">{yjT("yijing.hist.reviewing", loc)}</span>{" "}
           <span className="muted">{new Date(reviewAt).toLocaleString()}</span>{" "}
           <Link href="/yijing/history" style={{ marginLeft: "0.5rem" }}>
@@ -224,19 +244,16 @@ export default function LiuyaoTool({ historyId }: { historyId?: string }) {
       </div>
 
       <div className="card">
-        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
-          <button
-            className={`btn ${mode === "coin" ? "" : "ghost"}`}
-            onClick={() => setMode("coin")}
-          >
-            {yjT("liuyao.modeCoin", loc)}
-          </button>
-          <button
-            className={`btn ${mode === "manual" ? "" : "ghost"}`}
-            onClick={() => setMode("manual")}
-          >
-            {yjT("liuyao.modeManual", loc)}
-          </button>
+        <div style={{ marginBottom: "1rem" }}>
+          <Seg
+            value={mode}
+            onChange={setMode}
+            label={yjT("liuyao.modeLabel", loc)}
+            options={[
+              { value: "coin", label: yjT("liuyao.modeCoin", loc) },
+              { value: "manual", label: yjT("liuyao.modeManual", loc) },
+            ]}
+          />
         </div>
 
         {mode === "coin" ? (
@@ -257,6 +274,13 @@ export default function LiuyaoTool({ historyId }: { historyId?: string }) {
                     {i === 5 ? yjT("liuyao.yaoTop", loc) : i === 0 ? yjT("liuyao.yaoBottom", loc) : `${i + 1}`}
                   </span>
                   <select
+                    aria-label={
+                      i === 5
+                        ? yjT("liuyao.yaoTop", loc)
+                        : i === 0
+                          ? yjT("liuyao.yaoBottom", loc)
+                          : yjFmt(yjT("liuyao.yaoN", loc), { n: i + 1 })
+                    }
                     value={manual[i]}
                     onChange={(e) =>
                       setManual((p) =>
@@ -265,6 +289,7 @@ export default function LiuyaoTool({ historyId }: { historyId?: string }) {
                     }
                     style={{
                       font: "inherit",
+                      minHeight: "44px",
                       padding: "0.4rem 0.6rem",
                       background: "var(--paper)",
                       color: "var(--ink)",
@@ -293,18 +318,24 @@ export default function LiuyaoTool({ historyId }: { historyId?: string }) {
             {yjT("yijing.reset", loc)}
           </button>
         )}
-        {rolling && <p className="muted">{yjT("liuyao.rolling", loc)}</p>}
+        <p className="muted" role="status" style={rolling ? undefined : { margin: 0 }}>
+          {rolling ? yjT("liuyao.rolling", loc) : ""}
+        </p>
+        <p className="sr-only" aria-live="polite">
+          {announce}
+        </p>
+        {result.err && (
+          <p className="notice" role="alert">
+            {result.err}
+          </p>
+        )}
       </div>
 
-      {result.err && (
-        <div className="card" style={{ borderColor: "var(--cinnabar)" }}>
-          <p style={{ margin: 0, color: "var(--accent-text)" }}>{result.err}</p>
-        </div>
-      )}
-
       {showResult && (
-        <div className="card">
-          <h2 className="section-title">{yjT("liuyao.result", loc)}</h2>
+        <div className="card" ref={resultRef}>
+          <h2 className="section-title" tabIndex={-1} ref={resultHeadRef}>
+            {yjT("liuyao.result", loc)}
+          </h2>
           <div style={{ marginBottom: "0.8rem", lineHeight: 1.9 }}>
             <span style={{ fontSize: "1.6rem", marginRight: "0.5rem" }}>{zT(result.hexName)}</span>
             <span className="badge">{zT(result.r.shape)}</span>{" "}

@@ -209,7 +209,8 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
   return (
     <div>
       <h2 className="group-title">{t("infer.chatTitle")}</h2>
-      <div className="chat-log" aria-live="polite">
+      <span className="sr-only" role="status">{!busy && log.at(-1)?.role === "assistant" ? t("chat.replyDone") : ""}</span>
+      <div className="chat-log">
         {log.map((t2, i) => (
           <div key={i} className={`bubble ${t2.role}`}>
             {t2.role === "assistant" ? (

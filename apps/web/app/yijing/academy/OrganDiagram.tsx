@@ -1,6 +1,8 @@
 "use client";
 
 import { FigureOutline } from "./BodyDiagram";
+import { useLocale } from "@/lib/i18n";
+import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 
 /**
  * 人體內臟圖:五臟照五行(肝木、心火、脾土、肺金、腎水),
@@ -32,11 +34,12 @@ const ORGANS: OrganMark[] = [
 ];
 
 export default function OrganDiagram({ active }: { active: string | null }) {
+  const { locale } = useLocale();
   return (
     <svg
       viewBox="0 0 220 226"
       role="img"
-      aria-label="人體五臟對應圖"
+      aria-label={yjT("academy.organMap", locale as YijingLocale)}
       style={{ display: "block", width: "100%", maxWidth: "250px", margin: "0 auto" }}
     >
       <FigureOutline />

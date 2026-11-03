@@ -16,19 +16,22 @@ import { go } from "@/lib/nav";
  * 用戶 AI 設定(經 AI 設定頁揀嘅 provider/model/key/人設)由 aiRequestParts() 帶上;
  * 冇改過設定就默認 Workers AI(共用 $2/月預算守衛 + KV 緩存)。
  * 預算耗盡(code AI_BUDGET)→ 額度卡(同 StreamedReport 一致);其他錯誤 → 人話 + 重試,原文收入「技術細節」。
+ * 六爻等其他解讀:傳 endpoint + body(locale 同 AI 設定會自動加上),其餘 UI 狀態共用。
  */
-export function AiInterpret({
-  hexagram,
-  lines,
-  locale,
-  question,
-}: {
-  hexagram: number;
-  lines: CoinLine[];
-  locale: YijingLocale;
-  /** 用戶問題(選填):有傳先會送去 server,冇就唔送(privacy) */
-  question?: string;
-}) {
+export function AiInterpret(
+  props: {
+    locale: YijingLocale;
+  } & (
+    | {
+        hexagram: number;
+        lines: CoinLine[];
+        /** 用戶問題(選填):有傳先會送去 server,冇就唔送(privacy) */
+        question?: string;
+      }
+    | { endpoint: string; body: Record<string, unknown> }
+  ),
+) {
+  const { locale } = props;
   const { t } = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -41,11 +44,11 @@ export function AiInterpret({
     setText("");
     setErr(null);
     try {
-      await streamPost(
-        "/api/yijing/interpret",
-        { hexagram, lines, locale, question, ...aiRequestParts() },
-        (full) => setText(full),
-      );
+      const [url, body] =
+        "endpoint" in props
+          ? [props.endpoint, props.body]
+          : ["/api/yijing/interpret", { hexagram: props.hexagram, lines: props.lines, question: props.question }];
+      await streamPost(url, { ...body, locale, ...aiRequestParts() }, (full) => setText(full));
       setState("done");
     } catch (e) {
       const code = (e as { code?: string } | null)?.code;

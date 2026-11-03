@@ -63,6 +63,8 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "yijing.pos.5": S("五爻", "五爻", "Line 5"),
   "yijing.pos.6": S("上爻", "上爻", "Line 6"),
   "yijing.moving": S("動", "动", "moving"),
+  "meihua.announce.done": S("起卦完成。本卦{name}。", "起卦完成。本卦{name}。", "Cast complete. Primary hexagram: {name}."),
+  "meihua.badTime": S("起卦時間格式唔啱,請重新揀日期同時間。", "起卦时间格式不对,请重新选择日期和时间。", "That casting time isn't valid — please pick the date and time again."),
   "yijing.announce.done": S("六爻已成。本卦{name}。", "六爻已成。本卦{name}。", "All six lines cast. Primary hexagram: {name}."),
   "yijing.huFold": S("進階", "进阶", "Advanced"),
   "yijing.translation": S("英譯：{src}", "英译：{src}", "Translation: {src}, public domain."),
@@ -114,6 +116,8 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "academy.quizScore": S("得分 {s} / {t}", "得分 {s} / {t}", "Score {s} / {t}"),
   "academy.quizRight": S("正確", "正确", "Correct"),
   "academy.quizWrong": S("再想想", "再想想", "Review"),
+  "academy.quizAnswer": S("正解", "正解", "Correct answer"),
+  "academy.quizYourPick": S("你揀嘅", "你选的", "Your pick"),
 
   /* —— 六爻納甲 —— */
   "liuyao.title": S("六爻納甲", "六爻纳甲", "Six Lines Najia"),
@@ -127,6 +131,8 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "liuyao.cast": S("裝卦", "装卦", "Cast chart"),
   "liuyao.yaoTop": S("上爻", "上爻", "Top"),
   "liuyao.yaoBottom": S("初爻", "初爻", "Bottom"),
+  "liuyao.yaoN": S("第{n}爻", "第{n}爻", "Line {n}"),
+  "liuyao.modeLabel": S("起卦方式", "起卦方式", "Casting method"),
   "liuyao.result": S("裝卦結果", "装卦结果", "Chart"),
   "liuyao.moving": S("動", "动", "moving"),
   "liuyao.static": S("靜", "静", "still"),
@@ -251,6 +257,11 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "cases.method": S("占法", "占法", "Method"),
   "cases.ben": S("本卦", "本卦", "Base"),
   "cases.bian": S("之卦", "之卦", "Changed to"),
+
+  /* —— 學院圖表 aria-label —— */
+  "academy.bodyMap": S("人體八卦對應圖", "人体八卦对应图", "Body map of the eight trigrams"),
+  "academy.organMap": S("人體五臟對應圖", "人体五脏对应图", "Five organs mapped to the five elements"),
+  "academy.taiji": S("太極圖(陰陽魚,可拖拽旋轉)", "太极图(阴阳鱼,可拖拽旋转)", "Taiji (yin-yang fish) — drag to rotate"),
 };
 
 /** 取文案;缺 key 時回落 zht,再回落 key 本身。 */

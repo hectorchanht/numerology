@@ -9,11 +9,9 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
-import {
-  MINGLI_GLOSSARY,
-  YIJING_GLOSSARY,
-  type GlossaryTerm,
-} from "@numerology/knowledge";
+// 走 subpath:唔好經 barrel,否則 layout bundle 會連帶成個知識庫數據。
+import { YIJING_GLOSSARY, type GlossaryTerm } from "@numerology/knowledge/glossary";
+import { MINGLI_GLOSSARY } from "@numerology/knowledge/mingli-glossary";
 // 相對引用(非 @/):node --test 經 test-dist 執行時 @/ 無法解析,
 // Next 端經 extensionAlias 同樣解到 ./i18n.ts,同一模組。
 import { useLocale, useScript } from "./i18n.js";

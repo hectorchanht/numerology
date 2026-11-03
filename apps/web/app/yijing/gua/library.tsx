@@ -156,12 +156,12 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
       <h3 className="section-title" style={{ marginTop: "1.4rem" }}>
         {yjT("gua.interp", loc)}
       </h3>
-      <div className="filter-chips" role="tablist">
+      <div className="filter-chips" role="group" aria-label={yjT("gua.interp", loc)}>
         {TABS.map((k) => (
           <button
             key={k}
-            role="tab"
-            aria-selected={tab === k}
+            type="button"
+            aria-pressed={tab === k}
             className="filter-chip"
             onClick={() => setTab(k)}
           >
@@ -252,7 +252,7 @@ export default function GuaLibrary() {
                 >
                   <span style={{ fontSize: "1.9rem", lineHeight: 1.2 }}>{h.symbol}</span>
                   <span style={{ fontFamily: "var(--serif)", fontSize: "0.92rem" }}>{zT(h.name)}</span>
-                  <span className="muted" style={{ fontSize: "0.68rem" }}>
+                  <span className="muted" style={{ fontSize: "0.72rem" }}>
                     #{h.number}
                   </span>
                 </button>

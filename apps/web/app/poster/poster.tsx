@@ -138,7 +138,9 @@ export default function ChartPoster() {
 
   return (
     <>
-      <style>{`
+      {/* dangerouslySetInnerHTML:SSR 會把文字子節點嘅引號轉成 &quot;(例如 [data-theme="light"]),
+          客戶端係原文 → hydration mismatch。用 __html 兩邊輸出一致。 */}
+      <style dangerouslySetInnerHTML={{ __html: `
         .poster-wrap { max-width: 460px; margin: 8px auto 0; }
         .poster-paper {
           position: relative;
@@ -149,7 +151,7 @@ export default function ChartPoster() {
         }
         .poster-v {
           writing-mode: vertical-rl; letter-spacing: 0.5em;
-          color: var(--label-3); font-size: 13px; user-select: none;
+          color: var(--label-2); font-size: 13px; user-select: none;
         }
         .poster-logo { display: block; width: 52px; height: 52px; border-radius: 14px; flex: none; }
         .poster-logo-light { display: none; }
@@ -159,21 +161,21 @@ export default function ChartPoster() {
         .poster-row:last-child { border-bottom: none; }
         .poster-k { min-width: 4.2em; color: var(--label-2); font-size: 13px; }
         .poster-v2 { font-size: 16px; }
-        .poster-h { color: var(--accent); font-size: 13px; letter-spacing: 0.04em; margin-bottom: 4px; }
+        .poster-h { color: var(--accent-text); font-size: 13px; letter-spacing: 0.04em; margin-bottom: 4px; }
         .poster-pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 6px; }
         .poster-pillar { text-align: center; border-radius: 12px; padding: 10px 4px; background: var(--card-2); }
         .poster-pillar .gz { font-size: 24px; font-weight: 500; color: var(--label); }
-        .poster-pillar .ss { font-size: 12px; color: var(--accent); margin-top: 2px; min-height: 1.2em; }
-        .poster-pillar .lb { font-size: 11px; color: var(--label-3); margin-top: 2px; }
+        .poster-pillar .ss { font-size: 12px; color: var(--accent-text); margin-top: 2px; min-height: 1.2em; }
+        .poster-pillar .lb { font-size: 11px; color: var(--label-2); margin-top: 2px; }
         .poster-dayun-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 6px; }
         .poster-dayun-cell { text-align: center; border-radius: 10px; padding: 8px 4px; background: var(--card-2); border: 1.5px solid transparent; }
         .poster-dayun-cell.cur { border-color: var(--accent); }
         .poster-dayun-cell .gz { font-size: 15px; font-weight: 500; color: var(--label); }
-        .poster-dayun-cell.cur .gz { color: var(--accent); font-weight: 700; }
-        .poster-dayun-cell .ag { font-size: 11px; color: var(--label-3); margin-top: 2px; }
+        .poster-dayun-cell.cur .gz { color: var(--accent-text); font-weight: 700; }
+        .poster-dayun-cell .ag { font-size: 11px; color: var(--label-2); margin-top: 2px; }
         .poster-actions { margin-top: 16px; }
         .poster-actions .muted { text-align: center; margin: 8px 0 0; }
-      `}</style>
+      ` }} />
 
       {/* 單欄:標題在上、海報置中(同 /yijing/gua) */}
       <div className="masthead">

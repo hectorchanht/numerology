@@ -37,8 +37,6 @@ import { go } from "@/lib/nav";
 
 type View = "toolbar" | "explain" | "glossary" | null;
 
-const CANTO = "#0071e3";
-const MANDO = "#34c759";
 
 const BAR_STYLE: CSSProperties = {
   zIndex: 60,
@@ -60,6 +58,7 @@ const BTN_STYLE: CSSProperties = {
   border: "none",
   borderRadius: 8,
   padding: "7px 10px",
+  minHeight: 44,
   fontSize: 13,
   lineHeight: 1.2,
   cursor: "pointer",
@@ -280,7 +279,8 @@ export function SelectionToolbar() {
 
   if (!sel || !view) return null;
 
-  const speakBtn = (lang: SpeechLang, label: string, color: string) => {
+  // 播放中嘅語言:跟單一金色 accent(唔再用藍 / 綠做第二、三種強調色)。
+  const speakBtn = (lang: SpeechLang, label: string) => {
     const active = isPlaying && currentLang === lang;
     return (
       <button
@@ -288,11 +288,11 @@ export function SelectionToolbar() {
         type="button"
         onClick={() => toggleSpeak(lang)}
         aria-pressed={active}
-        aria-label={`${label}朗讀`}
+        aria-label={t("select.readAloudOf", { label })}
         style={{
           ...BTN_STYLE,
-          color: active ? color : "var(--label)",
-          background: active ? `${color}1a` : "transparent",
+          color: active ? "var(--accent-text)" : "var(--label)",
+          background: active ? "var(--accent-soft)" : "transparent",
           fontWeight: active ? 600 : 400,
         }}
       >
@@ -314,8 +314,8 @@ export function SelectionToolbar() {
         role="toolbar"
         aria-label={sel.text}
       >
-        {speakBtn("zh-HK", t("select.speakCanto"), CANTO)}
-        {speakBtn("zh-CN", t("select.speakMando"), MANDO)}
+        {speakBtn("zh-HK", t("select.speakCanto"))}
+        {speakBtn("zh-CN", t("select.speakMando"))}
         <button type="button" onClick={openExplain} style={BTN_STYLE}>
           <span aria-hidden="true">💬</span>
           {t("select.explain")}

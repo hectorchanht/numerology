@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useScript } from "@/lib/i18n";
+import { ELEMENT_STYLE } from "@/lib/elementColors";
 
 /**
  * 手機號八星配對表(民間數字八星體系;延年、絕命兩組經道之光《天眼風水師》
@@ -38,8 +39,8 @@ const STAR_OF_PAIR: Record<string, { star: string; kind: "ji" | "xiong" | "fu" }
 })();
 
 const KIND_STYLE = {
-  ji: { bg: "#2e933c", fg: "#ffffff" },
-  xiong: { bg: "#c92a2a", fg: "#ffffff" },
+  ji: { bg: ELEMENT_STYLE.木.bg, fg: ELEMENT_STYLE.木.fg },
+  xiong: { bg: ELEMENT_STYLE.火.bg, fg: ELEMENT_STYLE.火.fg },
   fu: { bg: "#868e96", fg: "#ffffff" },
   bian: { bg: "#e9ecef", fg: "#495057" },
 } as const;

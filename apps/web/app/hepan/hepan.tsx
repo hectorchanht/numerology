@@ -85,19 +85,24 @@ export default function HepanTool() {
     setSide: (s: Side) => void,
     personKey: "hepan.personA" | "hepan.personB",
   ) => (
-    <div className="card" style={{ padding: 16, marginBottom: 12 }}>
+    <div className="card" style={{ marginBottom: 12 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
         <strong>{t(personKey)}</strong>
-        {side.input && <span className="muted" style={{ fontSize: "0.8rem" }}>✓</span>}
+        {side.input && <span className="muted">✓</span>}
       </div>
-      <input
-        className="input"
-        value={side.name}
-        onChange={(e) => setSide({ ...side, name: e.target.value })}
-        placeholder={t("hepan.namePh")}
-        maxLength={8}
-        style={{ width: "100%", marginBottom: 8 }}
-      />
+      <div className="field" style={{ marginBottom: 8 }}>
+        <label htmlFor={`hepan-name-${personKey.slice(-1)}`} className="sr-only">
+          {t(personKey)} · {t("hepan.namePh")}
+        </label>
+        <input
+          id={`hepan-name-${personKey.slice(-1)}`}
+          type="text"
+          value={side.name}
+          onChange={(e) => setSide({ ...side, name: e.target.value })}
+          placeholder={t("hepan.namePh")}
+          maxLength={8}
+        />
+      </div>
       <BirthForm
         loading={false}
         onSubmit={(input) => setSide({ ...side, input, chart: null })}
@@ -171,20 +176,20 @@ export default function HepanTool() {
 
   return (
     <div ref={cardRef}>
-      <h1 style={{ fontSize: "1.5rem", fontWeight: 800 }}>{t("hepan.title")}</h1>
-      <p className="muted" style={{ margin: "4px 0 16px", fontSize: "0.9rem" }}>{t("hepan.disclaimer")}</p>
+      <h1 className="large">{t("hepan.title")}</h1>
+      <p className="muted" style={{ margin: "4px 0 16px" }}>{t("hepan.disclaimer")}</p>
 
       {sideBlock(a, setA, "hepan.personA")}
       {sideBlock(b, setB, "hepan.personB")}
 
-      <button className="btn-primary" style={{ width: "100%", marginBottom: 16 }} disabled={loading} onClick={pair}>
+      <button type="button" className="btn block" style={{ marginBottom: 16 }} disabled={loading} onClick={pair}>
         {loading ? t("form.submitting") : t("hepan.start")}
       </button>
-      {error && <p style={{ color: "#ff453a", marginBottom: 12 }}>{error}</p>}
+      {error && <p className="notice" role="alert" style={{ marginBottom: 12 }}>{error}</p>}
 
       {cmp && (
         <div>
-          <div className="card" style={{ padding: 16, marginBottom: 12 }}>
+          <div className="card" style={{ marginBottom: 12 }}>
             <div style={{ fontWeight: 700, marginBottom: 8, textAlign: "center" }}>
               {z(a.name.trim() || t("hepan.personA"))} × {z(b.name.trim() || t("hepan.personB"))}
             </div>
@@ -194,14 +199,15 @@ export default function HepanTool() {
             {row(t("hepan.spousePalace"), stars(cmp.spouseA, noStar), stars(cmp.spouseB, noStar))}
             {row(t("hepan.dayMaster"), cmp.ca.bazi.dayMaster, cmp.cb.bazi.dayMaster)}
           </div>
-          <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
-            <button className="btn-primary" style={{ flex: 1 }} disabled={busy} onClick={onDownload}>
+          <div className="btn-row" style={{ marginBottom: 24 }}>
+            <button type="button" className="btn" disabled={busy} onClick={onDownload}>
               {busy ? t("name.downloading") : t("name.download")}
             </button>
-            <button className="btn" style={{ flex: 1 }} onClick={onCopyLink}>
+            <button type="button" className="btn secondary" onClick={onCopyLink}>
               {copied ? t("name.copied") : t("name.copyLink")}
             </button>
           </div>
+          <span className="sr-only" role="status" aria-live="polite">{copied ? t("name.copied") : ""}</span>
         </div>
       )}
     </div>

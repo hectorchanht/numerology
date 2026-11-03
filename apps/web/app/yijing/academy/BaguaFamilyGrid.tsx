@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useScript } from "@/lib/i18n";
+import { Seg } from "@/components/ui";
 import BodyMaps from "./BodyMaps";
 import TaijiOverlay from "./BaguaWheel";
+import { ELEMENT_STYLE, type Element5 } from "@/lib/elementColors";
 
-type Element5 = "木" | "火" | "金" | "水" | "土";
 
 interface TrigramInfo {
   name: string;
@@ -92,13 +93,6 @@ const WANG_SHUAI: Record<Element5, string[]> = {
   水: ["休", "囚", "相", "旺", "死"],
 };
 
-const ELEMENT_STYLE: Record<Element5, { bg: string; fg: string; bd: string }> = {
-  木: { bg: "#2e933c", fg: "#ffffff", bd: "#1e6b28" },
-  火: { bg: "#e03131", fg: "#ffffff", bd: "#a61e1e" },
-  金: { bg: "#f1f3f5", fg: "#343a40", bd: "#adb5bd" },
-  水: { bg: "#212529", fg: "#ffffff", bd: "#000000" },
-  土: { bg: "#eab308", fg: "#422006", bd: "#a16207" },
-};
 
 /** 獨特爻位置(下而上 0-2);純卦回傳 -1 */
 function uniqueLineIndex(t: TrigramInfo): number {
@@ -150,48 +144,21 @@ export function BaguaFamilyGrid() {
   /** 太極圖轉咗幾多個 45°(snap 後計) */
   const steps = ((Math.round(angle / 45) % 8) + 8) % 8;
 
-  const tabBtn = (active: boolean): React.CSSProperties => ({
-    flex: 1,
-    padding: "0.55rem 0",
-    borderRadius: "10px",
-    border: active ? "1px solid var(--cinnabar)" : "1px solid var(--line)",
-    background: active ? "var(--cinnabar-soft)" : "transparent",
-    color: "var(--ink)",
-    fontSize: "0.95rem",
-    cursor: "pointer",
-  });
-
-  const stepBtn: React.CSSProperties = {
-    border: "1.5px solid var(--line)",
-    background: "var(--card)",
-    borderRadius: "999px",
-    padding: "0.28rem 0.7rem",
-    fontSize: "0.82rem",
-    fontWeight: 700,
-    cursor: "pointer",
-  };
 
   return (
     <div className="academy-widget-card">
-      <div style={{ display: "flex", gap: "0.6rem", marginBottom: "0.7rem" }}>
-        <button
-          style={tabBtn(mode === "xian")}
-          onClick={() => {
-            setMode("xian");
+      <div style={{ marginBottom: "0.7rem" }}>
+        <Seg
+          value={mode}
+          onChange={(m) => {
+            setMode(m);
             setAngle(0);
           }}
-        >
-          {zT("先天八卦")}
-        </button>
-        <button
-          style={tabBtn(mode === "hou")}
-          onClick={() => {
-            setMode("hou");
-            setAngle(0);
-          }}
-        >
-          {zT("後天八卦")}
-        </button>
+          options={[
+            { value: "xian", label: zT("先天八卦") },
+            { value: "hou", label: zT("後天八卦") },
+          ]}
+        />
       </div>
       <p className="muted" style={{ fontSize: "0.82rem", textAlign: "center", margin: "0 0 0.8rem" }}>
         {zT("方位:上南下北,左東右西。同一家人,兩種座位——切換看看每卦搬到哪裡。")}
@@ -214,25 +181,16 @@ export function BaguaFamilyGrid() {
             setAngle(0);
           }}
           aria-pressed={wheelOn}
-          style={{
-            border: `1.5px solid ${wheelOn ? "var(--cinnabar)" : "var(--line)"}`,
-            background: wheelOn ? "var(--cinnabar)" : "var(--card)",
-            color: wheelOn ? "#fff" : undefined,
-            borderRadius: "999px",
-            padding: "0.28rem 0.85rem",
-            fontSize: "0.82rem",
-            fontWeight: 700,
-            cursor: "pointer",
-          }}
+          className={`chip${wheelOn ? " on" : ""}`}
         >
           {zT(wheelOn ? "疊太極圖:開" : "疊太極圖")}
         </button>
         {wheelOn && (
           <>
-            <button onClick={() => stepWheel(-1)} style={stepBtn} aria-label={zT("逆時針轉45度")}>
+            <button onClick={() => stepWheel(-1)} className="chip" aria-label={zT("逆時針轉45度")}>
               ⟲ 45°
             </button>
-            <button onClick={() => stepWheel(1)} style={stepBtn} aria-label={zT("順時針轉45度")}>
+            <button onClick={() => stepWheel(1)} className="chip" aria-label={zT("順時針轉45度")}>
               ⟳ 45°
             </button>
             <button
@@ -240,7 +198,7 @@ export function BaguaFamilyGrid() {
                 setSnapping(true);
                 setAngle(0);
               }}
-              style={stepBtn}
+              className="chip"
             >
               {zT("對齊本圖")}
             </button>
@@ -297,7 +255,7 @@ export function BaguaFamilyGrid() {
                 )}
                 <span style={{ fontSize: "1.35rem" }}>☯</span>
                 <span style={{ fontSize: "0.78rem", fontWeight: 700 }}>{zT("中宮")}</span>
-                <span style={{ fontSize: "0.68rem", color: "var(--muted)" }}>{zT("土")}</span>
+                <span style={{ fontSize: "0.72rem", color: "var(--label-2)" }}>{zT("土")}</span>
               </div>
             );
           }
@@ -340,15 +298,15 @@ export function BaguaFamilyGrid() {
               </span>
               {/* 字體/行高收緊過:五行的總高度要細過格闊,aspectRatio:1 先真係出到正方形
                   (內容高過格闊嗰陣,aspect-ratio 會讓步俾內容,格變長方形,疊上去嘅太極魚變橢圓) */}
-              <span style={{ fontSize: "0.62rem", lineHeight: 1.1, opacity: 0.85 }}>{zT(DIRECTIONS[i])}</span>
+              <span style={{ fontSize: "0.72rem", lineHeight: 1.05, opacity: 0.85 }}>{zT(DIRECTIONS[i])}</span>
               <span style={{ fontSize: "1.24rem", fontWeight: 800, lineHeight: 1.05 }}>
                 {t.name} <span style={{ fontSize: "0.95rem" }}>{t.symbol}</span>
               </span>
               <span style={{ fontSize: "0.74rem", fontWeight: 700, lineHeight: 1.12 }}>{zT(t.family)}</span>
-              <span style={{ fontSize: "0.63rem", lineHeight: 1.12, opacity: 0.85 }}>
+              <span style={{ fontSize: "0.72rem", lineHeight: 1.05, opacity: 0.85 }}>
                 {zT(t.nature)} / {zT(t.element)}
               </span>
-              <span style={{ fontSize: "0.58rem", lineHeight: 1.12, opacity: 0.75, whiteSpace: "nowrap" }}>
+              <span style={{ fontSize: "0.72rem", lineHeight: 1.05, opacity: 0.85, whiteSpace: "nowrap" }}>
                 {zT(t.term)}・{zT(t.hour)}
               </span>
             </button>
@@ -404,6 +362,7 @@ export function BaguaFamilyGrid() {
               flexDirection: "column",
               gap: "5px",
             }}
+            role="img"
             aria-label={zT("卦爻(自下而上讀)")}
           >
             {[2, 1, 0].map((li) => (
@@ -456,7 +415,7 @@ export function BaguaFamilyGrid() {
                   textAlign: "center",
                 }}
               >
-                <dt style={{ fontSize: "0.72rem", color: "var(--muted)" }}>{k}</dt>
+                <dt style={{ fontSize: "0.72rem", color: "var(--label-2)" }}>{k}</dt>
                 <dd style={{ margin: 0, fontSize: "1.02rem", fontWeight: 700 }}>{v}</dd>
               </div>
             ))}
@@ -475,20 +434,20 @@ export function BaguaFamilyGrid() {
                       textAlign: "center",
                       border: `1.5px solid ${strong ? "var(--cinnabar)" : "var(--line)"}`,
                       background: strong ? "var(--cinnabar)" : "var(--card)",
-                      color: strong ? "#fff" : undefined,
+                      color: strong ? "var(--on-accent)" : undefined,
                       borderRadius: "10px",
                       padding: "0.35rem 0.1rem",
                       opacity: st === "死" ? 0.55 : 1,
                     }}
                   >
-                    <div style={{ fontSize: "0.68rem", color: strong ? "#fff" : "var(--muted)" }}>
+                    <div style={{ fontSize: "0.72rem", color: strong ? "var(--on-accent)" : "var(--label-2)" }}>
                       {zT(s)}
                     </div>
                     <div
                       style={{
                         fontSize: "1rem",
                         fontWeight: 800,
-                        color: !strong && st === "相" ? "var(--cinnabar)" : undefined,
+                        color: !strong && st === "相" ? "var(--accent-text)" : undefined,
                       }}
                     >
                       {zT(st)}

@@ -9,6 +9,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./glossary": {
+      "types": "./dist/glossary.d.ts",
+      "default": "./dist/glossary.js"
+    },
+    "./mingli-glossary": {
+      "types": "./dist/mingli-glossary.d.ts",
+      "default": "./dist/mingli-glossary.js"
     }
   },
   "scripts": {
@@ -18,5 +26,6 @@
   "files": [
     "dist",
     "data"
-  ]
+  ],
+  "sideEffects": false
 }

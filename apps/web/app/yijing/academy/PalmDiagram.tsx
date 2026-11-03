@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useScript } from "@/lib/i18n";
+import { Seg } from "@/components/ui";
+import { ELEMENT_STYLE, type Element5 } from "@/lib/elementColors";
 
-type Element5 = "木" | "火" | "金" | "水" | "土";
 
 interface BranchNode {
   zhi: string;
@@ -17,13 +18,6 @@ interface BranchNode {
   y: number;
 }
 
-const ELEMENT_STYLE: Record<Element5, { bg: string; fg: string; bd: string }> = {
-  木: { bg: "#2e933c", fg: "#ffffff", bd: "#1e6b28" },
-  火: { bg: "#e03131", fg: "#ffffff", bd: "#a61e1e" },
-  金: { bg: "#f1f3f5", fg: "#343a40", bd: "#adb5bd" },
-  水: { bg: "#212529", fg: "#ffffff", bd: "#000000" },
-  土: { bg: "#eab308", fg: "#422006", bd: "#a16207" },
-};
 
 /** 十二地支掌訣:節點座標對應指節位置(上南下北,左東右西) */
 const BRANCHES: BranchNode[] = [
@@ -75,17 +69,7 @@ export function PalmDiagram() {
   const [tab, setTab] = useState<"palm" | "magic">("palm");
   const [sel, setSel] = useState<BranchNode | null>(null);
   const [selMagic, setSelMagic] = useState<MagicCell | null>(null);
-
-  const tabBtn = (active: boolean): React.CSSProperties => ({
-    flex: 1,
-    padding: "0.55rem 0",
-    borderRadius: "10px",
-    border: active ? "1px solid var(--cinnabar)" : "1px solid var(--line)",
-    background: active ? "var(--cinnabar-soft)" : "transparent",
-    color: "var(--ink)",
-    fontSize: "0.95rem",
-    cursor: "pointer",
-  });
+  const [focusZhi, setFocusZhi] = useState<string | null>(null);
 
   return (
     <div
@@ -97,13 +81,15 @@ export function PalmDiagram() {
         background: "var(--bg-soft)",
       }}
     >
-      <div style={{ display: "flex", gap: "0.6rem", marginBottom: "1rem" }}>
-        <button style={tabBtn(tab === "palm")} onClick={() => setTab("palm")}>
-          {zT("掌中訣")}
-        </button>
-        <button style={tabBtn(tab === "magic")} onClick={() => setTab("magic")}>
-          {zT("九宮格")}
-        </button>
+      <div style={{ marginBottom: "1rem" }}>
+        <Seg
+          value={tab}
+          onChange={setTab}
+          options={[
+            { value: "palm", label: zT("掌中訣") },
+            { value: "magic", label: zT("九宮格") },
+          ]}
+        />
       </div>
 
       {tab === "palm" && (
@@ -111,7 +97,7 @@ export function PalmDiagram() {
           <svg
             viewBox="0 0 400 540"
             style={{ width: "100%", maxWidth: "340px", display: "block", margin: "0 auto" }}
-            role="img"
+            role="group"
             aria-label={zT("十二地支掌中訣示意圖")}
           >
             {/* 手掌 */}
@@ -124,7 +110,7 @@ export function PalmDiagram() {
               <rect x="44" y="352" width="104" height="42" rx="21" transform="rotate(-24 96 373)" />
             </g>
             {/* 方位季節標註:上南下北,左東右西 */}
-            <g fill="var(--muted)" fontSize="13" textAnchor="middle">
+            <g fill="var(--label-2)" fontSize="13" textAnchor="middle">
               <text x="200" y="62">{zT("夏 · 南")}</text>
               <text x="200" y="528">{zT("冬 · 北")}</text>
               <text x="34" y="300">{zT("春 · 東")}</text>
@@ -138,10 +124,30 @@ export function PalmDiagram() {
                 <g
                   key={b.zhi}
                   onClick={() => setSel(b)}
-                  style={{ cursor: "pointer" }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSel(b);
+                    }
+                  }}
+                  onFocus={(e) => {
+                    // 只喺鍵盤聚焦(:focus-visible)時畫焦點圈
+                    let kb = true;
+                    try { kb = e.currentTarget.matches(":focus-visible"); } catch {}
+                    if (kb) setFocusZhi(b.zhi);
+                  }}
+                  onBlur={() => setFocusZhi((z) => (z === b.zhi ? null : z))}
+                  tabIndex={0}
+                  style={{ cursor: "pointer", outline: "none" }}
                   role="button"
+                  aria-pressed={active}
                   aria-label={`${b.zhi} ${b.animal} ${b.time}`}
                 >
+                  {/* 透明點擊區,放大觸控目標 */}
+                  <circle cx={b.x} cy={b.y} r={25} fill="transparent" />
+                  {focusZhi === b.zhi && (
+                    <circle cx={b.x} cy={b.y} r={25} fill="none" stroke="var(--accent)" strokeWidth={3} />
+                  )}
                   <circle
                     cx={b.x}
                     cy={b.y}
@@ -169,7 +175,7 @@ export function PalmDiagram() {
           <div style={{ display: "flex", gap: "0.6rem", marginTop: "0.8rem", flexWrap: "wrap" }}>
             <button
               className="btn ghost"
-              style={{ fontSize: "0.85rem", padding: "0.45rem 0.9rem" }}
+              style={{ fontSize: "0.9rem" }}
               onClick={() => {
                 const zhi = currentBranchZhi();
                 setSel(BRANCHES.find((b) => b.zhi === zhi) ?? null);
@@ -180,7 +186,7 @@ export function PalmDiagram() {
             {sel && (
               <button
                 className="btn ghost"
-                style={{ fontSize: "0.85rem", padding: "0.45rem 0.9rem" }}
+                style={{ fontSize: "0.9rem" }}
                 onClick={() => setSel(null)}
               >
                 {zT("清除")}
@@ -215,7 +221,7 @@ export function PalmDiagram() {
                     background: "var(--card)",
                   }}
                 >
-                  <dt style={{ fontSize: "0.72rem", color: "var(--muted)" }}>{k}</dt>
+                  <dt style={{ fontSize: "0.72rem", color: "var(--label-2)" }}>{k}</dt>
                   <dd style={{ margin: 0, fontSize: "1.05rem", fontWeight: 700 }}>{v}</dd>
                 </div>
               ))}
@@ -259,6 +265,7 @@ export function PalmDiagram() {
                     cursor: "pointer",
                   }}
                   aria-label={`${c.n} ${c.gua}`}
+                  aria-pressed={active}
                 >
                   {c.n}
                 </button>
@@ -301,7 +308,7 @@ export function PalmDiagram() {
                     textAlign: "center",
                   }}
                 >
-                  <dt style={{ fontSize: "0.72rem", color: "var(--muted)" }}>{k}</dt>
+                  <dt style={{ fontSize: "0.72rem", color: "var(--label-2)" }}>{k}</dt>
                   <dd style={{ margin: 0, fontSize: "1.05rem", fontWeight: 700 }}>{v}</dd>
                 </div>
               ))}
@@ -315,7 +322,7 @@ export function PalmDiagram() {
                   gridColumn: "1 / -1",
                 }}
               >
-                <dt style={{ fontSize: "0.72rem", color: "var(--muted)" }}>{zT("方位")}</dt>
+                <dt style={{ fontSize: "0.72rem", color: "var(--label-2)" }}>{zT("方位")}</dt>
                 <dd style={{ margin: 0, fontSize: "1.05rem", fontWeight: 700 }}>{selMagic.direction}</dd>
               </div>
             </dl>

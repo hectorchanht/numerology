@@ -33,7 +33,20 @@ export function Seg<T extends string>({
           className={o.value === value ? "on" : ""}
           disabled={disabled}
           {...(tabs
-            ? { role: "tab", "aria-selected": o.value === value }
+            ? {
+                role: "tab",
+                "aria-selected": o.value === value,
+                // roving tabindex:Tab 鍵只停當前 tab,左右箭嘴喺 tabs 之間移
+                tabIndex: o.value === value ? 0 : -1,
+                onKeyDown: (e: React.KeyboardEvent<HTMLButtonElement>) => {
+                  const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+                  if (!step) return;
+                  e.preventDefault();
+                  const i = options.findIndex((x) => x.value === value);
+                  const next = options[(i + step + options.length) % options.length]!;
+                  onChange(next.value);
+                },
+              }
             : { "aria-pressed": o.value === value })}
           onClick={() => onChange(o.value)}
         >
@@ -92,7 +105,7 @@ export function ScreenNav({
       ) : (
         <>
           <img className="logo logo-dark" src="/logo.png" width={28} height={28} alt="" aria-hidden="true" />
-          <img className="logo logo-light" src="/logo-light.png" width={28} height={28} alt="" aria-hidden="true" />
+          <img className="logo logo-light" src="/logo-light.png" width={28} height={28} alt="" aria-hidden="true" loading="lazy" />
         </>
       )}
       <span className="eyebrow">{eyebrow}</span>

@@ -1,6 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useLocale } from "@/lib/i18n";
+import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 
 /**
  * 太極圖(陰陽魚)疊加層:半透明陰陽魚蓋住成個九宮格,用嚟切割/演示
@@ -24,7 +26,16 @@ export default function TaijiOverlay({
   onDragStart: () => void;
   onRelease: () => void;
 }) {
+  const { locale } = useLocale();
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduceMotion(mq.matches);
+    const on = () => setReduceMotion(mq.matches);
+    mq.addEventListener?.("change", on);
+    return () => mq.removeEventListener?.("change", on);
+  }, []);
   const drag = useRef<{ startPointer: number; startAngle: number } | null>(null);
 
   const pointerAngle = (e: React.PointerEvent) => {
@@ -79,13 +90,13 @@ export default function TaijiOverlay({
           position: "absolute",
           inset: 0,
           transform: `rotate(${angle}deg)`,
-          transition: snapping ? "transform 0.3s ease" : "none",
+          transition: snapping && !reduceMotion ? "transform 0.3s ease" : "none",
         }}
       >
         <svg
           viewBox="0 0 100 100"
           role="img"
-          aria-label="太極圖(陰陽魚,可拖拽旋轉)"
+          aria-label={yjT("academy.taiji", locale as YijingLocale)}
           style={{ display: "block", width: "100%", height: "100%" }}
         >
           {/* 預轉 -90°:呢條 path 本身陽在左、陰在右;轉完陰在上、陽在下(上陰下陽) */}
