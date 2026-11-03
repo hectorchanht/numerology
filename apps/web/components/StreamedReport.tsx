@@ -257,6 +257,8 @@ export function StreamedReport({
   const anyError = !!slots?.some((s) => s.status === "error");
   /** 額度用盡:各節同時失敗,收成一張卡,唔再逐節重試(重試都係 429)。 */
   const budget = slots?.find((s) => s.code === "AI_BUDGET");
+  /** 全部節都係額度失敗:章節列表同進度都收起,得返額度卡。 */
+  const allBudget = !!slots?.length && slots.every((s) => s.code === "AI_BUDGET");
   /** 非額度錯誤先提示檢查 provider 配置。 */
   const otherError = !!slots?.some((s) => s.status === "error" && s.code !== "AI_BUDGET");
 
@@ -290,7 +292,7 @@ export function StreamedReport({
           type="button"
           className="icon-btn"
           onClick={exportPdf}
-          disabled={!slots || running}
+          disabled={!slots || running || !!budget}
           aria-label={t("report.exportPdf")}
         >
           <Icon name="download" />
@@ -300,20 +302,35 @@ export function StreamedReport({
       {children}
 
       <div className="report-controls">
-        {/* 視角:首次預設合參直接生成;生成過先出,用嚟換視角重生成 */}
-        {slots ? (
-          <Seg
-            compact
-            label={t("report.regen")}
-            value={lens}
-            onChange={setLens}
-            options={LENSES.map((l) => ({ value: l.key, label: t(l.labelKey) }))}
-          />
-        ) : null}
-        <button type="button" className="btn block" onClick={() => generate(lens)} disabled={running}>
-          <Icon name={slots ? "refresh" : "spark"} />
-          {slots ? t("report.regenShort") : t("report.generate")}
-        </button>
+        {!slots ? (
+          // 首次:一粒主行動,預設合參。
+          <button type="button" className="btn block" onClick={() => generate(lens)}>
+            <Icon name="spark" />
+            {t("report.generateN", { n: segments.length })}
+          </button>
+        ) : budget ? null : (
+          // 生成過:閱讀先行,換視角撳即生成(次要樣式,唔搶正文);額度用晒就收起。
+          <div className="lens-row">
+            <span className="lens-lbl">{t("report.regen")}</span>
+            <Seg
+              compact
+              label={t("report.regen")}
+              value={shownLens ?? lens}
+              onChange={(l) => { if (!running && l !== shownLens) { setLens(l); void generate(l); } }}
+              options={LENSES.map((l) => ({ value: l.key, label: t(l.labelKey) }))}
+            />
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={() => generate(shownLens ?? lens)}
+              disabled={running}
+              aria-label={t("report.regenShort")}
+              title={t("report.regenShort")}
+            >
+              <Icon name="refresh" />
+            </button>
+          </div>
+        )}
         <AiModelNote />
       </div>
 
@@ -324,7 +341,7 @@ export function StreamedReport({
         </>
       ) : (
         <>
-          <div className="progress">
+          <div className="progress" hidden={allBudget}>
             <span role="status" aria-live="polite">
               {running || anyError
                 ? t("report.progressShort", { done: running ? settled : slots.filter((s) => s.status === "done").length, total: segments.length })
@@ -349,14 +366,16 @@ export function StreamedReport({
           ) : null}
 
           {/* 手機:頂部 sticky 章節 strip;桌面:左側 sticky 目錄 + 右側正文(.report-body grid) */}
-          <div className="report-body">
+          <div className="report-body" hidden={allBudget}>
             <div className="strip sticky-strip">
               {segments.map((seg, i) => {
                 const s = slots[i];
+                if (s?.code === "AI_BUDGET") return null;
                 return (
                   <button
                     key={seg.key}
                     type="button"
+                    aria-current={active === seg.key ? "true" : undefined}
                     className={`chip${active === seg.key ? " on" : ""}`}
                     onClick={() => jump(seg.key)}
                   >
@@ -370,6 +389,8 @@ export function StreamedReport({
             <div ref={secRef} className="report-secs">
               {segments.map((seg, i) => {
                 const s: Slot = slots[i] ?? { text: "", status: "streaming", err: "" };
+                // 額度失敗嘅節唔逐張出「失敗」卡,額度卡已經講晒。
+                if (s.code === "AI_BUDGET") return null;
                 const has = s.text.trim() !== "";
                 const state =
                   s.status === "done" ? "stateDone"
@@ -427,11 +448,9 @@ export function StreamedReport({
                         <p className="note">{sectionNotes[seg.key]}</p>
                       ) : null}
                       {has ? null : s.status === "streaming" ? (
-                        <div role="status" aria-label={t("report.stateQueued")}>
+                        <div aria-hidden="true">
                           <div className="skel" /><div className="skel w80" /><div className="skel w60" />
                         </div>
-                      ) : s.status === "error" && s.code === "AI_BUDGET" ? (
-                        <p className="note">{t("report.budgetSec")}</p>
                       ) : s.status === "error" ? (
                         <div className="sec-error">
                           <p className="notice">{t("report.segFail", { err: s.err })}</p>
@@ -452,7 +471,7 @@ export function StreamedReport({
 
           {otherError ? <p className="note">{t("report.providerHint")}</p> : null}
 
-          <div className="btn-row">
+          <div className="btn-row" hidden={!!budget}>
             {onAsk ? (
               <button type="button" className="btn secondary" onClick={onAsk}>
                 <Icon name="msg" />

@@ -105,10 +105,17 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
       : "";
   const invalid = (id: string) =>
     errField === id ? { "aria-invalid": true as const, "aria-describedby": "birth-err" } : {};
+  /** 改返出錯嗰格:清走錯誤(下次提交再驗)。 */
+  const clearErr = (key: string) => {
+    if (errField === key) { setErrField(""); setError(""); }
+  };
   const edit = (key: string, val: string) => {
     setV((s) => ({ ...s, [key]: val }));
-    if (errField === key) setErrField("");
+    clearErr(key);
   };
+  /** 錯誤顯示喺出錯嗰行入面,手機彈鍵盤都睇到。 */
+  const errSub = (id: string) =>
+    errField === id ? <span className="sub err" id="birth-err" role="alert">{error}</span> : null;
   const solarSub = !trueSolar ? t("form.trueSolarOff") : longitude === "" ? t("form.trueSolarNeedCity") : t("form.trueSolarOn");
 
   return (
@@ -141,6 +148,7 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
                 <span className="lbl">
                   {f.key === "year" ? yearLabel : t(f.labelKey)}
                   {f.key === "hour" && hourSub ? <span className="sub">{hourSub}</span> : null}
+                  {errSub(f.key)}
                 </span>
                 <input
                   id={f.key} type="number" inputMode="numeric"
@@ -153,7 +161,7 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
             ))}
             <label className="row" htmlFor="minute">
               <Icon name="clock" className="ic dim" />
-              <span className="lbl">{t("form.minute")}</span>
+              <span className="lbl">{t("form.minute")}{errSub("minute")}</span>
               <input
                 id="minute" type="number" inputMode="numeric" min={0} max={59}
                 value={v.minute}
@@ -180,12 +188,12 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
             </label>
             <div className="row" id="gender">
               <Icon name="user" className="ic" />
-              <span className="lbl">{t("form.gender")}</span>
+              <span className="lbl">{t("form.gender")}{errSub("gender")}</span>
               <Seg
                 compact
                 label={t("form.gender")}
                 value={gender}
-                onChange={(g) => { setGender(g); if (errField === "gender") setErrField(""); }}
+                onChange={(g) => { setGender(g); clearErr("gender"); }}
                 options={[
                   { value: "男", label: t("form.male") },
                   { value: "女", label: t("form.female") },
@@ -198,7 +206,7 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
         </div>
       </div>
 
-      {error ? <p className="notice" id="birth-err" role="alert">{error}</p> : null}
+      {error && !errField ? <p className="notice" role="alert">{error}</p> : null}
       <button className="btn block cta" type="submit" disabled={loading}>
         <Icon name="spark" />
         {loading ? t("form.submitting") : t("form.submit")}

@@ -26,7 +26,8 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
   const { t, locale } = useLocale();
   const { z } = useScript();
   const [v, setV] = useState<Record<string, string>>({ year: "", month: "", day: "" });
-  const [gender, setGender] = useState<"男" | "女">("男");
+  // 同 BirthForm 一致:性別決定大運順逆,唔預設。
+  const [gender, setGender] = useState<"男" | "女" | "">("");
   const [calendar, setCalendar] = useState<Calendar>("solar");
   const [isLeapMonth, setIsLeapMonth] = useState(false);
   const [longitude, setLongitude] = useState<string>("");
@@ -42,7 +43,7 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
   const lon = trueSolar && longitude !== "" ? { longitude: Number(longitude) } : {};
 
   const inferInput = () => ({
-    year: Number(v.year), month: Number(v.month), day: Number(v.day), gender,
+    year: Number(v.year), month: Number(v.month), day: Number(v.day), gender: gender as "男" | "女",
     calendar,
     ...(calendar === "lunar" && isLeapMonth ? { isLeapMonth: true } : {}),
     ...lon,
@@ -56,6 +57,7 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
 
   const start = async () => {
     if (!validDate()) { setError(t("infer.badDate")); return; }
+    if (!gender) { setError(t("form.genderRequired")); return; }
     setError("");
     setBusy(true);
     try {
@@ -109,7 +111,7 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
   const adopt = (hour: number) => {
     onAdopt({
       year: Number(v.year), month: Number(v.month), day: Number(v.day),
-      hour, minute: 0, gender, calendar,
+      hour, minute: 0, gender: gender as "男" | "女", calendar,
       ...(calendar === "lunar" && isLeapMonth ? { isLeapMonth: true } : {}),
       ...lon,
     });
@@ -155,7 +157,7 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
               compact
               label={t("form.gender")}
               value={gender}
-              onChange={setGender}
+              onChange={(g) => { setGender(g); setError(""); }}
               options={[
                 { value: "男", label: t("form.male") },
                 { value: "女", label: t("form.female") },
