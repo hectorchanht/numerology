@@ -622,6 +622,78 @@ h1.large + .seg { margin-bottom: 12px; }
   font-size: 15px; white-space: nowrap; }
 .filter-chip[aria-pressed="true"], .filter-chip[aria-selected="true"] { background: var(--label); color: var(--on-label); font-weight: 600; }
 
+/* ---------- 易經起卦(/yijing):擲錢盤 + 六爻由下而上疊起 ---------- */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.yj-review { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; font-size: 15px; }
+.yj-ask + .yj-send { margin-top: 12px; }
+.field input::placeholder { color: var(--label-3); }
+.yj-stage { margin-top: 16px; }
+.yj-stage-h { font-size: 17px; font-weight: 600; margin: 0 0 16px; text-align: center; }
+/* 擲錢盤:三枚方孔錢;未擲顯示錢孔,擲完顯示字 / 花 */
+.yj-tray { display: flex; justify-content: center; gap: 14px; margin: 0 0 20px; perspective: 400px; }
+.yj-coin { width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  background: var(--card-3); color: var(--label); font-size: 22px; font-weight: 600;
+  box-shadow: inset 0 0 0 1.5px var(--line-strong); }
+.yj-hole { display: block; width: 14px; height: 14px; border-radius: 2px; box-shadow: inset 0 0 0 1.5px var(--label-3); }
+.yj-coin.flipping { animation: yj-flip 0.32s linear infinite; }
+.yj-coin.landed { animation: yj-land 0.28s cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes yj-flip { from { transform: rotateY(0); } to { transform: rotateY(360deg); } }
+@keyframes yj-land { from { transform: scale(0.85); } to { transform: none; } }
+/* 六爻疊:上爻在頂、初爻在底;空槽虛線,下一爻淡金提示 */
+.yj-stack { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 6px; }
+.yj-slot { display: grid; grid-template-columns: 3.4em minmax(56px, 1fr) auto auto; align-items: center;
+  gap: 12px; min-height: 36px; padding: 0 4px; font-size: 15px; }
+.yj-pos { font-size: 13px; color: var(--label-3); white-space: nowrap; }
+.yj-slot.filled .yj-pos { color: var(--label-2); }
+.yj-bar { display: flex; gap: 14%; height: 12px; max-width: 160px; border-radius: 3px; box-shadow: inset 0 0 0 1px var(--sep); }
+.yj-slot.filled .yj-bar { box-shadow: none; }
+.yj-slot.next .yj-bar { box-shadow: inset 0 0 0 1px var(--accent-line); }
+.yj-bar i { flex: 1; border-radius: 3px; background: var(--label); animation: yj-in 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+.yj-slot.moving .yj-bar i { background: var(--accent); }
+@keyframes yj-in { from { opacity: 0; transform: scaleX(0.6); } to { opacity: 1; transform: none; } }
+.yj-val { color: var(--label-2); white-space: nowrap; }
+.yj-mv { margin-left: 6px; font-size: 12px; padding: 2px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--label); }
+.yj-faces { font-size: 13px; color: var(--label-3); letter-spacing: 0.15em; font-variant-numeric: tabular-nums; }
+.yj-toss { min-height: 52px; }
+.yj-again { margin-top: 20px; }
+.yj-auto { display: block; margin: 6px auto 0; }
+.yj-hint { text-align: center; margin: 12px 0 0; }
+.yj-how { margin-top: 16px; border-top: 0.5px solid var(--sep); padding-top: 12px; font-size: 14px; }
+.yj-how summary, .yj-adv summary, .yj-detail summary { cursor: pointer; color: var(--label-2); min-height: 32px;
+  display: flex; align-items: center; list-style: none; }
+.yj-how summary::-webkit-details-marker, .yj-adv summary::-webkit-details-marker, .yj-detail summary::-webkit-details-marker { display: none; }
+.yj-how summary::after, .yj-adv summary::after, .yj-detail summary::after { content: "›"; margin-left: 6px; transition: transform 0.2s; }
+.yj-how[open] summary::after, .yj-adv[open] summary::after, .yj-detail[open] summary::after { transform: rotate(90deg); }
+.yj-how p { margin: 6px 0 8px; color: var(--label-2); line-height: 1.7; }
+/* 結果:本卦做主角,變卦次之,互卦收入「進階」 */
+.yj-result { margin-top: 16px; scroll-margin-top: 16px; animation: fade 0.3s ease-out; }
+.yj-ben { display: flex; align-items: center; gap: 16px; }
+.yj-sym { font-size: 64px; line-height: 1; color: var(--label); flex: none; }
+.yj-ben-t { min-width: 0; }
+.yj-name { font-size: 28px; font-weight: 600; line-height: 1.2; }
+.yj-judg { margin: 16px 0 0; font-size: 17px; line-height: 1.7; }
+.yj-lab { color: var(--label-2); margin-right: 6px; }
+.yj-lab::after { content: ":"; }
+.yj-moving { margin-top: 20px; }
+.yj-sub-h { font-size: 15px; font-weight: 600; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+.yj-yao { border-radius: 10px; padding: 10px 12px; background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); }
+.yj-yao + .yj-yao { margin-top: 8px; }
+.yj-yao-n { color: var(--label); font-weight: 600; margin-bottom: 2px; }
+.yj-sub { margin-top: 16px; border-radius: 10px; padding: 14px; background: var(--card-2); }
+.yj-sub p { margin: 0; line-height: 1.7; }
+.yj-sym-sm { font-size: 28px; line-height: 1; }
+.yj-adv { margin-top: 12px; font-size: 15px; }
+.yj-adv p { margin: 6px 0 0; line-height: 1.7; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.yj-ai { margin-top: 20px; }
+.yj-ai .yj-sub { margin-top: 12px; }
+.yj-ai-text { white-space: pre-wrap; line-height: 1.85; }
+.yj-ai .text-btn { margin-top: 4px; }
+.yj-detail { margin-top: 10px; font-size: 13px; }
+.yj-detail p { color: var(--label-3); overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: reduce) {
+  .yj-coin.flipping, .yj-coin.landed, .yj-bar i, .yj-result { animation: none; }
+}
+
 /* ---------- Tab bar ---------- */
 .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: var(--tabbar-bg);
   -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
@@ -764,6 +836,7 @@ h1.large + .seg { margin-bottom: 12px; }
   .yj-layout:not(:has(> .yj-result)) > .yj-col { display: block; max-width: 680px; }
   .yj-layout:has(> .yj-result) { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 0 32px; align-items: start; }
   .yj-layout:has(> .yj-result) > .yj-col { display: block; position: sticky; top: 16px; }
+  .yj-layout > .yj-result { margin-top: 0; }
 
   /* /poster:單欄(標題在上、海報置中,同 /yijing/gua);分欄已棄用 */
 }

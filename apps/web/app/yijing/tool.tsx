@@ -13,6 +13,8 @@ import { AiInterpret } from "./AiInterpret";
 import { Term, withTermHighlights } from "@/lib/highlightTerms";
 import { saveYijingCast, getYijingCast } from "@/lib/yijingHistory";
 import Link from "next/link";
+import { Icon } from "@/components/Icon";
+import { ToggleRow } from "@/components/ui";
 import { GroupTabs } from "@/components/GroupTabs";
 import { CASTING_TABS } from "@/lib/navGroups";
 
@@ -28,13 +30,6 @@ const LINE_LABEL: Record<CoinLine, string> = {
   8: "yijing.line.youngYin",
   6: "yijing.line.oldYin",
 };
-const LINE_GLYPH: Record<CoinLine, string> = {
-  9: "⚊○",
-  7: "⚊",
-  8: "⚋",
-  6: "⚋×",
-};
-
 function rollLine(): TossedLine {
   const coins = [Math.random() < 0.5, Math.random() < 0.5, Math.random() < 0.5] as [
     boolean,
@@ -43,34 +38,6 @@ function rollLine(): TossedLine {
   ];
   const sum = coins.reduce((a, c) => a + (c ? 3 : 2), 0);
   return { value: sum as CoinLine, coins };
-}
-
-/** 經典卦形:陽爻一橫,陰爻兩截(由下而上 render 時傳 reversed)。 */
-function HexFigure({ bits, moving }: { bits: number[]; moving?: boolean[] }) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "7px", width: "84px" }}>
-      {[...bits].reverse().map((b, i) => (
-        <div key={i} style={{ display: "flex", gap: "6px", height: "9px" }}>
-          {b === 1 ? (
-            <div
-              style={{
-                flex: 1,
-                background: "var(--ink)",
-                borderRadius: "2px",
-                outline: moving?.[5 - i] ? "2px solid var(--cinnabar)" : "none",
-                outlineOffset: "2px",
-              }}
-            />
-          ) : (
-            <>
-              <div style={{ flex: 1, background: "var(--ink)", borderRadius: "2px" }} />
-              <div style={{ flex: 1, background: "var(--ink)", borderRadius: "2px" }} />
-            </>
-          )}
-        </div>
-      ))}
-    </div>
-  );
 }
 
 export default function YijingTool({ historyId }: { historyId?: string }) {
@@ -90,6 +57,9 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
   const [lines, setLines] = useState<TossedLine[]>([]);
   const [rolling, setRolling] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resultRef = useRef<HTMLElement | null>(null);
+  /** 讀屏通知:每擲一爻 / 六爻已成(擲錢動畫係 aria-hidden) */
+  const [announce, setAnnounce] = useState("");
   /** 歷史回顧模式:由 ?h=<id> 入嚟,唔再存檔 */
   const reviewMode = useRef(false);
   const [reviewAt, setReviewAt] = useState<number | null>(null);
@@ -141,10 +111,19 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
   const ben = cast ? getHexagram(cast.hexagram) : undefined;
   const bian = cast?.changed ? getHexagram(cast.changed) : undefined;
   const hu = cast ? getHexagram(cast.hu) : undefined;
-  const movingFlags = useMemo(
-    () => (cast ? cast.lines.map((v) => v === 6 || v === 9) : []),
-    [cast],
-  );
+
+  const isMoving = (v: CoinLine) => v === 6 || v === 9;
+  const posLabel = (pos: number) => yjT(`yijing.pos.${pos}`, loc);
+  const coinFace = (heads: boolean) => yjT(heads ? "yijing.coin.heads" : "yijing.coin.tails", loc);
+  /** 英文界面:術語前加英文名,中文術語照留(可撳睇解釋) */
+  const term = (zh: string, key: string) =>
+    loc === "en" ? (
+      <>
+        {yjT(key, loc)} <Term term={zh} />
+      </>
+    ) : (
+      <Term term={zh} />
+    );
 
   const commitLine = (line: TossedLine) => setLines((p) => [...p, line]);
 
@@ -181,28 +160,41 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
     if (timer.current) clearTimeout(timer.current);
     setLines([]);
     setRolling(false);
+    setAnnounce("");
     savedSig.current = null;
   };
 
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
+
+  // 六爻已成:讀屏報本卦;手機結果喺下面 → 捲到結果(回顧模式唔捲)
+  useEffect(() => {
+    if (!done || !ben) return;
+    setAnnounce(yjFmt(yjT("yijing.announce.done", loc), { name: zT(ben.name) }));
+    if (reviewMode.current) return;
+    const el = resultRef.current;
+    if (!el) return;
+    const below = el.getBoundingClientRect().top > window.innerHeight * 0.55;
+    if (!below) return;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    // ben 只隨 cast 變;loc / zT 變唔重新捲
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done, ben]);
+
+  const last = lines[lines.length - 1];
+  const nextN = Math.min(lines.length + 1, 6);
+
+  // 每擲一爻讀屏報一次(第六爻由上面「六爻已成」接手)
+  useEffect(() => {
+    if (!last || lines.length === 6) return;
+    setAnnounce(`${posLabel(lines.length)} ${yjT(LINE_LABEL[last.value], loc)}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lines.length]);
+
   return (
     <>
-      <style>{`
-        .yj-coins { display: inline-flex; gap: 6px; }
-        .yj-coin {
-          width: 34px; height: 34px; border-radius: 50%;
-          display: grid; place-items: center;
-          font-size: 15px; font-weight: 600;
-          background: var(--accent); color: var(--on-accent);
-        }
-        .yj-coin.flipping { animation: yj-flip 0.32s linear infinite; }
-        .yj-coin.pop { animation: yj-pop 0.4s ease-out; }
-        @keyframes yj-flip { from { transform: rotateY(0); } to { transform: rotateY(360deg); } }
-        @keyframes yj-pop { 0% { transform: scale(0.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        .yj-line-row { display: flex; align-items: center; gap: 0.9rem; padding: 0.5rem 0; border-bottom: 0.5px solid var(--line); overflow-x: auto; }
-        .yj-line-row:last-child { border-bottom: none; }
-        .yj-glyph { font-size: 1.5rem; min-width: 3.2em; text-align: center; letter-spacing: 0.1em; }
-      `}</style>
-
       <GroupTabs links={CASTING_TABS} label={yjT("nav.group.divine", loc)} />
 
       <div className="masthead">
@@ -211,21 +203,17 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
       </div>
 
       {reviewAt !== null && (
-        <div className="card" style={{ borderColor: "var(--cinnabar-soft)", marginBottom: "1rem" }}>
-          <span className="badge">{yjT("yijing.hist.reviewing", loc)}</span>{" "}
-          <span className="muted">
-            {new Date(reviewAt).toLocaleString()}
-          </span>{" "}
-          <Link href="/yijing/history" style={{ marginLeft: "0.5rem" }}>
-            {yjT("yijing.hist.backToHistory", loc)}
-          </Link>
-        </div>
+        <p className="yj-review">
+          <span className="tag accent">{yjT("yijing.hist.reviewing", loc)}</span>
+          <span className="muted">{new Date(reviewAt).toLocaleString()}</span>
+          <Link href="/yijing/history">{yjT("yijing.hist.backToHistory", loc)}</Link>
+        </p>
       )}
 
       {/* .yj-layout:手機 display:contents;桌面左欄問卦/起卦、右欄卦象結果 */}
       <div className="yj-layout">
         <div className="yj-col">
-          <div className="card">
+          <div className="card yj-ask">
             <div className="field">
               <label htmlFor="yj-q">{yjT("yijing.question.label", loc)}</label>
               <input
@@ -233,171 +221,190 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder={yjT("yijing.question.ph", loc)}
+                maxLength={200}
+                readOnly={done}
               />
             </div>
-            <label
-              style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.6rem", cursor: "pointer" }}
-            >
-              <input
-                type="checkbox"
-                checked={sendQ}
-                onChange={(e) => {
-                  setSendQ(e.target.checked);
-                  try {
-                    window.localStorage.setItem("numerology-yj-sendq", e.target.checked ? "1" : "0");
-                  } catch {
-                    /* ignore */
-                  }
-                }}
-              />
-              <span className="muted" style={{ fontSize: "0.85rem" }}>
-                {yjT("yijing.sendQuestion", loc)}
-              </span>
-            </label>
-            <p className="muted" style={{ marginTop: "0.7rem", marginBottom: 0 }}>
-              <Term term="問卦" /> · {yjT("yijing.askHonest", loc)}
-            </p>
           </div>
+          <div className="list yj-send">
+            <ToggleRow
+              icon="send"
+              label={yjT("yijing.sendQuestion", loc)}
+              sub={yjT(sendQ ? "yijing.sendQuestion.on" : "yijing.sendQuestion.off", loc)}
+              checked={sendQ}
+              onChange={(v) => {
+                setSendQ(v);
+                try {
+                  window.localStorage.setItem("numerology-yj-sendq", v ? "1" : "0");
+                } catch {
+                  /* ignore */
+                }
+              }}
+            />
+          </div>
+          <p className="note">
+            {term("問卦", "yijing.wenGua")} · {yjT("yijing.askHonest", loc)}
+          </p>
 
-          <div className="card">
-            <h2 className="section-title">
-              {yjFmt(yjT("yijing.toss", loc), { n: Math.min(lines.length + 1, 6) })}
+          <section className="card yj-stage" aria-labelledby="yj-stage-h">
+            <h2 id="yj-stage-h" className="yj-stage-h">
+              {done ? yjT("yijing.done", loc) : yjFmt(yjT("yijing.progress", loc), { n: lines.length })}
             </h2>
-            <div className="strip" style={{ marginBottom: "1rem" }}>
-              <button className="btn" onClick={tossOne} disabled={rolling || done}>
-                {yjFmt(yjT("yijing.toss", loc), { n: Math.min(lines.length + 1, 6) })}
-              </button>
-              <button className="btn ghost" onClick={tossAll} disabled={rolling || done}>
-                {yjT("yijing.auto", loc)}
-              </button>
-              {(done || lines.length > 0) && (
-                <button className="btn ghost" onClick={reset}>
-                  {yjT("yijing.reset", loc)}
-                </button>
-              )}
-            </div>
 
-            {rolling && lines.length < 6 && (
-              <div className="yj-coins" aria-hidden style={{ marginBottom: "0.8rem" }}>
+            {!done && (
+              <div className="yj-tray" aria-hidden="true">
                 {[0, 1, 2].map((i) => (
-                  <span key={i} className="yj-coin flipping" style={{ animationDelay: `${i * 0.08}s` }}>
-                    {i % 2 ? yjT("yijing.coin.tails", loc) : yjT("yijing.coin.heads", loc)}
+                  <span
+                    key={rolling ? `r${i}` : `${lines.length}-${i}`}
+                    className={`yj-coin${rolling ? " flipping" : last ? " landed" : ""}`}
+                    style={rolling ? { animationDelay: `${i * 0.08}s` } : undefined}
+                  >
+                    {!rolling && last ? coinFace(last.coins[i]!) : <i className="yj-hole" />}
                   </span>
                 ))}
               </div>
             )}
 
-            <div>
-              {[...lines].reverse().map((l, ri) => {
-                const pos = lines.length - ri; // 1..6 由下而上
+            {/* 主按鈕緊貼擲錢盤,手機首屏撳得到 */}
+            {!done && (
+              <>
+                <button type="button" className="btn block yj-toss" onClick={tossOne} disabled={rolling}>
+                  {yjFmt(yjT("yijing.toss", loc), { n: nextN })}
+                </button>
+                <button type="button" className="text-btn yj-auto" onClick={tossAll} disabled={rolling}>
+                  {yjT("yijing.auto", loc)}
+                </button>
+              </>
+            )}
+
+            {lines.length === 0 && <p className="note yj-hint">{yjT("yijing.stageHint", loc)}</p>}
+
+            {/* 六爻由下而上疊起:未擲嘅位留空槽 */}
+            <ol className="yj-stack">
+              {[6, 5, 4, 3, 2, 1].map((pos) => {
+                const l = lines[pos - 1];
+                const mv = l ? isMoving(l.value) : false;
+                const yang = l ? l.value === 7 || l.value === 9 : false;
+                const isNext = !done && pos === lines.length + 1;
                 return (
-                  <div className="yj-line-row" key={pos}>
-                    <span className="muted" style={{ minWidth: "2.6em" }}>
-                      {pos === 1 || pos === 6
-                        ? pos === 1
-                          ? "初"
-                          : "上"
-                        : String(pos)}
+                  <li key={pos} className={`yj-slot${l ? " filled" : ""}${isNext ? " next" : ""}${mv ? " moving" : ""}`}>
+                    <span className="yj-pos">{posLabel(pos)}</span>
+                    <span className="yj-bar" aria-hidden="true">
+                      {l ? (
+                        yang ? (
+                          <i />
+                        ) : (
+                          <>
+                            <i />
+                            <i />
+                          </>
+                        )
+                      ) : null}
                     </span>
-                    <span className="yj-coins">
-                      {l.coins.map((c, i) => (
-                        <span key={i} className="yj-coin pop" style={{ width: "26px", height: "26px", fontSize: "0.8rem" }}>
-                          {c ? yjT("yijing.coin.heads", loc) : yjT("yijing.coin.tails", loc)}
-                        </span>
-                      ))}
+                    <span className="yj-val">
+                      {l ? (
+                        <>
+                          {yjT(LINE_LABEL[l.value], loc)}
+                          {mv ? <span className="yj-mv">{yjT("yijing.moving", loc)}</span> : null}
+                        </>
+                      ) : null}
                     </span>
-                    <span className="yj-glyph">{LINE_GLYPH[l.value]}</span>
-                    <span style={{ color: "var(--ink-soft)" }}>{yjT(LINE_LABEL[l.value], loc)}</span>
-                    {(l.value === 6 || l.value === 9) && (
-                      <span className="badge badge-warn">
-                        <Term term="動爻" />
-                      </span>
-                    )}
-                  </div>
+                    <span className="yj-faces" aria-hidden="true">
+                      {l ? l.coins.map((c) => coinFace(c)).join("") : null}
+                    </span>
+                  </li>
                 );
               })}
-              {lines.length === 0 && !rolling && (
-                <p className="muted">{yjT("yijing.sub", loc)}</p>
-              )}
-            </div>
-          </div>
+            </ol>
+
+            {done && (
+              <button type="button" className="btn secondary block yj-again" onClick={reset}>
+                <Icon name="refresh" />
+                {yjT("yijing.reset", loc)}
+              </button>
+            )}
+
+            <details className="yj-how">
+              <summary>{yjT("yijing.how.title", loc)}</summary>
+              <p>{yjT("yijing.how.body", loc)}</p>
+              <Link href="/yijing/academy">{yjT("yijing.how.academy", loc)}</Link>
+            </details>
+
+            <p className="sr-only" aria-live="polite">
+              {announce}
+            </p>
+          </section>
         </div>
 
         {cast && ben && (
-          <div className="card yj-result">
-            <h2 className="section-title">{yjT("yijing.result", loc)}</h2>
-            <div style={{ display: "flex", gap: "1.2rem", alignItems: "flex-start", flexWrap: "wrap" }}>
-              <HexFigure bits={ben.bits} moving={movingFlags} />
-              <div style={{ flex: "1 1 220px" }}>
-                <div style={{ display: "flex", alignItems: "baseline", gap: "0.7rem", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: "2.6rem", lineHeight: 1 }}>{ben.symbol}</span>
-                  <span style={{ fontFamily: "var(--serif)", fontSize: "1.5rem" }}>
-                    <Term term="本卦" /> · {zT(ben.name)}
-                  </span>
-                  <span className="muted">
-                    {ben.pinyin} · {ben.nameEn} · #{ben.number}
-                  </span>
+          <section className="card yj-result" ref={resultRef} aria-labelledby="yj-res-h">
+            <h2 id="yj-res-h" className="sr-only">
+              {yjT("yijing.result", loc)}
+            </h2>
+            <div className="yj-ben">
+              <span className="yj-sym" aria-hidden="true">
+                {ben.symbol}
+              </span>
+              <div className="yj-ben-t">
+                <div className="yj-name">
+                  {term("本卦", "yijing.benGua")} · {zT(ben.name)}
                 </div>
-                <p style={{ marginTop: "0.7rem" }}>
-                  <Term term="卦辭" />:{` `}
-                  <span style={{ fontFamily: "var(--serif)", fontSize: "1.05rem" }}>{withTermHighlights(ben.judgment, zT)}</span>
-                </p>
+                <div className="muted">
+                  {ben.pinyin} · {ben.nameEn} · #{ben.number}
+                </div>
               </div>
             </div>
+            <p className="yj-judg">
+              <span className="yj-lab">{term("卦辭", "yijing.judgment")}</span>
+              {withTermHighlights(ben.judgment, zT)}
+            </p>
 
             {cast.changing.length > 0 ? (
-              <div style={{ marginTop: "1.2rem" }}>
-                <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
-                  <Term term="動爻" />
-                </h3>
+              <div className="yj-moving">
+                <h3 className="yj-sub-h">{term("動爻", "yijing.changing")}</h3>
                 {cast.changing.map((p) => (
-                  <div
-                    key={p}
-                    style={{
-                      borderRadius: "12px",
-                      padding: "0.6rem 0.8rem",
-                      marginBottom: "0.5rem",
-                      background: "var(--accent-soft)",
-                    }}
-                  >
-                    <div style={{ fontFamily: "var(--serif)", color: "var(--cinnabar)", marginBottom: "0.2rem" }}>
-                      {zT(yaoName(ben, p))}
-                    </div>
-                    <div style={{ fontSize: "0.92rem" }}>{withTermHighlights(ben.lines[p - 1] ?? "", zT)}</div>
+                  <div key={p} className="yj-yao">
+                    <div className="yj-yao-n">{zT(yaoName(ben, p))}</div>
+                    <div>{withTermHighlights(ben.lines[p - 1] ?? "", zT)}</div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="muted" style={{ marginTop: "1rem" }}>
-                {yjT("yijing.noChange", loc)}
-              </p>
+              <p className="note">{yjT("yijing.noChange", loc)}</p>
             )}
 
-            {(bian || hu) && (
-              <div className="grid-2" style={{ marginTop: "1.2rem" }}>
-                {bian && (
-                  <div className="card" style={{ marginTop: 0 }}>
-                    <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>
-                      <span style={{ fontSize: "1.8rem", marginRight: "0.5rem" }}>{bian.symbol}</span>
-                      <Term term="變卦" /> · {zT(bian.name)}
-                    </h3>
-                    <p style={{ margin: 0, fontSize: "0.92rem" }}>
-                      <Term term="卦辭" />: {withTermHighlights(bian.judgment, zT)}
-                    </p>
-                  </div>
-                )}
-                {hu && (
-                  <div className="card" style={{ marginTop: 0 }}>
-                    <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>
-                      <span style={{ fontSize: "1.8rem", marginRight: "0.5rem" }}>{hu.symbol}</span>
-                      <Term term="互卦" /> · {zT(hu.name)}
-                    </h3>
-                    <p style={{ margin: 0, fontSize: "0.92rem" }}>
-                      <Term term="卦辭" />: {withTermHighlights(hu.judgment, zT)}
-                    </p>
-                  </div>
-                )}
+            {bian && (
+              <div className="yj-sub">
+                <h3 className="yj-sub-h">
+                  <span className="yj-sym-sm" aria-hidden="true">
+                    {bian.symbol}
+                  </span>
+                  <span>
+                    {term("變卦", "yijing.bianGua")} · {zT(bian.name)}
+                  </span>
+                </h3>
+                <p>
+                  <span className="yj-lab">{term("卦辭", "yijing.judgment")}</span>
+                  {withTermHighlights(bian.judgment, zT)}
+                </p>
               </div>
+            )}
+
+            {hu && (
+              <details className="yj-adv">
+                <summary>
+                  <span>
+                    {yjT("yijing.huFold", loc)} · {term("互卦", "yijing.huGua")} · {zT(hu.name)}
+                  </span>
+                </summary>
+                <p>
+                  <span className="yj-sym-sm" aria-hidden="true">
+                    {hu.symbol}
+                  </span>
+                  <span className="yj-lab">{term("卦辭", "yijing.judgment")}</span>
+                  {withTermHighlights(hu.judgment, zT)}
+                </p>
+              </details>
             )}
 
             <AiInterpret
@@ -406,9 +413,11 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
               locale={loc}
               question={sendQ ? question.trim() || undefined : undefined}
             />
-          </div>
+          </section>
         )}
       </div>
+
+      <p className="disclaimer">{yjT("yijing.disclaimer", loc)}</p>
     </>
   );
 }
