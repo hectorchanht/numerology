@@ -22,6 +22,7 @@ import { YijingHistoryPanel } from "@/components/YijingHistoryPanel";
 import { FortuneTimeline } from "@/components/FortuneTimeline";
 import { FortuneDayun, FortuneYears, FortuneRhythm } from "@/components/FortuneSections";
 import { ChartSummary, WuxingChart } from "@/components/Charts";
+import { SectionBasis } from "@/components/SectionBasis";
 import { Icon } from "@/components/Icon";
 import { EmptyChart, ScreenNav, Seg } from "@/components/ui";
 import { loadAi } from "@/lib/aiSettings";
@@ -284,6 +285,7 @@ export default function Home() {
 
           <div className="split-main">
             <Seg
+              label={t("mode.label")}
               value={mode}
               onChange={setMode}
               options={[
@@ -421,6 +423,7 @@ export default function Home() {
               <WuxingChart chart={ready.chart} />
 
               <Seg
+                label={t("chart.sysLabel")}
                 value={sys}
                 onChange={setSys}
                 options={[
@@ -499,6 +502,8 @@ export default function Home() {
                 onAsk={() => go("chat")}
                 startSignal={reportStart}
                 sectionNotes={{ health: t("app.disclaimer2"), wealth: t("app.disclaimer2") }}
+                basis={(k) => <SectionBasis chart={ready.chart} segKey={k} />}
+                next={{ label: t("report.nextFortune"), onClick: () => switchAiView("fortune") }}
               >
                 {aiSeg}
               </StreamedReport>

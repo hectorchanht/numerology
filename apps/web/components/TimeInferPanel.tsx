@@ -49,15 +49,33 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
     ...lon,
   });
 
-  const validDate = (): boolean =>
-    DATE_FIELDS.every((f) => {
+  /** 出錯欄位(同 BirthForm 一致:行內顯示 + aria-invalid + 聚焦)。 */
+  const [errField, setErrField] = useState("");
+  const fail = (field: string, msg: string) => {
+    setError(msg);
+    setErrField(field);
+    const el = document.getElementById(field === "gender" ? "ti-gender" : `ti-${field}`);
+    (el?.querySelector("button") ?? el)?.focus();
+  };
+  /** 回傳第一個出錯欄位(冇就 null);日數按月份檢查(農曆最多 30)。 */
+  const checkDate = (): [string, string] | null => {
+    for (const f of DATE_FIELDS) {
       const n = Number(v[f.key]);
-      return v[f.key] !== "" && Number.isInteger(n) && n >= f.min && n <= f.max;
-    });
+      if (v[f.key] === "" || !Number.isInteger(n) || n < f.min || n > f.max) {
+        return [f.key, t("form.invalidField", { label: t(f.labelKey) })];
+      }
+    }
+    const maxDay = calendar === "solar" ? new Date(Number(v.year), Number(v.month), 0).getDate() : 30;
+    return Number(v.day) > maxDay ? ["day", t("form.dayInvalid", { max: maxDay })] : null;
+  };
+  const errSub = (id: string) =>
+    errField === id ? <span className="sub err" id="ti-err" role="alert">{error}</span> : null;
 
   const start = async () => {
-    if (!validDate()) { setError(t("infer.badDate")); return; }
-    if (!gender) { setError(t("form.genderRequired")); return; }
+    const bad = checkDate();
+    if (bad) { fail(bad[0], bad[1]); return; }
+    if (!gender) { fail("gender", t("form.genderRequired")); return; }
+    setErrField("");
     setError("");
     setBusy(true);
     try {
@@ -145,19 +163,24 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
           {DATE_FIELDS.map((f) => (
             <label className="row" key={f.key} htmlFor={`ti-${f.key}`}>
               <Icon name="cal" className="ic" />
-              <span className="lbl">{f.key === "year" ? (calendar === "lunar" ? t("form.yearLunar") : t("form.yearSolar")) : t(f.labelKey)}</span>
+              <span className="lbl">
+                {f.key === "year" ? (calendar === "lunar" ? t("form.yearLunar") : t("form.yearSolar")) : t(f.labelKey)}
+                {errSub(f.key)}
+              </span>
               <input id={`ti-${f.key}`} type="number" inputMode="numeric" min={f.min} max={f.max}
-                value={v[f.key]} onChange={(e) => setV((s) => ({ ...s, [f.key]: e.target.value }))} />
+                value={v[f.key]}
+                onChange={(e) => { setV((s) => ({ ...s, [f.key]: e.target.value })); if (errField === f.key) { setErrField(""); setError(""); } }}
+                {...(errField === f.key ? { "aria-invalid": true as const, "aria-describedby": "ti-err" } : {})} />
             </label>
           ))}
-          <div className="row">
+          <div className="row" id="ti-gender">
             <Icon name="user" className="ic" />
-            <span className="lbl">{t("form.gender")}</span>
+            <span className="lbl">{t("form.gender")}{errSub("gender")}</span>
             <Seg
               compact
               label={t("form.gender")}
               value={gender}
-              onChange={(g) => { setGender(g); setError(""); }}
+              onChange={(g) => { setGender(g); setError(""); setErrField(""); }}
               options={[
                 { value: "男", label: t("form.male") },
                 { value: "女", label: t("form.female") },
@@ -173,7 +196,7 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
             onChange={setTrueSolar}
           />
         </div>
-        {error ? <p className="notice" role="alert">{error}</p> : null}
+        {error && !errField ? <p className="notice" role="alert">{error}</p> : null}
         <button type="button" className="btn block cta" onClick={start} disabled={busy}>
           <Icon name="spark" />
           {busy ? t("infer.preparing") : t("infer.start")}
@@ -186,7 +209,7 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
   return (
     <div>
       <h2 className="group-title">{t("infer.chatTitle")}</h2>
-      <div className="chat-log">
+      <div className="chat-log" aria-live="polite">
         {log.map((t2, i) => (
           <div key={i} className={`bubble ${t2.role}`}>
             {t2.role === "assistant" ? (
@@ -197,7 +220,7 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
           </div>
         ))}
       </div>
-      {error ? <p className="notice" role="alert">{error}</p> : null}
+      {error && !errField ? <p className="notice" role="alert">{error}</p> : null}
       <form className="chat-input" onSubmit={(e) => { e.preventDefault(); answer(); }}>
         <input value={draft} placeholder={t("infer.answerPh")} onChange={(e) => setDraft(e.target.value)} disabled={busy} aria-label={t("infer.answerPh")} />
         <button className="icon-btn solid" type="submit" disabled={busy || !draft.trim()} aria-label={t("infer.answerBtn")}>

@@ -322,6 +322,13 @@ label.row { cursor: pointer; }
 @keyframes ai-picker-spin { to { transform: rotate(360deg); } }
 
 /* 首頁 hero:河圖洛書特色卡(九宮格視覺,桌面左欄唔留白) */
+/* 手機 / 平板:主任務(表單)緊跟標題同導言,點用同河圖洛書卡移到表單之後;桌面兩欄唔變 */
+@media (max-width: 1023px) {
+  .split-home { display: flex; flex-direction: column; }
+  .split-home > .split-main { display: block; order: 1; }
+  .split-home .intro-sub, .split-home .intro-steps, .split-home .hero-hetu { order: 2; }
+  .split-home > .split-b { display: block; order: 3; }
+}
 .hero-hetu { display: flex; gap: 14px; align-items: center; margin-top: 20px;
   background: linear-gradient(135deg, var(--accent-soft), transparent 75%), var(--card);
   border: 1px solid var(--accent-line); border-radius: var(--radius);
@@ -973,6 +980,15 @@ h1.large + .seg { margin-bottom: 12px; }
 .evid-body { margin-top: 8px; }
 .evid-list { margin: 8px 0 4px; padding-left: 18px; font-size: 13px; color: var(--label-2); }
 .evid-list li { margin: 4px 0; }
+/* 命盤依據(確定性,唔靠模型):同 AI 依據同款摺疊,逐行「標籤 值」 */
+/* 命盤依據唔係另一張卡:去框,上面一條 hairline 同正文分開 */
+.evid.basis { border: 0; border-top: 0.5px solid var(--sep); border-radius: 0; background: none; padding: 4px 0 0; margin-top: 14px; }
+.basis-list { list-style: none; padding-left: 0; }
+.basis-k { color: var(--label); font-weight: 600; margin-right: 8px; }
+.basis-note { font-size: 12px; color: var(--label-2); margin: 6px 0 2px; }
+/* 報告讀完:下一步(大運流年) */
+.btn.next-step { margin-top: 24px; }
+.evid > summary, .think-head { min-height: 44px; }
 
 /* 正文分塊(parseSectionBlocks 渲染):定性塊之間留節奏,唔再係文字牆 */
 .va-block { margin: 20px 0 24px; }

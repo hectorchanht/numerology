@@ -13,6 +13,7 @@ export function Seg<T extends string>({
   compact,
   label,
   tabs,
+  disabled,
 }: {
   value: T;
   options: readonly { value: T; label: string }[];
@@ -21,6 +22,7 @@ export function Seg<T extends string>({
   label?: string;
   /** 切換畫面(唔係揀值)用:tablist / tab 語義。 */
   tabs?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <div className={`seg${compact ? " compact" : ""}`} role={tabs ? "tablist" : "group"} aria-label={label}>
@@ -29,6 +31,7 @@ export function Seg<T extends string>({
           key={o.value}
           type="button"
           className={o.value === value ? "on" : ""}
+          disabled={disabled}
           {...(tabs
             ? { role: "tab", "aria-selected": o.value === value }
             : { "aria-pressed": o.value === value })}

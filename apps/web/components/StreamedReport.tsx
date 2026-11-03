@@ -14,7 +14,7 @@ import { Icon, SECTION_ICON } from "@/components/Icon";
 import { AiModelNote } from "@/components/AiModelNote";
 import { Seg, ScreenNav } from "@/components/ui";
 import { go } from "@/lib/nav";
-import { DualPronounce } from "@/lib/DualPronounce";
+import { PronounceButton } from "@dawn-studio/pronounce";
 import { speechText } from "@/lib/speechText";
 
 /** 分段定义:key 对应引擎 REPORT_SEGMENTS / FORTUNE_SEGMENTS,label 用作章節卡標題。 */
@@ -52,6 +52,10 @@ interface Props {
   restoredLens?: string | null;
   /** 額度用晒時「返去睇命盤」。 */
   onShowChart?: () => void;
+  /** 報告讀完嘅下一步(例如去大運流年)。 */
+  next?: { label: string; onClick: () => void };
+  /** 每節嘅命盤依據(確定性,唔靠模型);有正文先顯示。 */
+  basis?: (segKey: string) => React.ReactNode;
   /** 章節腳註(例如健康 / 財富節嘅專業意見提示),有正文先顯示。 */
   sectionNotes?: Record<string, string>;
   /** 外部觸發生成(遞增即觸發一次,用合參);已有內容就唔重跑。 */
@@ -86,7 +90,7 @@ interface Slot {
 /** 通用流式报告:选视角 → 各节并行调 endpoint → 每节一张卡,逐字渲染 Markdown。 */
 export function StreamedReport({
   input, endpoint, title, description, segments, onSectionDone, restoredSections,
-  collapsible, onAsk, onBack, children, repairText, renderSectionBody, startSignal, sectionNotes, restoredLens, onShowChart,
+  collapsible, onAsk, onBack, children, repairText, renderSectionBody, startSignal, sectionNotes, restoredLens, onShowChart, basis, next,
 }: Props) {
   const { t, locale } = useLocale();
   const [slots, setSlots] = useState<Slot[] | null>(null);
@@ -101,6 +105,7 @@ export function StreamedReport({
   /** 當前命盤正喺度生成(期間唔俾遲到的歷史恢復蓋過)。 */
   const generating = useRef(false);
   const secRef = useRef<HTMLDivElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
   /** 每個視角各自嘅結果:換視角唔會冧咗已生成嘅內容,切返轉頭即刻睇返。 */
   const byLens = useRef<Partial<Record<Lens, Slot[]>>>({});
 
@@ -108,6 +113,8 @@ export function StreamedReport({
   const running = !!slots?.some((s) => s.status === "streaming");
   const settled = slots ? slots.filter((s) => s.status !== "streaming").length : 0;
   const lensLabel = (l: Lens) => t(LENSES.find((x) => x.key === l)!.labelKey);
+  /** 朗讀:每節一粒,預設跟介面語言(粵 / 普 / 英),撳開選單可換。 */
+  const ttsLangs = locale === "en" ? ["en-US"] : locale === "zhs" ? ["zh-CN", "zh-HK"] : ["zh-HK", "zh-CN"];
 
   const key = JSON.stringify(input);
   // 換咗命盤 → 作廢舊一輪並清空。
@@ -268,6 +275,18 @@ export function StreamedReport({
 
   const anyError = !!slots?.some((s) => s.status === "error");
 
+  // 章節 strip 跟住當前節橫向捲(只捲 strip,唔郁頁面),讀到後面幾節都見到自己喺邊。
+  useEffect(() => {
+    const strip = stripRef.current;
+    const chip = strip?.querySelector<HTMLElement>(`[data-k="${active}"]`);
+    if (!strip || !chip) return;
+    const l = chip.offsetLeft;
+    const r = l + chip.offsetWidth;
+    if (l < strip.scrollLeft || r > strip.scrollLeft + strip.clientWidth) {
+      strip.scrollTo({ left: Math.max(0, l - 16), behavior: "smooth" });
+    }
+  }, [active]);
+
   /** 換視角:存低當前結果,有舊結果就即刻顯示,冇就等用戶撳生成(唔會自動覆蓋)。 */
   const switchLens = (l: Lens) => {
     if (running || l === lens) return;
@@ -312,9 +331,10 @@ export function StreamedReport({
   const lensRow = budget ? null : (
     <div className="lens-block">
       <div className="lens-row">
-        <span className="lens-lbl">{t("report.regen")}</span>
+        <span className="lens-lbl">{running ? t("report.lensBusy") : t("report.regen")}</span>
         <Seg
           compact
+          disabled={running}
           label={t("report.regen")}
           value={lens}
           onChange={switchLens}
@@ -346,14 +366,15 @@ export function StreamedReport({
 
       {children}
 
+      {/* 未生成:先講清楚生成乜(換咗視角就先出視角揀選),主行動喺下面 */}
+      {!slots ? (anyLensCached ? lensRow : <p className="note">{description}</p>) : null}
+
       <div className="report-controls">
         {!slots ? (
-          // 未生成(首次,或者換咗去未生成嘅視角):一粒主行動。
+          // 未生成(首次,或者換咗去未生成嘅視角):一粒主行動,同命盤頁 CTA 同一個講法。
           <button type="button" className="btn block" onClick={() => generate(lens)}>
             <Icon name="spark" />
-            {anyLensCached
-              ? t("report.generateLens", { lens: lensLabel(lens) })
-              : t("report.generateN", { n: segments.length })}
+            {t("report.generateLens", { lens: lensLabel(lens) })}
           </button>
         ) : null}
         <AiModelNote />
@@ -361,11 +382,12 @@ export function StreamedReport({
 
       {!slots ? (
         <>
-          <p className="note">{anyLensCached ? t("report.lensIdle") : description}</p>
-          {anyLensCached ? lensRow : <p className="note">{t("report.idleHint")}</p>}
+          <p className="note">{anyLensCached ? t("report.lensIdle") : t("report.idleHint")}</p>
         </>
       ) : (
         <>
+          {/* 進度完成後收起;完成嗰下用隱藏 live region 讀一次 */}
+          <span className="sr-only" role="status">{!running && !anyError && !allBudget ? t("report.stateDone") : ""}</span>
           <div className="progress" hidden={allBudget || !(running || anyError)}>
             <span role="status" aria-live="polite">
               {running || anyError
@@ -398,7 +420,7 @@ export function StreamedReport({
 
           {/* 手機:頂部 sticky 章節 strip;桌面:左側 sticky 目錄 + 右側正文(.report-body grid) */}
           <div className="report-body" hidden={allBudget}>
-            <div className="strip sticky-strip">
+            <div className="strip sticky-strip" ref={stripRef}>
               {segments.map((seg, i) => {
                 const s = slots[i];
                 if (s?.code === "AI_BUDGET") return null;
@@ -406,6 +428,7 @@ export function StreamedReport({
                   <button
                     key={seg.key}
                     type="button"
+                    data-k={seg.key}
                     aria-current={active === seg.key ? "true" : undefined}
                     className={`chip${active === seg.key ? " on" : ""}`}
                     onClick={() => jump(seg.key)}
@@ -465,7 +488,7 @@ export function StreamedReport({
                       {state !== "stateDone" ? <span className="sec-state">{t(`report.${state}` as TKey)}</span> : null}
                       {readText ? (
                         <span className="sec-tts" title={t("select.readSection")}>
-                          <DualPronounce text={readText} locale={locale} mode="all" />
+                          <PronounceButton text={readText} locale={locale} mode="all" langs={ttsLangs} />
                         </span>
                       ) : null}
                     </div>
@@ -477,6 +500,7 @@ export function StreamedReport({
                           renderCustom={(body) => renderSectionBody?.(seg.key, body, shownLens ?? "both") ?? null}
                         />
                       ) : null}
+                      {has ? basis?.(seg.key) : null}
                       {has && sectionNotes?.[seg.key] ? (
                         <p className="note">{sectionNotes[seg.key]}</p>
                       ) : null}
@@ -506,6 +530,13 @@ export function StreamedReport({
 
           {/* 換視角放報告尾:讀完先決定要唔要換個角度 */}
           {allBudget ? null : lensRow}
+
+          {next && !budget ? (
+            <button type="button" className="btn block next-step" onClick={next.onClick} disabled={running}>
+              {next.label}
+              <Icon name="chev" />
+            </button>
+          ) : null}
 
           <div className="btn-row" hidden={!!budget}>
             {onAsk ? (

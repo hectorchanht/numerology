@@ -34,6 +34,7 @@
     "lib/aiOpts.ts",
     "lib/sectionIcons.ts",
     "lib/ganzhi.ts",
+    "lib/basis.ts",
     "lib/yijingStrings.ts",
     "lib/poster.ts",
     "lib/yijingSite.ts",
