@@ -12,21 +12,26 @@ export function Seg<T extends string>({
   onChange,
   compact,
   label,
+  tabs,
 }: {
   value: T;
   options: readonly { value: T; label: string }[];
   onChange: (v: T) => void;
   compact?: boolean;
   label?: string;
+  /** 切換畫面(唔係揀值)用:tablist / tab 語義。 */
+  tabs?: boolean;
 }) {
   return (
-    <div className={`seg${compact ? " compact" : ""}`} role="group" aria-label={label}>
+    <div className={`seg${compact ? " compact" : ""}`} role={tabs ? "tablist" : "group"} aria-label={label}>
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           className={o.value === value ? "on" : ""}
-          aria-pressed={o.value === value}
+          {...(tabs
+            ? { role: "tab", "aria-selected": o.value === value }
+            : { "aria-pressed": o.value === value })}
           onClick={() => onChange(o.value)}
         >
           {o.label}

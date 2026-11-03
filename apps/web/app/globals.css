@@ -299,6 +299,13 @@ label.row { cursor: pointer; }
 .ai-pills .pill.warn { color: #ff8a80; border-color: rgba(255, 138, 128, 0.5); background: rgba(255, 138, 128, 0.12); }
 /* pills 係按鈕(撳開 picker):hover 微亮提示可撳 */
 .ai-pills button.pill:hover { filter: brightness(1.2); }
+/* 報告頁:provider / model / key 收成一行中性小字(撳落照開 picker),唔搶正文 */
+.report-controls .ai-pills { flex-wrap: nowrap; gap: 0; margin: 0; overflow: hidden; }
+.report-controls .ai-pills .pill, .report-controls .ai-pills .pill.model,
+.report-controls .ai-pills .pill.ok, .report-controls .ai-pills .pill.warn {
+  border: 0; background: none; color: var(--label-2); padding: 0; min-height: 32px; border-radius: 0;
+  overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.report-controls .ai-pills .pill + .pill::before { content: "·"; margin: 0 6px; color: var(--label-2); }
 /* pill picker 內容(用 FloatingCard 定位,點別處 / Escape 即關) */
 .ai-picker { display: flex; flex-direction: column; gap: 2px; }
 .ai-picker .hd { font-size: 11px; font-weight: 600; color: var(--label-2); padding: 2px 4px 6px; }
@@ -406,7 +413,10 @@ label.row { cursor: pointer; }
 
 /* ---------- 報告 ---------- */
 .report-controls { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
-/* 生成後:換視角一行(次要),唔用金色主掣搶正文 */
+/* 報告尾:換視角(次要),每個視角各自保留結果 */
+.lens-block { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 24px; }
+.lens-block .lens-row { align-self: stretch; }
+.lens-block .btn.secondary { color: var(--label-2); }
 .lens-row { display: flex; align-items: center; gap: 8px; }
 .lens-row .seg { flex: 1; min-width: 0; }
 .lens-lbl { font-size: 13px; color: var(--label-2); white-space: nowrap; }
@@ -420,6 +430,10 @@ label.row { cursor: pointer; }
 button.sec-h { min-height: 44px; margin: -8px 0; }
 .sec-h > .i { color: var(--accent-text); }
 .sec-title { font-size: 19px; font-weight: 600; flex: 1; min-width: 0; }
+.sec-hd-row { display: flex; align-items: center; gap: 8px; }
+.sec-hd-row > .sec-hd { flex: 1; min-width: 0; }
+.sec-tts { flex: none; display: inline-flex; }
+.budget-tech { font-size: 12px; }
 .sec-state { font-size: 12px; color: var(--label-2); white-space: nowrap; }
 .sec.streaming .sec-state, .sec.pending .sec-state {
   color: transparent; background: linear-gradient(90deg, var(--label-3) 0%, var(--label) 50%, var(--label-3) 100%);
@@ -830,7 +844,6 @@ h1.large + .seg { margin-bottom: 12px; }
   /* 報告 / 大運:左 sticky 目錄,右章節 */
   .report-controls { flex-direction: row; align-items: center; }
   .report-controls > .seg { flex: 1; max-width: 440px; }
-  .report-controls > .lens-row { flex: 1; max-width: 520px; }
   .report-controls > .btn.block { width: auto; padding: 0 28px; }
   .report-body { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 0 40px; align-items: start; }
   .report-body > .sticky-strip { position: sticky; top: 24px; flex-direction: column; gap: 2px; overflow: visible;
