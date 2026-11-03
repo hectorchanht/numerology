@@ -6,6 +6,7 @@ colors:
   lamplight-amber-soft: "rgba(227, 168, 87, 0.16)"
   lamplight-amber-line: "rgba(227, 168, 87, 0.45)"
   on-amber: "#1a1206"
+  amber-text-light: "#8f5a12"
   ink-black: "#000000"
   ink-card: "#1c1c1e"
   ink-card-2: "#2c2c2e"
@@ -20,6 +21,7 @@ colors:
   paper-card: "#f2f2f7"
   paper-card-2: "#e5e5ea"
   paper-label: "#1c1c1e"
+  paper-label-2: "rgba(60, 60, 67, 0.78)"
   signal-green: "#30d158"
   warn-coral: "#ff8a80"
 typography:
@@ -173,6 +175,7 @@ Ink greys carry all structure; lamplight amber is the only voice.
 - **Amber Wash** (rgba(227,168,87,0.16); 0.2 in light): tinted grounds — TL;DR card, accent tags, step-number discs, model pill.
 - **Amber Line** (rgba(227,168,87,0.45); 0.6 in light): secondary rings — opposite/trine palaces, accent stat cards, the middle tier of the three-level significance meter.
 - **Amber Ink** (#1a1206): text on solid amber.
+- **Amber Text, light theme** (#8f5a12): amber used *as text* (links, text buttons, accent labels) in the light theme, via `--accent-text`. Solid amber grounds, washes and rings keep #e3a857 in both themes; only the glyph colour deepens, because #e3a857 on #f2f2f7 is 1.9:1.
 
 ### Neutral
 - **Ink Black** (#000000): page ground (dark). Desktop wide-screen ground is #0a0a0a.
@@ -180,13 +183,15 @@ Ink greys carry all structure; lamplight amber is the only voice.
 - **Ink Fill** (rgba(118,118,128,0.24)): input grounds, segmented track, neutral tags, chart tracks.
 - **Separator** (rgba(84,84,88,0.6)): 0.5px hairlines between rows and table lines.
 - **Label / Label 2 / Label 3** (#fff / 60% / 38%): primary, secondary, tertiary text. Body prose uses 88% white.
-- **Paper White / Paper Card / Paper Card 2 / Paper Label** (#fff / #f2f2f7 / #e5e5ea / #1c1c1e): the light theme counterparts, following Apple system light.
+- **Paper White / Paper Card / Paper Card 2 / Paper Label** (#fff / #f2f2f7 / #e5e5ea / #1c1c1e): the light theme counterparts, following Apple system light. Light-theme Label 2 is 78% (not Apple's 60%) so secondary text clears 4.5:1 on Paper Card.
 
 ### Status
 - **Signal Green** (#30d158; #34c759 light): toggle on, "ok" pill only.
 - **Warn Coral** (#ff8a80): warning pill only.
 
 ### Named Rules
+**The Amber Text Rule.** Text set in amber uses `--accent-text`, never `--accent` directly; fills, rings and washes use `--accent`.
+
 **The One Gold Rule.** Lamplight amber is the only hue in the chrome. If two things on a screen are amber, ask which one is the real point; status green and coral are reserved for status pills and the toggle, never decoration.
 
 **The Grey Does the Work Rule.** Hierarchy comes from the label ladder (100 / 60 / 38%) and the card ladder, not from new colours. Charts encode tiers with amber-to-grey steps plus height or count, never colour alone.

@@ -126,7 +126,7 @@ function Detail({ hex, loc, onBack }: { hex: Hexagram; loc: YL; onBack: () => vo
                 style={{
                   minWidth: "3.4em",
                   fontFamily: "var(--serif)",
-                  color: "var(--cinnabar)",
+                  color: "var(--accent-text)",
                 }}
               >
                 {zT(yaoName(hex, pos))}

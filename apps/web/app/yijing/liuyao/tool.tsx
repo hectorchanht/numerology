@@ -298,7 +298,7 @@ export default function LiuyaoTool({ historyId }: { historyId?: string }) {
 
       {result.err && (
         <div className="card" style={{ borderColor: "var(--cinnabar)" }}>
-          <p style={{ margin: 0, color: "var(--cinnabar)" }}>{result.err}</p>
+          <p style={{ margin: 0, color: "var(--accent-text)" }}>{result.err}</p>
         </div>
       )}
 
@@ -343,7 +343,7 @@ export default function LiuyaoTool({ historyId }: { historyId?: string }) {
                 <span style={{ fontFamily: "var(--serif)", fontSize: "1.05rem", minWidth: "3.4em" }}>
                   {y.ganzhi}
                 </span>
-                <span style={{ color: "var(--cinnabar)", minWidth: "3em" }}>
+                <span style={{ color: "var(--accent-text)", minWidth: "3em" }}>
                   {loc === "en" ? QIN_EN[y.qin] : zT(y.qin)}
                 </span>
                 <YaoGlyph yang={y.yinYang === "陽"} moving={y.moving} />

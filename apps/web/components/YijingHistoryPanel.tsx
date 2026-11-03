@@ -69,7 +69,7 @@ function CastRow({ rec, loc, zT }: { rec: YijingCast; loc: YijingLocale; zT: (s:
               type="button"
               className="btn"
               onClick={onDelete}
-              style={{ color: "var(--cinnabar)", borderColor: "var(--cinnabar-soft)", padding: "0.3rem 0.7rem", fontSize: "0.85rem" }}
+              style={{ color: "var(--accent-text)", borderColor: "var(--cinnabar-soft)", padding: "0.3rem 0.7rem", fontSize: "0.85rem" }}
             >
               {yjT("yijing.hist.confirmDelete", loc)}
             </button>
@@ -128,7 +128,7 @@ function CastRow({ rec, loc, zT }: { rec: YijingCast; loc: YijingLocale; zT: (s:
           href={`${KIND_HREF[rec.kind]}?h=${rec.id}`}
           style={{ display: "flex", alignItems: "center", gap: "0.7rem", marginTop: "0.6rem", textDecoration: "none", color: "inherit" }}
         >
-          <span style={{ display: "grid", placeItems: "center", width: "2.6rem", height: "2.6rem", color: "var(--accent)" }}>
+          <span style={{ display: "grid", placeItems: "center", width: "2.6rem", height: "2.6rem", color: "var(--accent-text)" }}>
             <Icon name="compass" />
           </span>
           <span style={{ flex: 1 }}>

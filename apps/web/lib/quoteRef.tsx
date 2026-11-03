@@ -97,7 +97,7 @@ export function QuoteRef({ entry }: { entry: QuoteRefEntry }) {
             },
             createElement(
               "span",
-              { style: { color: "var(--cinnabar)" } },
+              { style: { color: "var(--accent-text)" } },
               entry.sourceLabel,
             ),
             createElement(

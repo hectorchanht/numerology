@@ -15,7 +15,7 @@ function Row({ r }: { r: PosterRow }) {
   return (
     <div className="poster-row">
       <span className="poster-k">{r.label}</span>
-      <span className="poster-v2" style={r.accent ? { color: "var(--cinnabar)" } : undefined}>
+      <span className="poster-v2" style={r.accent ? { color: "var(--accent-text)" } : undefined}>
         {r.value}
         {r.note && (
           <span className="muted" style={{ fontSize: "0.8rem", marginLeft: "0.5rem" }}>

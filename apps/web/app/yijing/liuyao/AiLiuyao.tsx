@@ -64,7 +64,7 @@ export function AiLiuyao({
       )}
       {state === "error" && (
         <div className="card" style={{ marginTop: "0.8rem", borderColor: "var(--cinnabar)" }}>
-          <p style={{ margin: "0 0 0.6rem", color: "var(--cinnabar)" }}>{err}</p>
+          <p style={{ margin: "0 0 0.6rem", color: "var(--accent-text)" }}>{err}</p>
           <button className="btn ghost" onClick={start}>
             {yjT("ai.retry", locale)}
           </button>

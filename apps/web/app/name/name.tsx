@@ -199,7 +199,7 @@ export default function NameTool() {
           <div className="card" style={{ padding: 20, marginBottom: 16, textAlign: "center" }}>
             <div style={{ fontSize: "1.3rem", fontWeight: 800 }}>{z(result.surname + result.given)}</div>
             <div style={{ margin: "8px 0" }}>
-              <span style={{ fontSize: "4rem", fontWeight: 800, color: "var(--accent)" }}>{result.score}</span>
+              <span style={{ fontSize: "4rem", fontWeight: 800, color: "var(--accent-text)" }}>{result.score}</span>
               <span className="muted" style={{ marginLeft: 6 }}>{t("name.scoreUnit")}</span>
             </div>
             <div style={{ fontWeight: 700, color: LUCK_COLOR[result.zong.luck] }}>

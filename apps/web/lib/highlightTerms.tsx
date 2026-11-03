@@ -153,7 +153,7 @@ export function Term({ term }: { term: string }) {
               {
                 style: {
                   fontFamily: "var(--serif)",
-                  color: "var(--cinnabar)",
+                  color: "var(--accent-text)",
                 },
               },
               zT(def.term),

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-02T13:00:00Z",
+  "generatedAt": "2026-11-03T12:00:00Z",
   "title": "Design System: 洛書命理",
   "extensions": {
     "colorMeta": {
@@ -123,6 +123,16 @@
         "role": "status",
         "displayName": "Warn Coral",
         "canonical": "#ff8a80"
+      },
+      "amber-text-light": {
+        "role": "primary",
+        "displayName": "Amber Text (light theme)",
+        "canonical": "#8f5a12"
+      },
+      "paper-label-2": {
+        "role": "neutral",
+        "displayName": "Paper Label 2 (light theme)",
+        "canonical": "rgba(60, 60, 67, 0.78)"
       }
     },
     "typographyMeta": {
@@ -335,6 +345,11 @@
         "name": "The Ring Not Lift Rule",
         "body": "To highlight a chart cell or card, draw an inset ring in amber or amber-line; do not add a drop shadow.",
         "section": "elevation"
+      },
+      {
+        "name": "The Amber Text Rule",
+        "body": "Text set in amber uses `--accent-text`, never `--accent` directly; fills, rings and washes use `--accent`.",
+        "section": "colors"
       }
     ],
     "dos": [

@@ -124,7 +124,7 @@ export default function FengshuiTool() {
             <div style={{ fontSize: "1.3rem", fontWeight: 800 }}>
               {t("fengshui.sitGua", { gua: z(sit) })} · {z(result.xiangGua)}向
             </div>
-            <div style={{ color: "var(--accent)", fontWeight: 700, marginTop: 4 }}>
+            <div style={{ color: "var(--accent-text)", fontWeight: 700, marginTop: 4 }}>
               {t("fengshui.yun", { yun: result.yunNum })}
             </div>
           </div>
@@ -148,7 +148,7 @@ export default function FengshuiTool() {
                     <span className="muted">{t("fengshui.xiangStar")}</span>
                     <span style={{ color: STATE_COLOR[p.xiangState] }}>{p.xiang}</span>
                   </div>
-                  <div style={{ fontSize: "0.72rem", color: "var(--accent)", marginTop: 2 }}>{z(p.note)}</div>
+                  <div style={{ fontSize: "0.72rem", color: "var(--accent-text)", marginTop: 2 }}>{z(p.note)}</div>
                 </div>
               );
             })}

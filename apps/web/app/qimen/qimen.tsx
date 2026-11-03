@@ -180,7 +180,7 @@ export default function QimenTool({ historyId }: { historyId?: string }) {
       {result && (
         <div>
           <div className="card" style={{ padding: 16, marginBottom: 12, textAlign: "center" }}>
-            <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "var(--accent)" }}>
+            <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "var(--accent-text)" }}>
               {t("qimen.dunju", { dun: z(result.dun), ju: result.ju })}
             </div>
             <div className="muted" style={{ marginTop: 4, fontSize: "0.9rem" }}>
@@ -201,11 +201,11 @@ export default function QimenTool({ historyId }: { historyId?: string }) {
                 <div key={g} className="card" style={{ padding: "10px 8px", minHeight: 118 }}>
                   <div style={{ fontWeight: 700, fontSize: "0.85rem", marginBottom: 4 }}>
                     {z(p.gongName)}{g}宮
-                    {p.maXing && <span style={{ color: "var(--accent)" }}> 馬</span>}
+                    {p.maXing && <span style={{ color: "var(--accent-text)" }}> 馬</span>}
                     {p.kongWang && <span style={{ color: "#ff9f0a" }}> 空</span>}
                   </div>
                   <div style={{ fontSize: "0.82rem" }}>
-                    <span style={{ color: "var(--accent)", fontWeight: 700 }}>{z(p.tianPan)}</span>
+                    <span style={{ color: "var(--accent-text)", fontWeight: 700 }}>{z(p.tianPan)}</span>
                     <span className="muted"> {z(p.star)}</span>
                   </div>
                   <div className="muted" style={{ fontSize: "0.82rem" }}>

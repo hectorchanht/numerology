@@ -90,7 +90,7 @@ function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBa
         style={{
           font: "inherit",
           fontSize: 14,
-          color: "var(--accent)",
+          color: "var(--accent-text)",
           background: "none",
           border: "none",
           cursor: "pointer",
@@ -110,7 +110,7 @@ function CaseDetail({ c, loc, onBack }: { c: ZhanliCase; loc: YijingLocale; onBa
             href={c.sourceUrl}
             target="_blank"
             rel="noreferrer"
-            style={{ color: "var(--accent)" }}
+            style={{ color: "var(--accent-text)" }}
           >
             查原文 ↗
           </a>

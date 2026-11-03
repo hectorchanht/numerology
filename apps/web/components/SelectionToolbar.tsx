@@ -375,7 +375,7 @@ export function SelectionToolbar() {
           loading ? (
             <span style={{ color: "var(--label-2)" }}>{t("select.explainLoading")}</span>
           ) : err ? (
-            <span style={{ color: "var(--accent)" }}>{err}</span>
+            <span style={{ color: "var(--accent-text)" }}>{err}</span>
           ) : (
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownTermComponents}>
               {answer}
@@ -401,7 +401,7 @@ export function SelectionToolbar() {
               style={{
                 ...BTN_STYLE,
                 background: "var(--accent-soft)",
-                color: "var(--accent)",
+                color: "var(--accent-text)",
                 fontWeight: 600,
                 flex: 1,
                 justifyContent: "center",
