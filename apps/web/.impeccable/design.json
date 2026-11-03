@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-02T13:00:00Z",
+  "title": "Design System: 洛書命理",
+  "extensions": {
+    "colorMeta": {
+      "lamplight-amber": {
+        "role": "primary",
+        "displayName": "Lamplight Amber 燈火金",
+        "canonical": "#e3a857",
+        "tonalRamp": [
+          "oklch(25% 0.04 70)",
+          "oklch(35% 0.06 70)",
+          "oklch(48% 0.09 70)",
+          "oklch(60% 0.11 70)",
+          "oklch(70% 0.12 70)",
+          "oklch(78% 0.11 72)",
+          "oklch(87% 0.07 75)",
+          "oklch(95% 0.03 78)"
+        ]
+      },
+      "lamplight-amber-soft": {
+        "role": "primary",
+        "displayName": "Amber Wash",
+        "canonical": "rgba(227, 168, 87, 0.16)"
+      },
+      "lamplight-amber-line": {
+        "role": "primary",
+        "displayName": "Amber Line",
+        "canonical": "rgba(227, 168, 87, 0.45)"
+      },
+      "on-amber": {
+        "role": "primary",
+        "displayName": "Amber Ink",
+        "canonical": "#1a1206"
+      },
+      "ink-black": {
+        "role": "neutral",
+        "displayName": "Ink Black",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "#000000",
+          "#0a0a0a",
+          "#1c1c1e",
+          "#2c2c2e",
+          "#3a3a3c",
+          "#636366",
+          "#d1d1d6",
+          "#f2f2f7"
+        ]
+      },
+      "ink-card": {
+        "role": "neutral",
+        "displayName": "Ink Card",
+        "canonical": "#1c1c1e"
+      },
+      "ink-card-2": {
+        "role": "neutral",
+        "displayName": "Ink Card 2",
+        "canonical": "#2c2c2e"
+      },
+      "ink-card-3": {
+        "role": "neutral",
+        "displayName": "Ink Card 3",
+        "canonical": "#3a3a3c"
+      },
+      "ink-fill": {
+        "role": "neutral",
+        "displayName": "Ink Fill",
+        "canonical": "rgba(118, 118, 128, 0.24)"
+      },
+      "ink-separator": {
+        "role": "neutral",
+        "displayName": "Separator",
+        "canonical": "rgba(84, 84, 88, 0.6)"
+      },
+      "label": {
+        "role": "neutral",
+        "displayName": "Label",
+        "canonical": "#ffffff"
+      },
+      "label-2": {
+        "role": "neutral",
+        "displayName": "Label 2",
+        "canonical": "rgba(235, 235, 245, 0.6)"
+      },
+      "label-3": {
+        "role": "neutral",
+        "displayName": "Label 3",
+        "canonical": "rgba(235, 235, 245, 0.38)"
+      },
+      "body-text": {
+        "role": "neutral",
+        "displayName": "Body Text",
+        "canonical": "rgba(255, 255, 255, 0.88)"
+      },
+      "paper-white": {
+        "role": "neutral",
+        "displayName": "Paper White (light theme)",
+        "canonical": "#ffffff"
+      },
+      "paper-card": {
+        "role": "neutral",
+        "displayName": "Paper Card (light theme)",
+        "canonical": "#f2f2f7"
+      },
+      "paper-card-2": {
+        "role": "neutral",
+        "displayName": "Paper Card 2 (light theme)",
+        "canonical": "#e5e5ea"
+      },
+      "paper-label": {
+        "role": "neutral",
+        "displayName": "Paper Label (light theme)",
+        "canonical": "#1c1c1e"
+      },
+      "signal-green": {
+        "role": "status",
+        "displayName": "Signal Green",
+        "canonical": "#30d158"
+      },
+      "warn-coral": {
+        "role": "status",
+        "displayName": "Warn Coral",
+        "canonical": "#ff8a80"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page title (h1.large); 40px on desktop."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "干支 glyphs in pillar cards and chart tables."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Report section titles and stat values."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Base UI text."
+      },
+      "prose": {
+        "displayName": "Prose",
+        "purpose": "Streamed AI interpretation."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Uppercase group titles above grouped lists."
+      }
+    },
+    "shadows": [
+      {
+        "name": "segment-thumb",
+        "value": "0 2px 6px rgba(0, 0, 0, 0.3)",
+        "purpose": "Selected segment in a segmented control (0.12 in light)."
+      },
+      {
+        "name": "toggle-knob",
+        "value": "0 2px 4px rgba(0, 0, 0, 0.2)",
+        "purpose": "iOS switch thumb."
+      },
+      {
+        "name": "popover",
+        "value": "0 8px 24px rgba(0, 0, 0, 0.5)",
+        "purpose": "Floating pickers and selection toolbar (0.14 in light)."
+      },
+      {
+        "name": "ring-selected",
+        "value": "inset 0 0 0 1.5px #e3a857",
+        "purpose": "Selected palace / current year; depth by ring, not lift."
+      },
+      {
+        "name": "ring-related",
+        "value": "inset 0 0 0 1px rgba(227, 168, 87, 0.45)",
+        "purpose": "Opposite/trine palaces, accent stat cards."
+      }
+    ],
+    "motion": [
+      {
+        "name": "screen-fade",
+        "value": "fade 0.22s ease-out (opacity + 4px rise)",
+        "purpose": "Screen entry; disabled under prefers-reduced-motion."
+      },
+      {
+        "name": "sheet-up",
+        "value": "0.22s ease-out (24px rise)",
+        "purpose": "Mobile 更多 sheet."
+      },
+      {
+        "name": "control",
+        "value": "0.2s",
+        "purpose": "Toggle, caret rotation."
+      },
+      {
+        "name": "shimmer",
+        "value": "1.4s linear infinite",
+        "purpose": "Streaming section state text."
+      },
+      {
+        "name": "pulse",
+        "value": "1.2s ease-in-out infinite",
+        "purpose": "Streaming dot on section chips."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "<768px",
+        "purpose": "Single column max 430px, bottom tab bar."
+      },
+      {
+        "name": "desk-ground",
+        "value": "600px",
+        "purpose": "Column gets hairline borders on desk ground."
+      },
+      {
+        "name": "tablet",
+        "value": "768px",
+        "purpose": "720px column, two-column forms."
+      },
+      {
+        "name": "desktop",
+        "value": "1024px",
+        "purpose": "240px sidebar, multi-column content."
+      },
+      {
+        "name": "wide",
+        "value": "1280px",
+        "purpose": "Chart page right rail."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main action; solid amber, one per screen.",
+      "html": "<button class=\"ds-btn\">排盤</button>",
+      "css": ".ds-btn { min-height: 50px; padding: 0 20px; border: 0; border-radius: 14px; background: #e3a857; color: #1a1206; font: 600 17px/1 -apple-system, BlinkMacSystemFont, 'PingFang HK', sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; } .ds-btn:active { opacity: 0.8; } .ds-btn:focus-visible { outline: 2px solid #e3a857; outline-offset: 2px; } .ds-btn:disabled { opacity: 0.45; cursor: not-allowed; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Secondary action on ink card ground.",
+      "html": "<button class=\"ds-btn-2\">匯出 PDF</button>",
+      "css": ".ds-btn-2 { min-height: 50px; padding: 0 20px; border: 0; border-radius: 14px; background: #1c1c1e; color: #e3a857; font: 600 17px/1 -apple-system, BlinkMacSystemFont, 'PingFang HK', sans-serif; cursor: pointer; } .ds-btn-2:active { opacity: 0.8; } .ds-btn-2:focus-visible { outline: 2px solid #e3a857; outline-offset: 2px; }"
+    },
+    {
+      "name": "Grouped List Row",
+      "kind": "custom",
+      "refersTo": "list-row",
+      "description": "iOS grouped list with inset hairline separators.",
+      "html": "<div class=\"ds-list\"><button class=\"ds-row\"><span class=\"ds-lbl\">出生日期</span><span class=\"ds-val\">1990-05-12</span><span class=\"ds-chev\">›</span></button><button class=\"ds-row\"><span class=\"ds-lbl\">出生地</span><span class=\"ds-val\">香港</span><span class=\"ds-chev\">›</span></button></div>",
+      "css": ".ds-list { background: #1c1c1e; border-radius: 14px; overflow: hidden; } .ds-row { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 10px 16px; width: 100%; border: 0; background: none; color: #fff; font: 400 17px/1.45 -apple-system, 'PingFang HK', sans-serif; text-align: left; position: relative; cursor: pointer; } .ds-row + .ds-row::before { content: ''; position: absolute; top: 0; left: 16px; right: 0; height: 0.5px; background: rgba(84,84,88,0.6); } .ds-row:active { background: #2c2c2e; } .ds-row:focus-visible { outline: 2px solid #e3a857; outline-offset: -2px; } .ds-lbl { flex: 1; } .ds-val { color: rgba(235,235,245,0.6); font-size: 15px; } .ds-chev { color: rgba(235,235,245,0.38); }"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "custom",
+      "refersTo": "segmented",
+      "description": "Native-style segmented switch (e.g. 陽曆 / 陰曆).",
+      "html": "<div class=\"ds-seg\"><button class=\"on\">陽曆</button><button>陰曆</button></div>",
+      "css": ".ds-seg { display: flex; background: rgba(118,118,128,0.24); border-radius: 10px; padding: 2px; gap: 2px; } .ds-seg button { flex: 1; min-height: 40px; border: 0; border-radius: 8px; background: none; color: rgba(235,235,245,0.6); font: 400 15px/1 -apple-system, 'PingFang HK', sans-serif; cursor: pointer; } .ds-seg button.on { background: #636366; color: #fff; font-weight: 600; box-shadow: 0 2px 6px rgba(0,0,0,0.3); } .ds-seg button:focus-visible { outline: 2px solid #e3a857; outline-offset: 2px; }"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Section strip chip; selected inverts to white.",
+      "html": "<div class=\"ds-strip\"><a class=\"ds-chip on\">格局</a><a class=\"ds-chip\"><i class=\"ds-dot\"></i>大運</a><a class=\"ds-chip\">流年</a></div>",
+      "css": ".ds-strip { display: flex; gap: 8px; } .ds-chip { min-height: 44px; padding: 0 16px; border-radius: 22px; background: #1c1c1e; color: rgba(235,235,245,0.6); font: 400 15px/1 -apple-system, 'PingFang HK', sans-serif; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; } .ds-chip.on { background: #fff; color: #000; font-weight: 600; } .ds-chip:focus-visible { outline: 2px solid #e3a857; outline-offset: 2px; } .ds-dot { width: 6px; height: 6px; border-radius: 50%; background: #e3a857; animation: ds-pulse 1.2s ease-in-out infinite; } @keyframes ds-pulse { 50% { opacity: 0.3; } }"
+    },
+    {
+      "name": "Report Section with TL;DR",
+      "kind": "card",
+      "refersTo": "tldr-card",
+      "description": "Signature: conclusion-first AI section card.",
+      "html": "<section class=\"ds-sec\"><div class=\"ds-sec-h\"><span class=\"ds-sec-t\">命盤格局</span><span class=\"ds-sec-s\">完成</span></div><div class=\"ds-tldr\"><span class=\"ds-tldr-k\">TL;DR</span><p>身弱用印，宜靜不宜躁。</p></div><p class=\"ds-prose\">日主丙火生於子月，水旺火弱……</p></section>",
+      "css": ".ds-sec { background: #1c1c1e; border-radius: 14px; padding: 18px; color: #fff; font-family: -apple-system, 'PingFang HK', sans-serif; } .ds-sec-h { display: flex; align-items: center; gap: 10px; } .ds-sec-t { flex: 1; font-size: 19px; font-weight: 600; } .ds-sec-s { font-size: 12px; color: rgba(235,235,245,0.38); } .ds-tldr { margin: 12px 0 14px; padding: 12px 14px; border-radius: 14px; background: rgba(227,168,87,0.16); box-shadow: inset 0 0 0 1px rgba(227,168,87,0.45); } .ds-tldr-k { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: #e3a857; } .ds-tldr p { margin: 2px 0 0; font-size: 16px; line-height: 1.55; font-weight: 600; } .ds-prose { margin: 0; font-size: 16px; line-height: 1.65; color: rgba(255,255,255,0.88); }"
+    },
+    {
+      "name": "Four Pillars",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Signature: 八字 pillars; day pillar marked by amber inset ring.",
+      "html": "<div class=\"ds-pillars\"><div class=\"ds-pl\"><div class=\"h\">年</div><div class=\"gz\">庚<br>午</div><div class=\"ss\">偏財</div></div><div class=\"ds-pl\"><div class=\"h\">月</div><div class=\"gz\">辛<br>巳</div><div class=\"ss\">正財</div></div><div class=\"ds-pl day\"><div class=\"h\">日</div><div class=\"gz\">丙<br>子</div><div class=\"ss\">日主</div></div><div class=\"ds-pl\"><div class=\"h\">時</div><div class=\"gz\">甲<br>午</div><div class=\"ss\">偏印</div></div></div>",
+      "css": ".ds-pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; font-family: -apple-system, 'PingFang HK', sans-serif; color: #fff; } .ds-pl { background: #1c1c1e; border-radius: 14px; padding: 14px 4px 12px; } .ds-pl .h, .ds-pl .ss { font-size: 12px; color: rgba(235,235,245,0.6); } .ds-pl .gz { font-size: 30px; line-height: 1.2; font-weight: 500; margin: 8px 0 6px; letter-spacing: 0.02em; } .ds-pl.day { box-shadow: inset 0 0 0 1px #e3a857; } .ds-pl.day .ss { color: #e3a857; }"
+    },
+    {
+      "name": "Tab Bar",
+      "kind": "nav",
+      "refersTo": "tabbar",
+      "description": "Phone/tablet frosted bottom navigation; active in amber.",
+      "html": "<nav class=\"ds-tabbar\"><button class=\"on\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><circle cx=\"12\" cy=\"12\" r=\"8\"/></svg>命盤</button><button><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M5 5h14v14H5z\"/></svg>易經</button><button><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M4 12h16M12 4v16\"/></svg>更多</button></nav>",
+      "css": ".ds-tabbar { display: grid; grid-template-columns: repeat(3, 1fr); height: 56px; background: rgba(18,18,18,0.82); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-top: 0.5px solid rgba(84,84,88,0.6); } .ds-tabbar button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: 0; background: none; color: rgba(235,235,245,0.45); font: 400 10px/1 -apple-system, 'PingFang HK', sans-serif; letter-spacing: 0.02em; cursor: pointer; } .ds-tabbar button.on { color: #e3a857; } .ds-tabbar button:focus-visible { outline: 2px solid #e3a857; outline-offset: -2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Gold Leaf on Ink（墨中一點金）",
+    "overview": "The interface is ink: true black ground, three steps of charcoal card, and labels that fall back through white, 60% and 38% opacity. Against it there is exactly one warm colour, a lamplight amber, applied the way gold leaf is applied to a scroll — only on the stroke that matters most. The day pillar of a 八字 chart, the 命宮 of a 紫微 board, the active tab, the primary action, the one-line conclusion of a report section. Everything else stays in grey so the gold keeps its meaning.\n\nStructurally it is an Apple-native app, not a mystic poster. System fonts, grouped lists, 44px touch targets, segmented controls, frosted sticky bars, an iOS toggle, a bottom tab bar on phones and a translucent sidebar on desktop. Familiarity is deliberate: the charts are dense and technical, so the chrome stays recognisable and quiet, and the cultural character lives in the content (干支, 星曜, 卦) and in the restraint of the single accent. Components feel native and restrained — no ornament, no decorative gradients, no custom fonts or CDN.\n\nDensity is mobile-first and medium: a 390–430px single column with a 20px gutter, cards separated by 12px, content that reads conclusion-first with evidence folded underneath.",
+    "keyCharacteristics": [
+      "Near-monochrome dark ground; light theme mirrors Apple system light.",
+      "One accent colour, identical in both themes.",
+      "Depth by tonal layering and inset rings, not shadows.",
+      "iOS-native controls and grouped-list rhythm.",
+      "System font stack; tabular numerals for years and counts.",
+      "Conclusion first (TL;DR card), evidence collapsed below."
+    ],
+    "rules": [
+      {
+        "name": "The One Gold Rule",
+        "body": "Lamplight amber is the only hue in the chrome. If two things on a screen are amber, ask which one is the real point; status green and coral are reserved for status pills and the toggle, never decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The Grey Does the Work Rule",
+        "body": "Hierarchy comes from the label ladder (100 / 60 / 38%) and the card ladder, not from new colours. Charts encode tiers with amber-to-grey steps plus height or count, never colour alone.",
+        "section": "colors"
+      },
+      {
+        "name": "The Weight Not Size Rule",
+        "body": "Inside a card, emphasis moves by weight (400 → 600) and label opacity before it moves by size. The scale has few steps on purpose.",
+        "section": "typography"
+      },
+      {
+        "name": "The Phone Is Canon Rule",
+        "body": "The 390–430px mobile layout and its bottom tab bar are the reference; larger breakpoints add columns, they never redesign the phone.",
+        "section": "layout"
+      },
+      {
+        "name": "The Ring Not Lift Rule",
+        "body": "To highlight a chart cell or card, draw an inset ring in amber or amber-line; do not add a drop shadow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep lamplight amber (#e3a857) as the only chrome hue, identical in both themes.",
+      "Do build hierarchy with the label ladder (100 / 60 / 38%) and the card ladder (#1c1c1e / #2c2c2e / #3a3a3c).",
+      "Do mark selection in charts with inset rings (1–1.5px amber or amber-line), not shadows.",
+      "Do keep touch targets at 44px minimum and inputs at 16px text.",
+      "Do keep the system font stack and tabular numerals for years, ages and counts.",
+      "Do keep the phone layout canonical; add columns at 768px and 1024px, never restyle the phone.",
+      "Do respect prefers-reduced-motion for screen fades, skeletons, shimmer and pulsing dots."
+    ],
+    "donts": [
+      "Don't introduce a second accent colour or use status green or coral decoratively.",
+      "Don't load web fonts or CDN assets.",
+      "Don't add decorative gradients; the only gradients are the loading shimmer and the faint amber wash on the 河圖洛書 hero card.",
+      "Don't use drop shadows for emphasis on cards or chart cells.",
+      "Don't replace native-feeling controls (grouped rows, segmented control, toggle, tab bar) with bespoke widgets.",
+      "Don't mark cards, callouts or verdicts with a thick coloured side border; use the amber wash and an inset ring. Quotes in prose take a 1px neutral rule."
+    ]
+  }
+}

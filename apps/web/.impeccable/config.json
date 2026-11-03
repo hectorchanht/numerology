@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "app/globals.css"
+        ],
+        "createdAt": "2026-11-03T04:58:20.336Z",
+        "reason": "agent triage: only hit is .sec-state loading shimmer on streaming status text (functional loading motion, reduced-motion disabled), not decorative emphasis"
+      }
+    ]
+  }
+}

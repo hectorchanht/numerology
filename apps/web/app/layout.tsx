@@ -81,6 +81,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="zh-Hant" data-theme="dark" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        {/* 首幀前按已存語言設 <html lang>(同 lib/i18n.ts 嘅 LS_KEY / HTML_LANG 一致),簡體 / 英文唔會先用繁體字形 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              'try{var l=localStorage.getItem("numerology-locale");if(l==="zhs")document.documentElement.lang="zh-Hans";else if(l==="en")document.documentElement.lang="en"}catch(e){}',
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html:

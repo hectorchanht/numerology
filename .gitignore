@@ -24,3 +24,7 @@ _legacy/
 .wrangler/
 test-dist/
 .vercel/
+
+# impeccable 本地快取
+apps/web/.impeccable/hook.cache.json
+apps/web/.impeccable/live/
