@@ -10,6 +10,7 @@ import { splitTldr } from "@/lib/tldr";
 import { splitThinking } from "@/lib/thinking";
 import { parseSectionBlocks, type SectionNode } from "@/lib/fortuneBlocks";
 import ThinkingFold from "@/components/ThinkingFold";
+import { Icon } from "@/components/Icon";
 
 /** 證據收納:dimmed + 預設折疊(同思考折疊同一個 pattern),永遠唔以正文亮度出現。 */
 function EvidenceFold({ items }: { items: string[] }) {
@@ -17,7 +18,7 @@ function EvidenceFold({ items }: { items: string[] }) {
   if (items.length === 0) return null;
   return (
     <details className="evid">
-      <summary>{t("fortune.evidence")}</summary>
+      <summary><Icon name="chevDown" small className="caret-ic" />{t("fortune.evidence")}</summary>
       <ul className="evid-list">
         {items.map((e, i) => (
           <li key={i}>{withTermHighlights(e)}</li>
@@ -80,6 +81,7 @@ export function SectionBodyView({
   /** 自訂渲染(大運雙軌圖等結構化卡):回傳非 null 即接管正文部分;思考/TL;DR 照常置頂。 */
   renderCustom?: (body: string) => ReactNode | null;
 }) {
+  const { t } = useLocale();
   const { thinking, content, open } = splitThinking(md);
   const { tldr, body } = splitTldr(stripLeadingHeading(content));
   const custom = renderCustom?.(body);
@@ -89,7 +91,7 @@ export function SectionBodyView({
       <ThinkingFold thinking={thinking} active={streaming && open} />
       {tldr ? (
         <div className="tldr-card">
-          <span className="tldr-tag">TL;DR</span>
+          <span className="tldr-tag">{t("report.tldr")}</span>
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownTermComponents}>
             {tldr}
           </ReactMarkdown>

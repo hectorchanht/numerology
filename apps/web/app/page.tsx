@@ -72,6 +72,9 @@ export default function Home() {
   const { screen } = useNav();
   const aiView = useAiView();
   const [mode, setMode] = useState<Mode>("known");
+  /** 推算時辰 panel 第一次打開先 mount(佢讀本機 AI 設定,SSR 唔好渲染),之後保持 mounted 唔丟資料。 */
+  const [inferMounted, setInferMounted] = useState(false);
+  useEffect(() => { if (mode === "infer") setInferMounted(true); }, [mode]);
   /** 歷史版分頁:命盤歷史 / 占卦歷史(兩 panel 保持 mounted,切換唔丟搜尋狀態)。 */
   const [histTab, setHistTab] = useState<"chart" | "yijing">("chart");
   const [sys, setSys] = useState<Sys>("bazi");
@@ -81,6 +84,8 @@ export default function Home() {
   const [error, setError] = useState("");
   /** 从历史记录恢复的章节正文(sectionKey → markdown),分 report/fortune 两组。 */
   const [restored, setRestored] = useState<Restored | null>(null);
+  /** 命盤頁「生成 AI 解讀」:遞增 → 報告開始生成。 */
+  const [reportStart, setReportStart] = useState(0);
 
   useEffect(() => {
     kept = input && chart ? { input, chart } : null;
@@ -265,7 +270,7 @@ export default function Home() {
 
             {/* 兩邊保持 mounted:切換模式唔會清走已填嘅資料 */}
             <div hidden={mode !== "infer"}>
-              <TimeInferPanel onAdopt={(birth) => { setMode("known"); onSubmit(birth); }} />
+              {inferMounted ? <TimeInferPanel onAdopt={(birth) => { setMode("known"); onSubmit(birth); }} /> : null}
             </div>
             <div hidden={mode !== "known"}>
               <BirthForm loading={loading} onSubmit={onSubmit} />
@@ -361,7 +366,8 @@ export default function Home() {
                 <div className="avatar" aria-hidden="true">{ready.input.gender}</div>
                 <div>
                   <div className="name">
-                    {ready.chart.input.year}-{ready.chart.input.month}-{ready.chart.input.day}{" "}
+                    {ready.chart.input.year}-{String(ready.chart.input.month).padStart(2, "0")}-
+                    {String(ready.chart.input.day).padStart(2, "0")}{" "}
                     {String(ready.chart.input.hour).padStart(2, "0")}:
                     {String(ready.chart.input.minute ?? 0).padStart(2, "0")} · {ready.chart.input.gender}
                   </div>
@@ -373,6 +379,16 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+
+              {/* 本畫面主行動:排完盤下一步就係 AI 解讀 */}
+              <button
+                type="button"
+                className="btn block"
+                onClick={() => { setReportStart((n) => n + 1); setAiView("report"); window.scrollTo(0, 0); }}
+              >
+                <Icon name="spark" />
+                {t("chart.readCta")}
+              </button>
 
               {/* 一眼睇晒:摘要卡 + 五行圖(確定性數據,零 AI) */}
               <h2 className="group-title">{t("viz.summary")}</h2>
@@ -455,6 +471,8 @@ export default function Home() {
                 onSectionDone={handleSectionDone("report")}
                 restoredSections={restored?.report ?? null}
                 onAsk={() => go("chat")}
+                startSignal={reportStart}
+                sectionNotes={{ health: t("app.disclaimer2"), wealth: t("app.disclaimer2") }}
               >
                 {aiSeg}
               </StreamedReport>

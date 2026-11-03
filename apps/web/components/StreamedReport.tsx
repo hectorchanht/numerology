@@ -48,6 +48,10 @@ interface Props {
   onAsk?: () => void;
   /** 頂部返回鍵。 */
   onBack?: () => void;
+  /** 章節腳註(例如健康 / 財富節嘅專業意見提示),有正文先顯示。 */
+  sectionNotes?: Record<string, string>;
+  /** 外部觸發生成(遞增即觸發一次,用合參);已有內容就唔重跑。 */
+  startSignal?: number;
   /** 插喺導航同視角控件之間的內容(例如大運時間線)。 */
   children?: React.ReactNode;
   /**
@@ -78,7 +82,7 @@ interface Slot {
 /** 通用流式报告:选视角 → 各节并行调 endpoint → 每节一张卡,逐字渲染 Markdown。 */
 export function StreamedReport({
   input, endpoint, title, description, segments, onSectionDone, restoredSections,
-  collapsible, onAsk, onBack, children, repairText, renderSectionBody,
+  collapsible, onAsk, onBack, children, repairText, renderSectionBody, startSignal, sectionNotes,
 }: Props) {
   const { t, locale } = useLocale();
   const [slots, setSlots] = useState<Slot[] | null>(null);
@@ -167,6 +171,13 @@ export function StreamedReport({
     );
     if (live()) generating.current = false;
   };
+
+  // 命盤頁「生成 AI 解讀」:未生成過先開始,已有內容(含歷史恢復)直接睇。
+  useEffect(() => {
+    if (!startSignal || slots) return;
+    void generate("both");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startSignal]);
 
   /**
    * 單節重試:只重跑指定章節,其他章節原樣保留。
@@ -289,13 +300,16 @@ export function StreamedReport({
       {children}
 
       <div className="report-controls">
-        <Seg
-          compact
-          label={t("report.pickLens")}
-          value={lens}
-          onChange={setLens}
-          options={LENSES.map((l) => ({ value: l.key, label: t(l.labelKey) }))}
-        />
+        {/* 視角:首次預設合參直接生成;生成過先出,用嚟換視角重生成 */}
+        {slots ? (
+          <Seg
+            compact
+            label={t("report.regen")}
+            value={lens}
+            onChange={setLens}
+            options={LENSES.map((l) => ({ value: l.key, label: t(l.labelKey) }))}
+          />
+        ) : null}
         <button type="button" className="btn block" onClick={() => generate(lens)} disabled={running}>
           <Icon name={slots ? "refresh" : "spark"} />
           {slots ? t("report.regenShort") : t("report.generate")}
@@ -311,7 +325,7 @@ export function StreamedReport({
       ) : (
         <>
           <div className="progress">
-            <span>
+            <span role="status" aria-live="polite">
               {running || anyError
                 ? t("report.progressShort", { done: running ? settled : slots.filter((s) => s.status === "done").length, total: segments.length })
                 : t("report.stateDone")}
@@ -408,8 +422,12 @@ export function StreamedReport({
                           streaming={s.status === "streaming"}
                           renderCustom={(body) => renderSectionBody?.(seg.key, body, shownLens ?? "both") ?? null}
                         />
-                      ) : s.status === "streaming" ? (
-                        <div aria-label={t("report.stateQueued")}>
+                      ) : null}
+                      {has && sectionNotes?.[seg.key] ? (
+                        <p className="note">{sectionNotes[seg.key]}</p>
+                      ) : null}
+                      {has ? null : s.status === "streaming" ? (
+                        <div role="status" aria-label={t("report.stateQueued")}>
                           <div className="skel" /><div className="skel w80" /><div className="skel w60" />
                         </div>
                       ) : s.status === "error" && s.code === "AI_BUDGET" ? (
@@ -446,6 +464,11 @@ export function StreamedReport({
               {t("report.exportPdf")}
             </button>
           </div>
+
+          <p className="disclaimer">
+            {t("app.disclaimer1")}<br />
+            {t("app.disclaimer2")}
+          </p>
         </>
       )}
     </>

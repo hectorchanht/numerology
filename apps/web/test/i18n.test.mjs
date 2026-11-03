@@ -26,7 +26,7 @@ test("i18n:所有文案非空字符串", () => {
 });
 
 test("i18n:关键默认文案为繁体", () => {
-  assert.equal(STRINGS.zht["form.title"], "輸入出生信息");
+  assert.equal(STRINGS.zht["form.title"], "輸入出生資料");
   assert.equal(STRINGS.zht["form.submit"], "排盤");
   assert.equal(STRINGS.zht["mode.known"], "我知道出生時辰");
   assert.equal(STRINGS.zhs["form.title"], "输入出生信息");

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLocale } from "../lib/i18n";
+import { Icon } from "./Icon";
 
 /**
  * 思考過程折疊塊(2026-11-02,Hector 定版面:思考 → TL;DR → 全文)。
@@ -30,9 +31,7 @@ export default function ThinkingFold({
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
-        <span className="think-chevron" aria-hidden>
-          {open ? "▾" : "▸"}
-        </span>
+        <Icon name="chevDown" small className="caret-ic" />
         {label}
       </button>
       {open && text ? <div className="think-body">{text}</div> : null}
