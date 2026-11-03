@@ -31,7 +31,13 @@ import { joinThinking } from "@/lib/thinking";
 
 type Mode = "known" | "infer";
 type Sys = "bazi" | "ziwei";
-type Restored = { report: Record<string, string> | null; fortune: Record<string, string> | null };
+type Restored = {
+  report: Record<string, string> | null;
+  fortune: Record<string, string> | null;
+  /** 各組最新章節嘅生成視角(舊記錄冇就 null)。 */
+  reportLens: string | null;
+  fortuneLens: string | null;
+};
 
 /** 跨 client 路由保留當前命盤(去 /poster、/yijing 再返嚟唔使重排)。 */
 let kept: { input: BirthInput; chart: ChartResult } | null = null;
@@ -40,7 +46,11 @@ let kept: { input: BirthInput; chart: ChartResult } | null = null;
 function sectionsOf(r: Reading): Restored {
   const report: Record<string, string> = {};
   const fortune: Record<string, string> = {};
+  let reportLens: string | null = null;
+  let fortuneLens: string | null = null;
   for (const [k, s] of Object.entries(r.sections)) {
+    if (k.startsWith("report:")) reportLens ??= s.lens || null;
+    else if (k.startsWith("fortune:")) fortuneLens ??= s.lens || null;
     // 思考同正文分開存;還原顯示嗰陣併返埋俾 SectionBody 重新分拆(折疊置頂)。
     // 舊記錄冇 thinking → joinThinking 原樣返正文,零影響。
     if (k.startsWith("report:")) report[k.slice("report:".length)] = joinThinking(s.thinking, s.markdown);
@@ -49,6 +59,8 @@ function sectionsOf(r: Reading): Restored {
   return {
     report: Object.keys(report).length ? report : null,
     fortune: Object.keys(fortune).length ? fortune : null,
+    reportLens,
+    fortuneLens,
   };
 }
 
@@ -212,11 +224,23 @@ export default function Home() {
   // narrow:桌面用窄欄(設定、對話),其餘畫面用全寬多欄。
   const show = (s: Screen, narrow?: boolean) => ({ className: narrow ? "screen narrow" : "screen", hidden: screen !== s });
 
+  /**
+   * 切換解讀 view:原本嘅 tab 喺被隱藏嘅 view 入面,焦點會跌落 body,
+   * 所以切換後將焦點移去新 view 嘅當前 tab(鍵盤 / 讀屏唔會迷路)。
+   */
+  const switchAiView = (v: AiView) => {
+    setAiView(v);
+    requestAnimationFrame(() =>
+      document.querySelector<HTMLElement>(`[data-ai-view="${v}"] [role="tab"][aria-selected="true"]`)?.focus(),
+    );
+  };
+
   /** 解讀版內三 view 切換(命盤 / 報告 / 大運),三個 view 共用同一控制。 */
   const aiSeg = (
     <Seg
+      tabs
       value={aiView}
-      onChange={setAiView}
+      onChange={switchAiView}
       label={t("tab.ai")}
       options={[
         { value: "chart", label: t("tab.chart") },
@@ -351,7 +375,7 @@ export default function Home() {
       <section {...show("ai")} aria-label={t("tab.ai")}>
         {ready ? (
           <>
-            <div hidden={aiView !== "chart"}>
+            <div hidden={aiView !== "chart"} data-ai-view="chart">
               <ScreenNav eyebrow={t("tab.chart")}>
           {ready ? (
             <Link href="/poster" className="icon-btn" aria-label={t("chart.posterSub")}>
@@ -384,7 +408,7 @@ export default function Home() {
               <button
                 type="button"
                 className="btn block"
-                onClick={() => { setReportStart((n) => n + 1); setAiView("report"); window.scrollTo(0, 0); }}
+                onClick={() => { setReportStart((n) => n + 1); switchAiView("report"); window.scrollTo(0, 0); }}
               >
                 <Icon name="spark" />
                 {t("chart.readCta")}
@@ -461,7 +485,7 @@ export default function Home() {
           </div>
             </div>
 
-            <div hidden={aiView !== "report"}>
+            <div hidden={aiView !== "report"} data-ai-view="report">
               <StreamedReport
                 input={ready.input}
                 endpoint="/api/report"
@@ -470,6 +494,8 @@ export default function Home() {
                 segments={REPORT_SEGS}
                 onSectionDone={handleSectionDone("report")}
                 restoredSections={restored?.report ?? null}
+                restoredLens={restored?.reportLens ?? null}
+                onShowChart={() => switchAiView("chart")}
                 onAsk={() => go("chat")}
                 startSignal={reportStart}
                 sectionNotes={{ health: t("app.disclaimer2"), wealth: t("app.disclaimer2") }}
@@ -477,7 +503,7 @@ export default function Home() {
                 {aiSeg}
               </StreamedReport>
             </div>
-            <div hidden={aiView !== "fortune"}>
+            <div hidden={aiView !== "fortune"} data-ai-view="fortune">
               <StreamedReport
                 input={ready.input}
                 endpoint="/api/fortune"
@@ -486,6 +512,8 @@ export default function Home() {
                 segments={FORTUNE_SEGS}
                 onSectionDone={handleSectionDone("fortune")}
                 restoredSections={restored?.fortune ?? null}
+                restoredLens={restored?.fortuneLens ?? null}
+                onShowChart={() => switchAiView("chart")}
                 onAsk={() => go("chat")}
                 collapsible
                 repairText={fortuneJson ? (md) => repairFortuneMarkdown(md, fortuneJson, locale) : undefined}

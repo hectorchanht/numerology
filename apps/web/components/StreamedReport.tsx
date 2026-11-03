@@ -48,6 +48,10 @@ interface Props {
   onAsk?: () => void;
   /** 頂部返回鍵。 */
   onBack?: () => void;
+  /** 歷史恢復內容係用邊個視角生成(冇記錄就 null)。 */
+  restoredLens?: string | null;
+  /** 額度用晒時「返去睇命盤」。 */
+  onShowChart?: () => void;
   /** 章節腳註(例如健康 / 財富節嘅專業意見提示),有正文先顯示。 */
   sectionNotes?: Record<string, string>;
   /** 外部觸發生成(遞增即觸發一次,用合參);已有內容就唔重跑。 */
@@ -82,7 +86,7 @@ interface Slot {
 /** 通用流式报告:选视角 → 各节并行调 endpoint → 每节一张卡,逐字渲染 Markdown。 */
 export function StreamedReport({
   input, endpoint, title, description, segments, onSectionDone, restoredSections,
-  collapsible, onAsk, onBack, children, repairText, renderSectionBody, startSignal, sectionNotes,
+  collapsible, onAsk, onBack, children, repairText, renderSectionBody, startSignal, sectionNotes, restoredLens, onShowChart,
 }: Props) {
   const { t, locale } = useLocale();
   const [slots, setSlots] = useState<Slot[] | null>(null);
@@ -97,6 +101,8 @@ export function StreamedReport({
   /** 當前命盤正喺度生成(期間唔俾遲到的歷史恢復蓋過)。 */
   const generating = useRef(false);
   const secRef = useRef<HTMLDivElement>(null);
+  /** 每個視角各自嘅結果:換視角唔會冧咗已生成嘅內容,切返轉頭即刻睇返。 */
+  const byLens = useRef<Partial<Record<Lens, Slot[]>>>({});
 
   const idBase = endpoint.replace(/\W/g, "");
   const running = !!slots?.some((s) => s.status === "streaming");
@@ -110,8 +116,10 @@ export function StreamedReport({
       run.current += 1;
       generating.current = false;
       startedFor.current = "";
+      byLens.current = {};
       setSlots(null);
       setShownLens(null);
+      setLens("both");
     }
   }, [key]);
 
@@ -121,8 +129,11 @@ export function StreamedReport({
     if (generating.current && startedFor.current === key) return;
     run.current += 1;
     startedFor.current = key;
+    byLens.current = {};
     setSlots(segments.map((seg): Slot => ({ text: restoredSections[seg.key] ?? "", status: "done", err: "" })));
-    setShownLens(null);
+    const rl = LENSES.find((x) => x.key === restoredLens)?.key ?? null;
+    setShownLens(rl);
+    setLens(rl ?? "both");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restoredSections]);
 
@@ -137,6 +148,7 @@ export function StreamedReport({
     const live = () => run.current === myRun;
     generating.current = true;
     startedFor.current = key;
+    setLens(useLens);
     setShownLens(useLens);
     const local: Slot[] = segments.map((): Slot => ({ text: "", status: "streaming", err: "" }));
     setSlots([...local]);
@@ -255,6 +267,18 @@ export function StreamedReport({
   };
 
   const anyError = !!slots?.some((s) => s.status === "error");
+
+  /** 換視角:存低當前結果,有舊結果就即刻顯示,冇就等用戶撳生成(唔會自動覆蓋)。 */
+  const switchLens = (l: Lens) => {
+    if (running || l === lens) return;
+    if (slots) byLens.current[lens] = slots;
+    const cached = byLens.current[l];
+    setLens(l);
+    setSlots(cached ?? null);
+    setShownLens(cached ? l : null);
+  };
+  /** 有任何視角生成過(用嚟決定未生成視角嗰陣都顯示換視角行)。 */
+  const anyLensCached = Object.keys(byLens.current).length > 0;
   /** 額度用盡:各節同時失敗,收成一張卡,唔再逐節重試(重試都係 429)。 */
   const budget = slots?.find((s) => s.code === "AI_BUDGET");
   /** 全部節都係額度失敗:章節列表同進度都收起,得返額度卡。 */
@@ -285,6 +309,27 @@ export function StreamedReport({
     return () => io.disconnect();
   }, [slots, idBase]);
 
+  const lensRow = budget ? null : (
+    <div className="lens-block">
+      <div className="lens-row">
+        <span className="lens-lbl">{t("report.regen")}</span>
+        <Seg
+          compact
+          label={t("report.regen")}
+          value={lens}
+          onChange={switchLens}
+          options={LENSES.map((l) => ({ value: l.key, label: t(l.labelKey) }))}
+        />
+      </div>
+      {slots ? (
+        <button type="button" className="btn secondary small" onClick={() => generate(lens)} disabled={running}>
+          <Icon name="refresh" />
+          {t("report.regenThis")}
+        </button>
+      ) : null}
+    </div>
+  );
+
   return (
     <>
       <ScreenNav eyebrow={title} onBack={onBack}>
@@ -303,65 +348,51 @@ export function StreamedReport({
 
       <div className="report-controls">
         {!slots ? (
-          // 首次:一粒主行動,預設合參。
+          // 未生成(首次,或者換咗去未生成嘅視角):一粒主行動。
           <button type="button" className="btn block" onClick={() => generate(lens)}>
             <Icon name="spark" />
-            {t("report.generateN", { n: segments.length })}
+            {anyLensCached
+              ? t("report.generateLens", { lens: lensLabel(lens) })
+              : t("report.generateN", { n: segments.length })}
           </button>
-        ) : budget ? null : (
-          // 生成過:閱讀先行,換視角撳即生成(次要樣式,唔搶正文);額度用晒就收起。
-          <div className="lens-row">
-            <span className="lens-lbl">{t("report.regen")}</span>
-            <Seg
-              compact
-              label={t("report.regen")}
-              value={shownLens ?? lens}
-              onChange={(l) => { if (!running && l !== shownLens) { setLens(l); void generate(l); } }}
-              options={LENSES.map((l) => ({ value: l.key, label: t(l.labelKey) }))}
-            />
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={() => generate(shownLens ?? lens)}
-              disabled={running}
-              aria-label={t("report.regenShort")}
-              title={t("report.regenShort")}
-            >
-              <Icon name="refresh" />
-            </button>
-          </div>
-        )}
+        ) : null}
         <AiModelNote />
       </div>
 
       {!slots ? (
         <>
-          <p className="note">{description}</p>
-          <p className="note">{t("report.idleHint")}</p>
+          <p className="note">{anyLensCached ? t("report.lensIdle") : description}</p>
+          {anyLensCached ? lensRow : <p className="note">{t("report.idleHint")}</p>}
         </>
       ) : (
         <>
-          <div className={`progress${running || anyError ? "" : " done"}`} hidden={allBudget}>
+          <div className="progress" hidden={allBudget || !(running || anyError)}>
             <span role="status" aria-live="polite">
               {running || anyError
                 ? t("report.progressShort", { done: running ? settled : slots.filter((s) => s.status === "done").length, total: segments.length })
                 : t("report.stateDone")}
             </span>
             <div className="bar"><i style={{ width: `${(settled / segments.length) * 100}%` }} /></div>
-            {shownLens ? <span className="tag accent">{lensLabel(shownLens)}</span> : null}
+            {shownLens ? <span className="tag">{lensLabel(shownLens)}</span> : null}
           </div>
 
           {budget ? (
             <div className="card empty" role="status">
-              <Icon name="gear" />
+              <Icon name="clock" />
               <div className="empty-t">{t("report.budgetTitle")}</div>
               <p className="note">{t("report.budgetBody")}</p>
-              <button type="button" className="btn block" onClick={() => go("settings")}>
+              {onShowChart ? (
+                <button type="button" className="btn block" onClick={onShowChart}>
+                  <Icon name="grid" />
+                  {t("report.budgetBack")}
+                </button>
+              ) : null}
+              <button type="button" className="btn secondary block" onClick={() => go("settings")}>
                 <Icon name="gear" />
                 {t("report.budgetSettings")}
               </button>
-              {/* REAL-ERROR RULE:服務端原文照樣顯示 */}
-              <p className="note">{budget.err}</p>
+              {/* REAL-ERROR RULE:服務端原文照樣顯示(標明係技術細節) */}
+              <p className="note budget-tech">{t("report.budgetTech")}{budget.err}</p>
             </div>
           ) : null}
 
@@ -409,33 +440,35 @@ export function StreamedReport({
                   <>
                     <Icon name={SECTION_ICON[seg.key] ?? "spark"} />
                     <span className="sec-title">{seg.label}</span>
-                    <span className="sec-state">{t(`report.${state}` as TKey)}</span>
                   </>
                 );
                 return (
                   <article className={cls} id={`${idBase}-${seg.key}`} key={seg.key}>
-                    <h3 className="sec-hd" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      {collapsible ? (
-                        <button
-                          type="button"
-                          className="sec-h"
-                          style={{ flex: 1, minWidth: 0 }}
-                          aria-expanded={isOpen}
-                          aria-controls={`${idBase}-${seg.key}-b`}
-                          onClick={() => toggle(seg.key)}
-                        >
-                          {head}
-                          <Icon name="chevDown" small className={`caret-ic${isOpen ? " up" : ""}`} />
-                        </button>
-                      ) : (
-                        <span className="sec-h" style={{ flex: 1, minWidth: 0 }}>{head}</span>
-                      )}
+                    {/* 標題淨係標題(讀屏唔會讀埋狀態同朗讀掣);狀態只喺未完成先顯示 */}
+                    <div className="sec-hd-row">
+                      <h3 className="sec-hd">
+                        {collapsible ? (
+                          <button
+                            type="button"
+                            className="sec-h"
+                            aria-expanded={isOpen}
+                            aria-controls={`${idBase}-${seg.key}-b`}
+                            onClick={() => toggle(seg.key)}
+                          >
+                            {head}
+                            <Icon name="chevDown" small className={`caret-ic${isOpen ? " up" : ""}`} />
+                          </button>
+                        ) : (
+                          <span className="sec-h">{head}</span>
+                        )}
+                      </h3>
+                      {state !== "stateDone" ? <span className="sec-state">{t(`report.${state}` as TKey)}</span> : null}
                       {readText ? (
-                        <span style={{ flex: "none", display: "inline-flex" }} title={t("select.readSection")}>
+                        <span className="sec-tts" title={t("select.readSection")}>
                           <DualPronounce text={readText} locale={locale} mode="all" />
                         </span>
                       ) : null}
-                    </h3>
+                    </div>
                     <div className="sec-b" id={`${idBase}-${seg.key}-b`} hidden={!isOpen}>
                       {has ? (
                         <SectionBodyView
@@ -453,7 +486,7 @@ export function StreamedReport({
                         </div>
                       ) : s.status === "error" ? (
                         <div className="sec-error">
-                          <p className="notice">{t("report.segFail", { err: s.err })}</p>
+                          <p className="notice" role="alert">{t("report.segFail", { err: s.err })}</p>
                           <button type="button" className="btn secondary small" onClick={() => retrySection(i)}>
                             <Icon name="refresh" />
                             {t("report.retrySection")}
@@ -470,6 +503,9 @@ export function StreamedReport({
           </div>
 
           {otherError ? <p className="note">{t("report.providerHint")}</p> : null}
+
+          {/* 換視角放報告尾:讀完先決定要唔要換個角度 */}
+          {allBudget ? null : lensRow}
 
           <div className="btn-row" hidden={!!budget}>
             {onAsk ? (
