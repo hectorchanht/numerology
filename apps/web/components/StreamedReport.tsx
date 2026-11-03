@@ -341,7 +341,7 @@ export function StreamedReport({
         </>
       ) : (
         <>
-          <div className="progress" hidden={allBudget}>
+          <div className={`progress${running || anyError ? "" : " done"}`} hidden={allBudget}>
             <span role="status" aria-live="polite">
               {running || anyError
                 ? t("report.progressShort", { done: running ? settled : slots.filter((s) => s.status === "done").length, total: segments.length })

@@ -137,6 +137,8 @@ svg.i.sm { width: 18px; height: 18px; }
   color: var(--accent); flex: none; text-decoration: none; }
 .icon-btn:active { background: var(--fill); }
 .icon-btn.lead { margin-left: -12px; }
+/* 頂部 nav 嘅動作 icon 用中性色:金色留俾 active tab 同主行動 */
+.nav .icon-btn { color: var(--label-2); }
 .icon-btn.solid { background: var(--accent); color: var(--on-accent); }
 .nav .logo { width: 28px; height: 28px; border-radius: 7px; flex: none; margin-right: 6px; display: block; }
 .icon-btn.danger { color: var(--label-3); }
@@ -409,6 +411,7 @@ label.row { cursor: pointer; }
 .progress { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--label-2); margin: 18px 4px 4px; }
 .progress .bar { flex: 1; height: 4px; border-radius: 2px; background: var(--fill); overflow: hidden; }
 .progress .bar i { display: block; height: 100%; background: var(--accent); transition: width 0.3s; }
+.progress.done .bar i { background: var(--label-3); }
 .sec { background: var(--card); border-radius: var(--radius); padding: 18px; margin-top: 12px; scroll-margin-top: 72px; }
 .sec-hd { margin: 0; font-size: inherit; font-weight: inherit; }
 .sec-h { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; color: var(--label); }

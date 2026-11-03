@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useLocale } from "../lib/i18n";
 import { Icon } from "./Icon";
 
@@ -20,6 +20,7 @@ export default function ThinkingFold({
 }) {
   const { t } = useLocale();
   const [open, setOpen] = useState(false);
+  const bodyId = useId();
   const text = thinking.trim();
   if (!text && !active) return null;
   const label = active ? t("report.thinkingActive") : t("report.thinking");
@@ -29,12 +30,13 @@ export default function ThinkingFold({
         type="button"
         className="think-head"
         aria-expanded={open}
+        aria-controls={bodyId}
         onClick={() => setOpen((v) => !v)}
       >
         <Icon name="chevDown" small className="caret-ic" />
         {label}
       </button>
-      {open && text ? <div className="think-body">{text}</div> : null}
+      {open && text ? <div className="think-body" id={bodyId}>{text}</div> : null}
     </div>
   );
 }

@@ -191,6 +191,8 @@ Ink greys carry all structure; lamplight amber is the only voice.
 
 **The Grey Does the Work Rule.** Hierarchy comes from the label ladder (100 / 60 / 38%) and the card ladder, not from new colours. Charts encode tiers with amber-to-grey steps plus height or count, never colour alone.
 
+**The Label 3 Is Not Text Rule.** Label 3 (38%) fails WCAG AA on the ink cards (about 3.2:1 on #1c1c1e), so it is reserved for decoration and disabled states: chevrons, dim icons, chart fills, shimmer. Any text a user needs to read on a card, including state words, captions, chart micro-labels and placeholders, uses Label 2 (60%) or brighter. Functional text has an 11px floor.
+
 ## Typography
 
 **Display Font:** system UI (-apple-system / SF Pro Text, with PingFang HK → TC → SC, Noto Sans TC, Microsoft JhengHei; under `:lang(zh-Hans)` the stack leads with PingFang SC, Noto Sans SC, Microsoft YaHei)
@@ -272,7 +274,7 @@ Continuous, gently rounded corners on a short scale: 14px for cards, lists and p
 ### Navigation
 - **Phone/tablet:** fixed frosted tab bar, 24px icons over 10px labels; idle in 45% label, active in amber. A 更多 bottom sheet (18px top radius) lists all tools in a two-column grid.
 - **Desktop:** fixed 240px frosted sidebar with brand lockup (logo, 17px/700 title, 11px subtitle); hover fills with ink-fill.
-- **Top nav:** 44px row with 13px label-2 eyebrow and amber icon actions.
+- **Top nav:** 44px row with 13px label-2 eyebrow and label-2 icon actions (amber stays on the active tab and the primary action).
 
 ### Report Section (signature)
 A collapsible card per AI section: amber icon, 19px title, small streaming state with a grey shimmer, then a **TL;DR card** (amber wash inside a 1px amber-line inset ring, 600 weight conclusion), followed by verdict/analysis blocks and a collapsed evidence fold. While streaming, a 2px amber caret blinks at the end of the last block; pending sections sit at 0.7 opacity with grey skeleton bars.
