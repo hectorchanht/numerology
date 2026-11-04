@@ -131,7 +131,7 @@ function Fuyi({ f }: { f: FuyiResult }) {
   );
 }
 
-function Matrix({ rows, neutral }: { rows: CrossRow[]; neutral: boolean }) {
+function Matrix({ rows }: { rows: CrossRow[] }) {
   const { t } = useLocale();
   const { z } = useScript();
   return (
@@ -147,7 +147,7 @@ function Matrix({ rows, neutral }: { rows: CrossRow[]; neutral: boolean }) {
           <div className="xs-meta">
             {r.fit === "anchor" ? null : (
               <span className={`xs-fit fit-${r.fit}`}>
-                {t("cross.fitQ")} <b>{t(neutral ? "cross.fit.neutralChart" : (`cross.fit.${r.fit}` as TKey))}</b>
+                {t("cross.fitQ")} <b>{t(`cross.fit.${r.fit}` as TKey)}</b>
               </span>
             )}
             <span className={`xs-tier tier-${r.tier}`}>{t(`cross.tier.${r.tier}` as TKey)}</span>
@@ -215,7 +215,7 @@ export function CrossSystemCard({ chart }: { chart: ChartResult }) {
       <h3 className="xs-h">{t("cross.fuyi")}</h3>
       <Fuyi f={r.fuyi} />
       <h3 className="xs-h">{t("cross.matrix")}</h3>
-      <Matrix rows={rows} neutral={r.fuyi.verdict === "neutral"} />
+      <Matrix rows={rows} />
       <p className="xs-note">{t("cross.bridge")}</p>
       <h3 className="xs-h">{t("cross.kamea")}</h3>
       <Kamea k={r.kamea} />

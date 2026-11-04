@@ -150,7 +150,7 @@ test("crossSystemFacts:中和盤不列基率,可能從格時標明", () => {
 
 test("crosssystem 指令:第二軸說明、按盤基率、從格警示、不自行計算扶抑", () => {
   const p = buildReportSectionPrompt([], seg, "both", "zht", facts);
-  for (const must of ["第二軸", "對八字喜忌", "照抄事實區塊", "按此盤", "可能從格", "從格喜忌與扶抑相反", "本站簡化評分、非古籍原文", "各體系皆為閒"]) {
+  for (const must of ["第二軸", "對八字喜忌", "照抄事實區塊", "按此盤", "可能從格", "從格喜忌與扶抑相反", "本站簡化評分、非古籍原文", "各體系皆為閒", "兩套不同方法,並列陳述各自結論,不合併也不互相修正"]) {
     assert.ok(p.includes(must), `缺條款: ${must}`);
   }
 });

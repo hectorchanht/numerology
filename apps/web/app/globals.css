@@ -592,7 +592,7 @@ button.sec-h { min-height: 44px; margin: -8px 0; }
 .xs-fy { display: block; width: 100%; max-width: 343px; height: auto; }
 .xs-fy-track { fill: var(--fill); }
 .xs-fy-band { fill: var(--sep); }
-.xs-fy-band-tick { stroke: var(--accent-text); stroke-width: 1.5; }
+.xs-fy-band-tick { stroke: var(--label-2); stroke-width: 1.5; }
 .xs-fy-bar { fill: var(--accent-text); }
 .xs-fy-tick { stroke: var(--label); stroke-width: 1.5; }
 .xs-fy-dot { fill: var(--accent-text); stroke: var(--card); stroke-width: 2; }
