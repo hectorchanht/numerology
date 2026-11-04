@@ -3,12 +3,12 @@ import type { Locale } from "./i18n.js";
 import { stableInputHash } from "./hash.js";
 
 /**
- * 排盘历史记录 —— **只存本机**(IndexedDB),不上 server。
- * 用户点某条记录 → 瞬间恢复命盘 + 已生成的章节,零 API 调用。
+ * 排盤歷史記錄 —— **只存本機**(IndexedDB),不上 server。
+ * 用戶點某條記錄 → 瞬間恢復命盤 + 已生成的章節,零 API 調用。
  */
 
 export interface HistorySection {
-  /** 该节正文 markdown(不含 ## 标题,恢复时按当前语言重拼标题)。 */
+  /** 該節正文 markdown(不含 ## 標題,恢復時按當前語言重拼標題)。 */
   markdown: string;
   /**
    * 該次生成嘅思考過程(2026-11-02 起,同 markdown 分開存)。
@@ -22,7 +22,7 @@ export interface HistorySection {
 }
 
 export interface Reading {
-  /** stableInputHash(input),同一组输入恒为同一 id。 */
+  /** stableInputHash(input),同一組輸入恆爲同一 id。 */
   id: string;
   createdAt: number;
   updatedAt: number;
@@ -85,7 +85,7 @@ function tx<T>(mode: IDBTransactionMode, fn: (store: IDBObjectStore) => IDBReque
   );
 }
 
-/** 输入 → 稳定记录 id。 */
+/** 輸入 → 穩定記錄 id。 */
 export async function readingId(input: BirthInput): Promise<string> {
   return stableInputHash(input as unknown as Record<string, unknown>);
 }
@@ -99,7 +99,7 @@ function sameVersion(a: HistorySection, b: HistorySection): boolean {
 }
 
 /**
- * 纯函数:某一節嘅完整版本列表(最新第一、去重、上限 20)。
+ * 純函數:某一節嘅完整版本列表(最新第一、去重、上限 20)。
  * 現行版(sections[key])永遠排第一;舊記錄冇 sectionHistory 時就以現行版
  * 合成單一版本回傳——所以舊記錄零遷移都睇得返佢嗰一版解讀。
  */
@@ -115,7 +115,7 @@ export function versionsOf(r: Reading, key: string): HistorySection[] {
 }
 
 /**
- * 纯函数:新一版 AI 解讀歸檔——新版做現行版,舊現行版唔再被覆蓋,
+ * 純函數:新一版 AI 解讀歸檔——新版做現行版,舊現行版唔再被覆蓋,
  * 而係留喺版本列表畀用戶之後睇返/逐版刪除。舊記錄首次歸檔時,
  * 原本嗰版(若內文不同)會自動做埋種子版本保留落嚟。
  */
@@ -135,7 +135,7 @@ export function archiveSectionInto(
 }
 
 /**
- * 纯函数:刪走某一節嘅指定版本(at 識別)。
+ * 純函數:刪走某一節嘅指定版本(at 識別)。
  * 刪嘅係現行版 → 下一版自動升為現行版;刪埋最後一版 → 成節移除。
  * 版本唔存在就原樣回傳。
  */
@@ -156,7 +156,7 @@ export function deleteVersionFrom(r: Reading, key: string, at: number): Reading 
   return { ...r, sections, sectionHistory };
 }
 
-/** 纯函数:把一节合并进记录(可测试,不碰 IndexedDB)。等同歸檔一版(舊版保留)。 */
+/** 純函數:把一節合併進記錄(可測試,不碰 IndexedDB)。等同歸檔一版(舊版保留)。 */
 export function mergeSectionInto(
   r: Reading,
   key: string,
@@ -165,16 +165,16 @@ export function mergeSectionInto(
   return archiveSectionInto(r, key, s);
 }
 
-/** 纯函数:出生摘要,如 "1990-06-15 14:00 男"。 */
+/** 純函數:出生摘要,如 "1990-06-15 14:00 男"。 */
 export function summarizeInput(input: BirthInput): string {
   const p2 = (n: number) => String(n).padStart(2, "0");
   return `${input.year}-${p2(input.month)}-${p2(input.day)} ${p2(input.hour)}:${p2(input.minute ?? 0)} ${input.gender}`;
 }
 
 /**
- * 新增或更新一条记录:已存在则保留旧章节,只更新命盘/输入/时间。
+ * 新增或更新一條記錄:已存在則保留舊章節,只更新命盤/輸入/時間。
  * name:有非空值就寫入;空/undefined 就保留舊名(還原/重排都唔會靜靜洗走名)。
- * 返回保存后的记录。
+ * 返回保存後的記錄。
  */
 export async function upsertReading(input: {
   input: BirthInput;
@@ -219,7 +219,7 @@ export function displayName(r: Reading): string {
   return r.name?.trim() ? r.name.trim() : summarizeInput(r.input);
 }
 
-/** 保存一节(歸檔新版進已有记录,舊版保留;记录不存在则跳过)。 */
+/** 保存一節(歸檔新版進已有記錄,舊版保留;記錄不存在則跳過)。 */
 export async function saveSection(
   input: BirthInput,
   key: string,
@@ -246,7 +246,7 @@ export async function getReading(id: string): Promise<Reading | null> {
   return (await tx("readonly", (s) => s.get(id)).catch(() => null)) as Reading | null;
 }
 
-/** 按更新时间倒序列出。 */
+/** 按更新時間倒序列出。 */
 export async function listReadings(): Promise<Reading[]> {
   const all = (await tx("readonly", (s) => s.getAll()).catch(() => [])) as Reading[];
   return all.sort((a, b) => b.updatedAt - a.updatedAt);
@@ -262,7 +262,7 @@ export async function clearReadings(): Promise<void> {
   notifyHistoryChanged();
 }
 
-/** 通知 HistoryPanel 刷新(同页多处写记录时用)。 */
+/** 通知 HistoryPanel 刷新(同頁多處寫記錄時用)。 */
 export function notifyHistoryChanged(): void {
   try {
     if (typeof window !== "undefined") window.dispatchEvent(new Event(HISTORY_EVENT));

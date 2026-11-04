@@ -2,13 +2,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { validateBirthInput, daysInMonth } from "../dist/index.js";
 
-// Bug 1 回归:validateBirthInput 必须按真实历法校验日期(月天数 + 闰年)。
+// Bug 1 迴歸:validateBirthInput 必須按真實曆法校驗日期(月天數 + 閏年)。
 
 test("daysInMonth:平年 2 月 28 天、闰年 29 天、大小月正确", () => {
   assert.equal(daysInMonth(2023, 2), 28);
   assert.equal(daysInMonth(2024, 2), 29);
-  assert.equal(daysInMonth(2000, 2), 29); // 整百年被 400 整除是闰年
-  assert.equal(daysInMonth(1900, 2), 28); // 整百年不被 400 整除不是闰年
+  assert.equal(daysInMonth(2000, 2), 29); // 整百年被 400 整除是閏年
+  assert.equal(daysInMonth(1900, 2), 28); // 整百年不被 400 整除不是閏年
   assert.equal(daysInMonth(2023, 4), 30);
   assert.equal(daysInMonth(2023, 1), 31);
 });

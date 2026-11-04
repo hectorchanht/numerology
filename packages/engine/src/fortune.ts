@@ -15,18 +15,18 @@ export interface DaYunAnalysis {
   endAge: number;
   startYear: number;
   endYear: number;
-  /** 大运天干十神(相对日主) */
+  /** 大運天干十神(相對日主) */
   ganShiShen: ShiShen;
-  /** 大运地支藏干及其十神 */
+  /** 大運地支藏干及其十神 */
   hideShiShen: { gan: string; shiShen: ShiShen }[];
-  /** 是否引动调候/喜用神(天干或藏干命中用神)→ 补救信号 */
+  /** 是否引動調候/喜用神(天干或藏干命中用神)→ 補救信號 */
   suppliesUseGod: boolean;
-  /** referenceYear 是否落在此运 */
+  /** referenceYear 是否落在此運 */
   isCurrent: boolean;
   /**
-   * 与该大运同期的大限(按大运起始年取 horoscope 判定,四化飞入本命宫)。
-   * 八字大运与紫微大限的十年区间不对齐,故逐运单独判定,避免模型把
-   * "当前大限"套用到每一步大运上。
+   * 與該大運同期的大限(按大運起始年取 horoscope 判定,四化飛入本命宮)。
+   * 八字大運與紫微大限的十年區間不對齊,故逐運單獨判定,避免模型把
+   * "當前大限"套用到每一步大運上。
    */
   ziweiDecadal: ZiweiScopeFortune;
 }
@@ -38,7 +38,7 @@ export interface LiuNianAnalysis {
   ganShiShen: ShiShen;
   suppliesUseGod: boolean;
   isReference: boolean;
-  /** 该流年是否已过(早于参考年)→ 供"回看验证" */
+  /** 該流年是否已過(早於參考年)→ 供"回看驗證" */
   isPast: boolean;
 }
 
@@ -47,7 +47,7 @@ export type SihuaType = "禄" | "权" | "科" | "忌";
 export interface Sihua {
   type: SihuaType;
   star: string;
-  /** 该化星所在的本命宫位名(即"化X飞入本命某宫") */
+  /** 該化星所在的本命宮位名(即"化X飛入本命某宮") */
   intoPalace: string;
 }
 
@@ -56,7 +56,7 @@ export interface ZiweiScopeFortune {
   year?: number;
   heavenlyStem: string;
   earthlyBranch: string;
-  /** 该运/年命宫落在本命哪个宫位名 */
+  /** 該運/年命宮落在本命哪個宮位名 */
   palaceName: string;
   sihua: Sihua[];
 }
@@ -79,13 +79,13 @@ export interface FortuneAnalysis {
 const SIHUA_ORDER: SihuaType[] = ["禄", "权", "科", "忌"];
 
 /**
- * 动态运势分析:把"静"的命盘和"动"的大运流年结合。
- * - 八字:每步大运/窗口内流年的十神 + 是否引动喜用神(补救/受困信号)
- * - 紫微:大限 / 流年四化飞入本命哪个宫
+ * 動態運勢分析:把"靜"的命盤和"動"的大運流年結合。
+ * - 八字:每步大運/窗口內流年的十神 + 是否引動喜用神(補救/受困信號)
+ * - 紫微:大限 / 流年四化飛入本命哪個宮
  *
- * @param opts.referenceYear 参考年(默认当前年);用于标记"当前所处运/年"。
- * @param opts.yearsAhead    向后展开的流年数(默认 8)。
- * @param opts.yearsBack     向前回看的流年数(默认 0;>0 时纳入已过年份供"回看验证")。
+ * @param opts.referenceYear 參考年(默認當前年);用於標記"當前所處運/年"。
+ * @param opts.yearsAhead    向後展開的流年數(默認 8)。
+ * @param opts.yearsBack     向前回看的流年數(默認 0;>0 時納入已過年份供"回看驗證")。
  */
 export function analyzeFortune(
   input: BirthInput,
@@ -105,7 +105,7 @@ export function analyzeFortune(
   const suppliesUseGod = (gan: string, hide: Tiangan[]): boolean =>
     useGods.has(gan) || hide.some((g) => useGods.has(g));
 
-  // —— 紫微排盘(先建,大运循环里要逐运判定同期大限) ——
+  // —— 紫微排盤(先建,大運循環裏要逐運判定同期大限) ——
   const a = astro.bySolar(
     `${t.year}-${t.month}-${t.day}`,
     hourToTimeIndex(t.hour),
@@ -135,7 +135,7 @@ export function analyzeFortune(
     })),
   });
 
-  // —— 八字大运 ——
+  // —— 八字大運 ——
   const ec = Solar.fromYmdHms(
     t.year, t.month, t.day, t.hour, t.minute, 0,
   ).getLunar().getEightChar();
@@ -146,7 +146,7 @@ export function analyzeFortune(
 
   for (const d of rawDaYun) {
     const ganZhi = d.getGanZhi();
-    if (ganZhi.trim().length !== 2) continue; // 跳过起运前虚运
+    if (ganZhi.trim().length !== 2) continue; // 跳過起運前虛運
     const gan = ganZhi[0]!;
     const zhi = ganZhi[1]!;
     const hide = dizhiHideGan(zhi);
@@ -164,17 +164,17 @@ export function analyzeFortune(
       hideShiShen: hide.map((g) => ({ gan: g, shiShen: shiShen(dayMaster, g) })),
       suppliesUseGod: suppliesUseGod(gan, hide),
       isCurrent: referenceYear >= startYear && referenceYear <= endYear,
-      // 该运中点年份时的紫微大限(四化飞入本命宫)。
-      // 用中点而非起点:首步大运的起点年龄常落在首个大限区间之前,
-      // 此时 horoscope 会回绕到末个大限(iztro 行为),给出错误的大限;
-      // 中点恒落在某大限区间内,结果稳定。
+      // 該運中點年份時的紫微大限(四化飛入本命宮)。
+      // 用中點而非起點:首步大運的起點年齡常落在首個大限區間之前,
+      // 此時 horoscope 會迴繞到末個大限(iztro 行爲),給出錯誤的大限;
+      // 中點恆落在某大限區間內,結果穩定。
       ziweiDecadal: toScope(
         "大限",
         a.horoscope(`${Math.round((startYear + endYear) / 2)}-6-1`).decadal,
       ),
     });
 
-    // 该运内、落在窗口的流年
+    // 該運內、落在窗口的流年
     for (const y of d.getLiuNian()) {
       const year = y.getYear();
       if (year < windowStart || year > windowEnd) continue;
@@ -194,8 +194,8 @@ export function analyzeFortune(
     }
   }
 
-  // —— 紫微大限(当前) / 流年四化 ——
-  // a / starToPalace / palaceNameByIndex / toScope 已在上方定义,此处复用。
+  // —— 紫微大限(當前) / 流年四化 ——
+  // a / starToPalace / palaceNameByIndex / toScope 已在上方定義,此處複用。
   const decadalH = a.horoscope(`${referenceYear}-6-1`);
   const decadal = toScope("大限", decadalH.decadal);
 
@@ -226,7 +226,7 @@ interface RawPalace {
   adjectiveStars: { name: string }[];
 }
 
-/** 建立"星曜名 → 本命宫位名"映射,用于判定四化飞入哪个宫。 */
+/** 建立"星曜名 → 本命宮位名"映射,用於判定四化飛入哪個宮。 */
 function buildStarToPalace(palaces: RawPalace[]): Map<string, string> {
   const map = new Map<string, string>();
   for (const p of palaces) {

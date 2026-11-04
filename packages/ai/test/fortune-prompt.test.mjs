@@ -9,7 +9,7 @@ import {
 
 const seg = (key) => FORTUNE_SEGMENTS.find((s) => s.key === key);
 
-/** 最小 FortuneAnalysis 夹具:够渲染小标题清单即可。 */
+/** 最小 FortuneAnalysis 夾具:夠渲染小標題清單即可。 */
 const fortuneFixture = {
   referenceYear: 2026,
   bazi: {
@@ -184,9 +184,9 @@ test("表达风格规则:一句话定性 + 禁废话开场 + 断语纪律", () =
   assert.ok(full.includes("绝不编造古籍断语"), "整篇 prompt 也应有断语纪律");
 });
 
-/* ── v2 形状无关修复(2026-10-23):新观测形状 + 紫微大限:無 ── */
+/* ── v2 形狀無關修復(2026-10-23):新觀測形狀 + 紫微大限:無 ── */
 
-/** 带同期大限的夹具 */
+/** 帶同期大限的夾具 */
 const fortuneDecadalFixture = {
   referenceYear: 2026,
   bazi: {
@@ -253,7 +253,7 @@ test("v2:紫微大限：無 被替换为该步同期大限", () => {
 test("v2:紫微大限干支错配被纠正,写对的不动", () => {
   const md = [
     "### 甲寅運（2–11歲／1995–2004年）",
-    "紫微大限：戊午（行福德）", // 错:套用了当前大限
+    "紫微大限：戊午（行福德）", // 錯:套用了當前大限
   ].join("\n");
   const fixed = fixFortuneHeadings(md, fortuneDecadalFixture, "zht");
   assert.ok(fixed.includes("紫微大限：丙辰（行官禄）"), "错配的戊午应被纠正为丙辰");

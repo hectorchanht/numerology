@@ -2,7 +2,7 @@ import type { BirthInput } from "@numerology/engine";
 
 export type Calendar = "solar" | "lunar";
 
-/** 表单产出的出生信息:阳历 BirthInput,外加历法标记(农历时由服务端转阳历)。 */
+/** 表單產出的出生信息:陽曆 BirthInput,外加曆法標記(農曆時由服務端轉陽曆)。 */
 export type BirthFormValue = BirthInput & {
   calendar?: Calendar;
   isLeapMonth?: boolean;

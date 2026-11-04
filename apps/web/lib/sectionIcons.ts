@@ -1,36 +1,36 @@
 /**
- * 报告章节 key → emoji(纯展示层,渲染时注入,与语言无关)。
- * 不进 prompt、不靠模型:同一 key 永远同一图标,三地语言一致。
- * 正文内不撒 emoji,每个章节标题仅一个。
+ * 報告章節 key → emoji(純展示層,渲染時注入,與語言無關)。
+ * 不進 prompt、不靠模型:同一 key 永遠同一圖標,三地語言一致。
+ * 正文內不撒 emoji,每個章節標題僅一個。
  */
 export const SECTION_ICONS: Record<string, string> = {
-  // 《命盘格局解读》
-  personality: "🪞", // 性格特質:照见自己
-  career: "💼", // 事业方向
-  wealth: "💰", // 财富特点
+  // 《命盤格局解讀》
+  personality: "🪞", // 性格特質:照見自己
+  career: "💼", // 事業方向
+  wealth: "💰", // 財富特點
   relationship: "❤️", // 感情婚姻
   health: "🌿", // 健康提示
-  luck: "🌠", // 大运流年概览
+  luck: "🌠", // 大運流年概覽
   crosssystem: "🔗", // 多體系交叉
-  advice: "💡", // 总体建议 · 开运参考
-  // 《大运流年深析》
-  overview: "🧭", // 当前总览:定盘定位
-  dayun: "🕰️", // 大运逐步精讲:时间之轮
+  advice: "💡", // 總體建議 · 開運參考
+  // 《大運流年深析》
+  overview: "🧭", // 當前總覽:定盤定位
+  dayun: "🕰️", // 大運逐步精講:時間之輪
   review: "🔍", // 回看校准
-  future: "🔮", // 未来流年走向
-  rhythm: "🌊", // 节奏与转折
-  action: "🎯", // 行动建议
+  future: "🔮", // 未來流年走向
+  rhythm: "🌊", // 節奏與轉折
+  action: "🎯", // 行動建議
 };
 
-/** 取某章节的图标(未知 key 回落为 ✦,永不抛错)。 */
+/** 取某章節的圖標(未知 key 回落爲 ✦,永不拋錯)。 */
 export function sectionIcon(key: string): string {
   return SECTION_ICONS[key] ?? "✦";
 }
 
 /**
- * 渲染时注入图标:把 markdown 首个 `## ` 标题行替换为带图标的确定性标题
- * (`## <icon> <label>`);若正文没有标题行则补一个。正文其余部分原样不动。
- * 历史记录里存的仍是无图标原文,图标只在渲染这一层出现。
+ * 渲染時注入圖標:把 markdown 首個 `## ` 標題行替換爲帶圖標的確定性標題
+ * (`## <icon> <label>`);若正文沒有標題行則補一個。正文其餘部分原樣不動。
+ * 歷史記錄裏存的仍是無圖標原文,圖標只在渲染這一層出現。
  */
 export function withIconHeading(segKey: string, label: string, markdown: string): string {
   return `## ${sectionIcon(segKey)} ${label}\n\n${stripLeadingHeading(markdown)}`;

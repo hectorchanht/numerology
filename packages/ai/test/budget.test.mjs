@@ -10,7 +10,7 @@ import {
   recordUsage,
 } from "../dist/budget.js";
 
-/** 内存 KV,模拟 Cloudflare KV binding 的 get/put 子集。 */
+/** 內存 KV,模擬 Cloudflare KV binding 的 get/put 子集。 */
 function memKv(seed = {}) {
   const m = new Map(Object.entries(seed));
   return {
@@ -20,7 +20,7 @@ function memKv(seed = {}) {
   };
 }
 
-// —— 预算数学 ——
+// —— 預算數學 ——
 test("budget:$2 上限换算为 181818 neurons", () => {
   assert.equal(BUDGET_USD_PER_MONTH, 2);
   assert.equal(USD_PER_1K_NEURONS, 0.011);
@@ -28,16 +28,16 @@ test("budget:$2 上限换算为 181818 neurons", () => {
   assert.equal(BUDGET_NEURONS, Math.floor((2 / 0.011) * 1000));
 });
 
-// —— 月份 key 按 UTC 滚动 ——
+// —— 月份 key 按 UTC 滾動 ——
 test("budget:月份 key 为 UTC 年月,跨月滚动", () => {
   assert.equal(budgetMonthKey(new Date("2026-10-22T10:00:00Z")), "ai-budget:2026-10");
   assert.equal(budgetMonthKey(new Date("2026-10-31T23:59:59Z")), "ai-budget:2026-10");
   assert.equal(budgetMonthKey(new Date("2026-11-01T00:00:00Z")), "ai-budget:2026-11");
-  // UTC 边界:东八区已是 11 月 1 日 08:00,UTC 仍是 10 月
+  // UTC 邊界:東八區已是 11 月 1 日 08:00,UTC 仍是 10 月
   assert.equal(budgetMonthKey(new Date("2026-11-01T00:30:00+08:00")), "ai-budget:2026-10");
 });
 
-// —— 检查与记账 ——
+// —— 檢查與記賬 ——
 test("budget:未超支时 checkBudget 返回累计,不抛错", async () => {
   const kv = memKv({ "ai-budget:2026-10": "1000" });
   const total = await checkBudget(kv, new Date("2026-10-15T00:00:00Z"));
@@ -76,15 +76,15 @@ test("budget:达到上限抛 BudgetExceededError(带固定标记)", async () => 
 
 test("budget:超支一个 neurons 也拒绝", async () => {
   const kv = memKv({ "ai-budget:2026-10": String(BUDGET_NEURONS - 0.5) });
-  // 未达上限:通过
+  // 未達上限:通過
   await checkBudget(kv, new Date("2026-10-15T00:00:00Z"));
   await recordUsage(kv, 1, new Date("2026-10-15T00:00:00Z"));
-  // 已达上限:拒绝
+  // 已達上限:拒絕
   await assert.rejects(checkBudget(kv, new Date("2026-10-15T00:00:00Z")), BudgetExceededError);
 });
 
 test("budget:跨月计数隔离", async () => {
   const kv = memKv({ "ai-budget:2026-10": String(BUDGET_NEURONS) });
-  // 10 月已满,11 月从 0 开始
+  // 10 月已滿,11 月從 0 開始
   assert.equal(await checkBudget(kv, new Date("2026-11-02T00:00:00Z")), 0);
 });

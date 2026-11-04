@@ -12,22 +12,22 @@ test("不提供经度则不校正,时间原样返回", () => {
 });
 
 test("东经偏东(>120)经度差为正,偏西为负", () => {
-  // 经度 130(偏东 10°)→ 经度差 (130-120)*4 = +40 分钟
+  // 經度 130(偏東 10°)→ 經度差 (130-120)*4 = +40 分鐘
   const east = resolveBirthDateTime({ ...SAMPLE, longitude: 130 });
   assert.equal(east.correction.applied, true);
   assert.equal(east.correction.longitudeMinutes, 40);
   assert.ok(east.correction.offsetMinutes > 0, "偏东应为正偏移");
-  // 北京约 116.4°(偏西)→ 经度差为负
+  // 北京約 116.4°(偏西)→ 經度差爲負
   const bj = resolveBirthDateTime({ ...SAMPLE, longitude: 116.4 });
   assert.ok(bj.correction.longitudeMinutes < 0, "偏西经度差应为负");
 });
 
 test("校正可能改变时柱(经度足够偏)", () => {
   const noCorr = castChart(SAMPLE);
-  const west = castChart({ ...SAMPLE, longitude: 90 }); // 偏西 30° → −120 分钟
+  const west = castChart({ ...SAMPLE, longitude: 90 }); // 偏西 30° → −120 分鐘
   assert.equal(noCorr.meta.trueSolarTimeApplied, false);
   assert.equal(west.meta.trueSolarTimeApplied, true);
-  // 09:30 − 120 分 ≈ 07:30,跨过时辰交界,时柱改变
+  // 09:30 − 120 分 ≈ 07:30,跨過時辰交界,時柱改變
   assert.notEqual(noCorr.bazi.fourPillars.hour.ganZhi, west.bazi.fourPillars.hour.ganZhi);
 });
 

@@ -12,7 +12,7 @@ import { STRINGS, LOCALES } from "../test-dist/i18n.js";
 
 const names = (ps) => ps.map((p) => p.name);
 
-// —— filter chips 分组 ——
+// —— filter chips 分組 ——
 test("filter:all=9, nokey=3, free=7(免key∪免费额度), paid=2", () => {
   assert.deepEqual(names(filterProviders("all")),
     ["workers-ai", "pollinations", "mac-llm", "glm", "gemini", "groq", "openrouter", "anthropic", "custom"]);
@@ -22,7 +22,7 @@ test("filter:all=9, nokey=3, free=7(免key∪免费额度), paid=2", () => {
   assert.deepEqual(names(filterProviders("paid")), ["anthropic", "custom"]);
 });
 
-// —— 每个 provider 的短名/note/cost key 在三语中都存在 ——
+// —— 每個 provider 的短名/note/cost key 在三語中都存在 ——
 test("providerMeta:shortKey/noteKey/costKey/filterKey 三语齐备", () => {
   for (const p of PROVIDER_META) {
     for (const loc of LOCALES) {
@@ -41,7 +41,7 @@ test("providerMeta:shortKey/noteKey/costKey/filterKey 三语齐备", () => {
   }
 });
 
-// —— tab 短名不含描述(无括号/无"需 key"字样) ——
+// —— tab 短名不含描述(無括號/無"需 key"字樣) ——
 test("providerMeta:tab 短名干净,只有短名", () => {
   for (const p of PROVIDER_META) {
     const label = STRINGS.zht[p.shortKey];
@@ -50,7 +50,7 @@ test("providerMeta:tab 短名干净,只有短名", () => {
   }
 });
 
-// —— cost 分档符合约定 ——
+// —— cost 分檔符合約定 ——
 test("providerMeta:cost 分档", () => {
   const cost = Object.fromEntries(PROVIDER_META.map((p) => [p.name, p.cost]));
   assert.deepEqual(cost, {
@@ -66,7 +66,7 @@ test("providerMeta:cost 分档", () => {
   });
 });
 
-// —— pollinations key 选填(匿名可用,填 key 更稳) ——
+// —— pollinations key 選填(匿名可用,填 key 更穩) ——
 test("providerMeta:pollinations optionalKey, 其余 nokey 无 key 字段", () => {
   const pol = PROVIDER_META.find((p) => p.name === "pollinations");
   assert.equal(pol.needsKey, false);
@@ -75,7 +75,7 @@ test("providerMeta:pollinations optionalKey, 其余 nokey 无 key 字段", () =>
   assert.equal(wai.optionalKey ?? false, false);
 });
 
-// —— filter 同时是模型 filter ——
+// —— filter 同時是模型 filter ——
 test("filterModels:free 只留 free:true", () => {
   const ms = [{ id: "a:free", free: true }, { id: "b" }, { id: "c", free: false }];
   assert.deepEqual(
@@ -154,9 +154,9 @@ test("recommend:filterModels(recommended) 按 provider 过滤,models/ 前缀对�
   const { filterModels } = await import("../test-dist/providerMeta.js");
   const live = [{ id: "models/gemini-2.5-flash" }, { id: "models/gemini-3.8-flash" }, { id: "models/gemini-flash-latest" }];
   assert.deepEqual(filterModels(live, "recommended", "gemini").map((m) => m.id), ["models/gemini-3.8-flash"]);
-  // 无推荐表的 provider → 不过滤
+  // 無推薦表的 provider → 不過濾
   assert.deepEqual(filterModels(live, "recommended", "workers-ai"), live);
-  // 无 provider 参数 → 不过滤
+  // 無 provider 參數 → 不過濾
   assert.deepEqual(filterModels(live, "recommended"), live);
 });
 
@@ -179,7 +179,7 @@ test("providerMeta:mac-mlx 已退役:PROVIDER_META 无此条目,isMacProvider �
   assert.equal(PROVIDER_META.find((p) => p.name === "mac-mlx"), undefined);
   assert.equal(RECOMMENDED_MODELS["mac-mlx"], undefined);
   assert.equal(STATIC_MODELS["mac-mlx"], undefined);
-  // 旧名只作 back-compat alias:Mac 待遇(Access 头/即时列表/短缓存)不丢。
+  // 舊名只作 back-compat alias:Mac 待遇(Access 頭/即時列表/短緩存)不丟。
   assert.equal(isMacProvider("mac-llm"), true);
   assert.equal(isMacProvider("mac-mlx"), true);
   assert.equal(isMacProvider("glm"), false);

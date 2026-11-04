@@ -246,7 +246,7 @@
 **Interfaces:** 無新增;`localeDirective(locale)` 簽名不變。
 
 - [ ] **Step 0:** 讀 `~/.claude/prompting-best-practices.md`。
-- [ ] **Step 1: 寫失敗測試**:`localeDirective("zht")` 含「通俗簡練」且不含「香港用語」;`localeDirective("zhs")` 含「通俗简练」;`localeDirective("en")` 含 `"plain"` 與 `"concise"`;`SYSTEM_PERSONA` 含「基率」與「不製造恐懼」或其簡體對應。
+- [ ] **Step 1: 寫失敗測試**:`localeDirective("zht")` 含「通俗簡練」且不含「香港用語」;`localeDirective("zhs")` 含「通俗簡練」;`localeDirective("en")` 含 `"plain"` 與 `"concise"`;`SYSTEM_PERSONA` 含「基率」與「不製造恐懼」或其簡體對應。
 - [ ] **Step 2:** → FAIL。
 - [ ] **Step 3:** 改寫。zht 指令明文禁止粵語口語字(列出:嘅、咗、喺、唔、嚟、佢、啲)。
 - [ ] **Step 4:** → PASS(含現有 `context.test.mjs`、`tldr-prompt.test.mjs`)。

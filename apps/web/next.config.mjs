@@ -12,10 +12,10 @@ const nextConfig = {
     }
     return config;
   },
-  // 排盘/AI 包用到 fs、import.meta.url、iztro/lunar,只在服务端运行,
-  // 标记为 external 避免被打进客户端 bundle 或破坏数据文件路径解析。
+  // 排盤/AI 包用到 fs、import.meta.url、iztro/lunar,只在服務端運行,
+  // 標記爲 external 避免被打進客戶端 bundle 或破壞數據文件路徑解析。
   experimental: {
-    // 允许源码用 `./x.js` 风格引用 `./x.ts`(与 packages/* 一致;node ESM 与测试亦需显式扩展名)。
+    // 允許源碼用 `./x.js` 風格引用 `./x.ts`(與 packages/* 一致;node ESM 與測試亦需顯式擴展名)。
     extensionAlias: {
       ".js": [".ts", ".tsx", ".js", ".jsx"],
     },

@@ -1,37 +1,37 @@
 /**
- * Workers AI 用量预算守卫:每月硬上限 $2。
+ * Workers AI 用量預算守衛:每月硬上限 $2。
  *
- * 背景:Workers AI 没有原生的月度 spending cap,超量只会计费($0.011 / 1K neurons)。
- * 这里在应用层强制执行:每次调用前后经 KV 读写当月(UTC)累计 neurons,
- * 达到上限即拒绝(429),绝不超支。
+ * 背景:Workers AI 沒有原生的月度 spending cap,超量只會計費($0.011 / 1K neurons)。
+ * 這裏在應用層強制執行:每次調用前後經 KV 讀寫當月(UTC)累計 neurons,
+ * 達到上限即拒絕(429),絕不超支。
  *
- * 保守口径:所有 neurons 都计入 $2(包含每日免费的 10,000 neurons)。
- * 因此实际账单恒为 $0 —— 上限(约 181,818 neurons/月)远低于免费额度总量
- * (10,000/天 ≈ 300,000/月),到上限即停,不会产生任何付费用量。
- * KV 为最终一致性,并发请求可能有轻微超调(文档见 NOTES.md),可接受。
+ * 保守口徑:所有 neurons 都計入 $2(包含每日免費的 10,000 neurons)。
+ * 因此實際賬單恆爲 $0 —— 上限(約 181,818 neurons/月)遠低於免費額度總量
+ * (10,000/天 ≈ 300,000/月),到上限即停,不會產生任何付費用量。
+ * KV 爲最終一致性,併發請求可能有輕微超調(文檔見 NOTES.md),可接受。
  */
 
-/** 每月预算(美元,用户设定,硬上限)。 */
+/** 每月預算(美元,用戶設定,硬上限)。 */
 export const BUDGET_USD_PER_MONTH = 2;
-/** Workers AI 计价:$0.011 / 1,000 neurons(官方定价,见 NOTES.md)。 */
+/** Workers AI 計價:$0.011 / 1,000 neurons(官方定價,見 NOTES.md)。 */
 export const USD_PER_1K_NEURONS = 0.011;
-/** 换算后的每月 neuron 上限(向下取整)。 */
+/** 換算後的每月 neuron 上限(向下取整)。 */
 export const BUDGET_NEURONS = Math.floor((BUDGET_USD_PER_MONTH / USD_PER_1K_NEURONS) * 1000);
 
-/** KV 的最小接口子集(Cloudflare KV binding 天然满足;测试可用内存实现)。 */
+/** KV 的最小接口子集(Cloudflare KV binding 天然滿足;測試可用內存實現)。 */
 export interface BudgetKV {
   get(key: string): Promise<string | null>;
   put(key: string, value: string): Promise<unknown>;
 }
 
-/** 当月(UTC)的计数 key,如 "ai-budget:2026-10"。月份按 UTC 边界滚动。 */
+/** 當月(UTC)的計數 key,如 "ai-budget:2026-10"。月份按 UTC 邊界滾動。 */
 export function budgetMonthKey(d: Date = new Date()): string {
   const y = d.getUTCFullYear();
   const m = String(d.getUTCMonth() + 1).padStart(2, "0");
   return `ai-budget:${y}-${m}`;
 }
 
-/** 预算耗尽时抛出的错误;http.ts 将其分类为 429(消息含固定标记,勿改)。 */
+/** 預算耗盡時拋出的錯誤;http.ts 將其分類爲 429(消息含固定標記,勿改)。 */
 export class BudgetExceededError extends Error {
   readonly usedNeurons: number;
   constructor(usedNeurons: number) {
@@ -52,8 +52,8 @@ async function readTotal(kv: BudgetKV, key: string): Promise<number> {
 }
 
 /**
- * 调用前检查:返回当前累计;若已达上限则抛 BudgetExceededError。
- * 必须在每次 Workers AI 调用前执行(流式为懒启动,放在 run() 内首行)。
+ * 調用前檢查:返回當前累計;若已達上限則拋 BudgetExceededError。
+ * 必須在每次 Workers AI 調用前執行(流式爲懶啓動,放在 run() 內首行)。
  */
 export async function checkBudget(kv: BudgetKV, now: Date = new Date()): Promise<number> {
   const total = await readTotal(kv, budgetMonthKey(now));
@@ -61,7 +61,7 @@ export async function checkBudget(kv: BudgetKV, now: Date = new Date()): Promise
   return total;
 }
 
-/** 调用后记账:累加本次 neurons,返回新的累计值。 */
+/** 調用後記賬:累加本次 neurons,返回新的累計值。 */
 export async function recordUsage(
   kv: BudgetKV,
   neurons: number,

@@ -420,7 +420,7 @@ export function BaguaFamilyGrid() {
               </div>
             ))}
           </dl>
-          {/* 五行旺衰:五格睇晒五季狀態,旺字朱砂標示 */}
+          {/* 五行旺衰:五格睇曬五季狀態,旺字硃砂標示 */}
           <div style={{ marginTop: "0.85rem" }}>
             <div style={{ display: "flex", gap: "0.4rem" }}>
               {WANG_SEASONS.map((s, si) => {

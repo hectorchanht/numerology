@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { repairFortuneMarkdown } from "../test-dist/fortuneRepair.js";
 
-/** 最小 FortuneAnalysis 夹具(与服务端测试同源的形状) */
+/** 最小 FortuneAnalysis 夾具(與服務端測試同源的形狀) */
 const fortune = {
   referenceYear: 2026,
   bazi: {
@@ -46,7 +46,7 @@ test("客户端修复:流年占位 + 正文不动", () => {
 });
 
 test("客户端修复:与服务端逻辑一致(spot check)", () => {
-  // 同一输入应得到与服务端相同的标题行
+  // 同一輸入應得到與服務端相同的標題行
   const md = "### 癸丑運（- 歲/-）";
   const fixed = repairFortuneMarkdown(md, fortune, "zht");
   assert.equal(fixed, "### 癸丑運（12–21歲／2005–2014年）");

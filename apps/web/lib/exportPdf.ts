@@ -1,4 +1,4 @@
-/** 打印用样式:印刷级排版,沿用水墨/朱砂视觉。 */
+/** 打印用樣式:印刷級排版,沿用水墨/硃砂視覺。 */
 const PRINT_CSS = `
   @page { size: A4; margin: 18mm 16mm; }
   * { box-sizing: border-box; }
@@ -43,8 +43,8 @@ export interface PrintText {
 }
 
 /**
- * 把一段已渲染的报告 HTML 导出为 PDF(经浏览器打印对话框「另存为 PDF」)。
- * 文字保持可选可搜索,排版独立干净。
+ * 把一段已渲染的報告 HTML 導出爲 PDF(經瀏覽器打印對話框「另存爲 PDF」)。
+ * 文字保持可選可搜索,排版獨立乾淨。
  */
 export function printReport(title: string, contentHtml: string, meta?: string, text: PrintText = {}): void {
   const w = window.open("", "_blank", "width=900,height=1000");
@@ -64,7 +64,7 @@ export function printReport(title: string, contentHtml: string, meta?: string, t
   );
   w.document.close();
   w.focus();
-  const trigger = () => { try { w.print(); } catch { /* 用户可手动打印 */ } };
+  const trigger = () => { try { w.print(); } catch { /* 用戶可手動打印 */ } };
   w.onload = trigger;
-  setTimeout(trigger, 500); // onload 偶尔不触发时兜底
+  setTimeout(trigger, 500); // onload 偶爾不觸發時兜底
 }

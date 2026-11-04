@@ -59,7 +59,7 @@ export function WuxingChart({ chart }: { chart: ChartResult }) {
   );
 }
 
-/** 命盤摘要卡:日主/月令、調候用神、五行旺缺、紫微命宮、五行局、當前大運——一眼睇晒。 */
+/** 命盤摘要卡:日主/月令、調候用神、五行旺缺、紫微命宮、五行局、當前大運——一眼睇曬。 */
 export function ChartSummary({ chart }: { chart: ChartResult }) {
   const { t } = useLocale();
   const { z } = useScript();

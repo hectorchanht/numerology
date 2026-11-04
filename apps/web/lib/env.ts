@@ -1,11 +1,11 @@
 let loaded = false;
 
 /**
- * 解析单行 .env,支持:
- * - `export KEY=...` 前缀
- * - 大小写 key([A-Za-z_][A-Za-z0-9_]*)
- * - 单/双引号值(双引号内支持 \ 转义);未引用的值去掉行尾注释(` # ...`)
- * - 空行与 `#` 注释行
+ * 解析單行 .env,支持:
+ * - `export KEY=...` 前綴
+ * - 大小寫 key([A-Za-z_][A-Za-z0-9_]*)
+ * - 單/雙引號值(雙引號內支持 \ 轉義);未引用的值去掉行尾註釋(` # ...`)
+ * - 空行與 `#` 註釋行
  * 返回 [key, value],非法行返回 null。
  */
 export function parseDotEnvLine(line: string): [string, string] | null {
@@ -22,22 +22,22 @@ export function parseDotEnvLine(line: string): [string, string] | null {
     const inner = v.match(/^'([^']*)'/);
     v = inner ? inner[1]! : v.replace(/^'|'$/g, "");
   } else {
-    // 未引用:行尾注释从「空白 + #」开始。
+    // 未引用:行尾註釋從「空白 + #」開始。
     v = v.replace(/\s+#.*$/, "").trim();
   }
   return [key, v];
 }
 
 /**
- * 把仓库根目录 .env 里的变量灌进 process.env(只灌尚未设置的)。
+ * 把倉庫根目錄 .env 裏的變量灌進 process.env(只灌尚未設置的)。
  * 多 provider:不同 provider 用不同 key(GLM_API_KEY / GEMINI_API_KEY / GROQ_API_KEY /
- * ANTHROPIC_API_KEY 等),所以这里不针对单一 key 早退,统一加载即可;
- * 具体 provider 的 key 缺失会在解读层(@numerology/ai)调用时给出明确报错。
- * 仅服务端、请求时调用(非 import 时)。
+ * ANTHROPIC_API_KEY 等),所以這裏不針對單一 key 早退,統一加載即可;
+ * 具體 provider 的 key 缺失會在解讀層(@numerology/ai)調用時給出明確報錯。
+ * 僅服務端、請求時調用(非 import 時)。
  *
- * Edge 说明:node:fs / node:path 采用运行时动态 import(webpackIgnore 让打包器
- * 原样保留),Cloudflare Workers 等无文件系统的运行时会直接走 catch 静默 no-op ——
- * key 必须走平台环境变量 / 请求级 BYOK。本函数因此是 async,调用方需 await。
+ * Edge 說明:node:fs / node:path 採用運行時動態 import(webpackIgnore 讓打包器
+ * 原樣保留),Cloudflare Workers 等無文件系統的運行時會直接走 catch 靜默 no-op ——
+ * key 必須走平臺環境變量 / 請求級 BYOK。本函數因此是 async,調用方需 await。
  */
 export async function ensureEnv(): Promise<void> {
   if (loaded) return;
@@ -51,7 +51,7 @@ export async function ensureEnv(): Promise<void> {
     readFileSync = fsMod.readFileSync;
     join = pathMod.join;
   } catch {
-    return; // 无 node 内建模块的运行时(Workers/edge):静默跳过
+    return; // 無 node 內建模塊的運行時(Workers/edge):靜默跳過
   }
 
   const cwd =
@@ -71,7 +71,7 @@ export async function ensureEnv(): Promise<void> {
         }
       }
     } catch {
-      /* 该路径无 .env,继续尝试下一个 */
+      /* 該路徑無 .env,繼續嘗試下一個 */
     }
   }
 }

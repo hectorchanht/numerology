@@ -3,9 +3,9 @@ import { getServerAiBindings, getMacLlmAccessHeaders } from "./aiBinding.js";
 import { isMacProvider } from "./providerMeta.js";
 
 /**
- * 从请求体解析 BYOK 设置(用户自带 provider/key)与自定义人设;仅透传、不落库、不记日志。
- * `systemPrompt` 取请求体**顶层**字段(与 `locale` 同级),而非塞进 `ai`:
- * 它是每次请求的用户覆盖项(像 locale 一样),保持 `ai` 的 BYOK 形状稳定。
+ * 從請求體解析 BYOK 設置(用戶自帶 provider/key)與自定義人設;僅透傳、不落庫、不記日誌。
+ * `systemPrompt` 取請求體**頂層**字段(與 `locale` 同級),而非塞進 `ai`:
+ * 它是每次請求的用戶覆蓋項(像 locale 一樣),保持 `ai` 的 BYOK 形狀穩定。
  */
 export function parseAi(body: unknown): ProviderOptions | undefined {
   const b = (body ?? {}) as { ai?: Record<string, unknown>; systemPrompt?: unknown };
@@ -29,16 +29,16 @@ export function parseAi(body: unknown): ProviderOptions | undefined {
 }
 
 /**
- * 服务端:解析 BYOK,并挂上 Workers AI 的服务端 binding。
- * aiBinding 只存在于服务端内存对象中——parseAi 绝不从请求体读取它,
- * 故客户端无法伪造或窥探;也不会被序列化进任何响应。
+ * 服務端:解析 BYOK,並掛上 Workers AI 的服務端 binding。
+ * aiBinding 只存在於服務端內存對象中——parseAi 絕不從請求體讀取它,
+ * 故客戶端無法僞造或窺探;也不會被序列化進任何響應。
  */
 export function resolveServerAi(body: unknown): ProviderOptions | undefined {
   const opts: ProviderOptions = parseAi(body) ?? {};
   const bindings = getServerAiBindings();
   if (bindings) opts.aiBinding = bindings;
-  // Mac provider(mac-llm;旧名 mac-mlx 亦认):附上 Cloudflare Access
-  // service token headers(仅服务端 env,绝不来自请求体)。
+  // Mac provider(mac-llm;舊名 mac-mlx 亦認):附上 Cloudflare Access
+  // service token headers(僅服務端 env,絕不來自請求體)。
   if (opts.provider && isMacProvider(opts.provider)) {
     const h = getMacLlmAccessHeaders();
     if (h) opts.extraHeaders = h;

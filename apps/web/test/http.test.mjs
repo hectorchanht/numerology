@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-// —— 预算耗尽:429 + AI_BUDGET 码,消息原样(去掉内部标记) ——
+// —— 預算耗盡:429 + AI_BUDGET 碼,消息原樣(去掉內部標記) ——
 test("http:预算耗尽 → 429 附 AI_BUDGET 码", async () => {
   const { classifyError } = await import("../test-dist/http.js");
   const r = classifyError(new Error("AI_BUDGET_EXCEEDED:本月 Workers AI 用量已達上限($2)"), "ai");
@@ -10,7 +10,7 @@ test("http:预算耗尽 → 429 附 AI_BUDGET 码", async () => {
   assert.equal(r.message, "本月 Workers AI 用量已達上限($2)");
 });
 
-// —— 模型下架错误码:404 + 模型消息 → 502 且附 MODEL_NOT_FOUND ——
+// —— 模型下架錯誤碼:404 + 模型消息 → 502 且附 MODEL_NOT_FOUND ——
 test("http:模型下架 404 附 MODEL_NOT_FOUND 码,其它 404 不附", async () => {
   const { classifyError } = await import("../test-dist/http.js");
   const mkErr = (status, message) => {

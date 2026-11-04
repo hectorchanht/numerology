@@ -1,7 +1,7 @@
-// 中国省→地级市 经度数据(真太阳时校正用)。
-// 数据来源:行政区划 province-city-china(uiwjs);经纬度 zhuyf8899/China_City_Geolocation_List;
-// 个别 geo 缺失的城市(宁波/南阳/襄阳/铜仁/三沙/儋州/海南州)用标准地理经度补充。
-// 经度仅取整到 0.01°,真太阳时为分钟级精度,足够。
+// 中國省→地級市 經度數據(真太陽時校正用)。
+// 數據來源:行政區劃 province-city-china(uiwjs);經緯度 zhuyf8899/China_City_Geolocation_List;
+// 個別 geo 缺失的城市(寧波/南陽/襄陽/銅仁/三沙/儋州/海南州)用標準地理經度補充。
+// 經度僅取整到 0.01°,真太陽時爲分鐘級精度,足夠。
 // nameHant 由 @dawn-studio/zh-convert s2tConvertLineSync 一次性預轉(見 /tmp/preconvert.mjs),UI 按 locale 直接揀,免 runtime 轉換。
 
 export interface City { name: string; nameHant: string; longitude: number }

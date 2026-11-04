@@ -16,7 +16,7 @@ test("buildCachedSystem:默认 zht,第三块为语言指令,不碰命盘事实�
   const sys = buildCachedSystem(chart);
   assert.equal(sys.length, 3);
   assert.ok(sys[2].text.includes("繁體中文"));
-  // 命盘事实块(第二块)不受语言影响
+  // 命盤事實塊(第二塊)不受語言影響
   const sysEn = buildCachedSystem(chart, undefined, "en");
   assert.equal(sysEn[1].text, sys[1].text);
   assert.ok(sysEn[2].text.includes("English"));

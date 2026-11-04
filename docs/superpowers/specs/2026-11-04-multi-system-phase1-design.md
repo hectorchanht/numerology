@@ -130,7 +130,7 @@ Fideler 已入庫資料的形式(`packages/knowledge/data/greek-gematria.json` +
   - 宇宙幾何對照:只可使用知識庫已有的數(洛書 45 / 15、Sun 方陣 111 / 666、Fideler 資料檔內數值),不得引入其他數字。
   - 科學角度:有相關才寫,只可引 `science-notes.json` 條目。
   - 對照表由前端畫,AI 不重畫表格。
-- `SYSTEM_PERSONA` 由「八字 + 紫微解讀師」擴為「多體系解讀師」;原「诚实」條款保留並延伸:不得引用知識庫外的研究或古書。
+- `SYSTEM_PERSONA` 由「八字 + 紫微解讀師」擴為「多體系解讀師」;原「誠實」條款保留並延伸:不得引用知識庫外的研究或古書。
 - `lens` 維持 `bazi | ziwei | both`;`crosssystem` 一節不受 lens 隔離影響(它本身就是多體系)。
 
 ## 測試

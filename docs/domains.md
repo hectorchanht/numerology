@@ -12,7 +12,7 @@
 | 紫微斗數 | 已入庫 | 紫微斗數全書;安星交 iztro | 是 | 五行局五行入對照矩陣 |
 | 易經 | 已入庫 | 周易(`yijing*.data.ts`)、Legge 英譯(公有領域) | 是(卦由數起) | 八卦配洛書九宮(後天八卦) |
 | 九星(氣學) | 已入庫 | 九星氣學;年星 / 月星由引擎 | 是 | 即洛書九宮飛星,主軸本體 |
-| 生命靈數 | 已入庫 | 畢氏數秘(現代算法)`pythagorean-numbers.json` | 是 | 經河圖數橋接五行(標 `bridge: 河圖`);數 1–9 落洛書格 |
+| 生命靈數 | 已入庫 | 畢氏數祕(現代算法)`pythagorean-numbers.json` | 是 | 經河圖數橋接五行(標 `bridge: 河圖`);數 1–9 落洛書格 |
 | 行星幻方 | 已入庫 | Agrippa, De occulta philosophia II.22(1533 版核對,Moon 誤印已記)`planetary-squares.json` | 是 | Saturn 方陣即洛書;其餘方陣為洛書的高階推廣 |
 | Greek gematria | 已入庫 | Fideler 等事實 + 頁碼`greek-gematria.json` | 是 | 365、729 等數的希臘字母值,與九宮 / 365 日對看 |
 | Agrippa correspondences / cabala | 已入庫 | Agrippa 卷 II–III:行星神名 / 智靈 / 靈、28 月宿、十 Sephiroth(`agrippa-correspondences.json`、`agrippa-cabala.json`) | 是(查表) | 行星神名值與幻方行和 / 總和相扣 |
@@ -43,7 +43,7 @@
 | 卡巴拉(生命樹) | todo | Sefer Yetzirah、Agrippa 轉述 | 是 | 十 Sephiroth 與九宮 + 1 的對位 |
 | Abjad | todo | 阿拉伯字母數值傳統 | 是 | 字母數化簡後落九宮 |
 | 西洋占星 | todo | Ptolemy, *Tetrabiblos*;現代星曆 | 是(需星曆) | 星期守護行星已經幻方接上 |
-| Chaldean 數秘 | todo | 迦勒底數字傳統(現代整理) | 是 | 1–8 數系,9 不用;與畢氏對比 |
+| Chaldean 數祕 | todo | 迦勒底數字傳統(現代整理) | 是 | 1–8 數系,9 不用;與畢氏對比 |
 | 塔羅 | todo | Rider-Waite 等(近代) | 否(抽牌) | 大阿爾卡納 22 張,與 Hebrew 字母數對看 |
 | 埃及旬星 / 民用曆 | todo | 埃及 decans、365 日民用曆 | 是 | 365 日 = 12 × 30 + 5 |
 | 藏曆 mewa | todo | 藏曆九宮(mewa) | 是 | 與九星同為洛書九宮,可直接對讀 |

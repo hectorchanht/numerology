@@ -2,18 +2,18 @@ import type { BirthInput } from "./types.js";
 import { WUXING } from "./shishen.js";
 import { isTiangan } from "@numerology/knowledge";
 
-/** 中国标准时所用经线(东经 120°)。 */
+/** 中國標準時所用經線(東經 120°)。 */
 const STANDARD_MERIDIAN = 120;
 
 export interface SolarTimeCorrection {
-  /** 是否已做真太阳时校正(提供了经度才会做) */
+  /** 是否已做真太陽時校正(提供了經度纔會做) */
   applied: boolean;
   longitude?: number;
-  /** 总偏移(分钟,= 经度差 + 均时差) */
+  /** 總偏移(分鐘,= 經度差 + 均時差) */
   offsetMinutes?: number;
-  /** 经度差带来的偏移(分钟) */
+  /** 經度差帶來的偏移(分鐘) */
   longitudeMinutes?: number;
-  /** 均时差(分钟) */
+  /** 均時差(分鐘) */
   equationOfTimeMinutes?: number;
 }
 
@@ -38,16 +38,16 @@ function dayOfYear(y: number, m: number, d: number): number {
   return n;
 }
 
-/** 均时差(分钟):真太阳时 − 平太阳时。标准近似公式。 */
+/** 均時差(分鐘):真太陽時 − 平太陽時。標準近似公式。 */
 function equationOfTime(n: number): number {
   const b = ((2 * Math.PI) / 364) * (n - 81);
   return 9.87 * Math.sin(2 * b) - 7.53 * Math.cos(b) - 1.5 * Math.sin(b);
 }
 
 /**
- * 把出生时钟时间换算为【真太阳时】(提供经度时)。
- * 真太阳时 = 时钟时间 + (经度 − 120)×4 分钟 + 均时差。
- * 用 UTC 做加减以避免本地时区干扰,确定性。
+ * 把出生時鐘時間換算爲【真太陽時】(提供經度時)。
+ * 真太陽時 = 時鐘時間 + (經度 − 120)×4 分鐘 + 均時差。
+ * 用 UTC 做加減以避免本地時區干擾,確定性。
  */
 export function resolveBirthDateTime(input: BirthInput): ResolvedDateTime {
   const minute = input.minute ?? 0;
@@ -82,7 +82,7 @@ export function resolveBirthDateTime(input: BirthInput): ResolvedDateTime {
   };
 }
 
-/** 五行 → 方位 / 颜色 / 季节(开运参考)。 */
+/** 五行 → 方位 / 顏色 / 季節(開運參考)。 */
 const WUXING_DIR: Record<string, { direction: string; color: string }> = {
   木: { direction: "东方", color: "青、绿" },
   火: { direction: "南方", color: "红、紫" },
@@ -98,7 +98,7 @@ export interface FavorableDirection {
   color: string;
 }
 
-/** 由喜用神(天干)推出有利的五行 → 方位 / 颜色。去重合并。 */
+/** 由喜用神(天干)推出有利的五行 → 方位 / 顏色。去重合並。 */
 export function favorableDirections(useGods: string[]): FavorableDirection[] {
   const byWuXing = new Map<string, string[]>();
   for (const g of useGods) {

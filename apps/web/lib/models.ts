@@ -8,7 +8,7 @@ import { filterRetired, isMacProvider } from "./providerMeta.js";
 
 export interface ModelEntry {
   id: string;
-  /** openrouter 等返回的免费标记(便于界面标注)。 */
+  /** openrouter 等返回的免費標記(便於界面標註)。 */
   free?: boolean;
 }
 
@@ -18,14 +18,14 @@ export interface ModelsResult {
   provider: string;
   source: ModelsSource;
   models: ModelEntry[];
-  /** 需要 key 才能拉取(如 401),前端回落到静态表并提示填 key。 */
+  /** 需要 key 才能拉取(如 401),前端回落到靜態表並提示填 key。 */
   needsKey?: boolean;
-  /** Mac provider 上游离线/失败时的软回落标记:仍回静态表,但前端可显示离线状态。 */
+  /** Mac provider 上游離線/失敗時的軟回落標記:仍回靜態表,但前端可顯示離線狀態。 */
   offline?: boolean;
   verifiedAt?: string;
 }
 
-/** 各 provider 的 OpenAI 兼容 /models 端点(anthropic/custom 无标准端点 → 走静态)。 */
+/** 各 provider 的 OpenAI 兼容 /models 端點(anthropic/custom 無標準端點 → 走靜態)。 */
 const MODELS_BASE_URL: Record<string, string> = {
   pollinations: "https://text.pollinations.ai/openai",
   "mac-llm": "https://ollama.hectorchan.com/v1",
@@ -36,7 +36,7 @@ const MODELS_BASE_URL: Record<string, string> = {
   ollama: "http://localhost:11434/v1",
 };
 
-/** anthropic 无 /models 端点:静态备选(与 SettingsPanel 旧表一致)。 */
+/** anthropic 無 /models 端點:靜態備選(與 SettingsPanel 舊錶一致)。 */
 const STATIC_MODELS: Record<string, string[]> = {
   anthropic: ["claude-sonnet-4-6", "claude-opus-4-8", "claude-haiku-4-5-20251001"],
   glm: ["glm-4-flash", "glm-4-flashx", "glm-4-air", "glm-4-plus", "glm-4-long"],
@@ -44,7 +44,7 @@ const STATIC_MODELS: Record<string, string[]> = {
   groq: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it", "deepseek-r1-distill-llama-70b"],
   openrouter: ["google/gemma-4-31b-it:free", "google/gemma-4-26b-a4b-it:free", "nvidia/nemotron-3.5-lightning:free"],
   pollinations: ["openai"],
-  // Mac 只行 Ollama(MLX 2026-11-02 停用):静态回落就是 Ollama 的 7 个模型。
+  // Mac 只行 Ollama(MLX 2026-11-02 停用):靜態回落就是 Ollama 的 7 個模型。
   "mac-llm": [
     "qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b", "deepseek-r1:14b", "gemma3:12b",
   ],
@@ -52,14 +52,14 @@ const STATIC_MODELS: Record<string, string[]> = {
 
 type FetchLike = (url: string, init?: RequestInit) => Promise<Response>;
 
-/** 静态 id 列表转模型项(`:free` 后缀 → free:true,供前端模型 filter 用)。 */
+/** 靜態 id 列表轉模型項(`:free` 後綴 → free:true,供前端模型 filter 用)。 */
 function toEntries(ids: string[]): ModelEntry[] {
   return ids.map((id) => (id.endsWith(":free") ? { id, free: true } : { id }));
 }
 
 type ModelsPayload = { data?: { id?: string; pricing?: { prompt?: string | number } }[] };
 
-/** 解析 OpenAI 兼容 /models 响应为模型项(pricing.prompt 为 0 → free:true)。 */
+/** 解析 OpenAI 兼容 /models 響應爲模型項(pricing.prompt 爲 0 → free:true)。 */
 function parseModelEntries(data: ModelsPayload): ModelEntry[] {
   const list = Array.isArray(data?.data) ? data.data : [];
   return list
@@ -77,13 +77,13 @@ export interface FetchProviderModelsOpts {
   key?: string;
   baseUrl?: string;
   fetchImpl?: FetchLike;
-  /** 服务端 KV(读动态下架登记用);缺省则只滤 hardcode seed。 */
+  /** 服務端 KV(讀動態下架登記用);缺省則只濾 hardcode seed。 */
   kv?: unknown;
-  /** 服务端注入的额外请求头(如 Mac provider 的 Access service token)。 */
+  /** 服務端注入的額外請求頭(如 Mac provider 的 Access service token)。 */
   accessHeaders?: Record<string, string>;
 }
 
-/** 拉单个 OpenAI 兼容端点的模型项(8s 超时);任何失败(网络/非 2xx/坏 JSON)返回 null。 */
+/** 拉單個 OpenAI 兼容端點的模型項(8s 超時);任何失敗(網絡/非 2xx/壞 JSON)返回 null。 */
 async function fetchEndpointEntries(
   baseURL: string,
   opts: FetchProviderModelsOpts,
@@ -108,8 +108,8 @@ async function fetchEndpointEntries(
 }
 
 /**
- * mac-llm 列表:只拉 Ollama 一个端点(MLX 已停用,不再有合并)。
- * 成功 → source:"live";失败(或列表为空) → 离线软回落静态 7 个。
+ * mac-llm 列表:只拉 Ollama 一個端點(MLX 已停用,不再有合併)。
+ * 成功 → source:"live";失敗(或列表爲空) → 離線軟回落靜態 7 個。
  */
 async function fetchMacModels(opts: FetchProviderModelsOpts): Promise<ModelsResult> {
   const entries = await fetchEndpointEntries(MODELS_BASE_URL["mac-llm"]!, opts);
@@ -121,21 +121,21 @@ async function fetchMacModels(opts: FetchProviderModelsOpts): Promise<ModelsResu
       models: toEntries(STATIC_MODELS["mac-llm"] ?? []),
     };
   }
-  // 下架过滤:登记统一归 mac-llm 名下(见 @numerology/ai 的 deadRegistryName)。
+  // 下架過濾:登記統一歸 mac-llm 名下(見 @numerology/ai 的 deadRegistryName)。
   const dead = opts.kv ? deadModelIds(await readDeadModels(opts.kv), "mac-llm") : new Set<string>();
   const filtered = filterRetired(entries).filter((m) => !dead.has(normDeadModelId(m.id)));
   return { provider: "mac-llm", source: "live", models: filtered.length > 0 ? filtered : entries };
 }
 
 /**
- * 拉取某 provider 的模型列表。纯函数(fetch 可注入,便于测试)。
- * - workers-ai:binding 无 list 接口,返回构建时核验表(verified-static)。
+ * 拉取某 provider 的模型列表。純函數(fetch 可注入,便於測試)。
+ * - workers-ai:binding 無 list 接口,返回構建時覈驗表(verified-static)。
  * - OpenAI 兼容:代理 {baseURL}/models;401 → needsKey。
- * - anthropic/custom:静态表(无标准端点)。
- * - mac-llm:单一 Mac provider → 只拉 Ollama 端点(见 fetchMacModels);
- *   显式传 baseUrl 时按单端点走既有流程。
- * - mac-mlx(退役旧名):入口先正规化为 mac-llm,行为与 mac-llm 完全一致。
- * key 只经 Authorization 头发送,绝不出现在返回值/日志中。
+ * - anthropic/custom:靜態表(無標準端點)。
+ * - mac-llm:單一 Mac provider → 只拉 Ollama 端點(見 fetchMacModels);
+ *   顯式傳 baseUrl 時按單端點走既有流程。
+ * - mac-mlx(退役舊名):入口先正規化爲 mac-llm,行爲與 mac-llm 完全一致。
+ * key 只經 Authorization 頭發送,絕不出現在返回值/日誌中。
  */
 export async function fetchProviderModels(
   provider: string,
@@ -201,8 +201,8 @@ export async function fetchProviderModels(
   }
   const data = (await res.json()) as ModelsPayload;
   const models = parseModelEntries(data);
-  // 下架模型直接移除(选了必 404),不让用户选到:hardcode seed + KV 动态登记取并集。
-  // 若过滤后为空则回落原列表(避免下拉被清空,属于异常状态)。
+  // 下架模型直接移除(選了必 404),不讓用戶選到:hardcode seed + KV 動態登記取並集。
+  // 若過濾後爲空則回落原列表(避免下拉被清空,屬於異常狀態)。
   const dead = opts.kv ? deadModelIds(await readDeadModels(opts.kv), name) : new Set<string>();
   const filtered = filterRetired(models).filter(
     (m) => !dead.has(normDeadModelId(m.id)),
@@ -210,13 +210,13 @@ export async function fetchProviderModels(
   return { provider: name, source: "live", models: filtered.length > 0 ? filtered : models };
 }
 
-/** 退役 alias 正规化:mac-mlx(MLX 停用前的旧名) → mac-llm;其它小写去空白原样。 */
+/** 退役 alias 正規化:mac-mlx(MLX 停用前的舊名) → mac-llm;其它小寫去空白原樣。 */
 function normProviderAlias(provider: string): string {
   const n = provider.trim().toLowerCase();
   return n === "mac-mlx" ? "mac-llm" : n;
 }
 
-/** 静态备选表(前端 24h 缓存失效/拉取失败时的回落,也供路由复用)。 */
+/** 靜態備選表(前端 24h 緩存失效/拉取失敗時的回落,也供路由複用)。 */
 export function staticModelsFor(provider: string): string[] {
   return STATIC_MODELS[normProviderAlias(provider)] ?? [];
 }

@@ -18,7 +18,7 @@ const dyn = dynOf("full");
 for (const must of ["八字大运", "八字流年", "紫微大限四化", "紫微流年四化"]) {
 assert.ok(dyn.includes(must), `full 缺少: ${must}`);
 }
-// 不传 opts 时默认也是 full
+// 不傳 opts 時默認也是 full
 const { markdown} = buildContextPack(chart, fortune);
 assert.ok(markdown.includes("紫微流年四化"), "默认应为 full");
 });
@@ -44,7 +44,7 @@ assert.ok(dyn.includes("### 八字大运"), "应有逐运节");
 assert.ok(dyn.includes("确定性信号"), "应有信号 digest");
 assert.ok(!dyn.includes("### 八字流年"), "dayun 不应有流年节");
 assert.ok(!dyn.includes("### 紫微流年四化"), "dayun 不应有流年四化节");
-// digest 内容来自确定性数据
+// digest 內容來自確定性數據
 const yongSteps = fortune.bazi.daYun.filter((d) => d.suppliesUseGod).map((d) => d.ganZhi);
 for (const gz of yongSteps.slice(0, 2)) {
 assert.ok(dyn.includes(gz), `digest 应列出引动用神步 ${gz}`);

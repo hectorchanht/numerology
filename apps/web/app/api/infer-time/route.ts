@@ -11,7 +11,7 @@ import { lockTextStream, scriptLocker } from "@/lib/script";
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
-/** 流式时辰推断对话:据已知人生事实比对 12 时辰命盘,反推最可能时辰。首 token 前失败 → JSON 错误(502),而非截断流。 */
+/** 流式時辰推斷對話:據已知人生事實比對 12 時辰命盤,反推最可能時辰。首 token 前失敗 → JSON 錯誤(502),而非截斷流。 */
 export async function POST(req: Request): Promise<Response> {
   try {
     await ensureEnv();

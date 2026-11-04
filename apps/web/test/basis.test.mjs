@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { sectionBasis, tenGodHits } from "../test-dist/basis.js";
 import { castChart } from "@numerology/engine";
 
-// 1990-02-15 23:00 男:日主辛、官禄武曲/天府、财帛紫微/天相、夫妻七杀、日支亥、调候己壬庚(穷通宝鉴)。
+// 1990-02-15 23:00 男:日主辛、官祿武曲/天府、財帛紫微/天相、夫妻七殺、日支亥、調候己壬庚(窮通寶鑑)。
 const chart = castChart({ year: 1990, month: 2, day: 15, hour: 23, minute: 0, gender: "男" });
 
 test("basis:每節依據直接取自命盤", () => {

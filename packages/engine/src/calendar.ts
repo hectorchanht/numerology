@@ -4,7 +4,7 @@ export interface LunarDate {
   year: number;
   month: number;
   day: number;
-  /** 是否闰月 */
+  /** 是否閏月 */
   isLeapMonth?: boolean;
 }
 
@@ -15,8 +15,8 @@ export interface SolarDate {
 }
 
 /**
- * 农历日期 → 阳历日期。闰月以负数月份传给 lunar-javascript。
- * @throws 当农历日期非法(如该年无此闰月)时抛错。
+ * 農曆日期 → 陽曆日期。閏月以負數月份傳給 lunar-javascript。
+ * @throws 當農曆日期非法(如該年無此閏月)時拋錯。
  * @example solarFromLunar({ year: 2000, month: 1, day: 1 }) => { year:2000, month:2, day:5 }
  */
 export function solarFromLunar(d: LunarDate): SolarDate {

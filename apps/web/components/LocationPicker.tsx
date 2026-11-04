@@ -6,7 +6,7 @@ import { useLocale } from "@/lib/i18n";
 import { Icon } from "@/components/Icon";
 
 interface Props {
-  /** 当前选中的经度(字符串;"" 表示不指定) */
+  /** 當前選中的經度(字符串;"" 表示不指定) */
   value: string;
   onChange: (longitude: string) => void;
 }

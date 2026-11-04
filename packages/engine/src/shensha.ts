@@ -1,12 +1,12 @@
 import type { Dizhi, Tiangan } from "@numerology/knowledge";
 
 /**
- * 八字神煞(常用标准集,非穷尽)。
- * 说明:神煞流派众多、定义有差异;此处只实现规则较一致、争议较小的常用神煞,
- * 对定义分歧大的(福星/德秀/童子/血刃等)从略,避免臆造。
+ * 八字神煞(常用標準集,非窮盡)。
+ * 說明:神煞流派衆多、定義有差異;此處只實現規則較一致、爭議較小的常用神煞,
+ * 對定義分歧大的(福星/德秀/童子/血刃等)從略,避免臆造。
  */
 
-/** 日干 → 触发该神煞的地支集合 */
+/** 日干 → 觸發該神煞的地支集合 */
 type GanMap = Partial<Record<Tiangan, Dizhi[]>>;
 
 const TIANYI: GanMap = {
@@ -58,19 +58,19 @@ const GAN_SHENSHA: { name: string; map: GanMap }[] = [
   { name: "红艳煞", map: HONGYAN },
 ];
 
-/** 三合局:首字(代表) → 局内地支,用于将星/华盖/驿马/桃花等。 */
+/** 三合局:首字(代表) → 局內地支,用於將星/華蓋/驛馬/桃花等。 */
 const SANHE_GROUP: Record<string, Dizhi[]> = {
   申子辰: ["申", "子", "辰"],
   亥卯未: ["亥", "卯", "未"],
   寅午戌: ["寅", "午", "戌"],
   巳酉丑: ["巳", "酉", "丑"],
 };
-/** 由某地支找其所属三合局 key */
+/** 由某地支找其所屬三合局 key */
 function groupOf(zhi: Dizhi): string | undefined {
   for (const [k, arr] of Object.entries(SANHE_GROUP)) if (arr.includes(zhi)) return k;
   return undefined;
 }
-/** 三合局 key → 各神煞对应地支 */
+/** 三合局 key → 各神煞對應地支 */
 const SANHE_SHENSHA: Record<string, Record<string, Dizhi>> = {
   申子辰: { 将星: "子", 华盖: "辰", 驿马: "寅", 桃花: "酉", 劫煞: "巳", 灾煞: "午", 亡神: "亥" },
   亥卯未: { 将星: "卯", 华盖: "未", 驿马: "巳", 桃花: "子", 劫煞: "申", 灾煞: "酉", 亡神: "寅" },
@@ -93,8 +93,8 @@ export interface ShenShaContext {
 }
 
 /**
- * 求某地支(某一柱)上坐落的神煞。以日干 + 年支/日支(三合)+ 年支(孤寡)为依据。
- * 返回去重后的神煞名数组。
+ * 求某地支(某一柱)上坐落的神煞。以日干 + 年支/日支(三合)+ 年支(孤寡)爲依據。
+ * 返回去重後的神煞名數組。
  */
 export function shenShaForBranch(ctx: ShenShaContext, zhi: Dizhi): string[] {
   const out = new Set<string>();
@@ -104,7 +104,7 @@ export function shenShaForBranch(ctx: ShenShaContext, zhi: Dizhi): string[] {
     if (map[ctx.dayGan]?.includes(zhi)) out.add(name);
   }
 
-  // 三合派:以年支、日支为基准各取一遍
+  // 三合派:以年支、日支爲基準各取一遍
   for (const base of [ctx.yearZhi, ctx.dayZhi]) {
     const g = groupOf(base);
     if (!g) continue;
@@ -113,7 +113,7 @@ export function shenShaForBranch(ctx: ShenShaContext, zhi: Dizhi): string[] {
     }
   }
 
-  // 孤辰寡宿:以年支为基准
+  // 孤辰寡宿:以年支爲基準
   const gg = GUGUA[ctx.yearZhi];
   if (gg) {
     if (gg.孤辰 === zhi) out.add("孤辰");

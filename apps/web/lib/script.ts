@@ -45,7 +45,7 @@ export function subscribeScript(fn: () => void): () => void {
 /**
  * 將一段字鎖去 locale 嘅字形(UI 用)。非中文原樣;字典未熱 → 原樣。
  * from = 來源字形:引擎 / iztro 出簡體(預設 "zh-Hans");知識庫(卦爻辭、術語表)係繁體正本,
- * 傳 "zh-Hant" → 繁體目標就唔郁。原因:s2t 會將古籍異體「正規化」(系→繫、御→禦、牀→床),
+ * 傳 "zh-Hant" → 繁體目標就唔鬱。原因:s2t 會將古籍異體「正規化」(系→繫、御→禦、牀→牀),
  * 繁體正本唔應該被改。(簡體目標照轉:t2s 對簡體係 no-op,仲順手修正舊記錄存咗嘅繁體。)
  */
 export function lockScript(text: string, loc: Locale, from: ZhScript = "zh-Hans"): string {
@@ -70,7 +70,7 @@ const BREAK = /[\s。!?;,、:」』)】》.!?;,:)]/u;
 
 /**
  * 包住 AI 文本流:逐塊累積,只喺安全斷點前嘅部分做轉換再發出,尾巴留待下一塊
- * (避免「头|发」被切開逐字轉錯)。finalMessage 成功時先沖走尾巴,保證下游
+ * (避免「頭|發」被切開逐字轉錯)。finalMessage 成功時先沖走尾巴,保證下游
  * (streamToPrimedResponse / 緩存 tee)喺收尾之前收齊全部已轉換文字。
  * lock 為 null → 原樣返回 stream。
  */

@@ -40,7 +40,7 @@ test("buildReportSectionPrompt 小标题随 locale 变化", () => {
   assert.ok(zhs.includes("## 性格特质"), "zhs 应为简体标题");
   const en = buildReportSectionPrompt([], seg, "both", "en");
   assert.ok(en.includes("## Personality Traits"), "en 应为英文标题");
-  // 默认 = zht
+  // 默認 = zht
   const def = buildReportSectionPrompt([], seg);
   assert.ok(def.includes("## 性格特質"), "默认 locale 应为 zht");
 });

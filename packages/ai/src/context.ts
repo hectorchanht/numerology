@@ -2,24 +2,24 @@ import { favorableDirections, MAYA_META, type ChartResult, type CrossSystemResul
 import { SCIENCE_NOTES } from "@numerology/knowledge";
 import type { AiLocale } from "./prompts.js";
 
-/** 上下文包:命盘事实 + 注意事项,供报告与对话共享同一份"真相"。 */
+/** 上下文包:命盤事實 + 注意事項,供報告與對話共享同一份"真相"。 */
 export interface ContextPack {
-  /** 喂给模型的紧凑命盘事实(Markdown) */
+  /** 餵給模型的緊湊命盤事實(Markdown) */
   markdown: string;
-  /** 精度/可信度边界提示(真太阳时、未校对数据等) */
+  /** 精度/可信度邊界提示(真太陽時、未校對數據等) */
   caveats: string[];
 }
 
 /**
- * 动态运势的作用域——分节生成时只喂该节需要的数据,而不是每次都把整份
- * fortune 倒给模型(2026-10-23 honest finding:模型会把逐运/逐年清单当填空模板
- * 走,越全越罐头)。结构输入,而不是加指令。
- * - full: 全部(整篇模式/对话,默认,保持旧行为)
- * - dayun: 仅八字大运各步(+确定性信号 digest);不要流年
- * - review: 仅已过流年(+年份→大运映射);不要未来年
- * - future: 仅参考年/未来流年(+年份→大运映射);不要已过年
- * - current: 仅当前大运/大限各一行(静态报告各节的动静结合一瞥)
- * - none: 不要动态段(纯静态节)
+ * 動態運勢的作用域——分節生成時只喂該節需要的數據,而不是每次都把整份
+ * fortune 倒給模型(2026-10-23 honest finding:模型會把逐運/逐年清單當填空模板
+ * 走,越全越罐頭)。結構輸入,而不是加指令。
+ * - full: 全部(整篇模式/對話,默認,保持舊行爲)
+ * - dayun: 僅八字大運各步(+確定性信號 digest);不要流年
+ * - review: 僅已過流年(+年份→大運映射);不要未來年
+ * - future: 僅參考年/未來流年(+年份→大運映射);不要已過年
+ * - current: 僅當前大運/大限各一行(靜態報告各節的動靜結合一瞥)
+ * - none: 不要動態段(純靜態節)
  */
 export type FortuneScope = "full" | "dayun" | "review" | "future" | "current" | "none";
 
@@ -28,8 +28,8 @@ export interface ContextPackOptions {
 }
 
 /**
- * 命盘 JSON(+ 可选动态运势) → 紧凑上下文包。纯函数,不调用网络/AI,可单测。
- * 报告与对话共用此包,确保两者基于同一命盘事实,不自相矛盾。
+ * 命盤 JSON(+ 可選動態運勢) → 緊湊上下文包。純函數,不調用網絡/AI,可單測。
+ * 報告與對話共用此包,確保兩者基於同一命盤事實,不自相矛盾。
  */
 export function buildContextPack(chart: ChartResult, fortune?: FortuneAnalysis, opts?: ContextPackOptions): ContextPack {
   const { input, bazi: b, ziwei: z, meta } = chart;
@@ -121,13 +121,13 @@ ${fortune ? renderFortuneSection(fortune, opts?.fortuneScope ?? "full") : ""}`;
   return { markdown, caveats };
 }
 
-/** 按 scope 决定动态段的取舍;none → 空字符串(调用方直接不拼动态段)。 */
+/** 按 scope 決定動態段的取捨;none → 空字符串(調用方直接不拼動態段)。 */
 function renderFortuneSection(f: FortuneAnalysis, scope: FortuneScope): string {
   if (scope === "none") return "";
   return "\n" + renderFortune(f, scope);
 }
 
-/** 渲染动态运势(大运/流年 + 紫微大限/流年四化飞宫)。 */
+/** 渲染動態運勢(大運/流年 + 紫微大限/流年四化飛宮)。 */
 function renderFortune(f: FortuneAnalysis, scope: FortuneScope = "full"): string {
   const u = (b: boolean) => (b ? "✓引动用神" : "");
   const cur = (b: boolean) => (b ? " 【当前运】" : "");
@@ -154,7 +154,7 @@ function renderFortune(f: FortuneAnalysis, scope: FortuneScope = "full"): string
 
   const useGodHeader = `> 喜用神(调候):${f.bazi.useGods.join("")}${f.bazi.useGodsReviewed ? "" : "(待校对)"}。"引动用神"=该运/年补益命局(补救信号);反之多为受困或需谨慎。`;
 
-  /** 年份→所属大运干支的紧凑映射(回看/未来节用,让模型知道某年落在哪步运)。 */
+  /** 年份→所屬大運干支的緊湊映射(回看/未來節用,讓模型知道某年落在哪步運)。 */
   const yearToStep = (years: number[]) => {
     const parts = years.map((yr) => {
       const d = f.bazi.daYun.find((s) => s.startYear <= yr && yr <= s.endYear);
@@ -163,7 +163,7 @@ function renderFortune(f: FortuneAnalysis, scope: FortuneScope = "full"): string
     return parts.length ? `  年份所属大运:${parts.join("、")}\n` : "";
   };
 
-  /** 确定性信号 digest:引动用神的步 + 大限化忌的步(纯数据,不做价值判断)。 */
+  /** 確定性信號 digest:引動用神的步 + 大限化忌的步(純數據,不做價值判斷)。 */
   const signalDigest = () => {
     const yongSteps = f.bazi.daYun.filter((d) => d.suppliesUseGod).map((d) => d.ganZhi);
     const jiSteps = f.bazi.daYun
@@ -215,7 +215,7 @@ ${yearlyLines}
 `;
   }
 
-  // full:旧行为(整篇模式/对话)
+  // full:舊行爲(整篇模式/對話)
   const liuNian = f.bazi.liuNian.map(liuNianLine).join(" | ");
   const yearly = f.ziwei.yearly.map(yearlyLine).join("\n");
 

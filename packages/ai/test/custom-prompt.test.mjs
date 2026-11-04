@@ -2,14 +2,14 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { applyCustomPrompt } from "../dist/index.js";
 
-// —— B. 自定义人设:追加为 system 末块 ——
+// —— B. 自定義人設:追加爲 system 末塊 ——
 test("applyCustomPrompt:非空人设追加为最后一块(语言指令之后)", () => {
   const sys = [{ text: "persona" }, { text: "语言指令:輸出語言…" }];
   const out = applyCustomPrompt(sys, { customSystemPrompt: "  你是一只猫  " });
   assert.equal(out.length, 3);
   assert.equal(out[2].text, "你是一只猫");
   assert.equal(out[1].text, "语言指令:輸出語言…");
-  // 不污染原数组
+  // 不污染原數組
   assert.equal(sys.length, 2);
 });
 

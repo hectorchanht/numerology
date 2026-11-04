@@ -49,7 +49,7 @@ export function tenGodHits(chart: ChartResult, gods: readonly string[]): TenGodH
   return out;
 }
 
-/** 引擎宮名係簡體(官禄 / 财帛…),兩種寫法都認。 */
+/** 引擎宮名係簡體(官祿 / 財帛…),兩種寫法都認。 */
 function palaceStars(chart: ChartResult, names: readonly string[]): string {
   const p = chart.ziwei.palaces.find((x) => names.includes(x.name));
   return p ? p.majorStars.map((s) => s.name).join("、") : "";

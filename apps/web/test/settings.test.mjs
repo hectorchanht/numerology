@@ -18,7 +18,7 @@ import {
 } from "../test-dist/history.js";
 import { stableInputHash } from "../test-dist/hash.js";
 
-// —— A. 分 provider 记 key:迁移 ——
+// —— A. 分 provider 記 key:遷移 ——
 test("migrateAiSettings:旧版单 apiKey 归到当时选中的 provider 名下", () => {
   const out = migrateAiSettings({ provider: "openrouter", apiKey: "sk-old", model: "", baseURL: "" });
   assert.equal(out.keys.openrouter, "sk-old");
@@ -48,13 +48,13 @@ test("migrateAiSettings:旧名 mac-mlx 映射到 mac-llm,MLX 模型 id 救济到
   const out2 = migrateAiSettings({ provider: "mac-mlx", model: "mlx-community/gpt-oss-20b-MXFP4-Q8" });
   assert.equal(out2.provider, "mac-llm");
   assert.equal(out2.model, "gpt-oss:20b");
-  // 已是新名/其它 provider 不受影响。
+  // 已是新名/其它 provider 不受影響。
   assert.equal(migrateAiSettings({ provider: "mac-llm", model: "qwen3:8b" }).provider, "mac-llm");
   assert.equal(migrateAiSettings({ provider: "glm" }).provider, "glm");
 });
 
 test("migrateAiSettings:mac-llm 下的 MLX 模型同样救济;未知 MLX 模型回默认推荐", () => {
-  // provider 已是 mac-llm、但 model 是合并时期选下的 MLX id → 一样映射。
+  // provider 已是 mac-llm、但 model 是合併時期選下的 MLX id → 一樣映射。
   assert.equal(
     migrateAiSettings({ provider: "mac-llm", model: "mlx-community/Qwen3-14B-4bit" }).model,
     "qwen3:14b",
@@ -63,18 +63,18 @@ test("migrateAiSettings:mac-llm 下的 MLX 模型同样救济;未知 MLX 模型�
     migrateAiSettings({ provider: "mac-llm", model: "mlx-community/gpt-oss-20b-MXFP4-Q8" }).model,
     "gpt-oss:20b",
   );
-  // 未知 mlx-community/* → mac-llm 默认推荐 qwen3:30b,不会打到死端点。
+  // 未知 mlx-community/* → mac-llm 默認推薦 qwen3:30b,不會打到死端點。
   assert.equal(
     migrateAiSettings({ provider: "mac-llm", model: "mlx-community/SomeOther-7B" }).model,
     "qwen3:30b",
   );
-  // Ollama 模型原样保留;非 Mac provider 的 model 就算长得像也不动。
+  // Ollama 模型原樣保留;非 Mac provider 的 model 就算長得像也不動。
   assert.equal(migrateAiSettings({ provider: "mac-llm", model: "qwen3:32b" }).model, "qwen3:32b");
   assert.equal(
     migrateAiSettings({ provider: "openrouter", model: "mlx-community/Qwen3-14B-4bit" }).model,
     "mlx-community/Qwen3-14B-4bit",
   );
-  // 空 model 不受影响。
+  // 空 model 不受影響。
   assert.equal(migrateAiSettings({ provider: "mac-mlx", model: "" }).model, "");
 });
 
@@ -85,7 +85,7 @@ test("currentKey:只取当前 provider 的 key,没填 → 空(不拿别的顶替
   assert.equal(currentKey(s2), "or-key");
 });
 
-// —— C. 缓存键稳定 ——
+// —— C. 緩存鍵穩定 ——
 const baseParts = {
   provider: "workers-ai",
   model: "",
@@ -120,7 +120,7 @@ test("stableInputHash:同一输入稳定,不同输入不同;minute 缺省按 0",
   assert.notEqual(h1, h3);
 });
 
-// —— C. tee:转发 + 累积 ——
+// —— C. tee:轉發 + 累積 ——
 function fakeStream(chunks) {
   const listeners = { text: [], error: [] };
   return {
@@ -148,14 +148,14 @@ test("teeTextStream:转发 text 给下游并累积全文", async () => {
 });
 
 test("teeTextStream:wrapper 上挂两个监听器(预热+正式)也不重复累积", async () => {
-  // 还原线上事故:streamToPrimedResponse 会先后挂两个 text 监听器,
-  // 旧实现导致缓存正文每个字符出现两次。
+  // 還原線上事故:streamToPrimedResponse 會先後掛兩個 text 監聽器,
+  // 舊實現導致緩存正文每個字符出現兩次。
   const inner = fakeStream(["ab", "cd", "ef"]);
   const { stream, acc } = teeTextStream(inner);
   const priming = [];
   const formal = [];
-  stream.on("text", (d) => priming.push(d)); // 预热监听器
-  stream.on("text", (d) => formal.push(d)); // 正式监听器
+  stream.on("text", (d) => priming.push(d)); // 預熱監聽器
+  stream.on("text", (d) => formal.push(d)); // 正式監聽器
   await stream.finalMessage();
   assert.equal(acc.text, "abcdef");
   assert.deepEqual(priming, ["ab", "cd", "ef"]);
@@ -188,10 +188,10 @@ test("prepareCachedStream:MISS 返回 miss,armPersistence(null) 不抛错", asyn
   assert.ok("miss" in r);
   assert.ok(created);
   assert.ok(r.miss.cacheKey.startsWith(AI_CACHE_PREFIX));
-  r.miss.armPersistence(null); // 无 waitUntil → 静默跳过
+  r.miss.armPersistence(null); // 無 waitUntil → 靜默跳過
 });
 
-// —— D. 历史纯逻辑 ——
+// —— D. 歷史純邏輯 ——
 test("mergeSectionInto:合并章节,不污染原对象", () => {
   const r = {
     id: "id1", createdAt: 1, updatedAt: 1, input: {}, locale: "zht", chart: {},

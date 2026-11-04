@@ -3,9 +3,9 @@ import assert from "node:assert/strict";
 import { streamToPrimedResponse } from "../test-dist/stream.js";
 import { classifyError } from "../test-dist/http.js";
 
-// —— Bug 3:首 token 前失败必须抛给调用方(不返回 Response),而不是静默截断流 ——
+// —— Bug 3:首 token 前失敗必須拋給調用方(不返回 Response),而不是靜默截斷流 ——
 
-/** 伪造 TextMessageStream:success 时逐块吐文本;failBeforeFirst 时首块前报错。 */
+/** 僞造 TextMessageStream:success 時逐塊吐文本;failBeforeFirst 時首塊前報錯。 */
 function fakeStream({ failBeforeFirst = false, chunks = ["甲", "乙"], status } = {}) {
   const tls = [];
   const els = [];
@@ -57,7 +57,7 @@ test("成功时正文完整:预热消费的首块会被回放,不丢失不重复
 
 test("超时未收到首块 → 抛超时错误(可分类为 502)", async () => {
   const never = fakeStream({ chunks: [] });
-  // chunks 为空时 finalMessage 永远不 resolve;靠超时兜底
+  // chunks 爲空時 finalMessage 永遠不 resolve;靠超時兜底
   never.finalMessage = () => new Promise(() => {});
   const err = await streamToPrimedResponse(never, 60).then(
     () => null,

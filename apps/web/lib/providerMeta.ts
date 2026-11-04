@@ -1,30 +1,30 @@
 import type { TKey } from "./i18n.js";
 
 /**
- * 设置面板用的 provider 元信息(客户端安全:不含任何 SDK)。
- * 与 packages/ai/src/provider.ts 的 listProviders() 保持一致(同名同序);
- * provider 增减时两处同步改。
+ * 設置面板用的 provider 元信息(客戶端安全:不含任何 SDK)。
+ * 與 packages/ai/src/provider.ts 的 listProviders() 保持一致(同名同序);
+ * provider 增減時兩處同步改。
  */
 export type ProviderGroup = "nokey" | "freekey" | "paid";
 
-/** 费用档:free=完全免费, freetier=免费额度, paid=付费。 */
+/** 費用檔:free=完全免費, freetier=免費額度, paid=付費。 */
 export type ProviderCost = "free" | "freetier" | "paid";
 
 export interface ProviderMeta {
   name: string;
-  /** tab 短名(仅短名,不塞描述)。 */
+  /** tab 短名(僅短名,不塞描述)。 */
   shortKey: TKey;
-  /** 选中后属性面板里的一行短注。 */
+  /** 選中後屬性面板裏的一行短注。 */
   noteKey: TKey;
   group: ProviderGroup;
   cost: ProviderCost;
   needsKey: boolean;
-  /** key 选填(如 Pollinations:匿名可用,填 key 更稳)。 */
+  /** key 選填(如 Pollinations:匿名可用,填 key 更穩)。 */
   optionalKey?: boolean;
   signup?: string;
 }
 
-/** 顶部 filter chips:全部 / 免 key / 免費 / 付費。免費=免 key ∪ 免费额度。 */
+/** 頂部 filter chips:全部 / 免 key / 免費 / 付費。免費=免 key ∪ 免費額度。 */
 export type ProviderFilter = "all" | "nokey" | "free" | "paid" | "recommended";
 
 export const FILTER_LABEL_KEYS: Record<ProviderFilter, TKey> = {
@@ -54,19 +54,19 @@ export const PROVIDER_META: ProviderMeta[] = [
 ];
 
 /**
- * 屋企 Mac 本地 provider 集合:同一部 headless Mac、同一个 Cloudflare Access app,
- * 共用即时模型列表 / 离线软回落 / 60s 缓存行为(与 @numerology/ai 的同名集合保持一致,
- * 两处增减时同步改)。
- * Mac 只行 Ollama 一个 runtime(MLX 2026-11-02 停用);mac-mlx 是已退役的旧名,
- * 只作 alias 保留 Mac 待遇并在各入口正规化到 mac-llm,新 UI 永不产生它
- * (旧设置载入时由 aiSettings 迁移映射,连同 mlx-community/* 模型 id 一并救济)。
+ * 屋企 Mac 本地 provider 集合:同一部 headless Mac、同一個 Cloudflare Access app,
+ * 共用即時模型列表 / 離線軟回落 / 60s 緩存行爲(與 @numerology/ai 的同名集合保持一致,
+ * 兩處增減時同步改)。
+ * Mac 只行 Ollama 一個 runtime(MLX 2026-11-02 停用);mac-mlx 是已退役的舊名,
+ * 只作 alias 保留 Mac 待遇並在各入口正規化到 mac-llm,新 UI 永不產生它
+ * (舊設置載入時由 aiSettings 遷移映射,連同 mlx-community/* 模型 id 一併救濟)。
  */
 export const MAC_PROVIDER_NAMES = ["mac-llm"] as const;
 
-/** 已退役的旧 provider 名(仅兼容:旧名入到嚟仍按 Mac provider 对待)。 */
+/** 已退役的舊 provider 名(僅兼容:舊名入到嚟仍按 Mac provider 對待)。 */
 export const MAC_PROVIDER_ALIASES = ["mac-mlx"] as const;
 
-/** 是否为屋企 Mac 本地 provider(mac-llm,或退役旧名 mac-mlx)。 */
+/** 是否爲屋企 Mac 本地 provider(mac-llm,或退役舊名 mac-mlx)。 */
 export function isMacProvider(name: string): boolean {
   const n = name.trim().toLowerCase();
   return (
@@ -88,21 +88,21 @@ export function filterProviders(filter: ProviderFilter): ProviderMeta[] {
   }
 }
 
-/** 带 free 标记的模型(与 SettingsPanel 的 ModelOption / models.ts 的 ModelEntry 同形)。 */
+/** 帶 free 標記的模型(與 SettingsPanel 的 ModelOption / models.ts 的 ModelEntry 同形)。 */
 export interface FreeFlaggedModel {
   id: string;
   free?: boolean;
 }
 
 /**
- * 模型级 filter:顶部的 全部/免 key/免費/付費 同时作用于模型下拉。
- * 免費/付費是模型层级属性(OpenRouter 一个 provider 内同时有 :free 和付费模型),
- * 只 filter provider tabs 会漏掉(见截图:filter=免費却选中了付费 model)。
- * - free: 只留 free===true;若列表没有任何 free 信息(静态表无标记)则回落为不过滤,
+ * 模型級 filter:頂部的 全部/免 key/免費/付費 同時作用於模型下拉。
+ * 免費/付費是模型層級屬性(OpenRouter 一個 provider 內同時有 :free 和付費模型),
+ * 只 filter provider tabs 會漏掉(見截圖:filter=免費卻選中了付費 model)。
+ * - free: 只留 free===true;若列表沒有任何 free 信息(靜態表無標記)則回落爲不過濾,
  *   避免把下拉清空。
- * - paid: 踢掉 free===true(未知视为候选);无信息时自然全留。
- * - all/nokey: 不过滤模型(免 key 已在 provider 层过滤)。
- * 结果为空时回落为全列表,保证下拉永远有可选项。
+ * - paid: 踢掉 free===true(未知視爲候選);無信息時自然全留。
+ * - all/nokey: 不過濾模型(免 key 已在 provider 層過濾)。
+ * 結果爲空時回落爲全列表,保證下拉永遠有可選項。
  */
 export function filterModels<T extends FreeFlaggedModel>(
   models: T[],
@@ -116,17 +116,17 @@ export function filterModels<T extends FreeFlaggedModel>(
   return filtered.length > 0 ? filtered : models;
 }
 
-/** 静态 id 列表转带 free 标记的模型项(`:free` 后缀 → free:true)。 */
+/** 靜態 id 列表轉帶 free 標記的模型項(`:free` 後綴 → free:true)。 */
 export function staticModelEntries(ids: string[]): FreeFlaggedModel[] {
   return ids.map((id) => (id.endsWith(":free") ? { id, free: true } : { id }));
 }
 
 /**
- * 推荐模型(2026-10-23 用 Hector 的 key 实测验证过可用):
- * - gemini: gemini-3.8-flash(旧 2.0 已被 Google 下架)
- * - openrouter: 三个 :free 模型(实测 200;注意免费额度是按 key 按天限的,超限会 429)
- * - anthropic: 两个有效 id(该 key 需先充值,余额为 0)
- * 推荐只做减法:filter 芯片「推荐」把模型下拉过滤到这个表。
+ * 推薦模型(2026-10-23 用 Hector 的 key 實測驗證過可用):
+ * - gemini: gemini-3.8-flash(舊 2.0 已被 Google 下架)
+ * - openrouter: 三個 :free 模型(實測 200;注意免費額度是按 key 按天限的,超限會 429)
+ * - anthropic: 兩個有效 id(該 key 需先充值,餘額爲 0)
+ * 推薦只做減法:filter 芯片「推薦」把模型下拉過濾到這個表。
  */
 export const RECOMMENDED_MODELS: Record<string, string[]> = {
   gemini: ["gemini-3.8-flash"],
@@ -139,12 +139,12 @@ export const RECOMMENDED_MODELS: Record<string, string[]> = {
   anthropic: ["claude-sonnet-4-6", "claude-opus-4-8"],
 };
 
-/** 该 provider 下此模型是否在推荐表里。 */
+/** 該 provider 下此模型是否在推薦表裏。 */
 export function isRecommended(provider: string, id: string): boolean {
   return (RECOMMENDED_MODELS[provider] ?? []).includes(normModelId(id));
 }
 
-/** 模型列表只留推荐(结果为空时回落为全列表,保证下拉永远有可选项)。 */
+/** 模型列表只留推薦(結果爲空時回落爲全列表,保證下拉永遠有可選項)。 */
 export function filterRecommended<T extends { id: string }>(models: T[], provider: string): T[] {
   const rec = RECOMMENDED_MODELS[provider];
   if (!rec || rec.length === 0) return models;
@@ -153,28 +153,28 @@ export function filterRecommended<T extends { id: string }>(models: T[], provide
 }
 
 /**
- * 规范化模型 id:Gemini 实时列表返回 `models/gemini-3.8-flash` 形式,
- * 与推荐表里的裸 id 对齐(两种形式发请求都有效,见 provider.ts)。
+ * 規範化模型 id:Gemini 實時列表返回 `models/gemini-3.8-flash` 形式,
+ * 與推薦表裏的裸 id 對齊(兩種形式發請求都有效,見 provider.ts)。
  */
 export function normModelId(id: string): string {
   return id.startsWith("models/") ? id.slice("models/".length) : id;
 }
 
 /**
- * 已下架模型(实测 404,选中必失败):从列表里直接移除,不让用户选到。
+ * 已下架模型(實測 404,選中必失敗):從列表裏直接移除,不讓用戶選到。
  * - gemini-2.0-flash: Google 已下架("no longer available")
- * - gemini-2.5-flash: 新用户不可用("no longer available to new users")
- * 用裸 id 存,比对经 normModelId 对齐 `models/` 前缀形式。
+ * - gemini-2.5-flash: 新用戶不可用("no longer available to new users")
+ * 用裸 id 存,比對經 normModelId 對齊 `models/` 前綴形式。
  */
 export const RETIRED_MODEL_IDS: string[] = ["gemini-2.0-flash", "gemini-2.5-flash"];
 
-/** 滤掉已下架模型(空结果则回落原列表,避免下拉被清空)。 */
+/** 濾掉已下架模型(空結果則回落原列表,避免下拉被清空)。 */
 export function filterRetired<T extends { id: string }>(models: T[]): T[] {
   const filtered = models.filter((m) => !RETIRED_MODEL_IDS.includes(normModelId(m.id)));
   return filtered.length > 0 ? filtered : models;
 }
 
-/** 静态模型备选(动态拉取失败/未缓存时的回落;workers-ai 用核验表,见 models.ts)。 */
+/** 靜態模型備選(動態拉取失敗/未緩存時的回落;workers-ai 用覈驗表,見 models.ts)。 */
 export const STATIC_MODELS: Record<string, string[]> = {
   "workers-ai": [
     "@cf/mistralai/mistral-small-3.1-24b-instruct",
@@ -182,7 +182,7 @@ export const STATIC_MODELS: Record<string, string[]> = {
     "@cf/meta/llama-3.2-3b-instruct",
   ],
   pollinations: ["openai"],
-  // Mac 只行 Ollama(MLX 已停用):静态表就是 Ollama 的 7 个(与服务端一致)。
+  // Mac 只行 Ollama(MLX 已停用):靜態表就是 Ollama 的 7 個(與服務端一致)。
   "mac-llm": [
     "qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b", "deepseek-r1:14b", "gemma3:12b",
   ],

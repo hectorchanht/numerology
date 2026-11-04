@@ -37,10 +37,10 @@ test("数据已逐格对照徐乐吾《穷通宝鉴》提要校订,reviewed 应�
 
 test("校订后的格:内容修正与丁火首位次序", () => {
   const table = loadQiongtongTable();
-  // A 内容修正
+  // A 內容修正
   assert.deepEqual(lookupTiaohou(table, "甲", "丑").useGods, ["丁", "庚", "丙"]);
   assert.deepEqual(lookupTiaohou(table, "乙", "戌").useGods, ["癸", "辛"]);
-  // B 丁火首位用神(甲/壬引丁为最急)
+  // B 丁火首位用神(甲/壬引丁爲最急)
   assert.deepEqual(lookupTiaohou(table, "丁", "寅").useGods, ["甲", "庚"]);
   assert.deepEqual(lookupTiaohou(table, "丁", "午").useGods, ["壬", "庚", "癸"]);
   assert.deepEqual(lookupTiaohou(table, "丁", "申").useGods, ["甲", "庚", "丙", "戊"]);

@@ -22,10 +22,10 @@ import {
 import { fixFortuneHeadings, makeFortuneLineFixer } from "./prompts.js";
 
 /**
- * 行级小标题修复流(TextStream 包装)。
- * 背景:弱模型即使 prompt 给了逐行照抄的清单,仍会输出 `### 癸未運（–歲／–年）`
- * 这类占位符(2026-10-22 live 实证)——纯 prompt 手段不可靠,服务端必须兜底。
- * 按行缓冲转发(小标题必为完整单行),其它内容逐行原样通过;流式体验不变。
+ * 行級小標題修復流(TextStream 包裝)。
+ * 背景:弱模型即使 prompt 給了逐行照抄的清單,仍會輸出 `### 癸未運（–歲／–年）`
+ * 這類佔位符(2026-10-22 live 實證)——純 prompt 手段不可靠,服務端必須兜底。
+ * 按行緩衝轉發(小標題必爲完整單行),其它內容逐行原樣通過;流式體驗不變。
  */
 class HeadingFixStream implements TextStream {
   private textListeners: Array<(d: string) => void> = [];
@@ -36,8 +36,8 @@ class HeadingFixStream implements TextStream {
     private readonly inner: TextStream,
     private readonly fixLine: (line: string) => string,
   ) {
-    // 构造时即订阅 inner:inner 是懒启动(首个 finalMessage() 才真正请求),
-    // 提前订阅不触发请求,只注册监听。
+    // 構造時即訂閱 inner:inner 是懶啓動(首個 finalMessage() 才真正請求),
+    // 提前訂閱不觸發請求,只註冊監聽。
     inner.on("text", (delta: string) => this.onDelta(delta));
     inner.on("error", (err: unknown) => this.errorListeners.forEach((l) => l(err)));
   }
@@ -76,10 +76,10 @@ class HeadingFixStream implements TextStream {
   }
 }
 
-/** 给大运流年流套上小标题修复;无 fortune 数据时原样返回。 */
+/** 給大運流年流套上小標題修復;無 fortune 數據時原樣返回。 */
 function withFortuneHeadingFix(stream: TextStream, fortune: FortuneAnalysis | undefined, locale: AiLocale): TextStream {
   if (!fortune) return stream;
-  // 有状态修复器:小标题形状无关修复 + 紫微大限"無"/错配修复,按行顺序喂。
+  // 有狀態修復器:小標題形狀無關修復 + 紫微大限"無"/錯配修復,按行順序喂。
   return new HeadingFixStream(stream, makeFortuneLineFixer(fortune, locale));
 }
 
@@ -89,18 +89,18 @@ export interface ReportResult {
 }
 
 export interface ReportOptions {
-  /** 动态运势分析(强烈建议传入,报告才能做动静结合) */
+  /** 動態運勢分析(強烈建議傳入,報告才能做動靜結合) */
   fortune?: FortuneAnalysis;
   maxTokens?: number;
-  /** BYOK:用户自带 provider/key */
+  /** BYOK:用戶自帶 provider/key */
   ai?: ProviderOptions;
-  /** 解读视角:纯八字 / 纯紫微 / 合参(默认合参)。仅分段流式接口生效。 */
+  /** 解讀視角:純八字 / 純紫微 / 合參(默認合參)。僅分段流式接口生效。 */
   lens?: ReportLens;
-  /** AI 输出语言(默认 zht 繁体)。 */
+  /** AI 輸出語言(默認 zht 繁體)。 */
   locale?: AiLocale;
 }
 
-/** 生成命盘解读报告(非流式)。需要当前 provider 的 API key。 */
+/** 生成命盤解讀報告(非流式)。需要當前 provider 的 API key。 */
 export async function generateReport(
   chart: ChartResult,
   opts: ReportOptions = {},
@@ -115,7 +115,7 @@ export async function generateReport(
   return { markdown: text, usage };
 }
 
-/** 生成报告(流式),返回文本事件流,供 Web 端逐字渲染。 */
+/** 生成報告(流式),返回文本事件流,供 Web 端逐字渲染。 */
 export function streamReport(chart: ChartResult, opts: ReportOptions = {}) {
   const { caveats } = buildContextPack(chart, opts.fortune);
   return chatStream({
@@ -126,7 +126,7 @@ export function streamReport(chart: ChartResult, opts: ReportOptions = {}) {
   }, opts.ai);
 }
 
-/** 《大运流年深析》(非流式):八字 × 紫微合参,逐步逐年。 */
+/** 《大運流年深析》(非流式):八字 × 紫微合參,逐步逐年。 */
 export async function generateFortuneReport(
   chart: ChartResult,
   opts: ReportOptions = {},
@@ -142,7 +142,7 @@ export async function generateFortuneReport(
   return { markdown, usage };
 }
 
-/** 《大运流年深析》(流式)。 */
+/** 《大運流年深析》(流式)。 */
 export function streamFortuneReport(chart: ChartResult, opts: ReportOptions = {}) {
   const { caveats } = buildContextPack(chart, opts.fortune);
   const locale = opts.locale ?? "zht";
@@ -156,10 +156,10 @@ export function streamFortuneReport(chart: ChartResult, opts: ReportOptions = {}
 }
 
 /**
- * 每节输出上限,设约 1800 token —— 纯"安全网",须明显高于实际自然篇幅。
- * 控篇幅靠 prompt 硬性字数(~900–1100 字);实测最慢的 Opus 即便如此仍会写到 ~1300–1400 字,
- * 故上限留到 1800,使其自然篇幅(~1400 字)在撞顶前就以句号收尾,不被 max_tokens 切半句;
- * 而 ~1400 字在 Opus ~32 字/秒下约 ~48s,仍稳在 Vercel 60s 内。上限须高于自然篇幅,切勿压到其下。
+ * 每節輸出上限,設約 1800 token —— 純"安全網",須明顯高於實際自然篇幅。
+ * 控篇幅靠 prompt 硬性字數(~900–1100 字);實測最慢的 Opus 即便如此仍會寫到 ~1300–1400 字,
+ * 故上限留到 1800,使其自然篇幅(~1400 字)在撞頂前就以句號收尾,不被 max_tokens 切半句;
+ * 而 ~1400 字在 Opus ~32 字/秒下約 ~48s,仍穩在 Vercel 60s 內。上限須高於自然篇幅,切勿壓到其下。
  */
 /**
  * 每節輸出上限。2026-11-02 由 1800 提高到 6000:report/fortune 路徑開啟
@@ -172,8 +172,8 @@ export function streamFortuneReport(chart: ChartResult, opts: ReportOptions = {}
 const SECTION_MAX_TOKENS = 6000;
 
 /**
- * 分节生成时动态运势的作用域映射(2026-10-23 context-trim):
- * 每节只喂它需要的数据,整份 fortune 不再每节重倒——结构输入,不加指令。
+ * 分節生成時動態運勢的作用域映射(2026-10-23 context-trim):
+ * 每節只餵它需要的數據,整份 fortune 不再每節重倒——結構輸入,不加指令。
  */
 const FORTUNE_SECTION_SCOPE: Record<string, FortuneScope> = {
   overview: "current",
@@ -184,11 +184,11 @@ const FORTUNE_SECTION_SCOPE: Record<string, FortuneScope> = {
   action: "current",
 };
 
-/** 《命盘格局解读》——单节流式(分段模式)。sectionKey ∈ REPORT_SEGMENTS[].key。 */
+/** 《命盤格局解讀》——單節流式(分段模式)。sectionKey ∈ REPORT_SEGMENTS[].key。 */
 export function streamReportSection(chart: ChartResult, sectionKey: string, opts: ReportOptions = {}) {
   const seg = REPORT_SEGMENTS.find((s) => s.key === sectionKey);
   if (!seg) throw new Error(`未知报告章节:${sectionKey}`);
-  // 静态报告各节:当前运一行(动静结合一瞥),不要整份 fortune。
+  // 靜態報告各節:當前運一行(動靜結合一瞥),不要整份 fortune。
   const scope: FortuneScope = "current";
   const { caveats } = buildContextPack(chart, opts.fortune, { fortuneScope: scope });
   const locale = opts.locale ?? "zht";
@@ -207,7 +207,7 @@ export function streamReportSection(chart: ChartResult, sectionKey: string, opts
   }, opts.ai);
 }
 
-/** 《大运流年深析》——单节流式(分段模式)。sectionKey ∈ FORTUNE_SEGMENTS[].key。 */
+/** 《大運流年深析》——單節流式(分段模式)。sectionKey ∈ FORTUNE_SEGMENTS[].key。 */
 export function streamFortuneSection(chart: ChartResult, sectionKey: string, opts: ReportOptions = {}) {
   const seg = FORTUNE_SEGMENTS.find((s) => s.key === sectionKey);
   if (!seg) throw new Error(`未知大运流年章节:${sectionKey}`);

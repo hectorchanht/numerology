@@ -13,7 +13,7 @@ import { changSheng } from "./changsheng.js";
 import { shenShaForBranch, type ShenShaContext } from "./shensha.js";
 import { resolveBirthDateTime } from "./solartime.js";
 
-/** 排八字四柱,并接入穷通宝鉴调候用神。 */
+/** 排八字四柱,並接入窮通寶鑑調候用神。 */
 export function castBazi(input: BirthInput): BaziChart {
   validateBirthInput(input);
   const { gender } = input;

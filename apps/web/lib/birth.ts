@@ -1,16 +1,16 @@
 import { solarFromLunar, type BirthInput, type HourInferInput } from "@numerology/engine";
 
-/** 引擎支持的公历年份范围(与 @numerology/engine 的 validateBirthInput 一致)。 */
+/** 引擎支持的公曆年份範圍(與 @numerology/engine 的 validateBirthInput 一致)。 */
 const MIN_YEAR = 1900;
 const MAX_YEAR = 2100;
 
-/** 若 body 标记为农历,把 year/month/day 转成阳历;否则原样返回。 */
+/** 若 body 標記爲農曆,把 year/month/day 轉成陽曆;否則原樣返回。 */
 function resolveCalendar(b: Record<string, unknown>, y: number, m: number, d: number) {
   if (b.calendar === "lunar") {
     const isLeap = b.isLeapMonth === true;
     const s = solarFromLunar({ year: y, month: m, day: d, isLeapMonth: isLeap });
-    // 农历→公历换算可能跨年(如农历 2100 年腊月 → 公历 2101 年):换算后仍需在引擎范围内,
-    // 否则下游会报一句看不懂的「非法出生信息:年 2101」。
+    // 農曆→公曆換算可能跨年(如農曆 2100 年臘月 → 公曆 2101 年):換算後仍需在引擎範圍內,
+    // 否則下游會報一句看不懂的「非法出生信息:年 2101」。
     if (s.year < MIN_YEAR || s.year > MAX_YEAR) {
       throw new Error(
         `农历${y}年${isLeap ? "闰" : ""}${m}月${d}日换算为公历${s.year}年${s.month}月${s.day}日,` +
@@ -22,7 +22,7 @@ function resolveCalendar(b: Record<string, unknown>, y: number, m: number, d: nu
   return { year: y, month: m, day: d };
 }
 
-/** 整数域:拒绝非整数(如 1990.5),在边界给出明确报错。 */
+/** 整數域:拒絕非整數(如 1990.5),在邊界給出明確報錯。 */
 function intNum(b: Record<string, unknown>, key: string): number {
   const v = Number(b[key]);
   if (!Number.isFinite(v)) throw new Error(`字段 ${key} 非数字`);
@@ -30,7 +30,7 @@ function intNum(b: Record<string, unknown>, key: string): number {
   return v;
 }
 
-/** 经度域:允许小数,但必须在 -180~180 范围内。 */
+/** 經度域:允許小數,但必須在 -180~180 範圍內。 */
 function longitudeNum(b: Record<string, unknown>): number | undefined {
   const raw = b.longitude;
   if (raw === undefined || raw === "" || raw === null) return undefined;
@@ -40,7 +40,7 @@ function longitudeNum(b: Record<string, unknown>): number | undefined {
   return v;
 }
 
-/** 把任意外部输入(API body)安全解析为 BirthInput,在边界快速失败。 */
+/** 把任意外部輸入(API body)安全解析爲 BirthInput,在邊界快速失敗。 */
 export function parseBirthInput(body: unknown): BirthInput {
   if (typeof body !== "object" || body === null) {
     throw new Error("请求体格式错误");
@@ -63,7 +63,7 @@ export function parseBirthInput(body: unknown): BirthInput {
   return input;
 }
 
-/** 时辰推断输入(无时辰):年月日 + 性别(+可选经度)。 */
+/** 時辰推斷輸入(無時辰):年月日 + 性別(+可選經度)。 */
 export function parseHourInferInput(body: unknown): HourInferInput {
   if (typeof body !== "object" || body === null) throw new Error("请求体格式错误");
   const b = body as Record<string, unknown>;

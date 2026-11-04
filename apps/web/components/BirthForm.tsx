@@ -11,7 +11,7 @@ import { Seg, ToggleRow } from "@/components/ui";
 interface Props {
   loading: boolean;
   onSubmit: (input: BirthFormValue) => void;
-  /** 预填值(测试期用) */
+  /** 預填值(測試期用) */
   defaults?: BirthInput | null;
 }
 

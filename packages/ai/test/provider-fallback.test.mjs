@@ -2,10 +2,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import http from "node:http";
 
-// —— 动态模型回落:默认模型被下架(404) → 拉实时 /models 取首个重试;
-//    显式指定的模型 404 → 直接抛真实错误,不回落。
+// —— 動態模型回落:默認模型被下架(404) → 拉實時 /models 取首個重試;
+//    顯式指定的模型 404 → 直接拋真實錯誤,不回落。
 
-const DEAD_DEFAULT = "google/gemma-4-26b-a4b-it:free"; // openrouter chat 默认模型
+const DEAD_DEFAULT = "google/gemma-4-26b-a4b-it:free"; // openrouter chat 默認模型
 const LIVE_MODEL = "live-model-1";
 
 function startMock() {
@@ -66,8 +66,8 @@ async function loadClient(baseURL, tag) {
   process.env.OPENROUTER_API_KEY = "test-key";
   delete process.env.AI_MODEL_REPORT;
   delete process.env.AI_MODEL_CHAT;
-  // 查询串打破模块缓存:每个测试用独立的 provider 模块实例
-  // (PROVIDERS 在模块加载时读取 OPENROUTER_BASE_URL,且回落缓存在模块级)
+  // 查詢串打破模塊緩存:每個測試用獨立的 provider 模塊實例
+  // (PROVIDERS 在模塊加載時讀取 OPENROUTER_BASE_URL,且回落緩存在模塊級)
   return import(`../dist/provider.js?${tag}`);
 }
 
@@ -101,7 +101,7 @@ test("provider:显式指定的死模型 404 → 抛真实错误,不回落", asyn
       ),
       /no longer available/,
     );
-    // 只打了一次 completions,没有去拉 /models
+    // 只打了一次 completions,沒有去拉 /models
     assert.deepEqual(seen.completions, [DEAD_DEFAULT]);
     assert.equal(seen.models, 0);
   } finally {
@@ -127,7 +127,7 @@ test("provider:流式默认模型 404 → 回落后续流正常", async () => {
   }
 });
 
-// —— Gemini SSE 挂起 → chatStream 改走非流式(2026-10-23 实测 Google 兼容层 stream:true 60s 无首字节)。
+// —— Gemini SSE 掛起 → chatStream 改走非流式(2026-10-23 實測 Google 兼容層 stream:true 60s 無首字節)。
 test("provider:gemini chatStream 不用 SSE,直接非流式取全文", async () => {
   const seen = { stream: 0, nonStream: 0 };
   const server = http.createServer((req, res) => {
@@ -137,7 +137,7 @@ test("provider:gemini chatStream 不用 SSE,直接非流式取全文", async () 
       const parsed = JSON.parse(body || "{}");
       if (parsed.stream) {
         seen.stream++;
-        // 模拟挂起的 SSE:直接 500,若代码走了流式就会失败
+        // 模擬掛起的 SSE:直接 500,若代碼走了流式就會失敗
         res.writeHead(500, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: { message: "hung" } }));
         return;

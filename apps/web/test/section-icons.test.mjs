@@ -8,7 +8,7 @@ test("stripLeadingHeading 去掉 AI 自帶標題,無標題時原樣返回", () =
   assert.equal(stripLeadingHeading(""), "");
 });
 
-// 与 REPORT_SECTIONS / FORTUNE_SEGMENTS 的 key 保持一致(两份报告共 14 节)
+// 與 REPORT_SECTIONS / FORTUNE_SEGMENTS 的 key 保持一致(兩份報告共 14 節)
 const ALL_KEYS = [
   "personality", "career", "wealth", "relationship", "health", "luck", "crosssystem", "advice",
   "overview", "dayun", "review", "future", "rhythm", "action",
@@ -46,7 +46,7 @@ test("withIconHeading 无标题行时补一个", () => {
 
 test("图标与语言无关:同一 key 三地标题共用同一图标", () => {
   assert.equal(sectionIcon("dayun"), sectionIcon("dayun"), "同一 key 图标应稳定");
-  // 繁/简/英标题不同,但 key 相同 → 图标相同(由调用方按 key 注入,不解析文本)
+  // 繁/簡/英標題不同,但 key 相同 → 圖標相同(由調用方按 key 注入,不解析文本)
   const zh = withIconHeading("review", "三、回看校準", "x");
   const en = withIconHeading("review", "3. Review & Calibration", "x");
   assert.ok(zh.startsWith("## 🔍 ") && en.startsWith("## 🔍 "));

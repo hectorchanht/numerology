@@ -1,15 +1,15 @@
 export interface AiSettings {
   provider: string;
   /**
-   * 每个 provider 各自记住的 key(provider 名 → key)。
-   * 某 provider 没填过 → 对应输入框显示为空,绝不拿别的 provider 的 key 顶替。
+   * 每個 provider 各自記住的 key(provider 名 → key)。
+   * 某 provider 沒填過 → 對應輸入框顯示爲空,絕不拿別的 provider 的 key 頂替。
    */
   keys: Record<string, string>;
   model: string;
   baseURL: string;
-  /** 自定义 AI 人设 / 系统提示;空字符串 = 用默认。 */
+  /** 自定義 AI 人設 / 系統提示;空字符串 = 用默認。 */
   systemPrompt: string;
-  /** @deprecated 旧版单 key 字段,仅迁移时读取,保存时丢弃。 */
+  /** @deprecated 舊版單 key 字段,僅遷移時讀取,保存時丟棄。 */
   apiKey?: string;
 }
 
@@ -30,16 +30,16 @@ const LS_KEY = "mingli.ai.v1";
 export const AI_SETTINGS_EVENT = "ai-settings-changed";
 
 /**
- * MLX 停用(2026-11-02)后的模型救济:已存设置若选中 mlx-community/* 模型 id,
- * 映射到 Ollama 同级模型;未知的 mlx-community/* → mac-llm 默认推荐(qwen3:30b)。
- * 只在 Mac provider 下由 migrateAiSettings 调用,其它 provider 的 model 不受影响。
+ * MLX 停用(2026-11-02)後的模型救濟:已存設置若選中 mlx-community/* 模型 id,
+ * 映射到 Ollama 同級模型;未知的 mlx-community/* → mac-llm 默認推薦(qwen3:30b)。
+ * 只在 Mac provider 下由 migrateAiSettings 調用,其它 provider 的 model 不受影響。
  */
 const MLX_MODEL_RESCUE: Record<string, string> = {
   "mlx-community/qwen3-14b-4bit": "qwen3:14b",
   "mlx-community/gpt-oss-20b-mxfp4-q8": "gpt-oss:20b",
 };
 
-/** 把已退役的 MLX 模型 id 映射到 Ollama 同级;非 MLX id 原样返回。 */
+/** 把已退役的 MLX 模型 id 映射到 Ollama 同級;非 MLX id 原樣返回。 */
 export function rescueMacModel(model: string): string {
   const m = model.trim();
   const hit = MLX_MODEL_RESCUE[m.toLowerCase()];
@@ -49,11 +49,11 @@ export function rescueMacModel(model: string): string {
 }
 
 /**
- * 纯函数:把 localStorage 里读到的旧对象迁移到新结构(不碰 window,可测试)。
- * - 旧版单 `apiKey` 非空 且 新版 `keys` 为空 → 归到当时选中的 provider 名下。
- * - provider="mac-mlx"(已退役的旧名)→ 映射到 "mac-llm"。
- * - Mac provider 下选了 mlx-community/* 模型 → 救济映射到 Ollama 同级
- *   (见 rescueMacModel;MLX 已停用,原样保留会打到死端点)。
+ * 純函數:把 localStorage 裏讀到的舊對象遷移到新結構(不碰 window,可測試)。
+ * - 舊版單 `apiKey` 非空 且 新版 `keys` 爲空 → 歸到當時選中的 provider 名下。
+ * - provider="mac-mlx"(已退役的舊名)→ 映射到 "mac-llm"。
+ * - Mac provider 下選了 mlx-community/* 模型 → 救濟映射到 Ollama 同級
+ *   (見 rescueMacModel;MLX 已停用,原樣保留會打到死端點)。
  */
 export function migrateAiSettings(raw: unknown): AiSettings {
   if (!raw || typeof raw !== "object") return { ...DEFAULT_AI };
@@ -78,7 +78,7 @@ export function migrateAiSettings(raw: unknown): AiSettings {
   return out;
 }
 
-/** 读取浏览器里保存的 AI 设置(随请求发送,服务端不保存)。 */
+/** 讀取瀏覽器裏保存的 AI 設置(隨請求發送,服務端不保存)。 */
 export function loadAi(): AiSettings {
   if (typeof window === "undefined") return { ...DEFAULT_AI };
   try {
@@ -92,7 +92,7 @@ export function loadAi(): AiSettings {
 
 export function saveAi(s: AiSettings): void {
   try {
-    // 丢弃旧版 apiKey 字段,只存新结构。
+    // 丟棄舊版 apiKey 字段,只存新結構。
     const { apiKey: _drop, ...rest } = s;
     void _drop;
     window.localStorage.setItem(LS_KEY, JSON.stringify(rest));
@@ -102,15 +102,15 @@ export function saveAi(s: AiSettings): void {
   }
 }
 
-/** 当前 provider 的 key;没填过 → 空字符串(绝不拿别的 provider 的 key 顶替)。 */
+/** 當前 provider 的 key;沒填過 → 空字符串(絕不拿別的 provider 的 key 頂替)。 */
 export function currentKey(s: AiSettings): string {
   return (s.keys[s.provider] ?? "").trim();
 }
 
 /**
- * 组装发往 API 的请求体片段。
- * - `ai`:BYOK(provider/key/model/baseURL),key 取当前 provider 名下的,没填则省略。
- * - `systemPrompt`:顶层字段(与 locale 同级),为空则省略 → 服务端用默认。
+ * 組裝發往 API 的請求體片段。
+ * - `ai`:BYOK(provider/key/model/baseURL),key 取當前 provider 名下的,沒填則省略。
+ * - `systemPrompt`:頂層字段(與 locale 同級),爲空則省略 → 服務端用默認。
  */
 export function aiRequestParts(): {
   ai: { provider: string; apiKey?: string; model?: string; baseURL?: string };

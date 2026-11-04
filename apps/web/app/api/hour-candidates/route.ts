@@ -5,7 +5,7 @@ import { errorResponse } from "@/lib/http";
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
-/** 返回某日 12 时辰的候选命盘区分特征(确定性,无 AI)。 */
+/** 返回某日 12 時辰的候選命盤區分特徵(確定性,無 AI)。 */
 export async function POST(req: Request): Promise<Response> {
   try {
     const input = parseHourInferInput(await req.json());

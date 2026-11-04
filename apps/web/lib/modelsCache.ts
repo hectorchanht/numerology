@@ -1,7 +1,7 @@
 /**
- * 模型列表的浏览器缓存(24h):SettingsPanel 写入/读取,
- * 生成时撞到 MODEL_NOT_FOUND(模型下架)则由 StreamedReport 清空,
- * 使下次打开设置时立即重新拉取(已滤走下架模型),无需等缓存过期。
+ * 模型列表的瀏覽器緩存(24h):SettingsPanel 寫入/讀取,
+ * 生成時撞到 MODEL_NOT_FOUND(模型下架)則由 StreamedReport 清空,
+ * 使下次打開設置時立即重新拉取(已濾走下架模型),無需等緩存過期。
  */
 
 export interface CachedModels {
@@ -46,7 +46,7 @@ export function writeModelsCache(
   }
 }
 
-/** 清空全部 provider 的模型缓存(下次打开设置时重新拉取,已滤走下架模型)。 */
+/** 清空全部 provider 的模型緩存(下次打開設置時重新拉取,已濾走下架模型)。 */
 export function clearModelsCache(): void {
   try {
     const keys: string[] = [];

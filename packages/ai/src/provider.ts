@@ -10,17 +10,17 @@ import { recordDeadModel } from "./deadModels.js";
 import { WORKERS_AI_DEFAULT_MODEL } from "./workersAiModels.js";
 
 /**
- * 多 provider 解读层:排盘永远本地确定性计算、不花钱;只有 AI 解读/对话走这里。
- * 通过 AI_PROVIDER 环境变量切换。默认 workers-ai(Cloudflare Workers AI binding,
- * 免 key,跑在 Cloudflare 自家网络,每月 $2 硬预算守卫),pollinations 作免 key 备选;
- * 也可用 openrouter(聚合 API,免费 :free 模型,需 key) / glm / gemini / groq / anthropic /
- * ollama(本地) / custom(任意 OpenAI 兼容端点)。
+ * 多 provider 解讀層:排盤永遠本地確定性計算、不花錢;只有 AI 解讀/對話走這裏。
+ * 通過 AI_PROVIDER 環境變量切換。默認 workers-ai(Cloudflare Workers AI binding,
+ * 免 key,跑在 Cloudflare 自家網絡,每月 $2 硬預算守衛),pollinations 作免 key 備選;
+ * 也可用 openrouter(聚合 API,免費 :free 模型,需 key) / glm / gemini / groq / anthropic /
+ * ollama(本地) / custom(任意 OpenAI 兼容端點)。
  *
- * 设计:除 Anthropic / workers-ai 外都走 OpenAI 兼容协议(同一段代码),
- * 靠 baseURL + 模型名区分。
+ * 設計:除 Anthropic / workers-ai 外都走 OpenAI 兼容協議(同一段代碼),
+ * 靠 baseURL + 模型名區分。
  */
 
-/** system 由若干文本块组成;cache:true 的块在 Anthropic 上打 prompt cache,其它 provider 忽略。 */
+/** system 由若干文本塊組成;cache:true 的塊在 Anthropic 上打 prompt cache,其它 provider 忽略。 */
 export interface SystemBlock {
   text: string;
   cache?: boolean;
@@ -36,40 +36,40 @@ export interface Usage {
   outputTokens: number;
   cacheCreationTokens: number;
   cacheReadTokens: number;
-  /** Workers AI 直接上报的 neurons(预算记账用,其它 provider 无)。 */
+  /** Workers AI 直接上報的 neurons(預算記賬用,其它 provider 無)。 */
   neurons?: number;
 }
 
 export type ModelKind = "report" | "chat";
 
 export interface CompletionRequest {
-  /** report → 选更强模型;chat → 选更快模型 */
+  /** report → 選更強模型;chat → 選更快模型 */
   kind: ModelKind;
   system: SystemBlock[];
   messages: ChatMessage[];
   maxTokens: number;
 }
 
-/** 按请求覆盖 provider/key(BYOK):任一缺省则回落到环境变量/默认。 */
+/** 按請求覆蓋 provider/key(BYOK):任一缺省則回落到環境變量/默認。 */
 export interface ProviderOptions {
   provider?: string;
   apiKey?: string;
   model?: string;
   baseURL?: string;
   /**
-   * Workers AI 的服务端 binding(仅服务端注入,绝不来自客户端请求体,
-   * 也绝不序列化给客户端):{ ai: env.AI, kv: env.AI_BUDGET_KV }。
+   * Workers AI 的服務端 binding(僅服務端注入,絕不來自客戶端請求體,
+   * 也絕不序列化給客戶端):{ ai: env.AI, kv: env.AI_BUDGET_KV }。
    */
   aiBinding?: { ai?: unknown; kv?: unknown };
   /**
-   * 服务端注入的额外请求头(仅服务端设置,绝不来自客户端请求体):
-   * 目前唯一用途是 Mac provider(mac-llm;旧名 mac-mlx 会先正规化)的 Cloudflare Access service token
-   * (CF-Access-Client-Id/Secret),由 resolveServerAi 从 Pages env 注入。
+   * 服務端注入的額外請求頭(僅服務端設置,絕不來自客戶端請求體):
+   * 目前唯一用途是 Mac provider(mac-llm;舊名 mac-mlx 會先正規化)的 Cloudflare Access service token
+   * (CF-Access-Client-Id/Secret),由 resolveServerAi 從 Pages env 注入。
    */
   extraHeaders?: Record<string, string>;
   /**
-   * 用户自定义的 AI 人设 / 系统提示(可空)。若非空,追加为 system 的**最后**一块
-   * (在 locale 语言指令之后),优先级最高,用户可覆盖默认人设。
+   * 用戶自定義的 AI 人設 / 系統提示(可空)。若非空,追加爲 system 的**最後**一塊
+   * (在 locale 語言指令之後),優先級最高,用戶可覆蓋默認人設。
    */
   customSystemPrompt?: string;
   /**
@@ -85,8 +85,8 @@ export interface ProviderOptions {
 }
 
 /**
- * 把用户自定义人设追加为 system 末块;为空/空白则原样返回。
- * 导出以便测试。
+ * 把用戶自定義人設追加爲 system 末塊;爲空/空白則原樣返回。
+ * 導出以便測試。
  */
 export function applyCustomPrompt(system: SystemBlock[], opts?: ProviderOptions): SystemBlock[] {
   const p = opts?.customSystemPrompt?.trim();
@@ -96,15 +96,15 @@ export function applyCustomPrompt(system: SystemBlock[], opts?: ProviderOptions)
 interface ProviderDef {
   kind: "anthropic" | "openai" | "workers-ai";
   label: string;
-  /** 依次尝试的环境变量名,第一个有值的作为 API key */
+  /** 依次嘗試的環境變量名,第一個有值的作爲 API key */
   keys: string[];
   baseURL?: string;
   models: Record<ModelKind, string>;
-  /** 免费申请地址(报错时提示用户) */
+  /** 免費申請地址(報錯時提示用戶) */
   signup?: string;
-  /** 是否免费额度 */
+  /** 是否免費額度 */
   free: boolean;
-  /** 本地/无需 API key(如 Ollama):缺 key 不报错,传占位符即可 */
+  /** 本地/無需 API key(如 Ollama):缺 key 不報錯,傳佔位符即可 */
   noKey?: boolean;
 }
 
@@ -193,27 +193,27 @@ const PROVIDERS: Record<string, ProviderDef> = {
 };
 
 /**
- * 屋企 Mac 上的本地 provider:同一部 headless Mac、同一个 Cloudflare Access
- * application + service token,共用 token 注入路径与即时模型列表行为。
- * 2026-11-02 起 Mac 只行 Ollama 一个 runtime(MLX 已停用:disable 唔 delete,
- * Mac 上的 LaunchAgent 只是 bootout + plist 改名 .disabled,日后可复活):
- * 32GB RAM 两边大模型互抢、MLX 线程死过两次,而 MLX 的 2 个模型与 Ollama 重复。
- * mac-mlx 是已退役的旧名,只作 alias:所有入口先正规化到 mac-llm(见
- * normalizeProviderName),新 UI 永不产生它;已存设置里的 mlx-community/* 模型 id
- * 由 web 侧 migrateAiSettings 映射到 Ollama 同级模型。
+ * 屋企 Mac 上的本地 provider:同一部 headless Mac、同一個 Cloudflare Access
+ * application + service token,共用 token 注入路徑與即時模型列表行爲。
+ * 2026-11-02 起 Mac 只行 Ollama 一個 runtime(MLX 已停用:disable 唔 delete,
+ * Mac 上的 LaunchAgent 只是 bootout + plist 改名 .disabled,日後可復活):
+ * 32GB RAM 兩邊大模型互搶、MLX 線程死過兩次,而 MLX 的 2 個模型與 Ollama 重複。
+ * mac-mlx 是已退役的舊名,只作 alias:所有入口先正規化到 mac-llm(見
+ * normalizeProviderName),新 UI 永不產生它;已存設置裏的 mlx-community/* 模型 id
+ * 由 web 側 migrateAiSettings 映射到 Ollama 同級模型。
  */
 export const MAC_PROVIDER_NAMES = ["mac-llm"] as const;
 
-/** 已退役的旧 provider 名(仅兼容:正规化到 mac-llm,仍按 Mac provider 对待)。 */
+/** 已退役的舊 provider 名(僅兼容:正規化到 mac-llm,仍按 Mac provider 對待)。 */
 export const MAC_PROVIDER_ALIASES = ["mac-mlx"] as const;
 
-/** provider 名正规化:退役 alias mac-mlx → mac-llm;其它原样(小写去空白)。 */
+/** provider 名正規化:退役 alias mac-mlx → mac-llm;其它原樣(小寫去空白)。 */
 export function normalizeProviderName(name: string): string {
   const n = name.trim().toLowerCase();
   return (MAC_PROVIDER_ALIASES as readonly string[]).includes(n) ? "mac-llm" : n;
 }
 
-/** 是否为屋企 Mac 本地 provider(mac-llm,或退役旧名 mac-mlx)。 */
+/** 是否爲屋企 Mac 本地 provider(mac-llm,或退役舊名 mac-mlx)。 */
 export function isMacProvider(name: string): boolean {
   const n = name.trim().toLowerCase();
   return (
@@ -222,17 +222,17 @@ export function isMacProvider(name: string): boolean {
   );
 }
 
-/** 死模型登记的归属名:Mac 统一记到 mac-llm 名下(模型列表按 mac-llm 过滤)。 */
+/** 死模型登記的歸屬名:Mac 統一記到 mac-llm 名下(模型列表按 mac-llm 過濾)。 */
 function deadRegistryName(name: string): string {
   return isMacProvider(name) ? "mac-llm" : name;
 }
 
-// 默认走 Cloudflare Workers AI binding(免 key,跑在 CF 自家网络,
-// 不受 Pollinations 免费 tier 在边缘网络的飘忽影响;每月 $2 硬预算守卫)。
-// binding 缺失(本地开发)时 provider 层会给出明确报错,届时切其它 provider 即可。
+// 默認走 Cloudflare Workers AI binding(免 key,跑在 CF 自家網絡,
+// 不受 Pollinations 免費 tier 在邊緣網絡的飄忽影響;每月 $2 硬預算守衛)。
+// binding 缺失(本地開發)時 provider 層會給出明確報錯,屆時切其它 provider 即可。
 const DEFAULT_PROVIDER = "workers-ai";
 
-/** 当前生效的 provider 名(小写,退役 alias 已正规化)。opts 可按请求覆盖(BYOK)。 */
+/** 當前生效的 provider 名(小寫,退役 alias 已正規化)。opts 可按請求覆蓋(BYOK)。 */
 export function activeProviderName(opts?: ProviderOptions): string {
   const name = normalizeProviderName(opts?.provider || process.env.AI_PROVIDER || DEFAULT_PROVIDER);
   if (name !== "custom" && !PROVIDERS[name]) {
@@ -281,12 +281,12 @@ function modelFor(def: ProviderDef, kind: ModelKind, opts?: ProviderOptions): st
 }
 
 /**
- * 动态模型回落(OpenAI 兼容 provider):默认模型可能被 provider 下架
- * (如 gemini-2.0-flash → 404 "no longer available"),硬编码默认即永久失效。
- * 仅当模型来自"默认"(用户与环境变量均未显式指定)时,404 触发一次实时
- * /models 拉取,取列表首个模型重试一次。显式指定的模型 404 → 直接抛真实错误,
- * 让用户去设置里换(前端模型列表本就是实时拉取的)。
- * 回落结果按 baseURL 缓存 10 分钟,避免默认已死时每次请求都多两次上游调用。
+ * 動態模型回落(OpenAI 兼容 provider):默認模型可能被 provider 下架
+ * (如 gemini-2.0-flash → 404 "no longer available"),硬編碼默認即永久失效。
+ * 僅當模型來自"默認"(用戶與環境變量均未顯式指定)時,404 觸發一次實時
+ * /models 拉取,取列表首個模型重試一次。顯式指定的模型 404 → 直接拋真實錯誤,
+ * 讓用戶去設置裏換(前端模型列表本就是實時拉取的)。
+ * 回落結果按 baseURL 緩存 10 分鐘,避免默認已死時每次請求都多兩次上游調用。
  */
 const MODEL_NOT_FOUND_RE = /not found|no longer available|does not exist|unknown model/i;
 const fallbackCache = new Map<string, { model: string; at: number }>();
@@ -299,7 +299,7 @@ function isModelNotFoundError(err: unknown): boolean {
   return MODEL_NOT_FOUND_RE.test(msg);
 }
 
-/** 模型是否显式指定(请求覆盖或环境变量):显式指定的不做动态回落。 */
+/** 模型是否顯式指定(請求覆蓋或環境變量):顯式指定的不做動態回落。 */
 function isModelExplicit(kind: ModelKind, opts?: ProviderOptions): boolean {
   if (opts?.model && opts.model.trim()) return true;
   const override = kind === "report" ? process.env.AI_MODEL_REPORT : process.env.AI_MODEL_CHAT;
@@ -311,8 +311,8 @@ function fallbackCacheKey(baseURL?: string): string {
 }
 
 /**
- * 解析本次实际要用的模型:显式指定 → 直接用;否则看回落缓存,
- * 命中且未过期则直接用上次验证可用的模型(默认已死时的快速路径)。
+ * 解析本次實際要用的模型:顯式指定 → 直接用;否則看回落緩存,
+ * 命中且未過期則直接用上次驗證可用的模型(默認已死時的快速路徑)。
  */
 function resolvePreferredModel(def: ProviderDef, kind: ModelKind, opts?: ProviderOptions): string {
   if (isModelExplicit(kind, opts)) return modelFor(def, kind, opts);
@@ -322,9 +322,9 @@ function resolvePreferredModel(def: ProviderDef, kind: ModelKind, opts?: Provide
 }
 
 /**
- * 拉取 OpenAI 兼容端点的实时模型 id 列表(失败抛错,由调用方决定如何处理)。
- * extraHeaders 为服务端注入头(如 Mac 的 Access token):Mac 端点没有它会被
- * Access 拦下(403),回落拉列表时必须同样带上。
+ * 拉取 OpenAI 兼容端點的實時模型 id 列表(失敗拋錯,由調用方決定如何處理)。
+ * extraHeaders 爲服務端注入頭(如 Mac 的 Access token):Mac 端點沒有它會被
+ * Access 攔下(403),回落拉列表時必須同樣帶上。
  */
 async function fetchLiveModelIds(
   baseURL: string,
@@ -343,9 +343,9 @@ async function fetchLiveModelIds(
 }
 
 /**
- * 404 回落:清掉可能已失效的缓存,拉实时列表取首个模型记入缓存并返回。
- * baseURL 传本次失败请求实际用的端点(即 def.baseURL,已折入用户覆盖)。
- * 列表拉取失败或为空 → 抛原始 404 错误(真实消息透出,供用户换模型)。
+ * 404 回落:清掉可能已失效的緩存,拉實時列表取首個模型記入緩存並返回。
+ * baseURL 傳本次失敗請求實際用的端點(即 def.baseURL,已折入用戶覆蓋)。
+ * 列表拉取失敗或爲空 → 拋原始 404 錯誤(真實消息透出,供用戶換模型)。
  */
 async function fallbackModel(
   baseURL: string | undefined,
@@ -368,7 +368,7 @@ async function fallbackModel(
   return first;
 }
 
-/** 给前端/日志看的一行摘要,不含任何 key。 */
+/** 給前端/日誌看的一行摘要,不含任何 key。 */
 export function providerSummary(opts?: ProviderOptions): string {
   const name = activeProviderName(opts);
   const def = resolveDef(name, opts);
@@ -384,10 +384,10 @@ function makeOpenAI(apiKey: string, baseURL?: string, defaultHeaders?: Record<st
 }
 
 /**
- * Mac provider(mac-llm;旧名 mac-mlx 已正规化,共用同一 Access app)的 Cloudflare Access
+ * Mac provider(mac-llm;舊名 mac-mlx 已正規化,共用同一 Access app)的 Cloudflare Access
  * service token headers。
- * 优先用 opts.extraHeaders(web 侧 resolveServerAi 从 Pages env 注入,生产环境可靠路径);
- * 其次读进程 env(CLI/本地开发用)。其它 provider 一律不带。
+ * 優先用 opts.extraHeaders(web 側 resolveServerAi 從 Pages env 注入,生產環境可靠路徑);
+ * 其次讀進程 env(CLI/本地開發用)。其它 provider 一律不帶。
  */
 function accessHeadersFor(name: string, opts?: ProviderOptions): Record<string, string> | undefined {
   if (!isMacProvider(name)) return undefined;
@@ -437,7 +437,7 @@ function fromOpenAIUsage(u: OpenAI.Completions.CompletionUsage | undefined): Usa
   };
 }
 
-// ── 统一文本流接口(与 Anthropic MessageStream 的最小子集一致,web 端零改动) ──
+// ── 統一文本流接口(與 Anthropic MessageStream 的最小子集一致,web 端零改動) ──
 export interface TextStream {
   on(event: "text", listener: (delta: string) => void): unknown;
   on(event: "error", listener: (err: unknown) => void): unknown;
@@ -589,7 +589,7 @@ function messageReasoning(res: OpenAI.Chat.Completions.ChatCompletion): string |
 
 type OpenAIChunkStream = AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
 
-/** 把 OpenAI 兼容的流式响应包成 Anthropic 风格的事件流。懒启动:首次 finalMessage() 才真正请求。 */
+/** 把 OpenAI 兼容的流式響應包成 Anthropic 風格的事件流。懶啓動:首次 finalMessage() 才真正請求。 */
 class OpenAITextStream implements TextStream {
   private textListeners: ((d: string) => void)[] = [];
   private errorListeners: ((e: unknown) => void)[] = [];
@@ -663,8 +663,8 @@ class OpenAITextStream implements TextStream {
 }
 
 /**
- * 非流式补全包成 TextStream(给 SSE 挂起的 provider 用,如 Gemini OpenAI 兼容层)。
- * 懒启动:首次 finalMessage() 才真正请求;全文一次性 emit,接口与流式一致。
+ * 非流式補全包成 TextStream(給 SSE 掛起的 provider 用,如 Gemini OpenAI 兼容層)。
+ * 懶啓動:首次 finalMessage() 才真正請求;全文一次性 emit,接口與流式一致。
  */
 class CompleteTextStream implements TextStream {
   private textListeners: ((d: string) => void)[] = [];
@@ -696,17 +696,17 @@ class CompleteTextStream implements TextStream {
   }
 
   abort(): void {
-    // 非流式请求无可中断的流,best-effort:已发出的请求完成后会被忽略。
+    // 非流式請求無可中斷的流,best-effort:已發出的請求完成後會被忽略。
   }
 }
 
 // ── Workers AI(binding)适配 ───────────────────────────────────────────────
 
 /**
- * 解码参数 baseline(2026-10-23 research-backed):
+ * 解碼參數 baseline(2026-10-23 research-backed):
  * temperature 0.7 / top_p 0.9 / repetition_penalty 1.1。
- * 研究结论:低 temperature 反而是重复 loop 的元凶(小模型更脆弱);aggressive penalty
- * 叠加会让输出更 erratic。env 可覆盖,方便一次只改一个变量做 A/B:
+ * 研究結論:低 temperature 反而是重複 loop 的元兇(小模型更脆弱);aggressive penalty
+ * 疊加會讓輸出更 erratic。env 可覆蓋,方便一次只改一個變量做 A/B:
  * AI_TEMPERATURE / AI_TOP_P / AI_REPETITION_PENALTY。
  */
 function numEnv(key: string, def: number): number {
@@ -725,7 +725,7 @@ export function workersAiDecodeParams(): {
     repetition_penalty: numEnv("AI_REPETITION_PENALTY", DECODE_DEFAULTS.repetition_penalty),
   };
 }
-/** OpenAI 兼容 / Anthropic 路径:只用通用参数(penalty 各家语义不一,不碰)。 */
+/** OpenAI 兼容 / Anthropic 路徑:只用通用參數(penalty 各家語義不一,不碰)。 */
 function baseDecodeParams(): { temperature: number; top_p: number } {
   return {
     temperature: numEnv("AI_TEMPERATURE", DECODE_DEFAULTS.temperature),
@@ -734,16 +734,16 @@ function baseDecodeParams(): { temperature: number; top_p: number } {
 }
 
 /**
- * Mac Ollama 端点专用参数:Ollama 上的 qwen3/deepseek 系默认先输出思考链,
- * 会吃掉 maxTokens 导致正文为空(实测 max_tokens=120 全被思考占满)。
- * reasoning_effort:"none" 关掉思考,正文直接出、更快——但思考被压制时,个别模型
- * 会把规划写进 content 做正文独白(2026-11-02 截圖實證,qwen3:30b)。
- * 故 captureThinking 开启时(仅 report/fortune route)不送此参数:让模型正常思考,
- * 思考走独立 reasoning 通道,由 ThinkStreamNormalizer 正规化后前端折叠展示。
- * Mac 自 MLX 停用后只剩 Ollama 一个 runtime,故凡 Mac provider 都送(旧名 mac-mlx
- * 已在 activeProviderName 正规化为 mac-llm,待遇一致)。
- * 注意:Ollama 实测接受 "none",但当前 OpenAI SDK 的 ReasoningEffort 未含它,故 cast;
- * 运行时序列化值仍为 "none",Ollama 认。
+ * Mac Ollama 端點專用參數:Ollama 上的 qwen3/deepseek 系默認先輸出思考鏈,
+ * 會喫掉 maxTokens 導致正文爲空(實測 max_tokens=120 全被思考佔滿)。
+ * reasoning_effort:"none" 關掉思考,正文直接出、更快——但思考被壓制時,個別模型
+ * 會把規劃寫進 content 做正文獨白(2026-11-02 截圖實證,qwen3:30b)。
+ * 故 captureThinking 開啓時(僅 report/fortune route)不送此參數:讓模型正常思考,
+ * 思考走獨立 reasoning 通道,由 ThinkStreamNormalizer 正規化後前端摺疊展示。
+ * Mac 自 MLX 停用後只剩 Ollama 一個 runtime,故凡 Mac provider 都送(舊名 mac-mlx
+ * 已在 activeProviderName 正規化爲 mac-llm,待遇一致)。
+ * 注意:Ollama 實測接受 "none",但當前 OpenAI SDK 的 ReasoningEffort 未含它,故 cast;
+ * 運行時序列化值仍爲 "none",Ollama 認。
  */
 function macRouteParams(
   name: string,
@@ -755,12 +755,12 @@ function macRouteParams(
     : {};
 }
 
-/** env.AI binding 的最小接口(实际为 Cloudflare 的 Ai binding)。 */
+/** env.AI binding 的最小接口(實際爲 Cloudflare 的 Ai binding)。 */
 interface AiBindingLike {
   run(model: string, input: Record<string, unknown>): Promise<unknown>;
 }
 
-/** 从 ProviderOptions 取出服务端注入的 binding;缺失则给明确报错(绝不静默)。 */
+/** 從 ProviderOptions 取出服務端注入的 binding;缺失則給明確報錯(絕不靜默)。 */
 function workersAiRuntime(opts?: ProviderOptions): { ai: AiBindingLike; kv: BudgetKV } {
   const ai = opts?.aiBinding?.ai as AiBindingLike | undefined;
   if (!ai || typeof ai.run !== "function") {
@@ -788,9 +788,9 @@ interface WorkersAiSseUsage {
 
 /**
  * 把 Workers AI binding 的 SSE 流(`data: {"response":"..."}` … `data: [DONE]`)
- * 包成统一的 TextStream。懒启动:首次 finalMessage() 才真正请求,
- * 预算检查放在 run() 首行——首 token 前超支会直接抛 BudgetExceededError,
- * 经 streamToPrimedResponse 预热后表现为干净的 JSON 429,而非截断流。
+ * 包成統一的 TextStream。懶啓動:首次 finalMessage() 才真正請求,
+ * 預算檢查放在 run() 首行——首 token 前超支會直接拋 BudgetExceededError,
+ * 經 streamToPrimedResponse 預熱後表現爲乾淨的 JSON 429,而非截斷流。
  */
 class WorkersAITextStream implements TextStream {
   private textListeners: ((d: string) => void)[] = [];
@@ -833,7 +833,7 @@ class WorkersAITextStream implements TextStream {
   private async run(): Promise<{ text: string; neurons: number }> {
     const { binding, kv, model, system, messages, maxTokens } = this.args;
     try {
-      // 预算前置检查:超支直接抛,预热层会转成 JSON 429。
+      // 預算前置檢查:超支直接拋,預熱層會轉成 JSON 429。
       await checkBudget(kv);
       const fullMessages = toWorkersAiMessages(system, messages);
       const stream = (await binding.run(model, {
@@ -851,7 +851,7 @@ class WorkersAITextStream implements TextStream {
     }
   }
 
-  /** 消费 SSE 流:拼 response 文本,取最后一个带 usage 的事件的 neurons(即总量)。 */
+  /** 消費 SSE 流:拼 response 文本,取最後一個帶 usage 的事件的 neurons(即總量)。 */
   private async pump(stream: ReadableStream<Uint8Array>): Promise<void> {
     const reader = stream.getReader();
     const decoder = new TextDecoder();
@@ -881,7 +881,7 @@ class WorkersAITextStream implements TextStream {
       try {
         obj = JSON.parse(payload) as { response?: unknown; usage?: WorkersAiSseUsage };
       } catch {
-        continue; // 极少数情况下的残缺块,跳过(文本已在前块发出)
+        continue; // 極少數情況下的殘缺塊,跳過(文本已在前塊發出)
       }
       if (typeof obj.response === "string" && obj.response) this.emitText(obj.response);
       const n = obj.usage?.neurons;
@@ -890,20 +890,20 @@ class WorkersAITextStream implements TextStream {
   }
 
   abort(): void {
-    // binding 流无外部 abort 语义;调用方(预热/取消)不再消费即等价终止。
+    // binding 流無外部 abort 語義;調用方(預熱/取消)不再消費即等價終止。
   }
 }
 
-// ── 对外统一入口 ──────────────────────────────────────────────────────────
+// ── 對外統一入口 ──────────────────────────────────────────────────────────
 
-/** 非流式补全。opts 可传 BYOK(用户自带 provider/key)。 */
+/** 非流式補全。opts 可傳 BYOK(用戶自帶 provider/key)。 */
 export async function chatComplete(
   req: CompletionRequest,
   opts?: ProviderOptions,
 ): Promise<{ text: string; usage: Usage }> {
   const name = activeProviderName(opts);
   const def = resolveDef(name, opts);
-  // 用户自定义人设追加为 system 末块(语言指令之后),优先级最高。
+  // 用戶自定義人設追加爲 system 末塊(語言指令之後),優先級最高。
   const system = applyCustomPrompt(req.system, opts);
   if (def.kind === "workers-ai") {
     const { ai, kv } = workersAiRuntime(opts);
@@ -963,10 +963,10 @@ export async function chatComplete(
     const res = await complete(preferred);
     return resultOf(res);
   } catch (err) {
-    // 默认模型被下架(404) → 动态回落到实时列表首个模型重试一次;
-    // 显式指定的模型 404 → 直接抛真实错误(用户去设置里换)。
-    // 无论哪种,先把下架模型记入 KV:下次拉模型列表时自动滤走(动态下架)。
-    // Mac 登记统一归 mac-llm 名下(列表按 mac-llm 过滤,见 deadRegistryName)。
+    // 默認模型被下架(404) → 動態回落到實時列表首個模型重試一次;
+    // 顯式指定的模型 404 → 直接拋真實錯誤(用戶去設置裏換)。
+    // 無論哪種,先把下架模型記入 KV:下次拉模型列表時自動濾走(動態下架)。
+    // Mac 登記統一歸 mac-llm 名下(列表按 mac-llm 過濾,見 deadRegistryName)。
     if (isModelNotFoundError(err)) await recordDeadModel(opts?.aiBinding?.kv, deadRegistryName(name), preferred);
     if (!isModelNotFoundError(err) || isModelExplicit(req.kind, opts)) throw err;
     const res = await complete(
@@ -976,11 +976,11 @@ export async function chatComplete(
   }
 }
 
-/** 流式补全。opts 可传 BYOK。返回 Anthropic 风格事件流,供 web 端逐字渲染。 */
+/** 流式補全。opts 可傳 BYOK。返回 Anthropic 風格事件流,供 web 端逐字渲染。 */
 export function chatStream(req: CompletionRequest, opts?: ProviderOptions): TextStream {
   const name = activeProviderName(opts);
   const def = resolveDef(name, opts);
-  // 用户自定义人设追加为 system 末块(语言指令之后),优先级最高。
+  // 用戶自定義人設追加爲 system 末塊(語言指令之後),優先級最高。
   const system = applyCustomPrompt(req.system, opts);
   if (def.kind === "workers-ai") {
     const { ai, kv } = workersAiRuntime(opts);
@@ -1004,7 +1004,7 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
     }) as unknown as TextStream;
   }
   if (name === "gemini") {
-    // Gemini OpenAI 兼容层的 SSE 流式会挂起(2026-10-23 实测:60s 无首字节,三次复现;
+    // Gemini OpenAI 兼容層的 SSE 流式會掛起(2026-10-23 實測:60s 無首字節,三次復現;
     // 非流式同一 endpoint 同一 key 正常 200)。改走非流式再包成 TextStream,文本一次性 emit。
     return new CompleteTextStream(async () => (await chatComplete(req, opts)).text);
   }
@@ -1022,9 +1022,9 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
     try {
       return await open(preferred);
     } catch (err) {
-      // 默认模型被下架(404) → 动态回落到实时列表首个模型重试一次(懒启动内);
-      // 显式指定的模型 404 → 直接抛真实错误。
-      // 无论哪种,先把下架模型记入 KV:下次拉模型列表时自动滤走(动态下架)。
+      // 默認模型被下架(404) → 動態回落到實時列表首個模型重試一次(懶啓動內);
+      // 顯式指定的模型 404 → 直接拋真實錯誤。
+      // 無論哪種,先把下架模型記入 KV:下次拉模型列表時自動濾走(動態下架)。
       if (isModelNotFoundError(err)) await recordDeadModel(opts?.aiBinding?.kv, deadRegistryName(name), preferred);
       if (!isModelNotFoundError(err) || explicit) throw err;
       return open(await fallbackModel(def.baseURL, apiKey, err, accessHeaders));
@@ -1033,9 +1033,9 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
 }
 
 /**
- * 语言指令提升:实测 Llama 3.1 8B 对 system 末尾的语言指令遵循不稳(仍出简体),
- * 但放在 user 消息开头则稳定输出繁体。故 workers-ai 路径下,把语言指令块
- * 同时前置到第一条 user 消息(原 system 块保留,双保险)。
+ * 語言指令提升:實測 Llama 3.1 8B 對 system 末尾的語言指令遵循不穩(仍出簡體),
+ * 但放在 user 消息開頭則穩定輸出繁體。故 workers-ai 路徑下,把語言指令塊
+ * 同時前置到第一條 user 消息(原 system 塊保留,雙保險)。
  */
 const LOCALE_DIRECTIVE_RE = /輸出語言|输出语言|Output language/;
 
@@ -1052,7 +1052,7 @@ function promoteLocaleDirective(
   return { systemText, messages: mapped };
 }
 
-/** Workers AI 的消息形态:system 单独成块(与 OpenAI 兼容层把 system 拼进文本不同)。 */
+/** Workers AI 的消息形態:system 單獨成塊(與 OpenAI 兼容層把 system 拼進文本不同)。 */
 function toWorkersAiMessages(
   system: SystemBlock[],
   messages: ChatMessage[],
@@ -1061,7 +1061,7 @@ function toWorkersAiMessages(
   return [...(systemText.trim() ? [{ role: "system", content: systemText }] : []), ...msgs];
 }
 
-/** 给 /api/models 用的 provider 元信息(分组/是否需 key/申请地址),workers-ai 排首位。 */
+/** 給 /api/models 用的 provider 元信息(分組/是否需 key/申請地址),workers-ai 排首位。 */
 export type ProviderGroup = "nokey" | "freekey" | "paid";
 
 export interface ProviderMeta {
@@ -1086,14 +1086,14 @@ export function listProviders(): ProviderMeta[] {
   ];
 }
 
-/** 给 /api/models 用的 baseURL 查询(anthropic/custom 无标准 /models 端点 → undefined)。退役 alias 先正规化。 */
+/** 給 /api/models 用的 baseURL 查詢(anthropic/custom 無標準 /models 端點 → undefined)。退役 alias 先正規化。 */
 export function providerBaseUrl(name: string): string | undefined {
   const def = PROVIDERS[normalizeProviderName(name)];
   if (!def || def.kind !== "openai") return undefined;
   return def.baseURL;
 }
 
-/** 该 provider 的 /models 是否需要 key(按注册表判断)。退役 alias 先正规化。 */
+/** 該 provider 的 /models 是否需要 key(按註冊表判斷)。退役 alias 先正規化。 */
 export function providerNeedsKey(name: string): boolean {
   const n = normalizeProviderName(name);
   if (n === "custom") return true;

@@ -19,7 +19,7 @@ test("env:export 前缀 / 引号 / 行尾注释 / 小写 key", () => {
   assert.deepEqual(parseDotEnvLine("9bad=x"), null);
 });
 
-// —— Bug 2: 错误分类 ——
+// —— Bug 2: 錯誤分類 ——
 test("http:输入错误 → 400,未知 provider → 400", () => {
   assert.equal(classifyError(new Error("非法出生信息: 日 30(2023年2月只有 28 天)")).status, 400);
   assert.equal(classifyError(new Error("请求体格式错误")).status, 400);
@@ -34,7 +34,7 @@ test("http:AI 上游错误 → 502 且透出真实消息(REAL-ERROR RULE)", () =
     [Object.assign(new Error("Connection error."), {}), "Connection error."],
     [Object.assign(new Error("Internal Server Error"), { status: 500 }), "Internal Server Error"],
     [new Error("AI 请求超时:20s 内未收到首个文本块"), "20s 内未收到首个文本块"],
-    // 模型下架 404:真实消息必须原样透出(含 provider 的更换建议)
+    // 模型下架 404:真實消息必須原樣透出(含 provider 的更換建議)
     [
       Object.assign(
         new Error("404 This model models/gemini-2.0-flash is no longer available. Please update your code to use models/gemini-3.8-flash"),
@@ -48,7 +48,7 @@ test("http:AI 上游错误 → 502 且透出真实消息(REAL-ERROR RULE)", () =
     assert.equal(c.status, 502, `${err.message} 应为 502`);
     assert.ok(c.message.includes(want), `502 信息应透出真实消息(含「${want}」): ${c.message}`);
   }
-  // AI 阶段未知错误兜底 502;输入阶段未知错误保持 400。消息均为原样。
+  // AI 階段未知錯誤兜底 502;輸入階段未知錯誤保持 400。消息均爲原樣。
   assert.equal(classifyError(new Error("mystery"), "ai").status, 502);
   assert.equal(classifyError(new Error("mystery"), "ai").message, "mystery");
   assert.equal(classifyError(new Error("mystery"), "input").status, 400);
@@ -86,7 +86,7 @@ test("http:errorResponse 返回对应状态码的 JSON", async () => {
   assert.ok(j.error.includes("非法出生信息"));
 });
 
-// —— Bug 5: 边界解析 ——
+// —— Bug 5: 邊界解析 ——
 test("birth:拒绝非整数 / 经度越界,小数经度通过", () => {
   const base = { year: 1990, month: 5, day: 30, hour: 11, minute: 0, gender: "男" };
   assert.throws(() => parseBirthInput({ ...base, year: 1990.5 }), /必须为整数/);
@@ -97,19 +97,19 @@ test("birth:拒绝非整数 / 经度越界,小数经度通过", () => {
   assert.throws(() => parseHourInferInput({ ...base, longitude: 999 }), /经度/);
 });
 
-// —— Bug 6: 农历换算后超出范围 ——
+// —— Bug 6: 農曆換算後超出範圍 ——
 test("birth:农历换算后超出 1900-2100 → 明确报错", () => {
-  // 农历 2100 年腊月廿九 → 公历 2101-1-28:应报换算越界,而非下游「年 2101」。
+  // 農曆 2100 年臘月廿九 → 公曆 2101-1-28:應報換算越界,而非下游「年 2101」。
   assert.throws(
     () => parseBirthInput({ year: 2100, month: 12, day: 29, hour: 12, gender: "男", calendar: "lunar" }),
     /换算为公历2101年1月28日.*超出引擎支持范围/,
   );
-  // 非法闰月:该年无此闰月。
+  // 非法閏月:該年無此閏月。
   assert.throws(
     () => parseBirthInput({ year: 2024, month: 2, day: 15, hour: 12, gender: "男", calendar: "lunar", isLeapMonth: true }),
     /非法农历日期|无此闰月/,
   );
-  // 正常农历转换不受影响。
+  // 正常農曆轉換不受影響。
   const ok = parseBirthInput({ year: 2000, month: 1, day: 1, hour: 12, gender: "男", calendar: "lunar" });
   assert.equal(ok.year, 2000);
   assert.equal(ok.month, 2);

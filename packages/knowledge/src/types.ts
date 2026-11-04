@@ -25,20 +25,20 @@ export interface Cite {
   locator?: string;
 }
 
-/** 知识库数据文件通用元信息 */
+/** 知識庫數據文件通用元信息 */
 export interface KnowledgeMeta {
   tier?: KnowledgeTier;
   name: string;
   schema: string;
   source: string;
   version: string;
-  /** 是否经人工逐条校对原著。false 时解读层应降权或标注。 */
+  /** 是否經人工逐條校對原著。false 時解讀層應降權或標註。 */
   reviewed: boolean;
   reviewNote?: string;
   [extra: string]: unknown;
 }
 
-/** 穷通宝鉴调候用神表:日干 -> 月支 -> 用神(按重要性排序) */
+/** 窮通寶鑑調候用神表:日干 -> 月支 -> 用神(按重要性排序) */
 export interface TiaohouTable {
   meta: KnowledgeMeta;
   data: Record<Tiangan, Record<Dizhi, Tiangan[]>>;

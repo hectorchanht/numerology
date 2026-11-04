@@ -27,7 +27,7 @@ export interface AcademySource {
  * 古典引文參照(證據鏈):課文引用的古籍原文,點按彈出全文 + 出處。
  * - quote: 課文所引短句(與正文標點一致)。
  * - fullText: 較完整的原文段落,逐字核實自 zh.wikisource.org 公有領域文本
- *   (2026-10-23 親自抓取;无→無 按本站公版通行本體例統一,屬字形變體非改字)。
+ *   (2026-10-23 親自抓取;無→無 按本站公版通行本體例統一,屬字形變體非改字)。
  * - url: 已親自抓取核實,勿憑空編造。
  */
 export interface AcademyQuoteRef {

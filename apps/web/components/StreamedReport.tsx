@@ -17,7 +17,7 @@ import { go } from "@/lib/nav";
 import { PronounceButton } from "@dawn-studio/pronounce";
 import { speechText } from "@/lib/speechText";
 
-/** 分段定义:key 对应引擎 REPORT_SEGMENTS / FORTUNE_SEGMENTS,label 用作章節卡標題。 */
+/** 分段定義:key 對應引擎 REPORT_SEGMENTS / FORTUNE_SEGMENTS,label 用作章節卡標題。 */
 export interface ReportSeg {
   key: string;
   label: string;
@@ -27,7 +27,7 @@ export interface ReportSeg {
 const scrollBehavior = (): ScrollBehavior =>
   typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 
-/** 解读视角:纯八字 / 纯紫微 / 合参。 */
+/** 解讀視角:純八字 / 純紫微 / 合參。 */
 type Lens = "bazi" | "ziwei" | "both";
 const LENSES: { key: Lens; labelKey: TKey }[] = [
   { key: "bazi", labelKey: "report.lensBazi" },
@@ -40,11 +40,11 @@ interface Props {
   endpoint: string;
   title: string;
   description: string;
-  /** 分段并行:各节并发请求、各自就位,绕开函数时长上限。 */
+  /** 分段並行:各節併發請求、各自就位,繞開函數時長上限。 */
   segments: readonly ReportSeg[];
-  /** 某节成功生成后回调(供历史记录保存):(sectionKey, 正文 markdown, lens, 思考过程)。 */
+  /** 某節成功生成後回調(供歷史記錄保存):(sectionKey, 正文 markdown, lens, 思考過程)。 */
   onSectionDone?: (segKey: string, markdown: string, lens: string, thinking?: string) => void;
-  /** 从历史记录恢复:sectionKey → 正文 markdown(不含 ## 标题,按当前语言重拼)。 */
+  /** 從歷史記錄恢復:sectionKey → 正文 markdown(不含 ## 標題,按當前語言重拼)。 */
   restoredSections?: Record<string, string> | null;
   /** 章節可摺疊(大運深析用);預設首節展開。 */
   collapsible?: boolean;
@@ -54,7 +54,7 @@ interface Props {
   onBack?: () => void;
   /** 歷史恢復內容係用邊個視角生成(冇記錄就 null)。 */
   restoredLens?: string | null;
-  /** 額度用晒時「返去睇命盤」。 */
+  /** 額度用曬時「返去睇命盤」。 */
   onShowChart?: () => void;
   /** 報告讀完嘅下一步(例如去大運流年)。 */
   next?: { label: string; onClick: () => void };
@@ -67,7 +67,7 @@ interface Props {
   /** 插喺導航同視角控件之間的內容(例如大運時間線)。 */
   children?: React.ReactNode;
   /**
-   * 渲染前對正文做確定性修復(大運流年用:小标题数字、紫微大限:無)。
+   * 渲染前對正文做確定性修復(大運流年用:小標題數字、紫微大限:無)。
    * 渲染時應用,故 KV/歷史記錄裡的舊佔位文本也會被修復,不改存檔原文。
    */
   repairText?: (md: string) => string;
@@ -87,11 +87,11 @@ interface Slot {
   text: string;
   status: "streaming" | "done" | "error";
   err: string;
-  /** 服务端错误码(AI_BUDGET = 本月额度用尽,各节收成一张额度卡)。 */
+  /** 服務端錯誤碼(AI_BUDGET = 本月額度用盡,各節收成一張額度卡)。 */
   code?: string;
 }
 
-/** 通用流式报告:选视角 → 各节并行调 endpoint → 每节一张卡,逐字渲染 Markdown。 */
+/** 通用流式報告:選視角 → 各節並行調 endpoint → 每節一張卡,逐字渲染 Markdown。 */
 export function StreamedReport({
   input, endpoint, title, description, segments, onSectionDone, restoredSections,
   collapsible, onAsk, onBack, children, repairText, renderSectionBody, startSignal, sectionNotes, restoredLens, onShowChart, basis, next,
@@ -134,7 +134,7 @@ export function StreamedReport({
     }
   }, [key]);
 
-  // 从历史记录恢复:直接显示为完成态,零 API 调用。
+  // 從歷史記錄恢復:直接顯示爲完成態,零 API 調用。
   useEffect(() => {
     if (!restoredSections) return;
     if (generating.current && startedFor.current === key) return;
@@ -148,7 +148,7 @@ export function StreamedReport({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restoredSections]);
 
-  // 每次请求都重读设置:key 取当前 provider 名下的(没填 → 空),人设为空则省略。
+  // 每次請求都重讀設置:key 取當前 provider 名下的(沒填 → 空),人設爲空則省略。
   const postBody = (extra: Record<string, unknown>, loc: Locale) => {
     const { ai, systemPrompt } = aiRequestParts();
     return { input, ai, locale: loc, ...(systemPrompt ? { systemPrompt } : {}), ...extra };
@@ -172,15 +172,15 @@ export function StreamedReport({
         })
           .then(() => {
             local[i] = { ...local[i]!, status: "done" };
-            // 成功且有正文 → 通知父组件存入本机历史(失败/吐空/已作廢的不存)。
-            // 思考同正文分開存:正文為空(思考食晒)嗰節唔好當成功歸檔。
+            // 成功且有正文 → 通知父組件存入本機歷史(失敗/吐空/已作廢的不存)。
+            // 思考同正文分開存:正文為空(思考食曬)嗰節唔好當成功歸檔。
             if (live() && local[i]!.text.trim()) {
               const sp = splitThinking(local[i]!.text);
               if (sp.content) onSectionDone?.(seg.key, sp.content, useLens, sp.thinking || undefined);
             }
           })
           .catch((e: unknown) => {
-            // 模型下架 → 清模型缓存,下次打开设置时重新拉取(已滤走下架模型)。
+            // 模型下架 → 清模型緩存,下次打開設置時重新拉取(已濾走下架模型)。
             if ((e as { code?: string })?.code === "MODEL_NOT_FOUND") clearModelsCache();
             local[i] = {
               ...local[i]!, status: "error", err: e instanceof Error ? e.message : t("report.segFailShort"),
@@ -233,7 +233,7 @@ export function StreamedReport({
       }
     } catch (e: unknown) {
       if (!live()) return;
-      // 模型下架 → 清模型缓存,下次打开设置时重新拉取(已滤走下架模型)。
+      // 模型下架 → 清模型緩存,下次打開設置時重新拉取(已濾走下架模型)。
       if ((e as { code?: string })?.code === "MODEL_NOT_FOUND") clearModelsCache();
       const errMsg = e instanceof Error ? e.message : t("report.segFailShort");
       const code = (e as { code?: string })?.code;
@@ -447,7 +447,7 @@ export function StreamedReport({
             <div ref={secRef} className="report-secs">
               {segments.map((seg, i) => {
                 const s: Slot = slots[i] ?? { text: "", status: "streaming", err: "" };
-                // 額度失敗嘅節唔逐張出「失敗」卡,額度卡已經講晒。
+                // 額度失敗嘅節唔逐張出「失敗」卡,額度卡已經講曬。
                 if (s.code === "AI_BUDGET") return null;
                 const has = s.text.trim() !== "";
                 const state =

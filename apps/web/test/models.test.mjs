@@ -10,7 +10,7 @@ function jsonResponse(status, body) {
   return { ok: status >= 200 && status < 300, status, json: async () => body };
 }
 
-// —— workers-ai:核验表 ——
+// —— workers-ai:覈驗表 ——
 test("models:workers-ai 返回 verified-static 核验表", async () => {
   const r = await fetchProviderModels("workers-ai");
   assert.equal(r.source, "verified-static");
@@ -20,7 +20,7 @@ test("models:workers-ai 返回 verified-static 核验表", async () => {
   assert.ok(r.verifiedAt);
 });
 
-// —— OpenAI 兼容:实时代理 ——
+// —— OpenAI 兼容:實時代理 ——
 test("models:live 代理解析 {data:[{id}]}", async () => {
   const fetchImpl = stubFetch(async (url, init) => {
     assert.match(url, /https:\/\/x\.test\/v1\/models/);
@@ -59,13 +59,13 @@ test("models:网络异常抛错(由路由转 502)", async () => {
   await assert.rejects(fetchProviderModels("glm", { fetchImpl }), /模型列表请求失败/);
 });
 
-// —— mac-llm 列表:只拉 Ollama 一个端点(MLX 已停用,无合并) ——
+// —— mac-llm 列表:只拉 Ollama 一個端點(MLX 已停用,無合併) ——
 const OLLAMA_IDS = ["gemma3:12b", "deepseek-r1:14b", "gpt-oss:20b", "qwen3:14b", "qwen3:8b", "qwen3:30b", "qwen3:32b"];
 const STATIC7 = [
   "qwen3:30b", "qwen3:8b", "qwen3:14b", "qwen3:32b", "gpt-oss:20b", "deepseek-r1:14b", "gemma3:12b",
 ];
 
-/** Ollama 端点的 stub fetch;任何其它 URL(尤其 MLX)即 throw,守住「不再打 MLX」。 */
+/** Ollama 端點的 stub fetch;任何其它 URL(尤其 MLX)即 throw,守住「不再打 MLX」。 */
 function macFetch({ ollamaIds = OLLAMA_IDS, ollamaStatus = 200, ollamaThrow = false } = {}) {
   return stubFetch(async (url) => {
     if (url.includes("ollama.hectorchan.com")) {
@@ -149,7 +149,7 @@ test("models:anthropic/custom 走静态表", async () => {
   assert.ok(r.models.length > 0);
 });
 
-// —— providerMeta:分组 ——
+// —— providerMeta:分組 ——
 test("models:PROVIDER_META 分组与 ai 包一致(workers-ai 首位)", () => {
   assert.equal(PROVIDER_META[0].name, "workers-ai");
   const groups = Object.fromEntries(PROVIDER_META.map((p) => [p.name, p.group]));
@@ -175,10 +175,10 @@ test("models:静态回落的 :free 模型带 free:true", async () => {
   assert.ok(r.models.every((m) => m.free === true), "openrouter 静态表应全为 :free");
 });
 
-// —— 动态下架:KV 登记的模型在 live 列表中被滤走 ——
+// —— 動態下架:KV 登記的模型在 live 列表中被濾走 ——
 test("models:KV 动态登记 + hardcode seed 在 live 列表中取并集过滤", async () => {
   const { DEAD_MODELS_KV_KEY } = await import("../test-dist/models.js").catch(() => ({}));
-  // DEAD_MODELS_KV_KEY 由 @numerology/ai 导出;经 test-dist 的 models.js 间接取不到时直接用字面 key。
+  // DEAD_MODELS_KV_KEY 由 @numerology/ai 導出;經 test-dist 的 models.js 間接取不到時直接用字面 key。
   const key = DEAD_MODELS_KV_KEY ?? "ai-dead-models:v1";
   const kv = {
     store: new Map([[key, JSON.stringify({ gemini: { "gemini-9.9-dead": Date.now() } })]]),
@@ -198,7 +198,7 @@ test("models:KV 动态登记 + hardcode seed 在 live 列表中取并集过滤",
   assert.deepEqual(r.models.map((m) => m.id), ["models/gemini-3.8-flash"]);
 });
 
-// —— accessHeaders 合并进模型列表请求头 ——
+// —— accessHeaders 合併進模型列表請求頭 ——
 test("models:accessHeaders 合并进 /models 请求头", async () => {
   let gotHeaders = null;
   const fetchImpl = stubFetch(async (url, init) => {

@@ -10,7 +10,7 @@ import {
 import { HOUR_INFER_PERSONA, localeDirective } from "./prompts.js";
 import type { ChatTurn } from "./chat.js";
 
-/** 把 12 时辰候选压成紧凑对照表喂给模型。 */
+/** 把 12 時辰候選壓成緊湊對照表餵給模型。 */
 function candidatesTable(cands: HourCandidate[]): string {
   return cands
     .map(
@@ -22,7 +22,7 @@ function candidatesTable(cands: HourCandidate[]): string {
     .join("\n");
 }
 
-/** 时辰推断的 system 块(人设 + 12 候选对照表 + 输出语言);第二块标记 cache(仅 Anthropic 生效)。 */
+/** 時辰推斷的 system 塊(人設 + 12 候選對照表 + 輸出語言);第二塊標記 cache(僅 Anthropic 生效)。 */
 export function buildHourInferSystem(cands: HourCandidate[], locale: AiLocale = "zht"): SystemBlock[] {
   return [
     { text: HOUR_INFER_PERSONA },
@@ -33,12 +33,12 @@ export function buildHourInferSystem(cands: HourCandidate[], locale: AiLocale = 
 
 export interface HourInferTurn extends ChatTurn {}
 
-// 设 1800 token(安全网):时辰推断每轮以提问为主、本就简短,压到 1800 确保最慢模型单轮也 <60s,
-// 不被 Vercel maxDuration=60 截断(人设已要求每轮只问 3-5 个问题)。
+// 設 1800 token(安全網):時辰推斷每輪以提問爲主、本就簡短,壓到 1800 確保最慢模型單輪也 <60s,
+// 不被 Vercel maxDuration=60 截斷(人設已要求每輪只問 3-5 個問題)。
 const HOUR_INFER_MAX_TOKENS = 1800;
 const HOUR_INFER_OPENING = "(开始)请简短说明原理,并向我提出第一轮用于区分时辰的问题。";
 
-/** 时辰推断对话(流式)。message 为空表示开场(模型应自我介绍并发起首轮提问)。 */
+/** 時辰推斷對話(流式)。message 爲空表示開場(模型應自我介紹併發起首輪提問)。 */
 export function streamHourInference(
   cands: HourCandidate[],
   history: HourInferTurn[],
@@ -54,7 +54,7 @@ export function streamHourInference(
   }, opts.ai);
 }
 
-/** 非流式版本(测试/批处理用)。 */
+/** 非流式版本(測試/批處理用)。 */
 export async function inferHour(
   cands: HourCandidate[],
   history: HourInferTurn[],

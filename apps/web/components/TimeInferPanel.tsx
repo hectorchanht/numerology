@@ -87,7 +87,7 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
       if (!res.ok || !data.candidates) throw new Error(data.error ?? t("infer.candidatesFail"));
       setCandidates(data.candidates);
       setStarted(true);
-      await send("", []); // 开场:让 AI 自我介绍并发起首轮提问
+      await send("", []); // 開場:讓 AI 自我介紹併發起首輪提問
     } catch (e) {
       setError(e instanceof Error ? e.message : t("infer.startFail"));
     } finally {
@@ -95,7 +95,7 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
     }
   };
 
-  // history = 本轮之前的完整对话;message = 本轮用户输入(空=开场)。
+  // history = 本輪之前的完整對話;message = 本輪用戶輸入(空=開場)。
   const send = async (message: string, history: Turn[]) => {
     const display: Turn[] = message ? [...history, { role: "user", content: message }] : [...history];
     setLog([...display, { role: "assistant", content: "" }]);

@@ -14,13 +14,13 @@ import { getServerAiBindings, getWaitUntil } from "@/lib/aiBinding";
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
-/** prompt 版本:改動追問 prompt 即換緩存鍵,不串味。v2 = 2026-10-23 精简去重人设。v3 = 2026-11-04 人設擴為多體系。 */
+/** prompt 版本:改動追問 prompt 即換緩存鍵,不串味。v2 = 2026-10-23 精簡去重人設。v3 = 2026-11-04 人設擴為多體系。 */
 const CHAT_PROMPT_VERSION = "chat/v3";
 
 /**
- * 流式对话追问(复用同一命盘 + 动态运势的缓存上下文)。
+ * 流式對話追問(複用同一命盤 + 動態運勢的緩存上下文)。
  * KV 緩存(命盤 + 歷史 + 問題 + 人設):重複問即零消耗命中,不燒 AI 額度。
- * 首 token 前失败 → JSON 错误(502),而非截断流。
+ * 首 token 前失敗 → JSON 錯誤(502),而非截斷流。
  */
 export async function POST(req: Request): Promise<Response> {
   try {

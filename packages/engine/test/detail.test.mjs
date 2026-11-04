@@ -3,16 +3,16 @@ import assert from "node:assert/strict";
 import { changSheng, shenShaForBranch, castBazi, CHANGSHENG_STAGES } from "../dist/index.js";
 
 test("十二长生计算正确(规则交叉验证)", () => {
-  assert.equal(changSheng("庚", "戌"), "衰"); // 庚长生巳,顺行至戌=衰
-  assert.equal(changSheng("丁", "丑"), "墓"); // 丁长生酉,逆行至丑=墓
-  assert.equal(changSheng("甲", "亥"), "长生"); // 甲阳长生在亥
-  assert.equal(changSheng("乙", "午"), "长生"); // 乙阴长生在午
+  assert.equal(changSheng("庚", "戌"), "衰"); // 庚長生巳,順行至戌=衰
+  assert.equal(changSheng("丁", "丑"), "墓"); // 丁長生酉,逆行至醜=墓
+  assert.equal(changSheng("甲", "亥"), "长生"); // 甲陽長生在亥
+  assert.equal(changSheng("乙", "午"), "长生"); // 乙陰長生在午
 });
 
 test("神煞标准规则:天乙/驿马/将星/桃花/华盖", () => {
-  // 日干庚 → 天乙贵人在丑、未
+  // 日干庚 → 天乙貴人在醜、未
   assert.ok(shenShaForBranch({ dayGan: "庚", yearZhi: "丑", dayZhi: "戌" }, "丑").includes("天乙贵人"));
-  // 年支申(申子辰局)→ 驿马在寅、将星在子、桃花在酉、华盖在辰
+  // 年支申(申子辰局)→ 驛馬在寅、將星在子、桃花在酉、華蓋在辰
   const ctx = { dayGan: "庚", yearZhi: "申", dayZhi: "子" };
   assert.ok(shenShaForBranch(ctx, "寅").includes("驿马"));
   assert.ok(shenShaForBranch(ctx, "子").includes("将星"));

@@ -20,7 +20,7 @@ test("每步大运都有同期大限,结构完整(禄权科忌各一)", () => {
 });
 
 test("同期大限与命宫大限区间独立交叉验证(中点年龄落入宫位大限区间)", () => {
-  // 用 castZiwei 的宫位 decadal.range 做独立验证,不依赖 horoscope 实现本身
+  // 用 castZiwei 的宮位 decadal.range 做獨立驗證,不依賴 horoscope 實現本身
   const f = analyzeFortune(MALE, { referenceYear: 2026, yearsAhead: 8 });
   const zw = castZiwei(MALE);
   for (const d of f.bazi.daYun) {
@@ -57,8 +57,8 @@ test("男女大运方向不同,同期大限各自有效", () => {
 });
 
 test("边界:首步大运(起点年龄小于首个大限区间)不回绕到末个大限", () => {
-  // 1988-11-03 男首步 3-12 岁;iztro horoscope 在起点年会回绕到 75-84 区间的大限,
-  // 中点法应给出首个大限(与命宫 5-14 区间一致)
+  // 1988-11-03 男首步 3-12 歲;iztro horoscope 在起點年會迴繞到 75-84 區間的大限,
+  // 中點法應給出首個大限(與命宮 5-14 區間一致)
   const f = analyzeFortune(MALE, { referenceYear: 2026, yearsAhead: 8 });
   const first = f.bazi.daYun[0];
   const zw = castZiwei(MALE);

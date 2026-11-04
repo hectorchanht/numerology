@@ -1,13 +1,13 @@
 import { DIZHI, isDizhi, isTiangan, type Dizhi, type Tiangan } from "@numerology/knowledge";
 
-/** 十二长生阶段(顺序固定)。 */
+/** 十二長生階段(順序固定)。 */
 export const CHANGSHENG_STAGES = [
   "长生", "沐浴", "冠带", "临官", "帝旺", "衰",
   "病", "死", "墓", "绝", "胎", "养",
 ] as const;
 export type ChangSheng = (typeof CHANGSHENG_STAGES)[number];
 
-/** 各天干「长生」所在地支 + 顺逆(阳干顺行、阴干逆行)。 */
+/** 各天干「長生」所在地支 + 順逆(陽干順行、陰干逆行)。 */
 const QI: Record<Tiangan, { branch: Dizhi; forward: boolean }> = {
   甲: { branch: "亥", forward: true },
   丙: { branch: "寅", forward: true },
@@ -24,8 +24,8 @@ const QI: Record<Tiangan, { branch: Dizhi; forward: boolean }> = {
 const branchIndex = (zhi: Dizhi): number => DIZHI.indexOf(zhi);
 
 /**
- * 求某天干在某地支的十二长生阶段。确定性。
- * 用于「星运」(日主 vs 各柱地支)与「自坐」(各柱天干 vs 自身地支)。
+ * 求某天干在某地支的十二長生階段。確定性。
+ * 用於「星運」(日主 vs 各柱地支)與「自坐」(各柱天干 vs 自身地支)。
  * @example changSheng("庚", "戌") => "衰"
  */
 export function changSheng(gan: Tiangan, zhi: Dizhi): ChangSheng {

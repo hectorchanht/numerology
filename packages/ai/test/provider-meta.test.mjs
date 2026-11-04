@@ -7,7 +7,7 @@ import {
 } from "../dist/client.js";
 import { WORKERS_AI_MODELS, WORKERS_AI_DEFAULT_MODEL } from "../dist/workersAiModels.js";
 
-// —— provider 分组元信息 ——
+// —— provider 分組元信息 ——
 test("provider:listProviders workers-ai 排首位,分组正确", () => {
   const list = listProviders();
   assert.equal(list[0].name, "workers-ai");
@@ -70,7 +70,7 @@ test("provider:mac-mlx 已退役:不在 listProviders,旧名在各入口正规�
   const names = list.map((p) => p.name);
   assert.ok(!names.includes("mac-mlx"), "UI 列表不应再有 mac-mlx(MLX 已停用)");
   assert.ok(names.includes("mac-llm"));
-  // def 已删:旧名经正规化后解析到 mac-llm 的 Ollama 端点,绝不再是 MLX 端点。
+  // def 已刪:舊名經正規化後解析到 mac-llm 的 Ollama 端點,絕不再是 MLX 端點。
   assert.equal(providerBaseUrl("mac-mlx"), "https://ollama.hectorchan.com/v1");
   assert.equal(providerNeedsKey("mac-mlx"), false);
   assert.equal(normalizeProviderName("mac-mlx"), "mac-llm");
@@ -78,7 +78,7 @@ test("provider:mac-mlx 已退役:不在 listProviders,旧名在各入口正规�
   assert.equal(normalizeProviderName("glm"), "glm");
   assert.equal(activeProviderName({ provider: "mac-mlx" }), "mac-llm");
   assert.equal(activeProviderName({ provider: "mac-llm" }), "mac-llm");
-  // alias 仍按 Mac provider 对待(Access 头/超时等待遇不丢)。
+  // alias 仍按 Mac provider 對待(Access 頭/超時等待遇不丟)。
   assert.equal(isMacProvider("mac-mlx"), true);
 });
 
@@ -99,9 +99,9 @@ test("provider:MLX 分流已退役:mac-llm 选任何模型都行 Ollama 待遇(r
   const baseURL = `http://127.0.0.1:${server.address().port}`;
   const req = { kind: "chat", maxTokens: 10, system: [], messages: [{ role: "user", content: "hi" }] };
   try {
-    // 就算请求里还带着退役的 mlx-community/* 模型 id,也只会落到 def 端点(Ollama,
-    // 这里被 baseURL 覆盖到本地替身),并按 Ollama 待遇送 reasoning_effort——
-    // 代码里已不存在任何去 MLX 端点的路径。
+    // 就算請求裏還帶着退役的 mlx-community/* 模型 id,也只會落到 def 端點(Ollama,
+    // 這裏被 baseURL 覆蓋到本地替身),並按 Ollama 待遇送 reasoning_effort——
+    // 代碼裏已不存在任何去 MLX 端點的路徑。
     await chatComplete(req, { provider: "mac-llm", model: "mlx-community/Qwen3-14B-4bit", baseURL });
     await chatComplete(req, { provider: "mac-llm", model: "qwen3:8b", baseURL });
   } finally {
@@ -210,7 +210,7 @@ test("provider:mac-llm 带 Access headers(opts 优先,env 兜底),其它 provide
   const baseURL = `http://127.0.0.1:${server.address().port}`;
   const req = { kind: "chat", maxTokens: 10, system: [], messages: [{ role: "user", content: "hi" }] };
   try {
-    // opts.extraHeaders 优先。
+    // opts.extraHeaders 優先。
     await chatComplete(req, {
       provider: "mac-llm", model: "qwen3:8b", baseURL,
       extraHeaders: { "CF-Access-Client-Id": "id-opts", "CF-Access-Client-Secret": "sec-opts" },
@@ -219,7 +219,7 @@ test("provider:mac-llm 带 Access headers(opts 优先,env 兜底),其它 provide
     process.env.AI_MAC_LLM_ACCESS_CLIENT_ID = "id-env";
     process.env.AI_MAC_LLM_ACCESS_CLIENT_SECRET = "sec-env";
     await chatComplete(req, { provider: "mac-llm", model: "qwen3:8b", baseURL });
-    // 其它 provider 不带。
+    // 其它 provider 不帶。
     await chatComplete(req, { provider: "openrouter", apiKey: "t", model: "x", baseURL });
   } finally {
     delete process.env.AI_MAC_LLM_ACCESS_CLIENT_ID;

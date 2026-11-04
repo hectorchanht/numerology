@@ -41,18 +41,18 @@ export type {
 } from "./fortune.js";
 
 /**
- * 读依赖版本,仅作元信息展示。
- * 版本号由构建时脚本 scripts/gen-versions.mjs 注入 src/versions.generated.ts,
- * 运行时只做查表 —— Edge/Workers 没有 node:module(createRequire),不能在运行时
- * 读依赖的 package.json。查不到就降级为 "unknown",绝不影响确定性排盘本身。
+ * 讀依賴版本,僅作元信息展示。
+ * 版本號由構建時腳本 scripts/gen-versions.mjs 注入 src/versions.generated.ts,
+ * 運行時只做查表 —— Edge/Workers 沒有 node:module(createRequire),不能在運行時
+ * 讀依賴的 package.json。查不到就降級爲 "unknown",絕不影響確定性排盤本身。
  */
 function depVersion(name: string): string {
   return DEPENDENCY_VERSIONS[name] ?? "unknown";
 }
 
 /**
- * 一次排出同一出生信息的【八字 + 紫微】双盘,返回标准命盘 JSON。
- * 这是引擎对外的主入口。纯确定性,无网络、无 AI。
+ * 一次排出同一出生信息的【八字 + 紫微】雙盤,返回標準命盤 JSON。
+ * 這是引擎對外的主入口。純確定性,無網絡、無 AI。
  */
 export function castChart(input: BirthInput): ChartResult {
   validateBirthInput(input);

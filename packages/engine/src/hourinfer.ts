@@ -2,7 +2,7 @@ import { castBazi } from "./bazi.js";
 import { castZiwei } from "./ziwei.js";
 import type { BirthInput, Gender } from "./types.js";
 
-/** 时辰推断输入:只知年月日 + 性别(+ 可选经度),不知时辰。 */
+/** 時辰推斷輸入:只知年月日 + 性別(+ 可選經度),不知時辰。 */
 export interface HourInferInput {
   year: number;
   month: number;
@@ -11,7 +11,7 @@ export interface HourInferInput {
   longitude?: number;
 }
 
-/** 十二时辰的代表小时(取时段中点附近,避开交界)。 */
+/** 十二時辰的代表小時(取時段中點附近,避開交界)。 */
 const SHICHEN = [
   { zhi: "子", label: "子时", range: "23:00–01:00", hour: 0 },
   { zhi: "丑", label: "丑时", range: "01:00–03:00", hour: 2 },
@@ -27,31 +27,31 @@ const SHICHEN = [
   { zhi: "亥", label: "亥时", range: "21:00–23:00", hour: 22 },
 ] as const;
 
-/** 一个时辰候选命盘的区分特征(供 AI 比对反推)。 */
+/** 一個時辰候選命盤的區分特徵(供 AI 比對反推)。 */
 export interface HourCandidate {
   shichen: string;
   range: string;
-  /** 代表小时(用于采用此时辰后填表) */
+  /** 代表小時(用於採用此時辰後填表) */
   hour: number;
-  /** 八字时柱干支 + 天干十神(同一天仅时柱随时辰变) */
+  /** 八字時柱干支 + 天干十神(同一天僅時柱隨時辰變) */
   baziHour: { ganZhi: string; shiShenGan: string; shiShenZhi: string[] };
-  /** 紫微命宫地支 */
+  /** 紫微命宮地支 */
   soulBranch: string;
-  /** 命宫主星 */
+  /** 命宮主星 */
   soulMajorStars: string[];
   /** 五行局 */
   fiveElementsClass: string;
   soul: string;
   body: string;
-  /** 身宫所在宫名 */
+  /** 身宮所在宮名 */
   bodyPalaceName: string;
-  /** 命宫三方四正合看主星(定格局的依据) */
+  /** 命宮三方四正合看主星(定格局的依據) */
   sanFangStars: string[];
 }
 
 /**
- * 为同一天生成 12 个时辰的候选命盘区分特征。
- * 时辰主要改变紫微命宫(12 个时辰=12 套不同格局),八字仅时柱变。
+ * 爲同一天生成 12 個時辰的候選命盤區分特徵。
+ * 時辰主要改變紫微命宮(12 個時辰=12 套不同格局),八字僅時柱變。
  */
 export function castHourCandidates(input: HourInferInput): HourCandidate[] {
   return SHICHEN.map((s) => {

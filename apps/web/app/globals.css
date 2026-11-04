@@ -658,7 +658,7 @@ button.sec-h { min-height: 44px; margin: -8px 0; }
 .hist-main { flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: 12px; min-height: 72px; padding: 10px 8px 10px 16px; text-align: left; color: var(--label); }
 .hist-main:active { background: var(--card-2); }
 .hist .avatar { width: 44px; height: 44px; font-size: 18px; flex: none; }
-/* 文字欄攞晒剩餘闊度:舊版時間戳以 flex 兄弟身份(nowrap ~100px)+ avatar + 兩個 icon 掣
+/* 文字欄攞曬剩餘闊度:舊版時間戳以 flex 兄弟身份(nowrap ~100px)+ avatar + 兩個 icon 掣
    喺手機窄卡夾到文字欄剩返一兩隻字寬;而家時間戳搬入文字欄入面嘅 meta 行,唔再搶位。 */
 .hist .hist-text { flex: 1 1 auto; min-width: 0; }
 .hist .hist-name { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -782,7 +782,7 @@ h1.large + .seg { margin-bottom: 12px; }
 .yj-toss { min-height: 52px; }
 .yj-again { margin-top: 20px; }
 .yj-auto { display: block; margin: 12px auto 0; }
-/* 擲緊卦:爻位壓矮,手機一屏睇得晒錢盤 + 掣 + 六爻 */
+/* 擲緊卦:爻位壓矮,手機一屏睇得曬錢盤 + 掣 + 六爻 */
 .yj-stack.casting { gap: 2px; }
 .yj-stack.casting .yj-slot { min-height: 26px; }
 .yj-stack.casting .yj-bar { height: 10px; }

@@ -3,16 +3,16 @@
 import { createElement, useCallback, useEffect, useSyncExternalStore } from "react";
 import { LOCALE_SCRIPT, isScriptWarm, lockScript, subscribeScript, warmScriptFor } from "./script.js";
 
-/** 支持的界面语言:繁体(香港用语,默认)/简体/英文。 */
+/** 支持的界面語言:繁體(香港用語,默認)/簡體/英文。 */
 export type Locale = "zht" | "zhs" | "en";
 export const LOCALES: readonly Locale[] = ["zht", "zhs", "en"];
 export const DEFAULT_LOCALE: Locale = "zht";
 const LS_KEY = "numerology-locale";
 
 /**
- * 界面文案字典。zht 为默认语言(香港书面中文,非机械简繁转换);
- * zhs 沿用原有简体文案;en 为自然英文。
- * 占位符用 {name} 形式,由 fmt() 填充。
+ * 界面文案字典。zht 爲默認語言(香港書面中文,非機械簡繁轉換);
+ * zhs 沿用原有簡體文案;en 爲自然英文。
+ * 佔位符用 {name} 形式,由 fmt() 填充。
  */
 const zht = {
   "app.seal": "命",
@@ -639,7 +639,7 @@ const zht = {
 
 export type TKey = keyof typeof zht;
 
-/** 简体中文:沿用原有文案。 */
+/** 簡體中文:沿用原有文案。 */
 const zhs: Record<TKey, string> = {
   "app.seal": "命",
   "app.title": "洛 书 命 理",
@@ -1263,7 +1263,7 @@ const zhs: Record<TKey, string> = {
   "science.lookBody": "对照的体系越多、类别越少,「有几个体系说法一致」就越容易纯属巧合。以 k = 4、m = 5 为例,至少一个相同的概率已达 {p}。看到吻合时,先问基准率是多少。",
 };
 
-/** 英文:自然英文翻译。 */
+/** 英文:自然英文翻譯。 */
 const en: Record<TKey, string> = {
   "app.seal": "命",
   "app.title": "Luo Shu",
@@ -1907,7 +1907,7 @@ function readStored(): Locale {
   return DEFAULT_LOCALE;
 }
 
-/** 轻量外部 store:所有 useLocale() 实例共享同一语言,切换即全局重渲染。 */
+/** 輕量外部 store:所有 useLocale() 實例共享同一語言,切換即全局重渲染。 */
 let current: Locale = readStored();
 const listeners = new Set<() => void>();
 
@@ -1933,7 +1933,7 @@ function subscribe(fn: () => void): () => void {
   };
 }
 
-/** 当前语言 + 切换 + 翻译函数。默认繁体(zht);选择持久化到 localStorage。 */
+/** 當前語言 + 切換 + 翻譯函數。默認繁體(zht);選擇持久化到 localStorage。 */
 export function useLocale(): {
   locale: Locale;
   setLocale: (l: Locale) => void;
@@ -1981,7 +1981,7 @@ const SWITCH_LABELS: Record<Locale, string> = { zht: "繁", zhs: "简", en: "EN"
 /** `<html lang>` 跟隨界面語言。 */
 export const HTML_LANG: Record<Locale, string> = { zht: "zh-Hant", zhs: "zh-Hans", en: "en" };
 
-/** 三向语言切换器:繁 / 简 / EN(分段控件,放在设定页)。 */
+/** 三向語言切換器:繁 / 簡 / EN(分段控件,放在設定頁)。 */
 export function LocaleSwitch(): React.ReactElement {
   const { locale, setLocale: set } = useLocale();
   return createElement(

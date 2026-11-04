@@ -35,7 +35,7 @@ const SYSTEM = [
 ];
 const MSGS = [{ role: "user", content: "寫兩句。"}];
 
-// —— 语言指令被前置到 user 消息 ——
+// —— 語言指令被前置到 user 消息 ——
 test("workers-ai:语言指令前置到首条 user 消息,system 保留", async () => {
 const captured = {};
 const kv = memKv();
@@ -53,19 +53,19 @@ const final = await stream.finalMessage();
 assert.equal(final.text, "甲乙");
 assert.equal(final.neurons, 1.2);
 assert.deepEqual(got, ["甲", "乙"]);
-// 首条 user 消息以语言指令开头
+// 首條 user 消息以語言指令開頭
 const sentMsgs = captured.input.messages;
 assert.ok(sentMsgs[0].role === "system", "首条应为 system");
 assert.ok(sentMsgs[1].content.startsWith(""), "语言指令应前置到 user 消息");
 assert.ok(sentMsgs[1].content.includes("寫兩句。"));
-// system 块原样保留(含指令,双保险)
+// system 塊原樣保留(含指令,雙保險)
 assert.ok(sentMsgs[0].content.includes(""));
-// 预算已记账
+// 預算已記賬
 const total = Number(await kv.get(budgetMonthKey()));
 assert.equal(total, 1.2);
 });
 
-// —— 无 binding 时给明确报错 ——
+// —— 無 binding 時給明確報錯 ——
 test("workers-ai:无 binding 抛明确错误(含指引)", () => {
 assert.throws(
 () => chatStream({ kind: "chat", system: SYSTEM, messages: MSGS, maxTokens: 100}, { provider: "workers-ai"}),
@@ -84,7 +84,7 @@ assert.throws(
 );
 });
 
-// —— 超预算时不调用 binding,直接抛 ——
+// —— 超預算時不調用 binding,直接拋 ——
 test("workers-ai:超预算时拒绝且不调用模型", async () => {
 const kv = memKv({ [budgetMonthKey()]: String(BUDGET_NEURONS)});
 let called = false;
@@ -97,7 +97,7 @@ await assert.rejects(stream.finalMessage(), /AI_BUDGET_EXCEEDED/);
 assert.equal(called, false);
 });
 
-// —— 非流式 chatComplete 同样走预算 ——
+// —— 非流式 chatComplete 同樣走預算 ——
 test("workers-ai:chatComplete 返回文本并记账", async () => {
 const kv = memKv();
 const binding = {
@@ -116,7 +116,7 @@ assert.equal(r.usage.neurons, 0.8);
 assert.equal(Number(await kv.get(budgetMonthKey())), 0.8);
 });
 
-// —— v3:decode params 随请求传给 Workers AI ——
+// —— v3:decode params 隨請求傳給 Workers AI ——
 test("workers-ai:chatComplete 传入 decode baseline(temp 0.7/top_p 0.9/rep 1.1)", async () => {
 const captured = {};
 const binding = { run: async (model, input) => { captured.input = input; return { response: "好", usage: { neurons: 0.1}};}};

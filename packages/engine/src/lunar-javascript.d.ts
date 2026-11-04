@@ -1,6 +1,6 @@
 /**
- * lunar-javascript 不自带 TS 类型,这里只声明本引擎用到的方法(最小面)。
- * 完整 API 见 https://6tail.cn/calendar/api.html
+ * lunar-javascript 不自帶 TS 類型,這裏只聲明本引擎用到的方法(最小面)。
+ * 完整 API 見 https://6tail.cn/calendar/api.html
  */
 declare module "lunar-javascript" {
   export class Solar {
@@ -33,7 +33,7 @@ declare module "lunar-javascript" {
   }
 
   export class Lunar {
-    /** month 为负数表示闰月(如 -2 = 闰二月) */
+    /** month 爲負數表示閏月(如 -2 = 閏二月) */
     static fromYmd(year: number, month: number, day: number): Lunar;
     getSolar(): Solar;
     getEightChar(): EightChar;
@@ -41,13 +41,13 @@ declare module "lunar-javascript" {
     getMonthNineStar(): NineStar;
     toString(): string;
     getYearInGanZhi(): string;
-    /** 农历年/月/日数字(月为负=闰月) */
+    /** 農曆年/月/日數字(月爲負=閏月) */
     getYear(): number;
     getMonth(): number;
     getDay(): number;
-    /** 农历年地支,如 "辰" */
+    /** 農曆年地支,如 "辰" */
     getYearZhi(): string;
-    /** 生肖,如 "龙" */
+    /** 生肖,如 "龍" */
     getYearShengXiao(): string;
     /** 上一個節氣(如立春/驚蟄等,含節) */
     getPrevJieQi(): JieQi;

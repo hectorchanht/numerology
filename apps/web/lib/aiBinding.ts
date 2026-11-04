@@ -1,13 +1,13 @@
 import { getRequestContext } from "@cloudflare/next-on-pages";
 
 /**
- * 从 Cloudflare Pages 的 request context 取服务端 binding(仅服务端调用)。
+ * 從 Cloudflare Pages 的 request context 取服務端 binding(僅服務端調用)。
  *
  * - `AI`:Workers AI binding(Settings > Bindings 中添加)。
- * - `AI_BUDGET_KV`:用量预算 KV(Settings > Bindings 中添加)。
+ * - `AI_BUDGET_KV`:用量預算 KV(Settings > Bindings 中添加)。
  *
- * 在 Cloudflare 之外(本地 next dev) getRequestContext() 会抛错 → 返回 null,
- * 由 provider 层给出明确报错(提示配置 binding 或切换其它 provider)。
+ * 在 Cloudflare 之外(本地 next dev) getRequestContext() 會拋錯 → 返回 null,
+ * 由 provider 層給出明確報錯(提示配置 binding 或切換其它 provider)。
  */
 export interface ServerAiBindings {
   ai: unknown;
@@ -26,11 +26,11 @@ export function getServerAiBindings(): ServerAiBindings | null {
 }
 
 /**
- * Mac provider(mac-llm;旧名 mac-mlx 已正规化)的 Cloudflare Access
- * service token headers(仅服务端从 Pages env 读)。
- * 主路径:getRequestContext().env;兜底:部分 edge runtime 同步进 globalThis.process.env。
- * 非 Pages 环境或未配置时返回 undefined(保持旧行为)。
- * secret 绝不进日志、不进响应,只随服务端请求发往 ollama.hectorchan.com。
+ * Mac provider(mac-llm;舊名 mac-mlx 已正規化)的 Cloudflare Access
+ * service token headers(僅服務端從 Pages env 讀)。
+ * 主路徑:getRequestContext().env;兜底:部分 edge runtime 同步進 globalThis.process.env。
+ * 非 Pages 環境或未配置時返回 undefined(保持舊行爲)。
+ * secret 絕不進日誌、不進響應,只隨服務端請求發往 ollama.hectorchan.com。
  */
 export function getMacLlmAccessHeaders(): Record<string, string> | undefined {
   try {
@@ -56,8 +56,8 @@ export function getMacLlmAccessHeaders(): Record<string, string> | undefined {
 }
 
 /**
- * 取 Cloudflare 的 waitUntil(用于响应返回后继续做缓存写入等后台工作)。
- * 非 Cloudflare 环境(本地 next dev)返回 null。
+ * 取 Cloudflare 的 waitUntil(用於響應返回後繼續做緩存寫入等後臺工作)。
+ * 非 Cloudflare 環境(本地 next dev)返回 null。
  */
 export function getWaitUntil(): ((p: Promise<unknown>) => void) | null {
   try {

@@ -1,6 +1,6 @@
-// AUTO-GENERATED from data/qiongtong.json — 内联为 TS 模块,随 JS 一同打包,
-// 避免运行时 fs 读取(Vercel serverless / 浏览器 / 小程序 均不可靠)。
-// 若需更新数据,改 data/qiongtong.json 后重新生成本文件。
+// AUTO-GENERATED from data/qiongtong.json — 內聯爲 TS 模塊,隨 JS 一同打包,
+// 避免運行時 fs 讀取(Vercel serverless / 瀏覽器 / 小程序 均不可靠)。
+// 若需更新數據,改 data/qiongtong.json 後重新生成本文件。
 import type { TiaohouTable } from "./types.js";
 
 const QIONGTONG_TABLE = {

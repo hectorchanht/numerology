@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import http from "node:http";
 
-// —— 动态下架登记:404 即写入 KV,列表拉取时滤走,30 天后过期复活。
+// —— 動態下架登記:404 即寫入 KV,列表拉取時濾走,30 天后過期復活。
 
 function memKV() {
   const store = new Map();
@@ -24,10 +24,10 @@ test("deadModels:登记/读取/归一化(models/ 前缀)/TTL 过期", async () =
   assert.equal(typeof map.gemini["gemini-2.5-flash"], "number");
   assert.equal(map.openrouter["dead/model:free"] > 0, true);
   assert.equal(kv.store.has(DEAD_MODELS_KV_KEY), true);
-  // 未过期 → 在集合里;31 天后 → 过期复活。
+  // 未過期 → 在集合裏;31 天后 → 過期復活。
   assert.equal(deadModelIds(map, "gemini").has("gemini-2.5-flash"), true);
   assert.equal(deadModelIds(map, "gemini", Date.now() + 31 * 24 * 60 * 60 * 1000).size, 0);
-  // 无效 kv 绝不抛错。
+  // 無效 kv 絕不拋錯。
   await recordDeadModel(null, "gemini", "x");
   await recordDeadModel({}, "gemini", "x");
   assert.deepEqual(await readDeadModels(null), {});
@@ -61,7 +61,7 @@ test("deadModels:显式指定模型 404 → 抛真实错误且已登记;默认�
   const port = server.address().port;
   const baseURL = `http://127.0.0.1:${port}`;
   try {
-    // 显式指定 → 抛错且登记。
+    // 顯式指定 → 拋錯且登記。
     const kv1 = memKV();
     await assert.rejects(
       chatComplete(
@@ -72,7 +72,7 @@ test("deadModels:显式指定模型 404 → 抛真实错误且已登记;默认�
     );
     const m1 = JSON.parse(kv1.store.get(DEAD_MODELS_KV_KEY));
     assert.equal(typeof m1.openrouter[DEAD], "number");
-    // 默认模型下架(非显式) → 回落成功且登记:用 openrouter 自身默认模型作 dead。
+    // 默認模型下架(非顯式) → 回落成功且登記:用 openrouter 自身默認模型作 dead。
     const kv2 = memKV();
     const res = await chatComplete(
       { kind: "chat", maxTokens: 10, system: [], messages: [{ role: "user", content: "hi" }] },

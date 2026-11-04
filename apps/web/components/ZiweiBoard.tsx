@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { ZiweiChart, ZiweiPalace, ZiweiStar } from "@numerology/engine";
 import { useLocale, useScript, type TKey } from "@/lib/i18n";
 
-/** 地支 → 传统紫微盘 4×4 网格坐标 [row, col]。 */
+/** 地支 → 傳統紫微盤 4×4 網格座標 [row, col]。 */
 const GRID: Record<string, [number, number]> = {
   巳: [1, 1], 午: [1, 2], 未: [1, 3], 申: [1, 4],
   辰: [2, 1], 酉: [2, 4],
@@ -14,7 +14,7 @@ const GRID: Record<string, [number, number]> = {
 
 const RING = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
 
-/** 某地支的三方四正地支集合(本宫 + 对宫 + 两三合)。 */
+/** 某地支的三方四正地支集合(本宮 + 對宮 + 兩三合)。 */
 function sanFangBranches(branch: string): { self: string; opposite: string; trine: string[] } {
   const i = RING.indexOf(branch);
   return {

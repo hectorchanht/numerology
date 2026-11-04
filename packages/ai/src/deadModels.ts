@@ -1,24 +1,24 @@
 /**
- * 动态下架模型登记:生成时撞到 404(模型不存在/已下架)即写入 KV,
- * 模型列表拉取时自动滤走 —— 不靠人手维护 hardcode 表。
+ * 動態下架模型登記:生成時撞到 404(模型不存在/已下架)即寫入 KV,
+ * 模型列表拉取時自動濾走 —— 不靠人手維護 hardcode 表。
  *
- * 存储:单条 KV(JSON),按 provider 分组,值为首次探到 404 的时间戳。
- * TTL 30 天:过期条目自动复活(模型有可能重新上架,复活后若再 404 会重新登记)。
- * hardcode 的 RETIRED_MODEL_IDS(web 侧 providerMeta)仍保留作 seed,两者取并集过滤。
+ * 存儲:單條 KV(JSON),按 provider 分組,值爲首次探到 404 的時間戳。
+ * TTL 30 天:過期條目自動復活(模型有可能重新上架,復活後若再 404 會重新登記)。
+ * hardcode 的 RETIRED_MODEL_IDS(web 側 providerMeta)仍保留作 seed,兩者取並集過濾。
  */
 
 import type { BudgetKV } from "./budget.js";
 
-/** KV 中登记表的 key。 */
+/** KV 中登記表的 key。 */
 export const DEAD_MODELS_KV_KEY = "ai-dead-models:v1";
-/** 登记有效期:30 天。 */
+/** 登記有效期:30 天。 */
 export const DEAD_MODELS_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 export interface DeadModelMap {
   [provider: string]: { [model: string]: number };
 }
 
-/** 归一化模型 id:与 web 侧 normModelId 一致,剥掉 Gemini 的 `models/` 前缀。 */
+/** 歸一化模型 id:與 web 側 normModelId 一致,剝掉 Gemini 的 `models/` 前綴。 */
 export function normDeadModelId(id: string): string {
   return id.startsWith("models/") ? id.slice("models/".length) : id;
 }
@@ -43,8 +43,8 @@ async function readMap(kv: BudgetKV): Promise<DeadModelMap> {
 }
 
 /**
- * 登记一个下架模型。绝不抛错 —— 登记失败不能掩盖调用方真正的生成错误,
- * 调用方仍需照常抛/回落。
+ * 登記一個下架模型。絕不拋錯 —— 登記失敗不能掩蓋調用方真正的生成錯誤,
+ * 調用方仍需照常拋/回落。
  */
 export async function recordDeadModel(
   kv: unknown,
@@ -58,17 +58,17 @@ export async function recordDeadModel(
     group[normDeadModelId(modelId)] = Date.now();
     await kv.put(DEAD_MODELS_KV_KEY, JSON.stringify(map));
   } catch {
-    /* ignore:登记是 best-effort */
+    /* ignore:登記是 best-effort */
   }
 }
 
-/** 读出登记表(供模型列表过滤用);kv 缺失或损坏时返回空表。 */
+/** 讀出登記表(供模型列表過濾用);kv 缺失或損壞時返回空表。 */
 export async function readDeadModels(kv: unknown): Promise<DeadModelMap> {
   if (!validKVRead(kv)) return {};
   return readMap(kv);
 }
 
-/** 某 provider 下仍在有效期内的下架模型 id 集合(已归一化)。 */
+/** 某 provider 下仍在有效期內的下架模型 id 集合(已歸一化)。 */
 export function deadModelIds(
   map: DeadModelMap,
   provider: string,

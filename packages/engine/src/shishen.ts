@@ -7,15 +7,15 @@ const WUXING: Record<Tiangan, WuXing> = {
   己: "土", 庚: "金", 辛: "金", 壬: "水", 癸: "水",
 };
 
-/** 阳=true,阴=false */
+/** 陽=true,陰=false */
 const IS_YANG: Record<Tiangan, boolean> = {
   甲: true, 乙: false, 丙: true, 丁: false, 戊: true,
   己: false, 庚: true, 辛: false, 壬: true, 癸: false,
 };
 
-/** 五行相生:键 生 值 */
+/** 五行相生:鍵 生 值 */
 const SHENG: Record<WuXing, WuXing> = { 木: "火", 火: "土", 土: "金", 金: "水", 水: "木" };
-/** 五行相克:键 克 值 */
+/** 五行相剋:鍵 克 值 */
 const KE: Record<WuXing, WuXing> = { 木: "土", 土: "水", 水: "火", 火: "金", 金: "木" };
 
 export type ShiShen =
@@ -23,7 +23,7 @@ export type ShiShen =
   | "正财" | "七杀" | "正官" | "偏印" | "正印";
 
 /**
- * 计算某天干相对日主的十神。确定性,基于五行生克 + 阴阳同异。
+ * 計算某天干相對日主的十神。確定性,基於五行生剋 + 陰陽同異。
  * @example shiShen("庚", "丁") => "正官"
  */
 export function shiShen(dayGan: Tiangan, otherGan: Tiangan): ShiShen {
@@ -44,14 +44,14 @@ export function shiShenOf(dayGan: string, otherGan: string): ShiShen | undefined
   return shiShen(dayGan, otherGan);
 }
 
-/** 十二地支藏干(本气在前)。标准表,与 lunar-javascript 输出一致。 */
+/** 十二地支藏干(本氣在前)。標準表,與 lunar-javascript 輸出一致。 */
 const HIDE_GAN: Record<string, Tiangan[]> = {
   子: ["癸"], 丑: ["己", "癸", "辛"], 寅: ["甲", "丙", "戊"], 卯: ["乙"],
   辰: ["戊", "乙", "癸"], 巳: ["丙", "庚", "戊"], 午: ["丁", "己"], 未: ["己", "丁", "乙"],
   申: ["庚", "壬", "戊"], 酉: ["辛"], 戌: ["戊", "辛", "丁"], 亥: ["壬", "甲"],
 };
 
-/** 取地支藏干。未知地支返回空数组。 */
+/** 取地支藏干。未知地支返回空數組。 */
 export function dizhiHideGan(zhi: string): Tiangan[] {
   return HIDE_GAN[zhi] ? [...HIDE_GAN[zhi]] : [];
 }

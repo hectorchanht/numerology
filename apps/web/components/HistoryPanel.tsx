@@ -61,8 +61,8 @@ const LENS_KEYS: Record<string, TKey> = {
 };
 
 /**
- * 历史记录:搜尋 + 列表,点击即恢复命盘 + 已生成的章节(零 API 调用)。
- * 记录只存在本机 IndexedDB,不上传。
+ * 歷史記錄:搜尋 + 列表,點擊即恢復命盤 + 已生成的章節(零 API 調用)。
+ * 記錄只存在本機 IndexedDB,不上傳。
  */
 export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void }) {
   const { t } = useLocale();

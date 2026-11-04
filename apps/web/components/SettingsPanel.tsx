@@ -49,8 +49,8 @@ export function SettingsPanel() {
     };
   }, []);
 
-  // 顶部 filter 同时是模型 filter:免费/付费作用于模型下拉;推荐只留实测可用的高性价比模型。
-  // 推荐模型置顶:长列表里好用的先看到,其余原序在后(不移除任何选项,不触发自动切换)。
+  // 頂部 filter 同時是模型 filter:免費/付費作用於模型下拉;推薦只留實測可用的高性價比模型。
+  // 推薦模型置頂:長列表裏好用的先看到,其餘原序在後(不移除任何選項,不觸發自動切換)。
   const visibleModels = useMemo(
     () =>
       [...filterModels(models, filter, value.provider)].sort(
@@ -61,7 +61,7 @@ export function SettingsPanel() {
     [models, filter, value.provider],
   );
 
-  // 当前选中的 model 若被 filter 滤掉(或已不在列表中) → 自动切到第一个可见。
+  // 當前選中的 model 若被 filter 濾掉(或已不在列表中) → 自動切到第一個可見。
   // 注意:SettingsPanel 成日 mount 住,reload 時 value 先由 DEFAULT_AI 載入真值,
   // models 有一 render 仲係舊 provider 嘅表——唔對齊就唔好判斷,否則會誤殺
   // 用戶啱啱經 pills 揀好嘅 model(先錯切去舊 provider 首個,再錯切去新 provider 首個)。
@@ -74,15 +74,15 @@ export function SettingsPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleModels, value.provider, modelsProvider]);
 
-  // 模型列表:缓存 → /api/models 动态拉取 → 静态备选。
-  // Mac provider 缓存 TTL 只有 60s,且即使有缓存都 background revalidate(SWR),保持即时。
+  // 模型列表:緩存 → /api/models 動態拉取 → 靜態備選。
+  // Mac provider 緩存 TTL 只有 60s,且即使有緩存都 background revalidate(SWR),保持即時。
   useEffect(() => {
     const provider = value.provider;
     const statics = staticModelEntries(STATIC_MODELS[provider] ?? []);
     const cached = readModelsCache(provider);
     const isMac = isMacProvider(provider);
     if (cached && cached.models.length > 0) {
-      // 旧缓存可能含已下架模型,读出即过滤(下次拉取后缓存自然干净)。
+      // 舊緩存可能含已下架模型,讀出即過濾(下次拉取後緩存自然乾淨)。
       setModels(filterRetired(cached.models));
       setModelsSource(cached.source);
       setModelsProvider(provider);
@@ -96,7 +96,7 @@ export function SettingsPanel() {
     (async () => {
       try {
         const headers: Record<string, string> = {};
-        // 取当前 provider 名下的 key(没填 → 不带头,不拿别的 provider 的 key 顶替)。
+        // 取當前 provider 名下的 key(沒填 → 不帶頭,不拿別的 provider 的 key 頂替)。
         const k = (value.keys[value.provider] ?? "").trim();
         if (k) headers["X-AI-Key"] = k;
         const res = await fetch(`/api/models?provider=${encodeURIComponent(provider)}`, {
@@ -118,7 +118,7 @@ export function SettingsPanel() {
         setModelsProvider(provider);
         writeModelsCache(provider, data.models, src === "offline" ? "static" : src);
       } catch {
-        /* 保持静态备选 */
+        /* 保持靜態備選 */
       }
     })();
     return () => {
@@ -141,7 +141,7 @@ export function SettingsPanel() {
   function selectFilter(f: ProviderFilter) {
     setFilter(f);
     const visible = filterProviders(f);
-    // filter 后当前 provider 不可见 → 自动选中第一个可见的(保持 tab 恒有一选中)。
+    // filter 後當前 provider 不可見 → 自動選中第一個可見的(保持 tab 恆有一選中)。
     if (!visible.some((p) => p.name === value.provider) && visible.length > 0) {
       selectProvider(visible[0]!.name);
     }
@@ -185,7 +185,7 @@ export function SettingsPanel() {
         ))}
       </div>
 
-      {/* provider tabs:只显示短名 */}
+      {/* provider tabs:只顯示短名 */}
       <div className="strip" role="group" aria-label={t("settings.provider")} style={{ marginTop: 8 }}>
         {visible.map((p) => (
           <button
@@ -200,7 +200,7 @@ export function SettingsPanel() {
         ))}
       </div>
 
-      {/* 属性面板:选中 provider 的结构化属性 + key + 模型 */}
+      {/* 屬性面板:選中 provider 的結構化屬性 + key + 模型 */}
       <div className="list prov-card">
         <div className="row plain">
           <span className="lbl">{t("settings.apiKey")}</span>
@@ -222,7 +222,7 @@ export function SettingsPanel() {
               autoComplete="off"
               placeholder={t("settings.apiKeyPh")}
               aria-label={t("settings.apiKey")}
-              // 每个 provider 各记各的 key;没填过 → 显示为空,绝不显示别的 provider 的 key。
+              // 每個 provider 各記各的 key;沒填過 → 顯示爲空,絕不顯示別的 provider 的 key。
               value={value.keys[value.provider] ?? ""}
               onChange={(e) => set({ keys: { ...value.keys, [value.provider]: e.target.value } })}
             />
@@ -279,7 +279,7 @@ export function SettingsPanel() {
       </div>
       <p className="note">{t(meta.noteKey)}</p>
 
-      {/* 自定义 AI 人设 / 系统提示:空 = 用默认;非空则追加为 system 末块,优先级最高 */}
+      {/* 自定義 AI 人設 / 系統提示:空 = 用默認;非空則追加爲 system 末塊,優先級最高 */}
       <div className="group-head">
         <h2 className="group-title"><label htmlFor="persona">{t("settings.personaLabel")}</label></h2>
         <button type="button" className="text-btn" onClick={() => set({ systemPrompt: "" })}>

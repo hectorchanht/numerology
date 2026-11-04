@@ -4,7 +4,7 @@ import { lockScript } from "./script.js";
 
 /**
  * 命盤海報(/poster)的純邏輯層(無 DOM、可測試):
- * 1. 術語跟語言:引擎 / iztro 一律輸出簡體(七杀、命宫…),呢度經 lockScript 按 locale 轉返。
+ * 1. 術語跟語言:引擎 / iztro 一律輸出簡體(七殺、命宮…),呢度經 lockScript 按 locale 轉返。
  * 2. 海報資料模型:畫面同導出 PNG 共用同一份 model,保證兩邊字眼一致。
  * 3. Canvas 版面:layoutPoster 只計座標、出繪圖指令;paintPoster 先至落 ctx。
  * 生辰私隱:導出用 includeBirth:false,model 根本冇生辰字串,畫布無從洩漏。

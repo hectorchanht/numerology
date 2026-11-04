@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { STRINGS, DEFAULT_LOCALE, LOCALES, fmt, setLocale } from "../test-dist/i18n.js";
 
-// —— 默认语言为繁体 ——
+// —— 默認語言爲繁體 ——
 test("i18n:默认语言为 zht,三种语言齐备", () => {
   assert.equal(DEFAULT_LOCALE, "zht");
   assert.deepEqual([...LOCALES].sort(), ["en", "zhs", "zht"]);
@@ -39,7 +39,7 @@ test("i18n:fmt 填充 {name} 占位符,缺失保留原样", () => {
   assert.equal(fmt("a {x} b", {}), "a {x} b");
 });
 
-// —— setLocale 在 node 环境不抛错(无 window) ——
+// —— setLocale 在 node 環境不拋錯(無 window) ——
 test("i18n:setLocale 无浏览器环境不抛错", () => {
   assert.doesNotThrow(() => setLocale("en"));
   setLocale("zht");

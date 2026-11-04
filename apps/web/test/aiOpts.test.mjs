@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { primeTimeoutMs } from "../test-dist/primeTimeout.js";
 
-// —— workers-ai 冷启动首 token 可能 >20s,预热放宽到 60s ——
+// —— workers-ai 冷啓動首 token 可能 >20s,預熱放寬到 60s ——
 test("primeTimeoutMs:workers-ai 放宽到 60s,默认/显式都生效", () => {
   assert.equal(primeTimeoutMs(undefined), 60_000);
   assert.equal(primeTimeoutMs({}), 60_000);

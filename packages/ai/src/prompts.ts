@@ -1,11 +1,11 @@
-/** AI 输出语言(与界面语言开关对应)。默认繁体(zht)。 */
+/** AI 輸出語言(與界面語言開關對應)。默認繁體(zht)。 */
 export type AiLocale = "zht" | "zhs" | "en";
 
 import type { FortuneAnalysis } from "@numerology/engine";
 
 /**
- * 输出语言指令 —— 追加到 system 末尾,不碰命盘事实块(干支/星曜名三地皆同)。
- * 放在最后一条 system block,Anthropic 的 prompt cache 前缀(人设 + 命盘)不受影响。
+ * 輸出語言指令 —— 追加到 system 末尾,不碰命盤事實塊(干支/星曜名三地皆同)。
+ * 放在最後一條 system block,Anthropic 的 prompt cache 前綴(人設 + 命盤)不受影響。
  */
 export function localeDirective(locale: AiLocale): string {
   if (locale === "zhs")
@@ -16,9 +16,9 @@ export function localeDirective(locale: AiLocale): string {
 }
 
 /**
- * 各报告章节标题的三地对照(key → locale → 标题)。
- * 模型会把 prompt 里的小标题逐字照抄进输出,故标题必须与输出语言一致,
- * 否则会出现"正文繁体、标题简体"的错位。
+ * 各報告章節標題的三地對照(key → locale → 標題)。
+ * 模型會把 prompt 裏的小標題逐字照抄進輸出,故標題必須與輸出語言一致,
+ * 否則會出現"正文繁體、標題簡體"的錯位。
  */
 export const SEGMENT_TITLES: Record<string, Record<AiLocale, string>> = {
   personality: { zht: "性格特質", zhs: "性格特质", en: "Personality Traits" },
@@ -37,13 +37,13 @@ export const SEGMENT_TITLES: Record<string, Record<AiLocale, string>> = {
   action: { zht: "六、行動建議", zhs: "六、行动建议", en: "6. Actionable Advice" },
 };
 
-/** 取某章节在指定语言下的标题(缺失时回落简体,再缺失回落 key 本身)。 */
+/** 取某章節在指定語言下的標題(缺失時回落簡體,再缺失回落 key 本身)。 */
 export function segmentTitle(key: string, locale: AiLocale): string {
   return SEGMENT_TITLES[key]?.[locale] ?? SEGMENT_TITLES[key]?.zhs ?? key;
 }
 
-/** 解读师人设 v3 (2026-10-23 research-backed):精简 ~50%,禁令改写为正面指令。
- * 研究结论:长禁令列表在小模型上适得其反(Pink Elephant 效应);只保留真正的 exclusion。 */
+/** 解讀師人設 v3 (2026-10-23 research-backed):精簡 ~50%,禁令改寫爲正面指令。
+ * 研究結論:長禁令列表在小模型上適得其反(Pink Elephant 效應);只保留真正的 exclusion。 */
 export const SYSTEM_PERSONA = `你是一位多體系命理解讀師:以【八字四柱】与【紫微斗数】为主,兼及九星、生命靈數、行星幻方等體系的交叉對照,说话直接、有料,文风通俗简练。九星、生命靈數、行星幻方等只在隨附「多體系事實」區塊時才對照;沒有該區塊時一律不提、不自行推算,因為這些數須由本站引擎計算。
 
 【动静结合,运为主导】命盘格局是"静"(先天的牌),大运流年是"动"(后天的局),运在一生中占主导:结论必须落到"哪步运、哪些年",而非只看静态命盘下断语。
@@ -64,7 +64,7 @@ export const SYSTEM_PERSONA = `你是一位多體系命理解讀師:以【八字
 - 不制造恐惧、不讲宿命:666、化忌、凶星等,以中性语气说明它在原体系中的本义;不预言死亡、疾病、灾祸,不推销开运物品。
 - 各体系平等:每个体系按其自身框架陈述,不把任何文明置于最高;起源地与年代以随附事实为准,未附则不写。`;
 
-/** 时辰推断师人设:据已知人生事实,比对当日 12 时辰命盘,反推最可能时辰。 */
+/** 時辰推斷師人設:據已知人生事實,比對當日 12 時辰命盤,反推最可能時辰。 */
 export const HOUR_INFER_PERSONA = `你是一位时辰推断师。用户只知道出生的年月日,不知道具体出生时辰。你的任务:通过询问用户【已知的人生事实】,比对该日 12 个时辰各自的命盘格局,推断最可能的出生时辰。
 
 重要原则:
@@ -75,7 +75,7 @@ export const HOUR_INFER_PERSONA = `你是一位时辰推断师。用户只知道
 5. 【收敛】证据较充分时直接给结论:【最可能时辰】+ 置信度(高/中/低)+ 1-2 个备选 + 推断依据;并提示"若认可,可点下方对应时辰按钮采用,生成完整命盘"。证据不足时继续提问、不硬凑;但一旦能判断就明确说,不要模棱两可地把所有时辰都说成"有可能"。
 6. 口吻专业、直接、像聊天,真实为先,不必刻意迎合。`;
 
-/** 报告章节定义。 */
+/** 報告章節定義。 */
 export const REPORT_SECTIONS = [
   { key: "personality", title: "性格特质", brief: "结合日主与命宫主星,刻画核心性格、思维方式与行为模式" },
   { key: "career", title: "事业方向", brief: "适合的领域与发展路径(稳定受薪 vs 开创型),官禄宫与十神并看" },
@@ -92,10 +92,10 @@ export const REPORT_SECTIONS = [
 
 export type ReportSectionKey = (typeof REPORT_SECTIONS)[number]["key"];
 
-/** 整篇模式(CLI 兼容)的 TL;DR 规则;标记与分段模式同为 TLDR_MARKER。 */
+/** 整篇模式(CLI 兼容)的 TL;DR 規則;標記與分段模式同爲 TLDR_MARKER。 */
 const WHOLE_TLDR_RULE = `【每节开头 TL;DR】每个「## 」小标题之后第一行写「TL;DR:<1–3 句一针见血的结论>」(标记原样照抄、不翻译),空一行再写正文。`;
 
-/** 组装报告的用户指令。locale 决定章节标题的语言(正文语言由 localeDirective 指令模型)。 */
+/** 組裝報告的用戶指令。locale 決定章節標題的語言(正文語言由 localeDirective 指令模型)。 */
 export function buildReportUserPrompt(caveats: string[], locale: AiLocale = "zht"): string {
   const sections = REPORT_SECTIONS.map((s, i) => `${i + 1}. ${segmentTitle(s.key, locale)}:${s.brief}`).join("\n");
   const caveatBlock = caveats.length
@@ -121,13 +121,13 @@ ${SELF_CHECK}${caveatBlock}`;
 }
 
 /**
- * 小标题清单(原样照抄用)。
- * 实测教训(2026-10-22 live):只给"格式模板 + 逐字照抄"不够——模型会照着模板的
- * 形状填占位符,输出 `### 甲寅運（–歲／–年）`(en dash 占位,连禁例都换了符号绕过)。
- * 解法是把本节每个小标题的**成品行**直接列出来,让模型逐行复制,不做任何格式转换。
- * 干支/星曜名在 en 下也保留汉字(与 localeDirective 的专有名词规则一致)。
+ * 小標題清單(原樣照抄用)。
+ * 實測教訓(2026-10-22 live):只給"格式模板 + 逐字照抄"不夠——模型會照着模板的
+ * 形狀填佔位符,輸出 `### 甲寅運（–歲／–年）`(en dash 佔位,連禁例都換了符號繞過)。
+ * 解法是把本節每個小標題的**成品行**直接列出來,讓模型逐行復制,不做任何格式轉換。
+ * 干支/星曜名在 en 下也保留漢字(與 localeDirective 的專有名詞規則一致)。
  */
-/** 大运小标题成品行(与【小标题清单】同源,供 prompt 与服务端后处理共用)。 */
+/** 大運小標題成品行(與【小標題清單】同源,供 prompt 與服務端後處理共用)。 */
 export function dayunHeadingLine(
   d: { ganZhi: string; startAge: number; endAge: number; startYear: number; endYear: number },
   locale: AiLocale,
@@ -139,7 +139,7 @@ export function dayunHeadingLine(
   return `### ${d.ganZhi}${yun}（${d.startAge}–${d.endAge}${sui}／${d.startYear}–${d.endYear}年）`;
 }
 
-/** 流年小标题成品行(与【小标题清单】同源,供 prompt 与服务端后处理共用)。 */
+/** 流年小標題成品行(與【小標題清單】同源,供 prompt 與服務端後處理共用)。 */
 export function liuNianHeadingLine(y: { year: number; ganZhi: string; age: number }, locale: AiLocale): string {
   if (locale === "en") return `### ${y.year} (${y.ganZhi}, age ${y.age})`;
   const sui = locale === "zhs" ? "岁" : "歲";
@@ -147,18 +147,18 @@ export function liuNianHeadingLine(y: { year: number; ganZhi: string; age: numbe
 }
 
 /**
- * 确定性后处理 v2:把模型写残的小标题逐行修复为标准成品行,形状无关。
- * 背景(2026-10-22 live 实证):弱模型(mistral-small)即使 prompt 里给了逐行照抄的
- * 清单,仍会输出 `### 癸未運（–歲／–年）` 这类占位符——纯 prompt 手段不可靠,
- * 必须服务端兜底。2026-10-23 新形状:`- 歲（-）：己巳運`(破折号前缀 + 占位 + 冒号 +
- * 干支運结尾),故 v2 不再限定 `###` 前缀,改为"干支+運锚定 + 标题感"判定。
+ * 確定性後處理 v2:把模型寫殘的小標題逐行修復爲標準成品行,形狀無關。
+ * 背景(2026-10-22 live 實證):弱模型(mistral-small)即使 prompt 裏給了逐行照抄的
+ * 清單,仍會輸出 `### 癸未運（–歲／–年）` 這類佔位符——純 prompt 手段不可靠,
+ * 必須服務端兜底。2026-10-23 新形狀:`- 歲（-）：己巳運`(破折號前綴 + 佔位 + 冒號 +
+ * 干支運結尾),故 v2 不再限定 `###` 前綴,改爲"干支+運錨定 + 標題感"判定。
  *
- * 判定某行是"<干支>運"小标题:干支+運出现在行首(md 前缀后)或短行行尾,或行内有
- * 占位符痕迹;且行内没有该步正确的起始年份数字(有正确年份 = 已写对,不动)。
- * 正文里顺带提到"這步己巳運…"的行(干支運在行中、后有正文、无占位符)不会被误伤。
+ * 判定某行是"<干支>運"小標題:干支+運出現在行首(md 前綴後)或短行行尾,或行內有
+ * 佔位符痕跡;且行內沒有該步正確的起始年份數字(有正確年份 = 已寫對,不動)。
+ * 正文裏順帶提到"這步己巳運…"的行(干支運在行中、後有正文、無佔位符)不會被誤傷。
  */
 const GZ_RE = "[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]";
-/** 占位符痕迹:短横/破折号配歲、空括号、ages 占位等 */
+/** 佔位符痕跡:短橫/破折號配歲、空括號、ages 佔位等 */
 const PLACEHOLDER_RE = /[-–—]\s*[歲岁]|[歲岁][（(]\s*[-–—]\s*[)）]|[(（]\s*[-–—]\s*[)）]\s*[：:]|ages?\s*[-–—(\[]/i;
 
 interface StepDecadal {
@@ -166,7 +166,7 @@ interface StepDecadal {
   palace: string;
 }
 
-/** 从行首(md 前缀后)或行尾(短行)抓"<干支>運";行内占位符形状也抓(限短行)。 */
+/** 從行首(md 前綴後)或行尾(短行)抓"<干支>運";行內佔位符形狀也抓(限短行)。 */
 function dayunGanzhiInLine(line: string): string | null {
   const t = line.trim();
   let m = t.match(new RegExp(`^[\\s#>*\\-–—\\d.)\\]\\*]{0,12}(${GZ_RE})(?:[運运]|\\s+Luck Period)`));
@@ -182,7 +182,7 @@ function dayunGanzhiInLine(line: string): string | null {
   return null;
 }
 
-/** 有状态的行级修复器:小标题形状无关修复 + 紫微大限"無"/错配修复。 */
+/** 有狀態的行級修復器:小標題形狀無關修復 + 紫微大限"無"/錯配修復。 */
 export function makeFortuneLineFixer(
   fortune: FortuneAnalysis,
   locale: AiLocale,
@@ -209,7 +209,7 @@ export function makeFortuneLineFixer(
   for (const y of fortune.bazi.liuNian) {
     if (!yearByGanzhi.has(y.ganZhi)) yearByGanzhi.set(y.ganZhi, liuNianHeadingLine(y, locale));
   }
-  // 每年所属大运步的同期大限(回看/未来节里"紫微大限:無"用它修复,而非当前大限)
+  // 每年所屬大運步的同期大限(回看/未來節裏"紫微大限:無"用它修復,而非當前大限)
   const decadalByYear = new Map<number, StepDecadal>();
   for (const y of fortune.bazi.liuNian) {
     const d = fortune.bazi.daYun.find((s) => s.startYear <= y.year && y.year <= s.endYear);
@@ -218,13 +218,13 @@ export function makeFortuneLineFixer(
       decadalByYear.set(y.year, { ganzhi: dec.heavenlyStem + dec.earthlyBranch, palace: dec.palaceName ?? "" });
     }
   }
-  // 总览节等:紫微大限:無 → 当前大限;进入某步大运后切换为该步同期大限。
+  // 總覽節等:紫微大限:無 → 當前大限;進入某步大運後切換爲該步同期大限。
   const cur = fortune.ziwei?.decadal;
   let current: StepDecadal | null =
     cur && cur.heavenlyStem && cur.earthlyBranch
       ? { ganzhi: cur.heavenlyStem + cur.earthlyBranch, palace: cur.palaceName ?? "" }
       : null;
-  /** 是否已见过大运/流年小标题:首个 ##(总览标题)不重置,之后的 ## 才暂停大限修复 */
+  /** 是否已見過大運/流年小標題:首個 ##(總覽標題)不重置,之後的 ## 才暫停大限修復 */
   let seenStep = false;
 
   const decadalNoneRe = /紫微大限\s*[：:]\s*(?:無|无|没有|未提供|暂无|[—–\-])\s*(?=$|[。，,；;、\s])/;
@@ -232,7 +232,7 @@ export function makeFortuneLineFixer(
   const gzRe = new RegExp(`(${GZ_RE})`);
 
   return (line: string): string => {
-    // 1) 大运小标题
+    // 1) 大運小標題
     const gz = dayunGanzhiInLine(line);
     if (gz) {
       const step = dayun.get(gz);
@@ -243,7 +243,7 @@ export function makeFortuneLineFixer(
         return line;
       }
     }
-    // 2) 流年小标题(不含運)
+    // 2) 流年小標題(不含運)
     const t = line.trim();
     if (!/[運运]/.test(t)) {
       const yrm = t.match(/(\d{4})/);
@@ -263,12 +263,12 @@ export function makeFortuneLineFixer(
           return fixed;
         }
         if (fixed && alreadyRight) {
-          // 已写对的流年标题:仍切换到该年所属大限,供后文"紫微大限:無"修复用
+          // 已寫對的流年標題:仍切換到該年所屬大限,供後文"紫微大限:無"修復用
           current = decadalByYear.get(Number(yrm[1]!)) ?? current;
           seenStep = true;
         }
       } else if (gm && (/年/.test(t) || /age/i.test(t))) {
-        // 无年份数字:年（辛丑年） / 年 丙午（歲）
+        // 無年份數字:年（辛丑年） / 年 丙午（歲）
         const fixed = yearByGanzhi.get(gm[1]!);
         if (fixed && (t.length <= 28 || /^#{1,4}\s/.test(t))) {
           const yr = [...liuNianByYear.entries()].find(([, e]) => e.ganZhi === gm[1]!)?.[0];
@@ -278,11 +278,11 @@ export function makeFortuneLineFixer(
         }
       }
     }
-    // 3) 大章节标题(## ):首个(总览)不重置,之后暂停大限修复(由小标题重新驱动)
+    // 3) 大章節標題(## ):首個(總覽)不重置,之後暫停大限修復(由小標題重新驅動)
     if (/^##(?!#)/.test(t)) {
       if (seenStep) current = null;
     }
-    // 4) 紫微大限:無 / 干支错配 → 确定性替换(保守:短行才做错配替换)
+    // 4) 紫微大限:無 / 干支錯配 → 確定性替換(保守:短行才做錯配替換)
     if (current) {
       if (decadalNoneRe.test(line)) {
         return line.replace(decadalNoneRe, `紫微大限：${current.ganzhi}（行${current.palace}）`);
@@ -305,7 +305,7 @@ export function fixFortuneHeadings(markdown: string, fortune: FortuneAnalysis, l
 }
 
 /**
- * 数字铁律。数字绝不自己推算;小标题从【小标题清单】照抄是唯一解法。
+ * 數字鐵律。數字絕不自己推算;小標題從【小標題清單】照抄是唯一解法。
  */
 const FORTUNE_NUMBERS_RULE = `【数字铁律·小标题原样照抄】
 - 下面【小标题清单】给出了本节每个小标题的**标准成品行**——输出时逐行**原样照抄,一字不改**,不做任何格式转换。
@@ -313,10 +313,10 @@ const FORTUNE_NUMBERS_RULE = `【数字铁律·小标题原样照抄】
 - 正文中提到某运/某年时,同样带上岁数与年份(如"1995–2004 这步运"),不写"这步运""那一年"这类无数字指代。`;
 
 /**
- * 通用输出纪律:结论先行,证据收纳。
- * 适用于所有 AI 章节(命盘报告/大运流年)与对话。
- * 【定性】【分析】【依据】三标记三地语言共用同一套(类比 TL;DR 标记:不翻译、原样照抄),
- * 前端据标记切块渲染——标记本身不展示,只做结构锚点。
+ * 通用輸出紀律:結論先行,證據收納。
+ * 適用於所有 AI 章節(命盤報告/大運流年)與對話。
+ * 【定性】【分析】【依據】三標記三地語言共用同一套(類比 TL;DR 標記:不翻譯、原樣照抄),
+ * 前端據標記切塊渲染——標記本身不展示,只做結構錨點。
  */
 export const VERDICT_FIRST_RULE = `【输出纪律·结论先行,证据收纳】
 - 每段第一句必须是结论/定性(这段最重要的一句话),依据和推理跟在后面;严禁把结论藏在段尾。
@@ -325,9 +325,9 @@ export const VERDICT_FIRST_RULE = `【输出纪律·结论先行,证据收纳】
 - 需要展开证据时,用段尾【依据】块:另起一段,以「【依据】」开头(标记原样照抄、不翻译),之后每条证据独立一行、一行只讲一个术语点,保持简短;前端会把此块收纳为次要样式。`;
 
 /**
- * 本节结构纪律 v3 (2026-10-23):正面表述版。
- * 研究结论:长禁令列表在小模型上适得其反;保留结构要求(两段式/清单),
- * 去重只靠一条正面指令(见 SYSTEM_PERSONA + SELF_CHECK 的 sandwich)。
+ * 本節結構紀律 v3 (2026-10-23):正面表述版。
+ * 研究結論:長禁令列表在小模型上適得其反;保留結構要求(兩段式/清單),
+ * 去重只靠一條正面指令(見 SYSTEM_PERSONA + SELF_CHECK 的 sandwich)。
  */
 function fortuneAntiRepetition(key: string): string {
   const mechanism = `形容词必须有信息量:每个判断写出机制(哪个天干/哪颗星→哪个宫→什么效果);写不出机制就删掉这句。`;
@@ -349,13 +349,13 @@ function fortuneAntiRepetition(key: string): string {
 }
 
 /**
- * 小标题清单(原样照抄用)。
- * 实测教训(2026-10-22 live):只给"格式模板 + 逐字照抄"不够——模型会照着模板的
- * 形状填占位符,输出 `### 甲寅運（–歲／–年）`(en dash 占位,连禁例都换了符号绕过)。
- * 解法是把本节每个小标题的**成品行**直接列出来,让模型逐行复制,不做任何格式转换。
- * 干支/星曜名在 en 下也保留汉字(与 localeDirective 的专有名词规则一致)。
- * 注意:清单只是"尽力而为"的 prompt 手段,最终兜底靠 fixFortuneHeadings(服务端
- * 确定性后处理)。
+ * 小標題清單(原樣照抄用)。
+ * 實測教訓(2026-10-22 live):只給"格式模板 + 逐字照抄"不夠——模型會照着模板的
+ * 形狀填佔位符,輸出 `### 甲寅運（–歲／–年）`(en dash 佔位,連禁例都換了符號繞過)。
+ * 解法是把本節每個小標題的**成品行**直接列出來,讓模型逐行復制,不做任何格式轉換。
+ * 干支/星曜名在 en 下也保留漢字(與 localeDirective 的專有名詞規則一致)。
+ * 注意:清單只是"盡力而爲"的 prompt 手段,最終兜底靠 fixFortuneHeadings(服務端
+ * 確定性後處理)。
  */
 function fortuneHeadingLedger(segKey: string, fortune: FortuneAnalysis, locale: AiLocale): string {
   const f = fortune.bazi;
@@ -371,11 +371,11 @@ ${lines.join("\n")}`;
 }
 
 /**
- * 风格块 v3 (2026-10-23 research-backed),放逐节 user message(不塞 system prompt):
- * - 1 段 exemplar(200–300 字,展示想要的 voice:定性+分析+类比+金句) + 4 条正面指令
- *   ——研究结论:directives + exemplar 组合在风格控制上胜过纯规则列表。
- * - 每节只用一种修辞(类比 OR 金句收尾),二选一。
- * - 金句三候选留其一;陈腔 ban list ≤8 项。
+ * 風格塊 v3 (2026-10-23 research-backed),放逐節 user message(不塞 system prompt):
+ * - 1 段 exemplar(200–300 字,展示想要的 voice:定性+分析+類比+金句) + 4 條正面指令
+ *   ——研究結論:directives + exemplar 組合在風格控制上勝過純規則列表。
+ * - 每節只用一種修辭(類比 OR 金句收尾),二選一。
+ * - 金句三候選留其一;陳腔 ban list ≤8 項。
  */
 const STYLE_EXEMPLAR = `【定性】这步运先蹲后跳:前五年蓄力,后五年发力。
 【分析】丙火日主行壬水大运,水克火,前几年如逆水行舟——不是能力不足,是时运未至。2029 年转入木运,木生火,顺风始来;前五年积下的本事,届时一并兑现。一句话:「运逆时练功,运顺时收成。」`;
@@ -391,18 +391,18 @@ ${STYLE_EXEMPLAR}
 - 陈腔禁用:「值得注意的是」「总而言之」「整体而言」「命中注定」「大吉大利」「宜多加留意」「显着地」「总之」「总体来说」(当机械结尾空话用时)。`;
 
 /**
- * plan-then-write(研究结论:先产出 verdict + 3–4 个互不重叠的角度,再逐段展开,
- * 结构上杜绝"换字重述")。单次调用内的轻量版:不输出规划过程,直接按角度写正文。
+ * plan-then-write(研究結論:先產出 verdict + 3–4 個互不重疊的角度,再逐段展開,
+ * 結構上杜絕"換字重述")。單次調用內的輕量版:不輸出規劃過程,直接按角度寫正文。
  */
 const PLAN_THEN_WRITE = `【动笔前先规划】先想好本节 3–4 个互不重叠的切入角度(每段一个角度,角度之间不许重叠),再逐段展开;【定性】就是该段角度的一句话版本。`;
 
 /**
- * self-check(与 system 人设里的去重句 sandwich:头尾各一,利用 recency bias)。
- * 研究结论:保留一条正面表述的去重指令,删掉其余一切。
+ * self-check(與 system 人設裏的去重句 sandwich:頭尾各一,利用 recency bias)。
+ * 研究結論:保留一條正面表述的去重指令,刪掉其餘一切。
  */
 const SELF_CHECK = `【写完自查】逐段检查:每段是否只讲一个新观点?有没有哪句只是换字重述前文?有就删掉,再输出。`;
 
-/** 组装《大运流年深析》的用户指令——八字 × 紫微合参,逐步逐年,不限篇幅。locale 决定章节标题的语言。 */
+/** 組裝《大運流年深析》的用戶指令——八字 × 紫微合參,逐步逐年,不限篇幅。locale 決定章節標題的語言。 */
 export function buildFortuneReportPrompt(caveats: string[], locale: AiLocale = "zht", fortune?: FortuneAnalysis): string {
   const caveatBlock = caveats.length
     ? `\n\n【必须遵守的注意事项(在相关结论处自然带出)】\n` + caveats.map((c) => "- " + c).join("\n")
@@ -454,20 +454,20 @@ ${ledger}${caveatBlock}`;
 }
 
 /* ────────────────────────────────────────────────────────────────────────
- * 分段生成:把两份长报告各拆成多节,每节一次独立 <60s 请求。
- * 目的:整篇一次跑(上万字)会被 Vercel 免费版 maxDuration=60 当场截断。
- * 各节都独立锚定同一份确定性命盘事实(不互相引用 AI 文本),故可分节甚至并行;
- * system(人设 + 命盘)逐节相同且带 prompt cache,节 2+ 命中缓存更省更快。
+ * 分段生成:把兩份長報告各拆成多節,每節一次獨立 <60s 請求。
+ * 目的:整篇一次跑(上萬字)會被 Vercel 免費版 maxDuration=60 當場截斷。
+ * 各節都獨立錨定同一份確定性命盤事實(不互相引用 AI 文本),故可分節甚至並行;
+ * system(人設 + 命盤)逐節相同且帶 prompt cache,節 2+ 命中緩存更省更快。
  * ──────────────────────────────────────────────────────────────────────── */
 
 export interface ReportSegment {
   key: string;
-  /** 章节小标题(不含 Markdown #),客户端按此顺序拼接展示。 */
+  /** 章節小標題(不含 Markdown #),客戶端按此順序拼接展示。 */
   title: string;
   instruction: string;
 }
 
-/** 《命盘格局解读》分节:六节静态底色 + 总体建议。 */
+/** 《命盤格局解讀》分節:六節靜態底色 + 總體建議。 */
 export const REPORT_SEGMENTS: ReportSegment[] = [
   ...REPORT_SECTIONS.map((s) => ({ key: s.key, title: s.title, instruction: s.brief })),
   {
@@ -484,7 +484,7 @@ export const REPORT_SEGMENTS: ReportSegment[] = [
   },
 ];
 
-/** 《大运流年深析》分节(对应整篇的六个 ## 章节)。 */
+/** 《大運流年深析》分節(對應整篇的六個 ## 章節)。 */
 export const FORTUNE_SEGMENTS: ReportSegment[] = [
   {
     key: "overview",
@@ -530,17 +530,17 @@ function caveatBlockOf(caveats: string[]): string {
 }
 
 /**
- * 单节目标字数。设 900–1100 字:足够扎实,又让最慢模型(Opus ~31 字/秒)在 ~35s 内
- * 自然写完、远低于 60s,且自然篇幅落在每节 token 上限之下,从根上避免"半句被切"。
+ * 單節目標字數。設 900–1100 字:足夠紮實,又讓最慢模型(Opus ~31 字/秒)在 ~35s 內
+ * 自然寫完、遠低於 60s,且自然篇幅落在每節 token 上限之下,從根上避免"半句被切"。
  */
 const SECTION_WORDS = "900–1100";
 
-/** 解读视角:纯八字 / 纯紫微 / 两者合参。 */
+/** 解讀視角:純八字 / 純紫微 / 兩者合參。 */
 export type ReportLens = "bazi" | "ziwei" | "both";
 
 /**
- * 视角指令——决定本次只用八字、只用紫微、还是两者合参。
- * 单一体系时强力隔离:就当另一套盘不存在,不互相翻译、不捏合(避免"太杂太乱、反而不准")。
+ * 視角指令——決定本次只用八字、只用紫微、還是兩者合參。
+ * 單一體系時強力隔離:就當另一套盤不存在,不互相翻譯、不捏合(避免"太雜太亂、反而不準")。
  */
 function lensDirective(lens: ReportLens): string {
   if (lens === "bazi")
@@ -551,14 +551,14 @@ function lensDirective(lens: ReportLens): string {
 }
 
 /**
- * 每节 TL;DR 的固定标记(三地语言皆用同一 ASCII 标记,前端据此切出摘要卡)。
- * TL;DR 与正文同一次请求、同一条流输出——**绝不另开 AI 调用**(Workers AI 预算守卫)。
+ * 每節 TL;DR 的固定標記(三地語言皆用同一 ASCII 標記,前端據此切出摘要卡)。
+ * TL;DR 與正文同一次請求、同一條流輸出——**絕不另開 AI 調用**(Workers AI 預算守衛)。
  */
 export const TLDR_MARKER = "TL;DR";
 
-/** TL;DR 指令:紧跟小标题输出一行摘要,再空一行接正文。
- * v3.1:TL;DR 只写一句话判断,岁数/年份/干支一律不写(由小标题承载)——
- * 2026-10-23 live 实测:模型在 TL;DR 里列举岁数时会输出"–歲、–歲"占位符。 */
+/** TL;DR 指令:緊跟小標題輸出一行摘要,再空一行接正文。
+ * v3.1:TL;DR 只寫一句話判斷,歲數/年份/干支一律不寫(由小標題承載)——
+ * 2026-10-23 live 實測:模型在 TL;DR 裏列舉歲數時會輸出"–歲、–歲"佔位符。 */
 function tldrDirective(title: string): string {
   return `【开头 TL;DR·硬性格式】「## ${title}」小标题之后,**第一行**必须是:
 ${TLDR_MARKER}:<1–3 句、合共不超过 60 字(英文不超过 45 词)的一句话结论>
@@ -583,7 +583,7 @@ const CROSS_DIRECTIVE = `【多體系交叉 · 本節並看各體系】本節依
 對照表已由頁面畫出,本節用段落解讀,不重畫表格。`;
 
 /**
- * 单节《命盘格局解读》指令(分段模式)。lens 决定纯八字/纯紫微/合参;locale 决定小标题语言。
+ * 單節《命盤格局解讀》指令(分段模式)。lens 決定純八字/純紫微/合參;locale 決定小標題語言。
  * extraFacts:只供 crosssystem 一節使用的多體系事實區塊,附在 user prompt 末尾(不進 system,保 prompt cache)。
  */
 export function buildReportSectionPrompt(
@@ -620,7 +620,7 @@ ${tldrDirective(title)}
 ${SELF_CHECK}${caveatBlockOf(caveats)}${cross && extraFacts ? `\n\n${extraFacts}` : ""}`;
 }
 
-/** 单节《大运流年深析》指令(分段模式)。lens 决定纯八字/纯紫微/合参;locale 决定小标题语言。 */
+/** 單節《大運流年深析》指令(分段模式)。lens 決定純八字/純紫微/合參;locale 決定小標題語言。 */
 export function buildFortuneSectionPrompt(caveats: string[], seg: ReportSegment, lens: ReportLens = "both", locale: AiLocale = "zht", fortune?: FortuneAnalysis): string {
   const title = segmentTitle(seg.key, locale);
   const basis =

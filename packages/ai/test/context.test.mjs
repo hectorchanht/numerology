@@ -35,7 +35,7 @@ test("传入动态运势后,上下文含大运/流年/四化飞宫", () => {
   for (const must of ["动态运势", "八字大运", "八字流年", "大限四化", "流年四化", "引动用神"]) {
     assert.ok(markdown.includes(must), `动态段缺少: ${must}`);
   }
-  // 不传 fortune 时不应出现动态段
+  // 不傳 fortune 時不應出現動態段
   assert.ok(!buildContextPack(chart).markdown.includes("动态运势"));
 });
 
@@ -47,14 +47,14 @@ test("系统人设强调动静结合、运为主导", () => {
 
 test("报告用户指令包含全部章节与注意事项", () => {
   const { caveats } = buildContextPack(chart);
-  // zhs 下标题应为简体原文(与 REPORT_SECTIONS.title 一致)
+  // zhs 下標題應爲簡體原文(與 REPORT_SECTIONS.title 一致)
   const promptZhs = buildReportUserPrompt(caveats, "zhs");
   for (const s of REPORT_SECTIONS) {
     assert.ok(promptZhs.includes(s.title), `指令缺少章节: ${s.title}`);
   }
   assert.ok(promptZhs.includes("真太阳时"), "指令应带出 caveat");
   assert.ok(SYSTEM_PERSONA.includes("八字") && SYSTEM_PERSONA.includes("紫微"));
-  // 默认 locale 为 zht:标题应为繁体
+  // 默認 locale 爲 zht:標題應爲繁體
   const promptDefault = buildReportUserPrompt(caveats);
   assert.ok(promptDefault.includes("性格特質"), "默认应为繁体标题");
   assert.ok(!promptDefault.includes("性格特质"), "默认不应出现简体标题");

@@ -6,8 +6,8 @@ export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 /**
- * 确定性运势数据(JSON,无 AI 调用):供前端在渲染前对报告文本做
- * 确定性修复(小标题数字、紫微大限:無)。同样修复 KV/历史记录里的旧占位文本。
+ * 確定性運勢數據(JSON,無 AI 調用):供前端在渲染前對報告文本做
+ * 確定性修復(小標題數字、紫微大限:無)。同樣修復 KV/歷史記錄裏的舊佔位文本。
  */
 export async function POST(req: Request): Promise<Response> {
   try {

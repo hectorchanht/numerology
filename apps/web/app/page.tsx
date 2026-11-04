@@ -97,7 +97,7 @@ export default function Home() {
   const [chart, setChart] = useState<ChartResult | null>(() => kept?.chart ?? null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  /** 从历史记录恢复的章节正文(sectionKey → markdown),分 report/fortune 两组。 */
+  /** 從歷史記錄恢復的章節正文(sectionKey → markdown),分 report/fortune 兩組。 */
   const [restored, setRestored] = useState<Restored | null>(null);
   /** 命盤頁「生成 AI 解讀」:遞增 → 報告開始生成。 */
   const [reportStart, setReportStart] = useState(0);
@@ -115,7 +115,7 @@ export default function Home() {
       .catch(() => {});
   }, []);
 
-  // 分段并行:key 对应引擎 REPORT_SEGMENTS / FORTUNE_SEGMENTS。
+  // 分段並行:key 對應引擎 REPORT_SEGMENTS / FORTUNE_SEGMENTS。
   const REPORT_SEGS = [
     { key: "personality", label: t("seg.personality") },
     { key: "career", label: t("seg.career") },
@@ -150,10 +150,10 @@ export default function Home() {
       const data = (await res.json()) as { chart?: ChartResult; error?: string };
       if (!res.ok || !data.chart) throw new Error(data.error ?? t("chart.errorFallback"));
       setChart(data.chart);
-      // 用服务端解析后的阳历输入(农历已转换),供后续报告/对话复用
+      // 用服務端解析後的陽曆輸入(農曆已轉換),供後續報告/對話複用
       setInput(data.chart.input);
       setRestored(null);
-      // 存入本机历史(保留已有章节,只更新命盘/时间;有名就寫入,留空保留舊名)。
+      // 存入本機歷史(保留已有章節,只更新命盤/時間;有名就寫入,留空保留舊名)。
       upsertReading({ input: data.chart.input, locale, chart: data.chart, name }).catch(() => {});
       goAi("chart");
     } catch (e) {
@@ -163,7 +163,7 @@ export default function Home() {
     }
   };
 
-  /** 从历史记录恢复:命盘 + 已生成的章节即时显示,零 API 调用。view = 解讀版落點 view(預設命盤)。 */
+  /** 從歷史記錄恢復:命盤 + 已生成的章節即時顯示,零 API 調用。view = 解讀版落點 view(預設命盤)。 */
   const handleRestore = (r: Reading, view: AiView = "chart") => {
     setMode("known");
     setError("");
@@ -175,7 +175,7 @@ export default function Home() {
     goAi(view);
   };
 
-  /** 某节成功生成 → 存入本机历史(带当时的 lens/provider/model)。 */
+  /** 某節成功生成 → 存入本機歷史(帶當時的 lens/provider/model)。 */
   const handleSectionDone =
     (endpoint: "report" | "fortune") =>
     (segKey: string, markdown: string, lens: string, thinking?: string) => {
@@ -199,7 +199,7 @@ export default function Home() {
     return () => setChatAvailable(false);
   }, [hasReady]);
   const nowLuck = chart ? currentLuckStep(chart.bazi) : undefined;
-  /** 确定性运势数据(无 AI 调用):渲染前修复小标题数字与紫微大限:無(含旧缓存文本)。 */
+  /** 確定性運勢數據(無 AI 調用):渲染前修復小標題數字與紫微大限:無(含舊緩存文本)。 */
   const [fortuneJson, setFortuneJson] = useState<FortuneAnalysis | null>(null);
   const inputKey = input ? JSON.stringify(input) : null;
   useEffect(() => {
@@ -423,7 +423,7 @@ export default function Home() {
                 {t("chart.readCta")}
               </button>
 
-              {/* 一眼睇晒:摘要卡 + 五行圖(確定性數據,零 AI) */}
+              {/* 一眼睇曬:摘要卡 + 五行圖(確定性數據,零 AI) */}
               <h2 className="group-title">{t("viz.summary")}</h2>
               <ChartSummary chart={ready.chart} />
               <h2 className="group-title">{t("chart.wuxing")}</h2>

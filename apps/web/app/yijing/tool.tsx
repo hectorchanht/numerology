@@ -327,7 +327,7 @@ export default function YijingTool({ historyId }: { historyId?: string }) {
               })}
             </ol>
 
-            {/* 「全部自動」擺喺爻疊之下,同主掣拉開距離,免手指滑錯一次過擲晒 */}
+            {/* 「全部自動」擺喺爻疊之下,同主掣拉開距離,免手指滑錯一次過擲曬 */}
             {!done && (
               <button type="button" className="text-btn yj-auto" onClick={tossAll} disabled={rolling}>
                 {yjT("yijing.auto", loc)}

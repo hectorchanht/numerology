@@ -2,10 +2,10 @@ import type { FortuneAnalysis } from "@numerology/engine";
 import type { Locale } from "./i18n.js";
 
 /**
- * 前端确定性修复:服务端 makeFortuneLineFixer(packages/ai/src/prompts.ts)
- * 的客户端镜像,逻辑保持同步。
- * 用途:修复已缓存(KV/历史记录)的旧占位文本,以及服务端未来新增的小标题形状。
- * 渲染时应用,不改存档原文。
+ * 前端確定性修復:服務端 makeFortuneLineFixer(packages/ai/src/prompts.ts)
+ * 的客戶端鏡像,邏輯保持同步。
+ * 用途:修復已緩存(KV/歷史記錄)的舊佔位文本,以及服務端未來新增的小標題形狀。
+ * 渲染時應用,不改存檔原文。
  */
 
 const GZ_RE = "[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]";
@@ -48,7 +48,7 @@ function dayunGanzhiInLine(line: string): string | null {
   return null;
 }
 
-/** 对单份报告 markdown 做确定性修复(小标题数字 + 紫微大限:無/错配 + 去重連續小標題)。 */
+/** 對單份報告 markdown 做確定性修復(小標題數字 + 紫微大限:無/錯配 + 去重連續小標題)。 */
 export function repairFortuneMarkdown(
   markdown: string,
   fortune: FortuneAnalysis,

@@ -5,7 +5,7 @@ import { errorResponse } from "@/lib/http";
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
-/** 排盘:出生信息 → 八字+紫微双盘 + 动态运势。确定性,不调 AI。 */
+/** 排盤:出生信息 → 八字+紫微雙盤 + 動態運勢。確定性,不調 AI。 */
 export async function POST(req: Request): Promise<Response> {
   try {
     const input = parseBirthInput(await req.json());

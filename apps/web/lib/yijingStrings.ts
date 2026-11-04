@@ -1,6 +1,6 @@
 /**
  * 易經學院(Phase 1)UI 文案:占卦 / 六十四卦 / 命盤海報。
- * 三地字典,与 apps/web/lib/i18n.ts 同模式,但獨立存放(不動 i18n.ts)。
+ * 三地字典,與 apps/web/lib/i18n.ts 同模式,但獨立存放(不動 i18n.ts)。
  * 通過 useLocale() 的 locale 取值: YIJING_STRINGS[id][locale]。
  */
 export type YijingLocale = "zht" | "zhs" | "en";

@@ -16,20 +16,20 @@ export const dynamic = "force-dynamic";
 
 /**
  * prompt 版本:改 prompt 即換緩存鍵,不串味。
- * v4 = 2026-10-23 v3.1 targeted fixes:TL;DR 禁列岁数年份干支(佔位符修復)、
- * 每步/每年只点 1–2 个最強信號、定性「起外號」具體化、同期大限稱謂統一、陳腔 ban list 擴充。
- * v5 = 2026-10-23 context-trim:分节生成按 FortuneScope 只喂该节需要的动态数据
- * (overview/action→current, dayun/rhythm→dayun+信号digest, review→已过年, future→未来年),
- * 整份 fortune 不再每节重倒;prompt 指令文字不变。
- * v6 = 2026-11-02 思考捕捉:与 report/v6 同步开启 captureThinking——生成行为变了,
- * v5 缓存里可能有压制下写进正文的规划独白(无标记、无法可靠分拆),整体失效。
- * v7 = 2026-11-02 harmony 正规化:与 report/v7 同步(provider 补 gpt-oss harmony
- * channel 拆分);v6 缓存里 MLX gpt-oss 的未正规化原文必须失效。
+ * v4 = 2026-10-23 v3.1 targeted fixes:TL;DR 禁列歲數年份干支(佔位符修復)、
+ * 每步/每年只點 1–2 個最強信號、定性「起外號」具體化、同期大限稱謂統一、陳腔 ban list 擴充。
+ * v5 = 2026-10-23 context-trim:分節生成按 FortuneScope 只喂該節需要的動態數據
+ * (overview/action→current, dayun/rhythm→dayun+信號digest, review→已過年, future→未來年),
+ * 整份 fortune 不再每節重倒;prompt 指令文字不變。
+ * v6 = 2026-11-02 思考捕捉:與 report/v6 同步開啓 captureThinking——生成行爲變了,
+ * v5 緩存裏可能有壓制下寫進正文的規劃獨白(無標記、無法可靠分拆),整體失效。
+ * v7 = 2026-11-02 harmony 正規化:與 report/v7 同步(provider 補 gpt-oss harmony
+ * channel 拆分);v6 緩存裏 MLX gpt-oss 的未正規化原文必須失效。
  * v8 = 2026-11-04 人設擴為多體系。
  */
 const PROMPT_VERSION = "fortune/v8";
 
-/** 流式生成《大运流年深析》(八字 × 紫微合参,逐步逐年)。首 token 前失败 → JSON 错误(502),而非截断流。 */
+/** 流式生成《大運流年深析》(八字 × 紫微合參,逐步逐年)。首 token 前失敗 → JSON 錯誤(502),而非截斷流。 */
 export async function POST(req: Request): Promise<Response> {
   try {
     await ensureEnv();
@@ -37,12 +37,12 @@ export async function POST(req: Request): Promise<Response> {
     const input = parseBirthInput(body.input);
     const chart = castChart(input);
     const fortune = analyzeFortune(input, { yearsBack: 5, yearsAhead: 8 });
-    // 深析路径同报告开启思考捕捉(Hector 2026-11-02):思考分流折叠呈现,不压制。
+    // 深析路徑同報告開啓思考捕捉(Hector 2026-11-02):思考分流摺疊呈現,不壓制。
     const ai = { ...resolveServerAi(body), captureThinking: true };
     const section = typeof body.section === "string" && body.section.trim() ? body.section.trim() : undefined;
     const lens = body.lens === "bazi" || body.lens === "ziwei" ? body.lens : "both";
     const locale = body.locale === "zhs" || body.locale === "en" ? body.locale : "zht";
-    // AI 响应缓存:同一输入+同一配置直接复用 KV 中的上次结果,不再烧预算。
+    // AI 響應緩存:同一輸入+同一配置直接複用 KV 中的上次結果,不再燒預算。
     const kv = (getServerAiBindings()?.kv ?? null) as KvLike | null;
     const cached = await prepareCachedStream(
       kv,
@@ -62,7 +62,7 @@ export async function POST(req: Request): Promise<Response> {
       await scriptLocker(locale),
     );
     if ("hit" in cached) return cached.hit;
-    // section 存在 → 只生成该节(分段模式,每节 <60s);缺省 → 整篇(CLI 兼容)。
+    // section 存在 → 只生成該節(分段模式,每節 <60s);缺省 → 整篇(CLI 兼容)。
     const resp = await streamToPrimedResponse(cached.miss.stream, primeTimeoutMs(ai));
     resp.headers.set("X-Cache", "MISS");
     cached.miss.armPersistence(getWaitUntil());
