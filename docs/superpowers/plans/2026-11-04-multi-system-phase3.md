@@ -15,7 +15,7 @@
 - 第一、二期 Global Constraints 照舊(AI 不自行計數;每個數可展開步驟;圖優先;每圖有文字替代;zht 無粵語口語字;repo 文字繁體)。
 - 扶抑評分權重照 spec §一 原樣:得令 ±3;藏干本氣 1.0 / 中氣 0.5 / 餘氣 0.3;天干 ±1;閾值 ±1.5;從格偵測 ±6。tier `modern`,步驟與 UI 寫明「本站簡化評分」。
 - 「同我或生我」= 比劫、印;「剋洩耗」= 官殺、食傷、財。
-- 基率:喜用約 2/5、忌約 3/5(喜用為 2 個五行時)。
+- 基率按每盤實際計:喜用五行數 / 5、忌五行數 / 5(身弱 2/5 對 3/5,身強 3/5 對 2/5;中和不計)。
 - 簡轉繁只動註解與 md;字串字面值一律不動;`README.zh-Hans.md` 不轉。
 - 分支 `feat/multi-system-p3`(worktree `.claude/worktrees/multi-system-p3`);完成後快轉 `main` 並 push(hectorchanht)。
 
@@ -50,7 +50,7 @@
 **Interfaces:**
 - Produces: `CrossSystemResult.fuyi: FuyiResult`;`CrossSignal.fit?: "favorable" | "unfavorable" | "neutral"`(bazi 無)。
 
-- [ ] **Step 1: 寫失敗測試**:非 bazi signal 的 fit 依其五行是否在 favorable / unfavorable;中和盤全部 neutral;steps 加一行說明 fit 依據與基率(2/5、3/5)。
+- [ ] **Step 1: 寫失敗測試**:非 bazi signal 的 fit 依其五行是否在 favorable / unfavorable;中和盤全部 neutral;steps 加一行說明 fit 依據與按盤計算的基率。
 - [ ] **Step 2–4:** FAIL → 實作 → PASS。
 - [ ] **Step 5:** Commit `feat(engine): 對照矩陣加入扶抑喜忌第二軸`。
 
@@ -67,7 +67,7 @@
 **Files:** Modify `packages/ai/src/context.ts`、`packages/ai/src/prompts.ts`;Test `packages/ai/test/crosssystem-prompt.test.mjs`
 
 - [ ] **Step 0:** 讀 `~/.claude/prompting-best-practices.md`。
-- [ ] **Step 1: 寫失敗測試**:事實區塊含身強弱、評分、喜忌五行、各 signal fit、「本站簡化評分」;prompt 含第二軸基率(2/5、3/5)與從格警示條款。
+- [ ] **Step 1: 寫失敗測試**:事實區塊含身強弱、評分、喜忌五行、各 signal fit、「本站簡化評分」;prompt 含按盤計算的第二軸基率與從格警示條款。
 - [ ] **Step 2–4:** FAIL → 實作 → ai + web PASS。
 - [ ] **Step 5:** Commit `feat(ai): 多體系事實加入扶抑喜忌`。
 

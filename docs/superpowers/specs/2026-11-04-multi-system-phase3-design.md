@@ -34,9 +34,9 @@
 ## 二、矩陣第二軸
 
 - `castCrossSystem` 輸出加 `fuyi`(上述結果)與每個 signal 的 `fit?: "favorable" | "unfavorable" | "neutral"`(相對八字喜忌;中和時全部 neutral;錨點 bazi 本身無 fit)。
-- 基率:喜用通常 2 個五行 → 隨機落喜用約 2/5;忌神約 3/5。UI 與 AI 必須寫明。
+- 基率按每盤實際計:隨機落喜用約「喜用五行數 / 5」,落忌約「忌五行數 / 5」(身弱 2/5 對 3/5,身強 3/5 對 2/5;中和不計)。UI 與 AI 必須寫明。
 - 卡片:矩陣加一欄「對你有利?」(喜 / 忌 / 閒),附扶抑步驟展開;顯示身強弱與評分條(圖)。
-- AI:`crossSystemFacts` 加扶抑結果與 fit;CROSS_DIRECTIVE 加「第二軸」說明與基率(2/5、3/5),可能從格時須明說。
+- AI:`crossSystemFacts` 加扶抑結果與 fit;CROSS_DIRECTIVE 加「第二軸」說明與按盤計算的基率,可能從格時須明說。
 
 ## 三、全 repo 簡轉繁
 
