@@ -6,7 +6,7 @@ const PLANETARY_SQUARES_DATA = {
   "meta": {
     "name": "Planetary magic squares (kameas)",
     "schema": "planet -> order n, rows (n×n, numbers 1..n²), lineSum = n(n²+1)/2, total = n²(n²+1)/2",
-    "source": "Traditional layouts as published in Agrippa, De occulta philosophia II.22 (1533), public domain. Planet order and symbolism as summarised in Fideler, Jesus Christ, Sun of God (1993), PDF pp. 258-263. Verified by test/planetary-squares.test.mjs.",
+    "source": "Traditional layouts as published in Agrippa, De occulta philosophia II.22 (1533), public domain. Planet order and symbolism as summarised in Fideler, Jesus Christ, Sun of God (1993), PDF pp. 258-263. Verified by test/planetary-squares.test.mjs. Cross-checked cell-by-cell against the 1533 Cologne first edition (LOC scan, archive.org DeOccultaPhilosophiaLoc1533, Book II ch. 22, PDF pp. 165-169) and the 1651 translation (Wikisource).",
     "version": "0.1.0",
     "reviewed": false
   },
@@ -106,7 +106,8 @@ const PLANETARY_SQUARES_DATA = {
           2,
           15
         ]
-      ]
+      ],
+      "note": "1533 p. 166 confirmed (MinerU misread 24/20 as 14/10; the Hebrew table settles it)"
     },
     {
       "planet": "Sun",
@@ -436,7 +437,8 @@ const PLANETARY_SQUARES_DATA = {
           4,
           45
         ]
-      ]
+      ],
+      "erratum": "1533 first edition prints 45 for 54 in row 1, column 8, in both the Arabic and the Hebrew table (PDF p. 169). 54 is required for the line sum 369."
     }
   ],
   "square729": {

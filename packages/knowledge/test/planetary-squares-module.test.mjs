@@ -2,10 +2,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { planetarySquare } from "../dist/index.js";
+import DATA from "../dist/planetary-squares.data.js";
 
 const P = JSON.parse(readFileSync(new URL("../data/planetary-squares.json", import.meta.url), "utf8"));
 
-test("內聯模組與 JSON 一致", () => {
+test("內聯模組整份與 JSON 一致", () => {
+  assert.deepEqual(DATA, P);
   for (const s of P.squares) assert.deepEqual(planetarySquare(s.planet).rows, s.rows, s.planet);
 });
 

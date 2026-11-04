@@ -9,6 +9,11 @@ export interface PlanetarySquare {
   order: number;
   rows: number[][];
   note?: string;
+  /** Sun 方陣的 Intelligence / Spirit(名、希伯來文、數值)。 */
+  intelligence?: { name: string; hebrew: string; value: number };
+  spirit?: { name: string; hebrew: string; value: number };
+  /** 版本勘誤(如 1533 版 Moon 方陣誤印)。 */
+  erratum?: string;
 }
 
 export const PLANETARY_SQUARES_META: KnowledgeMeta = DATA.meta;
