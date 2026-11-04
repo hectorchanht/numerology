@@ -50,14 +50,14 @@
 | Jyotish 27 宿 | todo | Brihat Parashara Hora Shastra 等 | 是(需星曆) | 27 宿與 27 = 729 的立方根 |
 | 巴比倫六十進制 | todo | 古巴比倫泥版 | 是 | 60 進位與 360 / 365 週期 |
 | 廣東話版(yue) | todo | 本站新增語言 `yue`(粵語書面語) | 不適用 | 不適用;需先定文風,再補三語以外字串 |
-| 扶抑喜忌引擎(B 方案) | todo | 滴天髓、子平真詮;本站自建 | 是(規則) | 比八字喜用神,補第二條對照軸 |
+| 扶抑喜忌引擎(B 方案) | 已入庫 | 滴天髓、子平真詮;本站自建 | 是(規則) | 第三期;本站簡化評分(非古籍原文),tier modern,從格只偵測不推算;補第二條對照軸 |
 
 ## 工程 todo
 
 | 項目 | 狀態 | 範圍 / 說明 |
 |---|---|---|
-| 全 repo 註解 / 文件由簡體轉為繁體(zht) | todo | `packages/*/src`、`apps/web` 的程式註解與既有 md 文件(如 `docs/knowledge-base.md` 既有段落)。不含 zhs 語言內容:i18n zhs 字串、資料 JSON 的 zhs 欄位、zhs 輸出指令 |
+| 全 repo 註解 / 文件由簡體轉為繁體(zht) | 已完成 | opencc s2t + 字形統一;`README.zh-Hans.md` 例外(保留簡體)。範圍: `packages/*/src`、`apps/web` 的程式註解與既有 md 文件(如 `docs/knowledge-base.md` 既有段落)。不含 zhs 語言內容:i18n zhs 字串、資料 JSON 的 zhs 欄位、zhs 輸出指令 |
 | 廣東話版(yue)locale | todo | 新增 `yue` 語言,需先定文風 |
-| 扶抑喜忌引擎(B 方案) | todo | 第二期;與八字喜用神比對 |
+| 扶抑喜忌引擎(B 方案) | 已入庫 | 第三期;本站簡化評分,tier modern,從格只偵測;與八字喜用神比對 |
 | 學院科學專區 | 已入庫 | 路徑 `/science`,含基率模擬器 |
 | 易經學院課文 zhs / en 翻譯 | todo | 第二期;現時回落 zht |
