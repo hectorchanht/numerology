@@ -1,0 +1,88 @@
+{
+  "meta": {
+    "name": "'Fourth Book of Occult Philosophy' compilation (1655) — geomancy figures, Heptameron days and planetary hours, Arbatel Olympic spirits",
+    "schema": "geomancy.figures: 16 x {name, rows (top→bottom, 1 = single point, 2 = double), planet, house sign, sign (zodiac distribution)}, triplicity schemes ; heptameron: days + Chaldean order + hour names ; arbatel: 7 Olympic spirits",
+    "source": "Henry Cornelius Agrippa (pseudo), His Fourth Book of Occult Philosophy … Geomancy … Heptameron (Peter de Abano) … Arbatel, tr. Robert Turner, London 1655; public domain. Read from the Cornell scan of the 1978 Askin facsimile (archive.org cu31924006718757); the 1978 editorial introduction was NOT used. `page` = PDF page (MinerU doc:e501ca4).",
+    "version": "0.1.0",
+    "reviewed": false,
+    "reviewNote": "Attributions are traditional, not historical: the Fourth Book and Heptameron are spurious ascriptions to Agrippa and Abano. Geomantic figure rows read from the printed table image (p. 41). Two OCR passes compared: local MinerU and archive.org's own OCR text."
+  },
+  "geomancy": {
+    "page": 41,
+    "figures": [
+      { "name": "Fortuna Major", "english": "greater fortune", "rows": [2, 2, 1, 1], "planet": "Sun", "houseSign": "Leo", "sign": "Taurus" },
+      { "name": "Fortuna Minor", "english": "lesser fortune", "rows": [1, 1, 2, 2], "planet": "Sun", "houseSign": "Leo", "sign": "Taurus" },
+      { "name": "Via", "english": "way", "rows": [1, 1, 1, 1], "planet": "Moon", "houseSign": "Cancer", "sign": "Virgo" },
+      { "name": "Populus", "english": "people", "rows": [2, 2, 2, 2], "planet": "Moon", "houseSign": "Cancer", "sign": "Aquarius" },
+      { "name": "Acquisitio", "english": "gain", "rows": [2, 1, 2, 1], "planet": "Jupiter", "houseSign": "Pisces", "sign": "Aries" },
+      { "name": "Laetitia", "english": "joy", "rows": [1, 2, 2, 2], "planet": "Jupiter", "houseSign": "Sagittarius", "sign": "Gemini" },
+      { "name": "Puella", "english": "girl", "rows": [1, 2, 1, 1], "planet": "Venus", "houseSign": "Taurus", "sign": "Cancer" },
+      { "name": "Amissio", "english": "loss", "rows": [1, 2, 1, 2], "planet": "Venus", "houseSign": "Libra", "sign": "Sagittarius" },
+      { "name": "Conjunctio", "english": "conjunction", "rows": [2, 1, 1, 2], "planet": "Mercury", "houseSign": "Virgo", "sign": "Libra" },
+      { "name": "Albus", "english": "white", "rows": [2, 2, 1, 2], "planet": "Mercury", "houseSign": "Gemini", "sign": "Leo" },
+      { "name": "Puer", "english": "boy", "rows": [1, 1, 2, 1], "planet": "Mars", "houseSign": "Scorpio", "sign": "Scorpio" },
+      { "name": "Rubeus", "english": "red", "rows": [2, 1, 2, 2], "planet": "Mars", "houseSign": "Scorpio", "sign": "Cancer" },
+      { "name": "Carcer", "english": "prison", "rows": [1, 2, 2, 1], "planet": "Saturn", "houseSign": "Capricorn", "sign": "Pisces" },
+      { "name": "Tristitia", "english": "sorrow", "rows": [2, 2, 2, 1], "planet": "Saturn", "houseSign": "Aquarius", "sign": "Sagittarius" },
+      { "name": "Caput Draconis", "english": "dragon's head", "rows": [2, 1, 1, 1], "planet": "North Node", "houseSign": "Capricorn", "sign": "Libra" },
+      { "name": "Cauda Draconis", "english": "dragon's tail", "rows": [1, 1, 1, 2], "planet": "South Node", "houseSign": "Scorpio", "sign": "Capricorn" }
+    ],
+    "notes": {
+      "pages": "planets and house signs p. 42; triplicities pp. 42-43; zodiac distribution p. 43",
+      "houseSign": "sign of the house of the figure's planet; the nodes are given Capricorn (head) and Scorpio (tail)",
+      "sign": "the separate 'they also distribute…' zodiac assignment (p. 43); Fortuna Major and Minor share Taurus, and Puella and Rubeus share Cancer",
+      "erratum": "p. 42 says 'Puella and Rubeus have for their sign Scorpio'. By the planet list on the same page this must be Puer and Rubeus (Mars); Puella (Venus) already has Taurus."
+    },
+    "triplicities": {
+      "bySigns": { "Fire": ["Puer", "Fortuna Major", "Fortuna Minor", "Laetitia"], "Earth": ["Puella", "Conjunctio", "Carcer", "Caput Draconis"], "Air": ["Albus", "Amissio", "Tristitia"], "Water": ["Via", "Populus", "Rubeus", "Cauda Draconis", "Acquisitio"] },
+      "byNatures": { "Fire": ["Fortuna Major", "Rubeus", "Puer", "Amissio"], "Air": ["Fortuna Minor", "Puella", "Laetitia", "Conjunctio"], "Water": ["Acquisitio", "Cauda Draconis", "Via", "Populus"], "Earth": ["Carcer", "Tristitia", "Albus", "Caput Draconis"] },
+      "vulgar": { "Fire": ["Cauda Draconis", "Fortuna Minor", "Amissio", "Rubeus"], "Air": ["Acquisitio", "Laetitia", "Puer", "Conjunctio"], "Water": ["Populus", "Via", "Albus", "Puella"], "Earth": ["Caput Draconis", "Fortuna Major", "Carcer", "Tristitia"] },
+      "preferred": "byNatures"
+    }
+  },
+  "heptameron": {
+    "page": 128,
+    "chaldeanOrder": ["Saturn", "Jupiter", "Mars", "Sun", "Venus", "Mercury", "Moon"],
+    "angelOfPlanet": { "Saturn": "Cassiel", "Jupiter": "Sachiel", "Mars": "Samael", "Sun": "Michael", "Venus": "Anael", "Mercury": "Raphael", "Moon": "Gabriel" },
+    "days": [
+      { "day": "Sunday", "planet": "Sun", "angels": ["Michael", "Dardiel", "Huratapal"], "airKing": "Varcan", "heaven": 4 },
+      { "day": "Monday", "planet": "Moon", "angels": ["Gabriel", "Michael", "Samael"], "airKing": "Arcan", "heaven": 1, "heavenName": "Shamain" },
+      { "day": "Tuesday", "planet": "Mars", "angels": ["Samael", "Satael", "Amabiel"], "heaven": 5 },
+      { "day": "Wednesday", "planet": "Mercury", "angels": ["Raphael", "Miel", "Seraphiel"], "airKing": "Mediat (Modiat)", "heaven": 2, "heavenName": "Raquie" },
+      { "day": "Thursday", "planet": "Jupiter", "angels": ["Sachiel", "Castiel", "Asasiel"], "airKing": "Suth", "heaven": 6 },
+      { "day": "Friday", "planet": "Venus", "angels": ["Anael", "Rachiel", "Sachiel"], "airKing": "Sarabotes", "heaven": 3 },
+      { "day": "Saturday", "planet": "Saturn", "angels": ["Cassiel", "Machatan", "Uriel"], "airKing": "Maymon", "heaven": null }
+    ],
+    "hourNames": {
+      "day": ["Yayn", "Janor", "Nasnia", "Salla", "Sadedali", "Thamur", "Ourer", "Tanic", "Neron", "Jayon", "Abay", "Natalon"],
+      "night": ["Beron", "Barol", "Thanu", "Athir", "Mathon", "Rana", "Netos", "Tafrac", "Sassur", "Aglo", "Calerna", "Salam"]
+    },
+    "hourRule": "Day and night are each split into 12 unequal hours. The first day-hour belongs to the day's planet; each later hour (day then night, continuing) takes the next planet in Chaldean order.",
+    "statedCells": [
+      { "day": "Friday", "half": "day", "hour": 1, "angel": "Anael" },
+      { "day": "Friday", "half": "day", "hour": 4, "angel": "Cassiel" },
+      { "day": "Friday", "half": "night", "hour": 1, "angel": "Samael" },
+      { "day": "Friday", "half": "night", "hour": 12, "angel": "Gabriel" },
+      { "day": "Saturday", "half": "day", "hour": 1, "angel": "Cassiel" },
+      { "day": "Saturday", "half": "day", "hour": 4, "angel": "Michael" },
+      { "day": "Saturday", "half": "night", "hour": 1, "angel": "Raphael" },
+      { "day": "Thursday", "half": "night", "hour": 1, "angel": "Gabriel" },
+      { "day": "Thursday", "half": "night", "hour": 12, "angel": "Michael" }
+    ]
+  },
+  "arbatel": {
+    "page": 183,
+    "spirits": [
+      { "name": "Aratron", "planet": "Saturn", "provinces": 49 },
+      { "name": "Bethor", "planet": "Jupiter", "provinces": 42, "erratum": "1655 prints XXXII (32) and a total of 186; the 7-step series and the total 196 require 42" },
+      { "name": "Phaleg", "planet": "Mars", "provinces": 35 },
+      { "name": "Och", "planet": "Sun", "provinces": 28 },
+      { "name": "Hagith", "planet": "Venus", "provinces": 21 },
+      { "name": "Ophiel", "planet": "Mercury", "provinces": 14 },
+      { "name": "Phul", "planet": "Moon", "provinces": 7 }
+    ],
+    "totalProvinces": 196,
+    "yearsEach": 490,
+    "epochs": { "note": "Aphorism 17: Bethor began 60 BC; Och ruled until AD 1410; Hagith until AD 1900.", "firstRuler": "Bethor", "firstStart": -60, "stated": [["Och", 1410], ["Hagith", 1900]] }
+  }
+}

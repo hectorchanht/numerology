@@ -82,6 +82,15 @@ Write a short overview in our own words: how the system works, then the tables g
 
 | Agrippa, *Three Books*, 1651 tr. via Wikisource (public domain; all 3 books) | facts + cross-check | Book I re-checked against 1651 text (herbs, fumes, stars match). Book II kameas match `planetary-squares.json` cell-for-cell (Moon table missing on Wikisource). New `agrippa-cabala.json` (planetary names, 28 mansions, Sephiroth), `docs/agrippa-cabala.md`. **Not yet extracted:** Book II scales of numbers ch. 4–14, Book III angel names (72 Shem ha-Mephorash, ch. 24–27) |
 
+| Agrippa *De occulta philosophia*, Cologne 1533 (LOC scan, archive.org DeOccultaPhilosophiaLoc1533; public domain, Latin) | verification only | Kameas checked against the first edition (Book II ch. 22, PDF pp. 165-169). The Moon table prints 45 for 54 (row 1, col 8) in both its Arabic and Hebrew forms; recorded as `erratum` |
+| *Fourth Book* compilation, tr. Turner 1655 (Cornell scan of 1978 Askin facsimile; 1655 text public domain, **1978 intro skipped**) | facts | `fourth-book.json`, `docs/fourth-book.md`: 16 geomantic figures (rows read from the p. 41 table image), Heptameron days/planetary hours, Arbatel Olympic spirits |
+
+## Archive.org lessons
+
+- `https://archive.org/metadata/<id>` gives title, date, publisher, rights and the file list. `<id>_djvu.txt` is archive.org's own OCR. It is a free **second, independent OCR** for cross-checking MinerU, but it has no page breaks.
+- A facsimile reprint wraps a public-domain text in modern, possibly copyrighted front matter (introductions, notes). Use only the original text, and say so in `meta.source`.
+- Old-print OCR misreads digits in tables (e.g. 24 → 14). For any number grid, view the page image. If there is a parallel Hebrew-numeral table, use it as a tie-breaker.
+
 ## Wikisource lessons
 
 - A Wikisource epub export can be **truncated**: it only contains what is transcluded into mainspace subpages, e.g. Book II ch. 1–3 only. The full text lives in the `Page:` namespace of the scan's djvu index. Fetch it with the MediaWiki API: `list=allpages&apnamespace=104&apprefix=<djvu name>/`, then `prop=revisions&rvslots=main` in batches of 50 titles. Send a User-Agent and sleep 1 s between batches.
