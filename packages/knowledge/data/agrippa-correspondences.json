@@ -91,7 +91,7 @@
       "plants": ["hazel", "cinquefoil", "herb mercury", "fumitory", "pimpernel", "marjoram", "parsley"],
       "animals": ["dog", "weasel", "ape", "fox", "hart", "mule", "hare", "civet"],
       "birds": ["linnet", "nightingale", "blackbird", "lark", "thrush", "parrot", "magpie", "ibis"],
-      "fish": ["octopus (pourcontrol)", "fork-fish", "mullet"],
+      "fish": ["octopus (pourcontrel)", "fork-fish", "mullet"],
       "herbApuleius": "mullein", "herbHermes": "cinquefoil",
       "fume": { "page": 148, "compound": ["mastic", "frankincense", "cloves", "cinquefoil", "agate"], "class": "peels and odoriferous seeds", "sevenAromatics": "cinnamon" },
       "places": ["shops", "schools", "warehouses", "merchants' exchanges"],
@@ -145,7 +145,7 @@
       { "n": 10, "name": "Spica", "stones": ["emerald"], "plants": ["sage", "trefoil", "periwinkle", "mugwort", "mandrake"] },
       { "n": 11, "name": "Alchamech (Arcturus)", "stones": ["jasper"], "plants": ["plantain"] },
       { "n": 12, "name": "Elpheia (Alphecca)", "stones": ["topaz"], "plants": ["rosemary", "trefoil", "ivy"] },
-      { "n": 13, "name": "Heart of the Scorpion (Antares)", "stones": ["sardonyx", "amethyst"], "plants": ["long birthwort", "saffron"] },
+      { "n": 13, "name": "Heart of the Scorpion (Antares)", "stones": ["sardius (1651: Sardonius)", "amethyst"], "plants": ["long birthwort", "saffron"] },
       { "n": 14, "name": "Falling Vulture (Vega)", "stones": ["chrysolite"], "plants": ["chicory", "fumitory"] },
       { "n": 15, "name": "Tail of Capricorn (Deneb Algedi)", "stones": ["chalcedony"], "plants": ["marjoram", "mugwort", "catnip", "mandrake root"] }
     ]
