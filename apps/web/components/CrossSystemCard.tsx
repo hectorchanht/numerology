@@ -100,6 +100,8 @@ function Fuyi({ f }: { f: FuyiResult }) {
         <title>{label}</title>
         <rect className="xs-fy-track" x={0} y={8} width={FY_W} height={12} rx={6} />
         <rect className="xs-fy-band" x={fyX(-1.5)} y={8} width={fyX(1.5) - fyX(-1.5)} height={12} />
+        <line className="xs-fy-band-tick" x1={fyX(-1.5)} x2={fyX(-1.5)} y1={5} y2={23} />
+        <line className="xs-fy-band-tick" x1={fyX(1.5)} x2={fyX(1.5)} y1={5} y2={23} />
         <rect className="xs-fy-bar" x={Math.min(x0, x)} y={8} width={Math.abs(x - x0)} height={12} />
         <line className="xs-fy-tick" x1={x0} x2={x0} y1={4} y2={24} />
         <circle className="xs-fy-dot" cx={x} cy={14} r={7} />
