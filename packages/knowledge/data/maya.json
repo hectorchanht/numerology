@@ -1,0 +1,272 @@
+{
+  "meta": {
+    "tier": "scholarly",
+    "name": "Maya calendar names",
+    "schema": "tzolkin[]/haab[] -> n, name, aliases",
+    "source": "現代通行拼寫(Maya Orthography 標準化);已抓取核對:https://en.wikipedia.org/wiki/Maya_calendar",
+    "version": "0.1.0",
+    "reviewed": false,
+    "cite": {
+      "work": "Maya calendar",
+      "locator": "https://en.wikipedia.org/wiki/Maya_calendar"
+    },
+    "reviewNote": "Haab 第 19 位 Wayeb 為年末五日,非二十日月。Tzolkin n 從 0(Imix)起,Haab n 從 0(Pop)起。"
+  },
+  "tzolkin": [
+    {
+      "n": 0,
+      "name": "Imix",
+      "aliases": []
+    },
+    {
+      "n": 1,
+      "name": "Ik'",
+      "aliases": [
+        "Ik"
+      ]
+    },
+    {
+      "n": 2,
+      "name": "Akb'al",
+      "aliases": [
+        "Akbal"
+      ]
+    },
+    {
+      "n": 3,
+      "name": "K'an",
+      "aliases": [
+        "Kan"
+      ]
+    },
+    {
+      "n": 4,
+      "name": "Chikchan",
+      "aliases": [
+        "Chicchan"
+      ]
+    },
+    {
+      "n": 5,
+      "name": "Kimi",
+      "aliases": [
+        "Cimi"
+      ]
+    },
+    {
+      "n": 6,
+      "name": "Manik'",
+      "aliases": [
+        "Manik"
+      ]
+    },
+    {
+      "n": 7,
+      "name": "Lamat",
+      "aliases": []
+    },
+    {
+      "n": 8,
+      "name": "Muluk",
+      "aliases": [
+        "Muluc"
+      ]
+    },
+    {
+      "n": 9,
+      "name": "Ok",
+      "aliases": [
+        "Oc"
+      ]
+    },
+    {
+      "n": 10,
+      "name": "Chuwen",
+      "aliases": [
+        "Chuen"
+      ]
+    },
+    {
+      "n": 11,
+      "name": "Eb'",
+      "aliases": [
+        "Eb"
+      ]
+    },
+    {
+      "n": 12,
+      "name": "B'en",
+      "aliases": [
+        "Ben"
+      ]
+    },
+    {
+      "n": 13,
+      "name": "Ix",
+      "aliases": []
+    },
+    {
+      "n": 14,
+      "name": "Men",
+      "aliases": []
+    },
+    {
+      "n": 15,
+      "name": "K'ib'",
+      "aliases": [
+        "Cib"
+      ]
+    },
+    {
+      "n": 16,
+      "name": "Kab'an",
+      "aliases": [
+        "Caban"
+      ]
+    },
+    {
+      "n": 17,
+      "name": "Etz'nab'",
+      "aliases": [
+        "Etznab"
+      ]
+    },
+    {
+      "n": 18,
+      "name": "Kawak",
+      "aliases": [
+        "Cauac"
+      ]
+    },
+    {
+      "n": 19,
+      "name": "Ajaw",
+      "aliases": [
+        "Ahau"
+      ]
+    }
+  ],
+  "haab": [
+    {
+      "n": 0,
+      "name": "Pop",
+      "aliases": []
+    },
+    {
+      "n": 1,
+      "name": "Wo'",
+      "aliases": [
+        "Wo"
+      ]
+    },
+    {
+      "n": 2,
+      "name": "Sip",
+      "aliases": []
+    },
+    {
+      "n": 3,
+      "name": "Sotz'",
+      "aliases": [
+        "Sotz",
+        "Zotz"
+      ]
+    },
+    {
+      "n": 4,
+      "name": "Sek",
+      "aliases": [
+        "Zec"
+      ]
+    },
+    {
+      "n": 5,
+      "name": "Xul",
+      "aliases": []
+    },
+    {
+      "n": 6,
+      "name": "Yaxk'in",
+      "aliases": [
+        "Yaxkin"
+      ]
+    },
+    {
+      "n": 7,
+      "name": "Mol",
+      "aliases": []
+    },
+    {
+      "n": 8,
+      "name": "Ch'en",
+      "aliases": [
+        "Chen"
+      ]
+    },
+    {
+      "n": 9,
+      "name": "Yax",
+      "aliases": []
+    },
+    {
+      "n": 10,
+      "name": "Sak",
+      "aliases": []
+    },
+    {
+      "n": 11,
+      "name": "Keh",
+      "aliases": [
+        "Ceh"
+      ]
+    },
+    {
+      "n": 12,
+      "name": "Mak",
+      "aliases": [
+        "Mac"
+      ]
+    },
+    {
+      "n": 13,
+      "name": "K'ank'in",
+      "aliases": [
+        "Kankin"
+      ]
+    },
+    {
+      "n": 14,
+      "name": "Muwan",
+      "aliases": [
+        "Muan"
+      ]
+    },
+    {
+      "n": 15,
+      "name": "Pax",
+      "aliases": []
+    },
+    {
+      "n": 16,
+      "name": "K'ayab",
+      "aliases": [
+        "Kayab"
+      ]
+    },
+    {
+      "n": 17,
+      "name": "Kumk'u",
+      "aliases": [
+        "Cumhu"
+      ]
+    },
+    {
+      "n": 18,
+      "name": "Wayeb",
+      "aliases": [
+        "Wayeb'",
+        "Uayeb"
+      ]
+    }
+  ]
+}

@@ -8,3 +8,5 @@ export * from "./yijing-legge.data.js";
 export * from "./planetary-squares.js";
 export * from "./pythagorean-numbers.js";
 export * from "./science-notes.js";
+export * from "./taixuan.js";
+export * from "./maya.js";
