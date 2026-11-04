@@ -1,0 +1,185 @@
+{
+  "meta": {
+    "name": "Pythagorean number qualities",
+    "schema": "n -> keywords(zht/zhs/en), tier, cite",
+    "source": "Keyword summaries (not quotations) after the arithmological tradition of (pseudo-)Iamblichus, Theology of Arithmetic, trans. Waterfield (1988); 11/22/33 are a modern convention.",
+    "version": "0.1.0",
+    "reviewed": false
+  },
+  "numbers": [
+    {
+      "n": 1,
+      "keywords": {
+        "zht": "本源、統一、起點",
+        "zhs": "本源、统一、起点",
+        "en": "origin, unity, beginning"
+      },
+      "tier": "classical",
+      "cite": {
+        "work": "Theology of Arithmetic",
+        "author": "Iamblichus (attributed)",
+        "year": 1988,
+        "locator": "trans. R. Waterfield, Phanes Press"
+      }
+    },
+    {
+      "n": 2,
+      "keywords": {
+        "zht": "二元、對立、相異",
+        "zhs": "二元、对立、相异",
+        "en": "duality, opposition, otherness"
+      },
+      "tier": "classical",
+      "cite": {
+        "work": "Theology of Arithmetic",
+        "author": "Iamblichus (attributed)",
+        "year": 1988,
+        "locator": "trans. R. Waterfield, Phanes Press"
+      }
+    },
+    {
+      "n": 3,
+      "keywords": {
+        "zht": "和諧、首個完整之數",
+        "zhs": "和谐、首个完整之数",
+        "en": "harmony, the first whole"
+      },
+      "tier": "classical",
+      "cite": {
+        "work": "Theology of Arithmetic",
+        "author": "Iamblichus (attributed)",
+        "year": 1988,
+        "locator": "trans. R. Waterfield, Phanes Press"
+      }
+    },
+    {
+      "n": 4,
+      "keywords": {
+        "zht": "穩固、公正、根基",
+        "zhs": "稳固、公正、根基",
+        "en": "stability, justice, foundation"
+      },
+      "tier": "classical",
+      "cite": {
+        "work": "Theology of Arithmetic",
+        "author": "Iamblichus (attributed)",
+        "year": 1988,
+        "locator": "trans. R. Waterfield, Phanes Press"
+      }
+    },
+    {
+      "n": 5,
+      "keywords": {
+        "zht": "婚配、生命、變化",
+        "zhs": "婚配、生命、变化",
+        "en": "marriage, life, change"
+      },
+      "tier": "classical",
+      "cite": {
+        "work": "Theology of Arithmetic",
+        "author": "Iamblichus (attributed)",
+        "year": 1988,
+        "locator": "trans. R. Waterfield, Phanes Press"
+      }
+    },
+    {
+      "n": 6,
+      "keywords": {
+        "zht": "首個完全數、秩序、均衡",
+        "zhs": "首个完全数、秩序、均衡",
+        "en": "first perfect number, order, balance"
+      },
+      "tier": "classical",
+      "cite": {
+        "work": "Theology of Arithmetic",
+        "author": "Iamblichus (attributed)",
+        "year": 1988,
+        "locator": "trans. R. Waterfield, Phanes Press"
+      }
+    },
+    {
+      "n": 7,
+      "keywords": {
+        "zht": "貞女、關鍵時刻、獨立",
+        "zhs": "贞女、关键时刻、独立",
+        "en": "virgin, critical times, self-sufficiency"
+      },
+      "tier": "classical",
+      "cite": {
+        "work": "Theology of Arithmetic",
+        "author": "Iamblichus (attributed)",
+        "year": 1988,
+        "locator": "trans. R. Waterfield, Phanes Press"
+      }
+    },
+    {
+      "n": 8,
+      "keywords": {
+        "zht": "首個立方數、穩定、完備",
+        "zhs": "首个立方数、稳定、完备",
+        "en": "first cube, steadiness, completeness"
+      },
+      "tier": "classical",
+      "cite": {
+        "work": "Theology of Arithmetic",
+        "author": "Iamblichus (attributed)",
+        "year": 1988,
+        "locator": "trans. R. Waterfield, Phanes Press"
+      }
+    },
+    {
+      "n": 9,
+      "keywords": {
+        "zht": "地平線、圓滿、終結",
+        "zhs": "地平线、圆满、终结",
+        "en": "horizon, completion, ending"
+      },
+      "tier": "classical",
+      "cite": {
+        "work": "Theology of Arithmetic",
+        "author": "Iamblichus (attributed)",
+        "year": 1988,
+        "locator": "trans. R. Waterfield, Phanes Press"
+      }
+    },
+    {
+      "n": 11,
+      "keywords": {
+        "zht": "直覺、啟發、感知敏銳",
+        "zhs": "直觉、启发、感知敏锐",
+        "en": "intuition, inspiration, heightened perception"
+      },
+      "tier": "modern",
+      "cite": {
+        "work": "Modern numerology master numbers",
+        "locator": "20th-century convention"
+      }
+    },
+    {
+      "n": 22,
+      "keywords": {
+        "zht": "構建、實現、宏大規劃",
+        "zhs": "构建、实现、宏大规划",
+        "en": "building, realisation, large-scale planning"
+      },
+      "tier": "modern",
+      "cite": {
+        "work": "Modern numerology master numbers",
+        "locator": "20th-century convention"
+      }
+    },
+    {
+      "n": 33,
+      "keywords": {
+        "zht": "關懷、教導、奉獻",
+        "zhs": "关怀、教导、奉献",
+        "en": "care, teaching, devotion"
+      },
+      "tier": "modern",
+      "cite": {
+        "work": "Modern numerology master numbers",
+        "locator": "20th-century convention"
+      }
+    }
+  ]
+}
