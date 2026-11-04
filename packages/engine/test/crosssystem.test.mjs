@@ -38,3 +38,20 @@ test("lifepath disagreement", () => {
   assert.equal(l.value, "33(全數字法 6)");
   assert.ok(l.steps.some((s) => s.includes("算法分歧")));
 });
+test("第二軸:fit 依扶抑喜忌", () => {
+  const r = castCrossSystem(castChart(SAMPLE));
+  assert.ok(r.fuyi && typeof r.fuyi.score === "number");
+  assert.equal(r.signals[0].fit, undefined);
+  for (const s of r.signals.slice(1)) {
+    const want = r.fuyi.favorable.includes(s.wuxing) ? "favorable"
+      : r.fuyi.unfavorable.includes(s.wuxing) ? "unfavorable" : "neutral";
+    assert.equal(s.fit, want);
+    assert.ok(s.steps.some((t) => t.includes("2/5") && t.includes("3/5")));
+  }
+});
+test("第二軸:中和盤全部 neutral", () => {
+  // 1980-04-05 13:00 扶抑總分 0(見 fuyi.test.mjs)
+  const r = castCrossSystem(castChart({ year: 1980, month: 4, day: 5, hour: 13, minute: 0, gender: "男" }));
+  assert.equal(r.fuyi.verdict, "neutral");
+  for (const s of r.signals.slice(1)) assert.equal(s.fit, "neutral");
+});

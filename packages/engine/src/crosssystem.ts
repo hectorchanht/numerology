@@ -5,6 +5,7 @@ import { WUXING } from "./shishen.js";
 import { castNineStar, type NineStarResult } from "./ninestar.js";
 import { lifePath, hetuWuxing, type LifePathResult } from "./lifepath.js";
 import { castKamea, type KameaResult } from "./kamea.js";
+import { castFuyi, type FuyiResult } from "./fuyi.js";
 
 export type Relation = "same" | "sheng" | "ke";
 export type CrossSystemId = "bazi" | "ziwei" | "ninestar" | "lifepath";
@@ -18,6 +19,8 @@ export interface CrossSignal {
   cite: Cite;
   steps: string[];
   relation?: Relation;
+  /** 相對八字扶抑喜忌;錨點 bazi 無 */
+  fit?: "favorable" | "unfavorable" | "neutral";
 }
 
 export interface CrossSystemResult {
@@ -27,6 +30,7 @@ export interface CrossSystemResult {
   nineStar: NineStarResult;
   lifePath: LifePathResult;
   kamea: KameaResult;
+  fuyi: FuyiResult;
 }
 
 const ORDER: Wuxing5[] = ["木", "火", "土", "金", "水"];
@@ -38,6 +42,7 @@ export function wuxingRelation(a: Wuxing5, b: Wuxing5): Relation {
 }
 
 const REL_ZH: Record<Relation, string> = { same: "同", sheng: "相生", ke: "相克" };
+const FIT_ZH = { favorable: "屬喜用", unfavorable: "屬忌", neutral: "屬閒" } as const;
 
 export function castCrossSystem(chart: ChartResult): CrossSystemResult {
   const { year, month, day } = chart.input;
@@ -86,13 +91,20 @@ export function castCrossSystem(chart: ChartResult): CrossSystemResult {
     ],
   });
 
+  const fuyi = castFuyi(chart);
   for (const s of signals) {
     if (s.system === "bazi") continue;
     s.relation = wuxingRelation(anchor, s.wuxing);
     s.steps.push(`與日主五行 ${anchor} 比對:${REL_ZH[s.relation]}`);
+    s.fit = fuyi.favorable.includes(s.wuxing) ? "favorable"
+      : fuyi.unfavorable.includes(s.wuxing) ? "unfavorable" : "neutral";
+    const why = fuyi.verdict === "neutral"
+      ? "八字中和,不定喜忌 → 閒"
+      : `五行 ${s.wuxing} ${FIT_ZH[s.fit]}(喜用 ${fuyi.favorable.join("、")};忌 ${fuyi.unfavorable.join("、")})`;
+    s.steps.push(`對八字扶抑喜忌:${why};基率:喜用通常 2 個五行,隨機落喜用約 2/5、忌約 3/5`);
   }
 
   const distribution = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 } as Record<Wuxing5, number>;
   for (const s of signals) distribution[s.wuxing]++;
-  return { anchor, signals, distribution, nineStar: ns, lifePath: lp, kamea };
+  return { anchor, signals, distribution, nineStar: ns, lifePath: lp, kamea, fuyi };
 }
