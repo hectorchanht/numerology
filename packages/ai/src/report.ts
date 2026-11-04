@@ -1,5 +1,5 @@
-import type { ChartResult, FortuneAnalysis } from "@numerology/engine";
-import { buildContextPack, type FortuneScope } from "./context.js";
+import { castCrossSystem, type ChartResult, type FortuneAnalysis } from "@numerology/engine";
+import { buildContextPack, crossSystemFacts, type FortuneScope } from "./context.js";
 import {
   buildReportUserPrompt,
   buildFortuneReportPrompt,
@@ -191,11 +191,14 @@ export function streamReportSection(chart: ChartResult, sectionKey: string, opts
   // 静态报告各节:当前运一行(动静结合一瞥),不要整份 fortune。
   const scope: FortuneScope = "current";
   const { caveats } = buildContextPack(chart, opts.fortune, { fortuneScope: scope });
+  const locale = opts.locale ?? "zht";
+  // 多體系事實只進本節 user prompt,system 不變(prompt cache 照常命中)。
+  const facts = seg.key === "crosssystem" ? crossSystemFacts(castCrossSystem(chart), locale) : undefined;
   return chatStream({
     kind: "report",
     maxTokens: opts.maxTokens ?? SECTION_MAX_TOKENS,
-    system: buildCachedSystem(chart, opts.fortune, opts.locale ?? "zht", { fortuneScope: scope }),
-    messages: [{ role: "user", content: buildReportSectionPrompt(caveats, seg, opts.lens ?? "both", opts.locale ?? "zht") }],
+    system: buildCachedSystem(chart, opts.fortune, locale, { fortuneScope: scope }),
+    messages: [{ role: "user", content: buildReportSectionPrompt(caveats, seg, opts.lens ?? "both", locale, facts) }],
   }, opts.ai);
 }
 

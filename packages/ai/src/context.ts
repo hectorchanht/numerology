@@ -1,4 +1,6 @@
-import { favorableDirections, type ChartResult, type FortuneAnalysis } from "@numerology/engine";
+import { favorableDirections, type ChartResult, type CrossSystemResult, type FortuneAnalysis } from "@numerology/engine";
+import { SCIENCE_NOTES } from "@numerology/knowledge";
+import type { AiLocale } from "./prompts.js";
 
 /** 上下文包:命盘事实 + 注意事项,供报告与对话共享同一份"真相"。 */
 export interface ContextPack {
@@ -232,4 +234,41 @@ ${daYun}
 ### 紫微流年四化(飞入本命宫,化忌冲宫尤需留意)
 ${yearly}
 `;
+}
+
+const SYS_ZH: Record<string, string> = { bazi: "八字日主", ziwei: "紫微五行局", ninestar: "九星年星", lifepath: "生命靈數" };
+const REL_ZH: Record<string, string> = { same: "印證(同五行)", sheng: "相生", ke: "分歧(相剋)" };
+const TIER_ZH: Record<string, string> = { classical: "原典", scholarly: "學者詮釋", modern: "近現代", science: "科學研究" };
+
+/**
+ * 多體系事實區塊(Markdown):只列引擎已算好的事實,不含解讀。
+ * 只附在 crosssystem 一節的 user prompt,不進 system(保持 prompt cache 前綴不變、其他節不受影響)。
+ */
+export function crossSystemFacts(r: CrossSystemResult, locale: AiLocale): string {
+  const cite = (c: { work: string; author?: string; year?: number | string; locator?: string }) =>
+    [c.author, c.work, c.year, c.locator].filter(Boolean).join(",");
+  const rows = r.signals.map((s) =>
+    `| ${SYS_ZH[s.system] ?? s.system} | ${s.value} | ${s.wuxing} | ${s.relation ? REL_ZH[s.relation] : "錨點"} | ${s.bridge ? `經${s.bridge}橋接` : "—"} | ${s.tier ? TIER_ZH[s.tier] : "未分級"} | ${cite(s.cite)} |`,
+  );
+  const k = r.kamea;
+  const marks = k.marks.map((m) => `${m.system === "lifepath" ? "生命靈數" : "九星年星"} ${m.value} 落第 ${m.row + 1} 行第 ${m.col + 1} 列`);
+  const dist = Object.entries(r.distribution).map(([w, n]) => `${w} ${n}`).join("、");
+  const notes = SCIENCE_NOTES.map((n) => `- [${n.id}] ${n.claim[locale]}(${cite(n.cite)})${n.reviewed ? "" : "(待校對)"}`);
+  return `# 多體系事實(確定性計算結果,勿改動數字)
+
+錨點:八字日主五行 ${r.anchor}。各體系按自身規則求出核心五行,再與錨點比對。
+
+| 體系 | 計出值 | 五行 | 與日主關係 | 橋接 | 層級 | 出處 |
+|---|---|---|---|---|---|---|
+${rows.join("\n")}
+
+- 五行分佈:${dist}
+
+## 宇宙幾何(本節可用的數)
+- 洛書(即 Saturn 3 階幻方):每行和 15,總和 45。
+- 出生星期:星期${"日一二三四五六"[k.weekday]} → 守護行星 ${k.planet} → ${k.order} 階幻方:每行和 ${k.lineSum},總和 ${k.total}。
+${marks.length ? `- 落點:${marks.join(";")}。` : "- 落點:無(數值超出方陣範圍)。"}
+
+## 科學研究條目(science-notes,本站唯一可引用的研究)
+${notes.join("\n")}`;
 }

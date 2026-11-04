@@ -25,8 +25,9 @@ export const dynamic = "force-dynamic";
  * v5 缓存里可能有压制下写进正文的规划独白(无标记、无法可靠分拆),整体失效。
  * v7 = 2026-11-02 harmony 正规化:与 report/v7 同步(provider 补 gpt-oss harmony
  * channel 拆分);v6 缓存里 MLX gpt-oss 的未正规化原文必须失效。
+ * v8 = 2026-11-04 人設擴為多體系。
  */
-const PROMPT_VERSION = "fortune/v7";
+const PROMPT_VERSION = "fortune/v8";
 
 /** 流式生成《大运流年深析》(八字 × 紫微合参,逐步逐年)。首 token 前失败 → JSON 错误(502),而非截断流。 */
 export async function POST(req: Request): Promise<Response> {

@@ -11,6 +11,7 @@ export const SECTION_ICONS: Record<string, string> = {
   relationship: "❤️", // 感情婚姻
   health: "🌿", // 健康提示
   luck: "🌠", // 大运流年概览
+  crosssystem: "🔗", // 多體系交叉
   advice: "💡", // 总体建议 · 开运参考
   // 《大运流年深析》
   overview: "🧭", // 当前总览:定盘定位

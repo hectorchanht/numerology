@@ -122,6 +122,7 @@ export default function Home() {
     { key: "relationship", label: t("seg.relationship") },
     { key: "health", label: t("seg.health") },
     { key: "luck", label: t("seg.luck") },
+    { key: "crosssystem", label: t("seg.crosssystem") },
     { key: "advice", label: t("seg.advice") },
   ] as const;
 

@@ -30,6 +30,7 @@ export function SectionBasis({ chart, segKey }: { chart: ChartResult; segKey: st
       case "wuxing": return t("basis.wuxing");
       case "luck": return t("viz.nowLuck");
       case "useGod": return t("viz.useGod");
+      case "crossSignal": return t(`cross.sys.${l.system}` as TKey);
     }
   };
   const value = (f: BasisFact): string => {
@@ -50,6 +51,9 @@ export function SectionBasis({ chart, segKey }: { chart: ChartResult; segKey: st
       }
       case "luck": return `${f.value} · ${t("fortune.ageRange", { a: f.vars?.a ?? "", b: f.vars?.b ?? "" })}`;
       case "useGod": return `${z(f.value)}${f.source ? ` · ${t("viz.useGodSub")}` : ""}`;
+      case "crossSignal":
+        return [z(f.value), String(f.vars?.wuxing ?? ""), t(`cross.rel.${f.vars?.relation}` as TKey), f.vars?.bridge ? t("cross.bridge") : ""]
+          .filter(Boolean).join(" · ");
       default: return z(f.value);
     }
   };

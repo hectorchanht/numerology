@@ -24,8 +24,9 @@ export const dynamic = "force-dynamic";
  * (无标记、事后无法可靠分拆),必须靠版本号整体失效。
  * v7 = 2026-11-02 harmony 正规化:provider 补上 gpt-oss harmony channel 拆分
  * (mlx-lm 原始标记);v6 缓存里 MLX gpt-oss 的未正规化原文必须失效。
+ * v8 = 2026-11-04 人設擴為多體系、新增 crosssystem 節。
  */
-const PROMPT_VERSION = "report/v7";
+const PROMPT_VERSION = "report/v8";
 
 /** 流式生成命盘解读报告(动静结合)。首 token 前失败 → JSON 错误(502),而非截断流。 */
 export async function POST(req: Request): Promise<Response> {

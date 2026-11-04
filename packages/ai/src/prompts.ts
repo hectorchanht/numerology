@@ -26,6 +26,7 @@ export const SEGMENT_TITLES: Record<string, Record<AiLocale, string>> = {
   relationship: { zht: "感情婚姻", zhs: "感情婚姻", en: "Relationships & Marriage" },
   health: { zht: "健康提示", zhs: "健康提示", en: "Health Notes" },
   luck: { zht: "大運流年概覽", zhs: "大运流年概览", en: "Luck Cycle Overview" },
+  crosssystem: { zht: "多體系交叉", zhs: "多体系交叉", en: "Cross-System Reading" },
   advice: { zht: "總體建議 · 開運參考", zhs: "总体建议 · 开运参考", en: "Overall Advice & Remedies" },
   overview: { zht: "一、當前總覽", zhs: "一、当前总览", en: "1. Current Overview" },
   dayun: { zht: "二、大運逐步精講", zhs: "二、大运逐步精讲", en: "2. Major Luck Periods in Detail" },
@@ -42,7 +43,7 @@ export function segmentTitle(key: string, locale: AiLocale): string {
 
 /** 解读师人设 v3 (2026-10-23 research-backed):精简 ~50%,禁令改写为正面指令。
  * 研究结论:长禁令列表在小模型上适得其反(Pink Elephant 效应);只保留真正的 exclusion。 */
-export const SYSTEM_PERSONA = `你是一位兼通【八字四柱】与【紫微斗数】的命理解读师,说话直接、有料,像个有见识的朋友在讲人话。
+export const SYSTEM_PERSONA = `你是一位多體系命理解讀師:以【八字四柱】与【紫微斗数】为主,兼及九星、生命靈數、行星幻方等體系的交叉對照,说话直接、有料,像个有见识的朋友在讲人话。
 
 【动静结合,运为主导】命盘格局是"静"(先天的牌),大运流年是"动"(后天的局),运在一生中占主导:结论必须落到"哪步运、哪些年",而非只看静态命盘下断语。
 
@@ -56,7 +57,7 @@ export const SYSTEM_PERSONA = `你是一位兼通【八字四柱】与【紫微�
 - 只根据随附的命盘事实推论,不编造命盘里没有的星曜、干支或神煞;紫微看四化飞宫、八字看十神引动,都以命盘数据为准。
 - 命盘给得出领域、性质、吉凶倾向——这些可以直接断言;给不出具体事件(某年换工作/分手/破财),一律不写,那是脑补。
 - 信号清晰就果断下结论;信号矛盾或数据有边界,就明说"这块不确定/两种力量并存"。
-- 绝不编造古籍断语装权威:想借传统说法时,只写"传统有此一说"。
+- 绝不编造古籍断语装权威:想借传统说法时,只写"传统有此一说"。引用研究或古書,只限隨附事實列出的條目與出處,因為其餘來源未經本站核對。
 - 健康只作提示并建议就医,投资/法律不下绝对结论;一句带过,不必反复。`;
 
 /** 时辰推断师人设:据已知人生事实,比对当日 12 时辰命盘,反推最可能时辰。 */
@@ -466,6 +467,12 @@ export interface ReportSegment {
 export const REPORT_SEGMENTS: ReportSegment[] = [
   ...REPORT_SECTIONS.map((s) => ({ key: s.key, title: s.title, instruction: s.brief })),
   {
+    key: "crosssystem",
+    title: "多體系交叉",
+    instruction:
+      "並列八字、紫微、九星、生命靈數各自求出的核心五行,講它們在哪裡交匯、在哪裡分歧,以及背後的機制。",
+  },
+  {
     key: "advice",
     title: "总体建议 · 开运参考",
     instruction:
@@ -554,24 +561,54 @@ ${TLDR_MARKER}:<1–3 句、合共不超过 60 字(英文不超过 45 词)的一
 ——直接给本节判决,像"事业:今年宜守不宜攻,转工等秋后。"这样一针见血;用输出语言写,标记「${TLDR_MARKER}:」本身原样照抄、不翻译、不加粗、不放引用符号。TL;DR 只写判断本身:岁数、年份、干支一律不写,它们由小标题承载。TL;DR 只写一行,然后空一行,再写正文。正文不要重复 TL;DR 原句。`;
 }
 
-/** 单节《命盘格局解读》指令(分段模式)。lens 决定纯八字/纯紫微/合参;locale 决定小标题语言。 */
-export function buildReportSectionPrompt(caveats: string[], seg: ReportSegment, lens: ReportLens = "both", locale: AiLocale = "zht"): string {
+/**
+ * 多體系交叉一節的專屬指令:取代 lens 指令(本節本身就是多體系,不受單一體系隔離)。
+ * 數字與出處只取自事實區塊;巧合講基率;橋接明說;666 / 凶星中性陳述。
+ */
+const CROSS_DIRECTIVE = `【多體系交叉 · 本節並看各體系】本節依下方「多體系事實」區塊,把八字、紫微、九星、生命靈數各按自身規則得出的核心五行並列比對。依此次序寫:
+1. 一句定性:幾個體系與日主五行同向(印證或相生),哪個相反(分歧)。
+2. 交匯與分歧逐點講機制:先說該體系怎樣得出這個五行,再說它與日主五行的生剋關係。生命靈數本身不講五行,它的五行是經河圖橋接而來,提到時寫明「經河圖橋接」。
+3. 宇宙幾何對照:洛書與所落幻方的行和、總和、落點,只用事實區塊列出的數。
+4. 科學角度:與本節論點相關才寫,只引事實區塊「science-notes」所列條目,以 [id] 標註;條目尚待校對,語氣保持審慎。
+本節出現的每個數字與每條引用,都只取自命盤事實或多體系事實區塊,因為其餘數字與來源未經本站計算或核對。
+講印證時一併講基率:五行只有五種,單一體系隨機與日主同五行的機會約五分之一,多個體系一致也可能出於巧合,所以把它當作參考而非證據。
+666、化忌、凶星等,以中性語氣說明其在原體系中的本義(例如 666 是太陽方陣全部數字之和),讓讀者理解而非擔憂。
+對照表已由頁面畫出,本節用段落解讀,不重畫表格。`;
+
+/**
+ * 单节《命盘格局解读》指令(分段模式)。lens 决定纯八字/纯紫微/合参;locale 决定小标题语言。
+ * extraFacts:只供 crosssystem 一節使用的多體系事實區塊,附在 user prompt 末尾(不進 system,保 prompt cache)。
+ */
+export function buildReportSectionPrompt(
+  caveats: string[],
+  seg: ReportSegment,
+  lens: ReportLens = "both",
+  locale: AiLocale = "zht",
+  extraFacts?: string,
+): string {
   const title = segmentTitle(seg.key, locale);
+  const cross = seg.key === "crosssystem";
+  const basisHint = cross
+    ? "(哪個體系、計出值、五行、與日主的關係)"
+    : lens === "ziwei" ? "(哪个宫位的哪颗星或四化)" : lens === "bazi" ? "(哪一柱/哪个十神/星运/神煞)" : "(哪一柱/哪个十神/哪个宫位的哪颗星或四化)";
+  const patternHint = cross
+    ? ""
+    : `若本节涉及性格/命格${lens === "bazi" ? ",以日主与十神格局立论" : lens === "ziwei" ? ",务必结合命宫三方四正四宫合看主星定格局,先点格局再展开" : ",紫微部分须结合命宫三方四正四宫合看主星定格局"}。`;
   return `请基于上方命盘事实,**只**写【命盘格局解读】中的这一节:「${title}」。
 本节要点:${seg.instruction}
 
-${lensDirective(lens)}
+${cross ? CROSS_DIRECTIVE : lensDirective(lens)}
 
 要求:
 - 【真实直接、不模棱两可】给出明确判断,优点缺点都直说,该断就断;少用"可能/也许/倾向于"安全垫,杜绝放之四海皆准、谁都适用的废话。真矛盾或数据有边界时明说"不确定/两种力量并存"。
 - 【篇幅·硬性】本节扼要讲透核心即可,约 ${SECTION_WORDS} 字、3–4 段;**务必在篇幅内把话说完、自然收尾(以句号结束),宁可少写一点,也绝不写到一半被切断。** 不要越界写其它节,也不要把大运流年展开成长篇(那是另一份报告)。
-- 每个论断挂依据${lens === "ziwei" ? "(哪个宫位的哪颗星或四化)" : lens === "bazi" ? "(哪一柱/哪个十神/星运/神煞)" : "(哪一柱/哪个十神/哪个宫位的哪颗星或四化)"}。若本节涉及性格/命格${lens === "bazi" ? ",以日主与十神格局立论" : lens === "ziwei" ? ",务必结合命宫三方四正四宫合看主星定格局,先点格局再展开" : ",紫微部分须结合命宫三方四正四宫合看主星定格局"}。
+- 每个论断挂依据${basisHint}。${patternHint}
 ${PLAN_THEN_WRITE}
 ${VERDICT_FIRST_RULE}
 ${STYLE_DIRECTIVES}
 - **输出以「## ${title}」作为小标题开头,只写这一节。**
 ${tldrDirective(title)}
-${SELF_CHECK}${caveatBlockOf(caveats)}`;
+${SELF_CHECK}${caveatBlockOf(caveats)}${cross && extraFacts ? `\n\n${extraFacts}` : ""}`;
 }
 
 /** 单节《大运流年深析》指令(分段模式)。lens 决定纯八字/纯紫微/合参;locale 决定小标题语言。 */

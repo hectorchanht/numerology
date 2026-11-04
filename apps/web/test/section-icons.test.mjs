@@ -8,13 +8,13 @@ test("stripLeadingHeading 去掉 AI 自帶標題,無標題時原樣返回", () =
   assert.equal(stripLeadingHeading(""), "");
 });
 
-// 与 REPORT_SECTIONS / FORTUNE_SEGMENTS 的 key 保持一致(两份报告共 13 节)
+// 与 REPORT_SECTIONS / FORTUNE_SEGMENTS 的 key 保持一致(两份报告共 14 节)
 const ALL_KEYS = [
-  "personality", "career", "wealth", "relationship", "health", "luck", "advice",
+  "personality", "career", "wealth", "relationship", "health", "luck", "crosssystem", "advice",
   "overview", "dayun", "review", "future", "rhythm", "action",
 ];
 
-test("13 个章节 key 都有非空图标", () => {
+test("14 个章节 key 都有非空图标", () => {
   for (const k of ALL_KEYS) {
     const icon = SECTION_ICONS[k];
     assert.ok(icon && icon.trim().length > 0, `${k} 缺少图标`);

@@ -521,7 +521,14 @@ export function StreamedReport({
                           </button>
                         </div>
                       ) : (
-                        <p className="note">{t("report.segEmpty")}</p>
+                        // 空節(含舊紀錄新增的章節)亦可單節生成。
+                        <div className="sec-error">
+                          <p className="note">{t("report.segEmpty")}</p>
+                          <button type="button" className="btn secondary small" onClick={() => retrySection(i)}>
+                            <Icon name="refresh" />
+                            {t("report.retrySection")}
+                          </button>
+                        </div>
                       )}
                     </div>
                   </article>

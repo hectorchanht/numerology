@@ -23,3 +23,12 @@ test("basis:十神命中位置含天干同藏干,日干唔計", () => {
   assert.deepEqual(hits.map((h) => `${h.pillar}.${h.part}:${h.god}`), ["year.zhi:七杀", "month.zhi:正官"]);
   assert.equal(tenGodHits(chart, ["比肩"]).length, 0);
 });
+
+test("basis:crosssystem 依據 = 各體系值與五行", async () => {
+  const { castCrossSystem } = await import("@numerology/engine");
+  const b = sectionBasis(chart, 2026).crosssystem;
+  const sig = castCrossSystem(chart).signals;
+  assert.equal(b.length, sig.length);
+  assert.deepEqual(b.map((f) => [f.label.system, f.value, f.vars.wuxing]), sig.map((s) => [s.system, s.value, s.wuxing]));
+  assert.equal(b.find((f) => f.label.system === "lifepath").vars.bridge, "河圖");
+});

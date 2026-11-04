@@ -1,4 +1,4 @@
-import type { ChartResult } from "@numerology/engine";
+import { castCrossSystem, type ChartResult, type CrossSystemId } from "@numerology/engine";
 import { WUXING, wuxingCount, wuxingHiddenCount, currentLuckStep } from "./ganzhi.js";
 
 /**
@@ -14,7 +14,8 @@ export type BasisLabel =
   | { kind: "dayBranch" }
   | { kind: "wuxing" }
   | { kind: "luck" }
-  | { kind: "useGod" };
+  | { kind: "useGod" }
+  | { kind: "crossSignal"; system: CrossSystemId };
 
 export interface BasisFact {
   label: BasisLabel;
@@ -108,6 +109,12 @@ export function sectionBasis(chart: ChartResult, year = new Date().getFullYear()
         ...(luck ? { vars: { a: luck.startAge, b: luck.endAge } } : {}),
       },
     ],
+    // 多體系交叉:各體系計出值與五行(含與日主關係、河圖橋接)。
+    crosssystem: castCrossSystem(chart).signals.map((s) => ({
+      label: { kind: "crossSignal", system: s.system },
+      value: s.value,
+      vars: { wuxing: s.wuxing, relation: s.relation ?? "anchor", ...(s.bridge ? { bridge: s.bridge } : {}) },
+    })),
     advice: [useGod, dayMaster],
   };
 }
