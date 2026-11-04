@@ -108,3 +108,4 @@ export {
 } from "./sancai.js";
 
 export { castNineStar, type NineStarInfo, type NineStarResult } from "./ninestar.js";
+export { reduceNumber, lifePath, hetuWuxing, type LifePathResult } from "./lifepath.js";
