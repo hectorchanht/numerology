@@ -33,7 +33,7 @@ mineru parse raw_pdf/<book>.pdf --pages 1-6 --json    # edition / rights check
 mineru parse raw_pdf/<book>.pdf --pages all --wait 1800 --output $SCRATCH/<book>.md
 ```
 
-A 450-page book takes about 5–15 min. Run long parses in the background and wait for the notification. Write output to the scratchpad, never into the repo.
+For old scans, or when the user wants maximum OCR effort: `--tier advanced` is **not** offered by this machine's managed local server (MinerU 4.1.7 reports `tier_mismatch`, supported = flash/basic/standard), and remote also only offers standard. So `standard` is the local ceiling here. Re-check `mineru server status --json` → `supported_tiers` after a MinerU upgrade. For pages with unusual scripts (Hebrew, Greek) or tables, verify against the page image. A/B other OCR engines (e.g. PaddleOCR) only on the pages that fail, not the whole book. A 450-page book takes about 5–15 min. Run long parses in the background and wait for the notification. Write output to the scratchpad, never into the repo.
 
 ## 4. Locate the facts. Don't read the whole book into context
 
@@ -78,4 +78,9 @@ Write a short overview in our own words: how the system works, then the tables g
 | Book | Status | Output |
 |---|---|---|
 | Fideler, *Jesus Christ, Sun of God* (1993, in copyright, libgen copy) | facts only | `greek-gematria.json`, `planetary-squares.json`, `docs/greek-gematria.md` |
-| Agrippa, *Three Books of Occult Philosophy*, 1898 Cornell scan (public domain) | in progress | — |
+| Agrippa, *Three Books of Occult Philosophy*, 1898 Cornell scan (public domain; **Book I only**) | facts | `agrippa-correspondences.json`, `docs/agrippa-correspondences.md`. Hebrew glyphs OCR'd as ✕; fixed by checking the page image (p. 258) |
+
+## OCR lessons
+
+- MinerU's VLM can invent filler on blank pages ("The image contains no text…"). Drop it, never treat it as source.
+- Non-Latin glyphs inside tables (Hebrew) may come out as `✕`. Check the page image and supply the glyphs from the standard alphabet. A test then checks them against known values (e.g. נכיאל = 111, סורת = 666).
