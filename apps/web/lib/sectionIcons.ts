@@ -22,15 +22,15 @@ export const SECTION_ICONS: Record<string, string> = {
   action: "🎯", // 行動建議
 };
 
-/** 取某章節的圖標(未知 key 回落爲 ✦,永不拋錯)。 */
+/** 取某章節的圖標(未知 key 回落為 ✦,永不拋錯)。 */
 export function sectionIcon(key: string): string {
   return SECTION_ICONS[key] ?? "✦";
 }
 
 /**
- * 渲染時注入圖標:把 markdown 首個 `## ` 標題行替換爲帶圖標的確定性標題
+ * 渲染時注入圖標:把 markdown 首個 `## ` 標題行替換為帶圖標的確定性標題
  * (`## <icon> <label>`);若正文沒有標題行則補一個。正文其餘部分原樣不動。
- * 歷史記錄裏存的仍是無圖標原文,圖標只在渲染這一層出現。
+ * 歷史記錄裡存的仍是無圖標原文,圖標只在渲染這一層出現。
  */
 export function withIconHeading(segKey: string, label: string, markdown: string): string {
   return `## ${sectionIcon(segKey)} ${label}\n\n${stripLeadingHeading(markdown)}`;

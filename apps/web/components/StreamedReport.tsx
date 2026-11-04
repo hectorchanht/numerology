@@ -134,7 +134,7 @@ export function StreamedReport({
     }
   }, [key]);
 
-  // 從歷史記錄恢復:直接顯示爲完成態,零 API 調用。
+  // 從歷史記錄恢復:直接顯示為完成態,零 API 調用。
   useEffect(() => {
     if (!restoredSections) return;
     if (generating.current && startedFor.current === key) return;
@@ -148,7 +148,7 @@ export function StreamedReport({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restoredSections]);
 
-  // 每次請求都重讀設置:key 取當前 provider 名下的(沒填 → 空),人設爲空則省略。
+  // 每次請求都重讀設置:key 取當前 provider 名下的(沒填 → 空),人設為空則省略。
   const postBody = (extra: Record<string, unknown>, loc: Locale) => {
     const { ai, systemPrompt } = aiRequestParts();
     return { input, ai, locale: loc, ...(systemPrompt ? { systemPrompt } : {}), ...extra };

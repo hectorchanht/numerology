@@ -17,7 +17,7 @@ test("东经偏东(>120)经度差为正,偏西为负", () => {
   assert.equal(east.correction.applied, true);
   assert.equal(east.correction.longitudeMinutes, 40);
   assert.ok(east.correction.offsetMinutes > 0, "偏东应为正偏移");
-  // 北京約 116.4°(偏西)→ 經度差爲負
+  // 北京約 116.4°(偏西)→ 經度差為負
   const bj = resolveBirthDateTime({ ...SAMPLE, longitude: 116.4 });
   assert.ok(bj.correction.longitudeMinutes < 0, "偏西经度差应为负");
 });

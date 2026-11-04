@@ -6,7 +6,7 @@ import { isTiangan } from "@numerology/knowledge";
 const STANDARD_MERIDIAN = 120;
 
 export interface SolarTimeCorrection {
-  /** 是否已做真太陽時校正(提供了經度纔會做) */
+  /** 是否已做真太陽時校正(提供了經度才會做) */
   applied: boolean;
   longitude?: number;
   /** 總偏移(分鐘,= 經度差 + 均時差) */
@@ -45,7 +45,7 @@ function equationOfTime(n: number): number {
 }
 
 /**
- * 把出生時鐘時間換算爲【真太陽時】(提供經度時)。
+ * 把出生時鐘時間換算為【真太陽時】(提供經度時)。
  * 真太陽時 = 時鐘時間 + (經度 − 120)×4 分鐘 + 均時差。
  * 用 UTC 做加減以避免本地時區干擾,確定性。
  */

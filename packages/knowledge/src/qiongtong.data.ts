@@ -1,4 +1,4 @@
-// AUTO-GENERATED from data/qiongtong.json — 內聯爲 TS 模塊,隨 JS 一同打包,
+// AUTO-GENERATED from data/qiongtong.json — 內聯為 TS 模塊,隨 JS 一同打包,
 // 避免運行時 fs 讀取(Vercel serverless / 瀏覽器 / 小程序 均不可靠)。
 // 若需更新數據,改 data/qiongtong.json 後重新生成本文件。
 import type { TiaohouTable } from "./types.js";

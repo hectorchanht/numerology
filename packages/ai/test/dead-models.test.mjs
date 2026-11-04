@@ -24,7 +24,7 @@ test("deadModels:登记/读取/归一化(models/ 前缀)/TTL 过期", async () =
   assert.equal(typeof map.gemini["gemini-2.5-flash"], "number");
   assert.equal(map.openrouter["dead/model:free"] > 0, true);
   assert.equal(kv.store.has(DEAD_MODELS_KV_KEY), true);
-  // 未過期 → 在集合裏;31 天后 → 過期復活。
+  // 未過期 → 在集合裡;31 天后 → 過期復活。
   assert.equal(deadModelIds(map, "gemini").has("gemini-2.5-flash"), true);
   assert.equal(deadModelIds(map, "gemini", Date.now() + 31 * 24 * 60 * 60 * 1000).size, 0);
   // 無效 kv 絕不拋錯。

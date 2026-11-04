@@ -2,7 +2,7 @@
  * 動態下架模型登記:生成時撞到 404(模型不存在/已下架)即寫入 KV,
  * 模型列表拉取時自動濾走 —— 不靠人手維護 hardcode 表。
  *
- * 存儲:單條 KV(JSON),按 provider 分組,值爲首次探到 404 的時間戳。
+ * 存儲:單條 KV(JSON),按 provider 分組,值為首次探到 404 的時間戳。
  * TTL 30 天:過期條目自動復活(模型有可能重新上架,復活後若再 404 會重新登記)。
  * hardcode 的 RETIRED_MODEL_IDS(web 側 providerMeta)仍保留作 seed,兩者取並集過濾。
  */

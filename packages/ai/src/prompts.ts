@@ -17,7 +17,7 @@ export function localeDirective(locale: AiLocale): string {
 
 /**
  * 各報告章節標題的三地對照(key → locale → 標題)。
- * 模型會把 prompt 裏的小標題逐字照抄進輸出,故標題必須與輸出語言一致,
+ * 模型會把 prompt 裡的小標題逐字照抄進輸出,故標題必須與輸出語言一致,
  * 否則會出現"正文繁體、標題簡體"的錯位。
  */
 export const SEGMENT_TITLES: Record<string, Record<AiLocale, string>> = {
@@ -42,7 +42,7 @@ export function segmentTitle(key: string, locale: AiLocale): string {
   return SEGMENT_TITLES[key]?.[locale] ?? SEGMENT_TITLES[key]?.zhs ?? key;
 }
 
-/** 解讀師人設 v3 (2026-10-23 research-backed):精簡 ~50%,禁令改寫爲正面指令。
+/** 解讀師人設 v3 (2026-10-23 research-backed):精簡 ~50%,禁令改寫為正面指令。
  * 研究結論:長禁令列表在小模型上適得其反(Pink Elephant 效應);只保留真正的 exclusion。 */
 export const SYSTEM_PERSONA = `你是一位多體系命理解讀師:以【八字四柱】与【紫微斗数】为主,兼及九星、生命靈數、行星幻方等體系的交叉對照,说话直接、有料,文风通俗简练。九星、生命靈數、行星幻方等只在隨附「多體系事實」區塊時才對照;沒有該區塊時一律不提、不自行推算,因為這些數須由本站引擎計算。
 
@@ -92,7 +92,7 @@ export const REPORT_SECTIONS = [
 
 export type ReportSectionKey = (typeof REPORT_SECTIONS)[number]["key"];
 
-/** 整篇模式(CLI 兼容)的 TL;DR 規則;標記與分段模式同爲 TLDR_MARKER。 */
+/** 整篇模式(CLI 兼容)的 TL;DR 規則;標記與分段模式同為 TLDR_MARKER。 */
 const WHOLE_TLDR_RULE = `【每节开头 TL;DR】每个「## 」小标题之后第一行写「TL;DR:<1–3 句一针见血的结论>」(标记原样照抄、不翻译),空一行再写正文。`;
 
 /** 組裝報告的用戶指令。locale 決定章節標題的語言(正文語言由 localeDirective 指令模型)。 */
@@ -122,7 +122,7 @@ ${SELF_CHECK}${caveatBlock}`;
 
 /**
  * 小標題清單(原樣照抄用)。
- * 實測教訓(2026-10-22 live):只給"格式模板 + 逐字照抄"不夠——模型會照着模板的
+ * 實測教訓(2026-10-22 live):只給"格式模板 + 逐字照抄"不夠——模型會照著模板的
  * 形狀填佔位符,輸出 `### 甲寅運（–歲／–年）`(en dash 佔位,連禁例都換了符號繞過)。
  * 解法是把本節每個小標題的**成品行**直接列出來,讓模型逐行復制,不做任何格式轉換。
  * 干支/星曜名在 en 下也保留漢字(與 localeDirective 的專有名詞規則一致)。
@@ -147,15 +147,15 @@ export function liuNianHeadingLine(y: { year: number; ganZhi: string; age: numbe
 }
 
 /**
- * 確定性後處理 v2:把模型寫殘的小標題逐行修復爲標準成品行,形狀無關。
- * 背景(2026-10-22 live 實證):弱模型(mistral-small)即使 prompt 裏給了逐行照抄的
+ * 確定性後處理 v2:把模型寫殘的小標題逐行修復為標準成品行,形狀無關。
+ * 背景(2026-10-22 live 實證):弱模型(mistral-small)即使 prompt 裡給了逐行照抄的
  * 清單,仍會輸出 `### 癸未運（–歲／–年）` 這類佔位符——純 prompt 手段不可靠,
  * 必須服務端兜底。2026-10-23 新形狀:`- 歲（-）：己巳運`(破折號前綴 + 佔位 + 冒號 +
- * 干支運結尾),故 v2 不再限定 `###` 前綴,改爲"干支+運錨定 + 標題感"判定。
+ * 干支運結尾),故 v2 不再限定 `###` 前綴,改為"干支+運錨定 + 標題感"判定。
  *
  * 判定某行是"<干支>運"小標題:干支+運出現在行首(md 前綴後)或短行行尾,或行內有
  * 佔位符痕跡;且行內沒有該步正確的起始年份數字(有正確年份 = 已寫對,不動)。
- * 正文裏順帶提到"這步己巳運…"的行(干支運在行中、後有正文、無佔位符)不會被誤傷。
+ * 正文裡順帶提到"這步己巳運…"的行(干支運在行中、後有正文、無佔位符)不會被誤傷。
  */
 const GZ_RE = "[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]";
 /** 佔位符痕跡:短橫/破折號配歲、空括號、ages 佔位等 */
@@ -209,7 +209,7 @@ export function makeFortuneLineFixer(
   for (const y of fortune.bazi.liuNian) {
     if (!yearByGanzhi.has(y.ganZhi)) yearByGanzhi.set(y.ganZhi, liuNianHeadingLine(y, locale));
   }
-  // 每年所屬大運步的同期大限(回看/未來節裏"紫微大限:無"用它修復,而非當前大限)
+  // 每年所屬大運步的同期大限(回看/未來節裡"紫微大限:無"用它修復,而非當前大限)
   const decadalByYear = new Map<number, StepDecadal>();
   for (const y of fortune.bazi.liuNian) {
     const d = fortune.bazi.daYun.find((s) => s.startYear <= y.year && y.year <= s.endYear);
@@ -218,7 +218,7 @@ export function makeFortuneLineFixer(
       decadalByYear.set(y.year, { ganzhi: dec.heavenlyStem + dec.earthlyBranch, palace: dec.palaceName ?? "" });
     }
   }
-  // 總覽節等:紫微大限:無 → 當前大限;進入某步大運後切換爲該步同期大限。
+  // 總覽節等:紫微大限:無 → 當前大限;進入某步大運後切換為該步同期大限。
   const cur = fortune.ziwei?.decadal;
   let current: StepDecadal | null =
     cur && cur.heavenlyStem && cur.earthlyBranch
@@ -350,11 +350,11 @@ function fortuneAntiRepetition(key: string): string {
 
 /**
  * 小標題清單(原樣照抄用)。
- * 實測教訓(2026-10-22 live):只給"格式模板 + 逐字照抄"不夠——模型會照着模板的
+ * 實測教訓(2026-10-22 live):只給"格式模板 + 逐字照抄"不夠——模型會照著模板的
  * 形狀填佔位符,輸出 `### 甲寅運（–歲／–年）`(en dash 佔位,連禁例都換了符號繞過)。
  * 解法是把本節每個小標題的**成品行**直接列出來,讓模型逐行復制,不做任何格式轉換。
  * 干支/星曜名在 en 下也保留漢字(與 localeDirective 的專有名詞規則一致)。
- * 注意:清單只是"盡力而爲"的 prompt 手段,最終兜底靠 fixFortuneHeadings(服務端
+ * 注意:清單只是"盡力而為"的 prompt 手段,最終兜底靠 fixFortuneHeadings(服務端
  * 確定性後處理)。
  */
 function fortuneHeadingLedger(segKey: string, fortune: FortuneAnalysis, locale: AiLocale): string {
@@ -397,7 +397,7 @@ ${STYLE_EXEMPLAR}
 const PLAN_THEN_WRITE = `【动笔前先规划】先想好本节 3–4 个互不重叠的切入角度(每段一个角度,角度之间不许重叠),再逐段展开;【定性】就是该段角度的一句话版本。`;
 
 /**
- * self-check(與 system 人設裏的去重句 sandwich:頭尾各一,利用 recency bias)。
+ * self-check(與 system 人設裡的去重句 sandwich:頭尾各一,利用 recency bias)。
  * 研究結論:保留一條正面表述的去重指令,刪掉其餘一切。
  */
 const SELF_CHECK = `【写完自查】逐段检查:每段是否只讲一个新观点?有没有哪句只是换字重述前文?有就删掉,再输出。`;
@@ -558,7 +558,7 @@ export const TLDR_MARKER = "TL;DR";
 
 /** TL;DR 指令:緊跟小標題輸出一行摘要,再空一行接正文。
  * v3.1:TL;DR 只寫一句話判斷,歲數/年份/干支一律不寫(由小標題承載)——
- * 2026-10-23 live 實測:模型在 TL;DR 裏列舉歲數時會輸出"–歲、–歲"佔位符。 */
+ * 2026-10-23 live 實測:模型在 TL;DR 裡列舉歲數時會輸出"–歲、–歲"佔位符。 */
 function tldrDirective(title: string): string {
   return `【开头 TL;DR·硬性格式】「## ${title}」小标题之后,**第一行**必须是:
 ${TLDR_MARKER}:<1–3 句、合共不超过 60 字(英文不超过 45 词)的一句话结论>

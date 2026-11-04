@@ -36,7 +36,7 @@ export async function streamToPrimedResponse(stream, timeoutMs = 20_000) {
     const encoder = new TextEncoder();
     const body = new ReadableStream({
         start(controller) {
-            // 預熱時已消費掉首個塊,這裏先回放,保證正文完整。
+            // 預熱時已消費掉首個塊,這裡先回放,保證正文完整。
             if (first)
                 controller.enqueue(encoder.encode(first));
             stream.on("text", (delta) => controller.enqueue(encoder.encode(delta)));

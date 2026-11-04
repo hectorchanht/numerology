@@ -2,7 +2,7 @@ import type { Dizhi, Tiangan } from "@numerology/knowledge";
 
 /**
  * 八字神煞(常用標準集,非窮盡)。
- * 說明:神煞流派衆多、定義有差異;此處只實現規則較一致、爭議較小的常用神煞,
+ * 說明:神煞流派眾多、定義有差異;此處只實現規則較一致、爭議較小的常用神煞,
  * 對定義分歧大的(福星/德秀/童子/血刃等)從略,避免臆造。
  */
 
@@ -93,7 +93,7 @@ export interface ShenShaContext {
 }
 
 /**
- * 求某地支(某一柱)上坐落的神煞。以日干 + 年支/日支(三合)+ 年支(孤寡)爲依據。
+ * 求某地支(某一柱)上坐落的神煞。以日干 + 年支/日支(三合)+ 年支(孤寡)為依據。
  * 返回去重後的神煞名數組。
  */
 export function shenShaForBranch(ctx: ShenShaContext, zhi: Dizhi): string[] {
@@ -104,7 +104,7 @@ export function shenShaForBranch(ctx: ShenShaContext, zhi: Dizhi): string[] {
     if (map[ctx.dayGan]?.includes(zhi)) out.add(name);
   }
 
-  // 三合派:以年支、日支爲基準各取一遍
+  // 三合派:以年支、日支為基準各取一遍
   for (const base of [ctx.yearZhi, ctx.dayZhi]) {
     const g = groupOf(base);
     if (!g) continue;
@@ -113,7 +113,7 @@ export function shenShaForBranch(ctx: ShenShaContext, zhi: Dizhi): string[] {
     }
   }
 
-  // 孤辰寡宿:以年支爲基準
+  // 孤辰寡宿:以年支為基準
   const gg = GUGUA[ctx.yearZhi];
   if (gg) {
     if (gg.孤辰 === zhi) out.add("孤辰");

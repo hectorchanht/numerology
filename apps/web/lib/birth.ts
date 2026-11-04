@@ -4,7 +4,7 @@ import { solarFromLunar, type BirthInput, type HourInferInput } from "@numerolog
 const MIN_YEAR = 1900;
 const MAX_YEAR = 2100;
 
-/** 若 body 標記爲農曆,把 year/month/day 轉成陽曆;否則原樣返回。 */
+/** 若 body 標記為農曆,把 year/month/day 轉成陽曆;否則原樣返回。 */
 function resolveCalendar(b: Record<string, unknown>, y: number, m: number, d: number) {
   if (b.calendar === "lunar") {
     const isLeap = b.isLeapMonth === true;
@@ -40,7 +40,7 @@ function longitudeNum(b: Record<string, unknown>): number | undefined {
   return v;
 }
 
-/** 把任意外部輸入(API body)安全解析爲 BirthInput,在邊界快速失敗。 */
+/** 把任意外部輸入(API body)安全解析為 BirthInput,在邊界快速失敗。 */
 export function parseBirthInput(body: unknown): BirthInput {
   if (typeof body !== "object" || body === null) {
     throw new Error("请求体格式错误");

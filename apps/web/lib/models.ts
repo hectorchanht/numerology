@@ -59,7 +59,7 @@ function toEntries(ids: string[]): ModelEntry[] {
 
 type ModelsPayload = { data?: { id?: string; pricing?: { prompt?: string | number } }[] };
 
-/** 解析 OpenAI 兼容 /models 響應爲模型項(pricing.prompt 爲 0 → free:true)。 */
+/** 解析 OpenAI 兼容 /models 響應為模型項(pricing.prompt 為 0 → free:true)。 */
 function parseModelEntries(data: ModelsPayload): ModelEntry[] {
   const list = Array.isArray(data?.data) ? data.data : [];
   return list
@@ -109,7 +109,7 @@ async function fetchEndpointEntries(
 
 /**
  * mac-llm 列表:只拉 Ollama 一個端點(MLX 已停用,不再有合併)。
- * 成功 → source:"live";失敗(或列表爲空) → 離線軟回落靜態 7 個。
+ * 成功 → source:"live";失敗(或列表為空) → 離線軟回落靜態 7 個。
  */
 async function fetchMacModels(opts: FetchProviderModelsOpts): Promise<ModelsResult> {
   const entries = await fetchEndpointEntries(MODELS_BASE_URL["mac-llm"]!, opts);
@@ -129,12 +129,12 @@ async function fetchMacModels(opts: FetchProviderModelsOpts): Promise<ModelsResu
 
 /**
  * 拉取某 provider 的模型列表。純函數(fetch 可注入,便於測試)。
- * - workers-ai:binding 無 list 接口,返回構建時覈驗表(verified-static)。
+ * - workers-ai:binding 無 list 接口,返回構建時核驗表(verified-static)。
  * - OpenAI 兼容:代理 {baseURL}/models;401 → needsKey。
  * - anthropic/custom:靜態表(無標準端點)。
  * - mac-llm:單一 Mac provider → 只拉 Ollama 端點(見 fetchMacModels);
  *   顯式傳 baseUrl 時按單端點走既有流程。
- * - mac-mlx(退役舊名):入口先正規化爲 mac-llm,行爲與 mac-llm 完全一致。
+ * - mac-mlx(退役舊名):入口先正規化為 mac-llm,行為與 mac-llm 完全一致。
  * key 只經 Authorization 頭發送,絕不出現在返回值/日誌中。
  */
 export async function fetchProviderModels(
@@ -202,7 +202,7 @@ export async function fetchProviderModels(
   const data = (await res.json()) as ModelsPayload;
   const models = parseModelEntries(data);
   // 下架模型直接移除(選了必 404),不讓用戶選到:hardcode seed + KV 動態登記取並集。
-  // 若過濾後爲空則回落原列表(避免下拉被清空,屬於異常狀態)。
+  // 若過濾後為空則回落原列表(避免下拉被清空,屬於異常狀態)。
   const dead = opts.kv ? deadModelIds(await readDeadModels(opts.kv), name) : new Set<string>();
   const filtered = filterRetired(models).filter(
     (m) => !dead.has(normDeadModelId(m.id)),

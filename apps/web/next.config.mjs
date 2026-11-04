@@ -13,7 +13,7 @@ const nextConfig = {
     return config;
   },
   // 排盤/AI 包用到 fs、import.meta.url、iztro/lunar,只在服務端運行,
-  // 標記爲 external 避免被打進客戶端 bundle 或破壞數據文件路徑解析。
+  // 標記為 external 避免被打進客戶端 bundle 或破壞數據文件路徑解析。
   experimental: {
     // 允許源碼用 `./x.js` 風格引用 `./x.ts`(與 packages/* 一致;node ESM 與測試亦需顯式擴展名)。
     extensionAlias: {

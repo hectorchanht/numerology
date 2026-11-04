@@ -16,7 +16,7 @@ export interface BirthInput {
   minute?: number;
   gender: Gender;
   /**
-   * 出生地經度(東經爲正,如北京約 116.4)。
+   * 出生地經度(東經為正,如北京約 116.4)。
    * 預留給真太陽時校正;當前版本【尚未應用】,見 ChartMeta.trueSolarTimeApplied。
    */
   longitude?: number;
@@ -28,7 +28,7 @@ export interface Pillar {
   zhi: string;
   ganZhi: string;
   naYin: string;
-  /** 天干十神(日柱爲日主本身,留空) */
+  /** 天干十神(日柱為日主本身,留空) */
   shiShenGan: string;
   /** 地支藏干 */
   hideGan: string[];
@@ -87,7 +87,7 @@ export interface ZiweiPalace {
   isBodyPalace: boolean;
   majorStars: ZiweiStar[];
   minorStars: ZiweiStar[];
-  /** 雜曜(龍池鳳閣、三臺八座、天刑、孤辰寡宿等) */
+  /** 雜曜(龍池鳳閣、三台八座、天刑、孤辰寡宿等) */
   adjectiveStars: ZiweiStar[];
   /** 大限範圍 [起, 止] 歲 */
   decadal: { range: [number, number]; heavenlyStem: string; earthlyBranch: string };
@@ -133,7 +133,7 @@ export interface ZiweiChart {
 }
 
 export interface ChartMeta {
-  /** 真太陽時是否已校正(提供出生地經度則爲 true)。 */
+  /** 真太陽時是否已校正(提供出生地經度則為 true)。 */
   trueSolarTimeApplied: boolean;
   /** 真太陽時校正詳情 */
   correction?: import("./solartime.js").SolarTimeCorrection;

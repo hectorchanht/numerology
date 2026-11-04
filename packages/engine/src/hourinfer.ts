@@ -50,7 +50,7 @@ export interface HourCandidate {
 }
 
 /**
- * 爲同一天生成 12 個時辰的候選命盤區分特徵。
+ * 為同一天生成 12 個時辰的候選命盤區分特徵。
  * 時辰主要改變紫微命宮(12 個時辰=12 套不同格局),八字僅時柱變。
  */
 export function castHourCandidates(input: HourInferInput): HourCandidate[] {

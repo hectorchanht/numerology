@@ -10,7 +10,7 @@ import { recordDeadModel } from "./deadModels.js";
 import { WORKERS_AI_DEFAULT_MODEL } from "./workersAiModels.js";
 
 /**
- * 多 provider 解讀層:排盤永遠本地確定性計算、不花錢;只有 AI 解讀/對話走這裏。
+ * 多 provider 解讀層:排盤永遠本地確定性計算、不花錢;只有 AI 解讀/對話走這裡。
  * 通過 AI_PROVIDER 環境變量切換。默認 workers-ai(Cloudflare Workers AI binding,
  * 免 key,跑在 Cloudflare 自家網絡,每月 $2 硬預算守衛),pollinations 作免 key 備選;
  * 也可用 openrouter(聚合 API,免費 :free 模型,需 key) / glm / gemini / groq / anthropic /
@@ -68,7 +68,7 @@ export interface ProviderOptions {
    */
   extraHeaders?: Record<string, string>;
   /**
-   * 用戶自定義的 AI 人設 / 系統提示(可空)。若非空,追加爲 system 的**最後**一塊
+   * 用戶自定義的 AI 人設 / 系統提示(可空)。若非空,追加為 system 的**最後**一塊
    * (在 locale 語言指令之後),優先級最高,用戶可覆蓋默認人設。
    */
   customSystemPrompt?: string;
@@ -85,7 +85,7 @@ export interface ProviderOptions {
 }
 
 /**
- * 把用戶自定義人設追加爲 system 末塊;爲空/空白則原樣返回。
+ * 把用戶自定義人設追加為 system 末塊;為空/空白則原樣返回。
  * 導出以便測試。
  */
 export function applyCustomPrompt(system: SystemBlock[], opts?: ProviderOptions): SystemBlock[] {
@@ -96,7 +96,7 @@ export function applyCustomPrompt(system: SystemBlock[], opts?: ProviderOptions)
 interface ProviderDef {
   kind: "anthropic" | "openai" | "workers-ai";
   label: string;
-  /** 依次嘗試的環境變量名,第一個有值的作爲 API key */
+  /** 依次嘗試的環境變量名,第一個有值的作為 API key */
   keys: string[];
   baseURL?: string;
   models: Record<ModelKind, string>;
@@ -194,12 +194,12 @@ const PROVIDERS: Record<string, ProviderDef> = {
 
 /**
  * 屋企 Mac 上的本地 provider:同一部 headless Mac、同一個 Cloudflare Access
- * application + service token,共用 token 注入路徑與即時模型列表行爲。
+ * application + service token,共用 token 注入路徑與即時模型列表行為。
  * 2026-11-02 起 Mac 只行 Ollama 一個 runtime(MLX 已停用:disable 唔 delete,
  * Mac 上的 LaunchAgent 只是 bootout + plist 改名 .disabled,日後可復活):
  * 32GB RAM 兩邊大模型互搶、MLX 線程死過兩次,而 MLX 的 2 個模型與 Ollama 重複。
  * mac-mlx 是已退役的舊名,只作 alias:所有入口先正規化到 mac-llm(見
- * normalizeProviderName),新 UI 永不產生它;已存設置裏的 mlx-community/* 模型 id
+ * normalizeProviderName),新 UI 永不產生它;已存設置裡的 mlx-community/* 模型 id
  * 由 web 側 migrateAiSettings 映射到 Ollama 同級模型。
  */
 export const MAC_PROVIDER_NAMES = ["mac-llm"] as const;
@@ -213,7 +213,7 @@ export function normalizeProviderName(name: string): string {
   return (MAC_PROVIDER_ALIASES as readonly string[]).includes(n) ? "mac-llm" : n;
 }
 
-/** 是否爲屋企 Mac 本地 provider(mac-llm,或退役舊名 mac-mlx)。 */
+/** 是否為屋企 Mac 本地 provider(mac-llm,或退役舊名 mac-mlx)。 */
 export function isMacProvider(name: string): boolean {
   const n = name.trim().toLowerCase();
   return (
@@ -285,7 +285,7 @@ function modelFor(def: ProviderDef, kind: ModelKind, opts?: ProviderOptions): st
  * (如 gemini-2.0-flash → 404 "no longer available"),硬編碼默認即永久失效。
  * 僅當模型來自"默認"(用戶與環境變量均未顯式指定)時,404 觸發一次實時
  * /models 拉取,取列表首個模型重試一次。顯式指定的模型 404 → 直接拋真實錯誤,
- * 讓用戶去設置裏換(前端模型列表本就是實時拉取的)。
+ * 讓用戶去設置裡換(前端模型列表本就是實時拉取的)。
  * 回落結果按 baseURL 緩存 10 分鐘,避免默認已死時每次請求都多兩次上游調用。
  */
 const MODEL_NOT_FOUND_RE = /not found|no longer available|does not exist|unknown model/i;
@@ -323,7 +323,7 @@ function resolvePreferredModel(def: ProviderDef, kind: ModelKind, opts?: Provide
 
 /**
  * 拉取 OpenAI 兼容端點的實時模型 id 列表(失敗拋錯,由調用方決定如何處理)。
- * extraHeaders 爲服務端注入頭(如 Mac 的 Access token):Mac 端點沒有它會被
+ * extraHeaders 為服務端注入頭(如 Mac 的 Access token):Mac 端點沒有它會被
  * Access 攔下(403),回落拉列表時必須同樣帶上。
  */
 async function fetchLiveModelIds(
@@ -345,7 +345,7 @@ async function fetchLiveModelIds(
 /**
  * 404 回落:清掉可能已失效的緩存,拉實時列表取首個模型記入緩存並返回。
  * baseURL 傳本次失敗請求實際用的端點(即 def.baseURL,已折入用戶覆蓋)。
- * 列表拉取失敗或爲空 → 拋原始 404 錯誤(真實消息透出,供用戶換模型)。
+ * 列表拉取失敗或為空 → 拋原始 404 錯誤(真實消息透出,供用戶換模型)。
  */
 async function fallbackModel(
   baseURL: string | undefined,
@@ -589,7 +589,7 @@ function messageReasoning(res: OpenAI.Chat.Completions.ChatCompletion): string |
 
 type OpenAIChunkStream = AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
 
-/** 把 OpenAI 兼容的流式響應包成 Anthropic 風格的事件流。懶啓動:首次 finalMessage() 才真正請求。 */
+/** 把 OpenAI 兼容的流式響應包成 Anthropic 風格的事件流。懶啟動:首次 finalMessage() 才真正請求。 */
 class OpenAITextStream implements TextStream {
   private textListeners: ((d: string) => void)[] = [];
   private errorListeners: ((e: unknown) => void)[] = [];
@@ -664,7 +664,7 @@ class OpenAITextStream implements TextStream {
 
 /**
  * 非流式補全包成 TextStream(給 SSE 掛起的 provider 用,如 Gemini OpenAI 兼容層)。
- * 懶啓動:首次 finalMessage() 才真正請求;全文一次性 emit,接口與流式一致。
+ * 懶啟動:首次 finalMessage() 才真正請求;全文一次性 emit,接口與流式一致。
  */
 class CompleteTextStream implements TextStream {
   private textListeners: ((d: string) => void)[] = [];
@@ -735,15 +735,15 @@ function baseDecodeParams(): { temperature: number; top_p: number } {
 
 /**
  * Mac Ollama 端點專用參數:Ollama 上的 qwen3/deepseek 系默認先輸出思考鏈,
- * 會喫掉 maxTokens 導致正文爲空(實測 max_tokens=120 全被思考佔滿)。
+ * 會吃掉 maxTokens 導致正文為空(實測 max_tokens=120 全被思考佔滿)。
  * reasoning_effort:"none" 關掉思考,正文直接出、更快——但思考被壓制時,個別模型
  * 會把規劃寫進 content 做正文獨白(2026-11-02 截圖實證,qwen3:30b)。
- * 故 captureThinking 開啓時(僅 report/fortune route)不送此參數:讓模型正常思考,
+ * 故 captureThinking 開啟時(僅 report/fortune route)不送此參數:讓模型正常思考,
  * 思考走獨立 reasoning 通道,由 ThinkStreamNormalizer 正規化後前端摺疊展示。
  * Mac 自 MLX 停用後只剩 Ollama 一個 runtime,故凡 Mac provider 都送(舊名 mac-mlx
- * 已在 activeProviderName 正規化爲 mac-llm,待遇一致)。
+ * 已在 activeProviderName 正規化為 mac-llm,待遇一致)。
  * 注意:Ollama 實測接受 "none",但當前 OpenAI SDK 的 ReasoningEffort 未含它,故 cast;
- * 運行時序列化值仍爲 "none",Ollama 認。
+ * 運行時序列化值仍為 "none",Ollama 認。
  */
 function macRouteParams(
   name: string,
@@ -755,7 +755,7 @@ function macRouteParams(
     : {};
 }
 
-/** env.AI binding 的最小接口(實際爲 Cloudflare 的 Ai binding)。 */
+/** env.AI binding 的最小接口(實際為 Cloudflare 的 Ai binding)。 */
 interface AiBindingLike {
   run(model: string, input: Record<string, unknown>): Promise<unknown>;
 }
@@ -788,9 +788,9 @@ interface WorkersAiSseUsage {
 
 /**
  * 把 Workers AI binding 的 SSE 流(`data: {"response":"..."}` … `data: [DONE]`)
- * 包成統一的 TextStream。懶啓動:首次 finalMessage() 才真正請求,
+ * 包成統一的 TextStream。懶啟動:首次 finalMessage() 才真正請求,
  * 預算檢查放在 run() 首行——首 token 前超支會直接拋 BudgetExceededError,
- * 經 streamToPrimedResponse 預熱後表現爲乾淨的 JSON 429,而非截斷流。
+ * 經 streamToPrimedResponse 預熱後表現為乾淨的 JSON 429,而非截斷流。
  */
 class WorkersAITextStream implements TextStream {
   private textListeners: ((d: string) => void)[] = [];
@@ -903,7 +903,7 @@ export async function chatComplete(
 ): Promise<{ text: string; usage: Usage }> {
   const name = activeProviderName(opts);
   const def = resolveDef(name, opts);
-  // 用戶自定義人設追加爲 system 末塊(語言指令之後),優先級最高。
+  // 用戶自定義人設追加為 system 末塊(語言指令之後),優先級最高。
   const system = applyCustomPrompt(req.system, opts);
   if (def.kind === "workers-ai") {
     const { ai, kv } = workersAiRuntime(opts);
@@ -964,7 +964,7 @@ export async function chatComplete(
     return resultOf(res);
   } catch (err) {
     // 默認模型被下架(404) → 動態回落到實時列表首個模型重試一次;
-    // 顯式指定的模型 404 → 直接拋真實錯誤(用戶去設置裏換)。
+    // 顯式指定的模型 404 → 直接拋真實錯誤(用戶去設置裡換)。
     // 無論哪種,先把下架模型記入 KV:下次拉模型列表時自動濾走(動態下架)。
     // Mac 登記統一歸 mac-llm 名下(列表按 mac-llm 過濾,見 deadRegistryName)。
     if (isModelNotFoundError(err)) await recordDeadModel(opts?.aiBinding?.kv, deadRegistryName(name), preferred);
@@ -980,7 +980,7 @@ export async function chatComplete(
 export function chatStream(req: CompletionRequest, opts?: ProviderOptions): TextStream {
   const name = activeProviderName(opts);
   const def = resolveDef(name, opts);
-  // 用戶自定義人設追加爲 system 末塊(語言指令之後),優先級最高。
+  // 用戶自定義人設追加為 system 末塊(語言指令之後),優先級最高。
   const system = applyCustomPrompt(req.system, opts);
   if (def.kind === "workers-ai") {
     const { ai, kv } = workersAiRuntime(opts);
@@ -1022,7 +1022,7 @@ export function chatStream(req: CompletionRequest, opts?: ProviderOptions): Text
     try {
       return await open(preferred);
     } catch (err) {
-      // 默認模型被下架(404) → 動態回落到實時列表首個模型重試一次(懶啓動內);
+      // 默認模型被下架(404) → 動態回落到實時列表首個模型重試一次(懶啟動內);
       // 顯式指定的模型 404 → 直接拋真實錯誤。
       // 無論哪種,先把下架模型記入 KV:下次拉模型列表時自動濾走(動態下架)。
       if (isModelNotFoundError(err)) await recordDeadModel(opts?.aiBinding?.kv, deadRegistryName(name), preferred);

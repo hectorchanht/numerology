@@ -5,15 +5,15 @@
 - 新增 `apps/web/lib/i18n.ts`:Locale 類型 `"zht"|"zhs"|"en"`,177 key 的 STRINGS 三地字典,
   `useLocale()`(外部 store + useSyncExternalStore,全應用共享,localStorage `numerology-locale` 持久化,
   默認 `"zht"`),`fmt()` 占位符填充,`LocaleSwitch`(繁/簡/EN,複用 `.mode-switch` 樣式,置於 masthead)。
-  zht 爲香港書面繁體(非機械轉換);zhs 沿用原簡體文案;en 自然英文。
+  zht 為香港書面繁體(非機械轉換);zhs 沿用原簡體文案;en 自然英文。
 - 全部 9 個組件 + page.tsx + layout.tsx(`<html lang="zh-Hant">`,metadata 繁體)改用 `t()`。
-  干支/星曜/宮位/地名等專名三地保持原樣;性別 option 的 value 仍爲 男/女(引擎要求),僅 label 本地化。
+  干支/星曜/宮位/地名等專名三地保持原樣;性別 option 的 value 仍為 男/女(引擎要求),僅 label 本地化。
 - AI 輸出語言:請求體新增可選 `locale` 字段(4 個 AI 路由解析,默認 zht),
-  經 `ReportOptions`/`ChatOptions`/hourinfer opts 傳入;`localeDirective()` 追加爲 system 末塊
+  經 `ReportOptions`/`ChatOptions`/hourinfer opts 傳入;`localeDirective()` 追加為 system 末塊
   (不碰命盤事實塊,Anthropic prompt cache 前綴不受影響)。
   前端 StreamedReport/ChatPanel/TimeInferPanel 的 POST body 均帶當前 locale。
 - 測試:web 新增 `test/i18n.test.mjs`(6 項:默認 zht、三地 key 集合一致、非空、關鍵繁體文案、fmt、node 下 setLocale 不拋錯);
-  ai 新增 `test/locale.test.mjs`(3 項:指令三地各異、system 末塊爲語言指令、命盤事實塊不受語言影響)。
+  ai 新增 `test/locale.test.mjs`(3 項:指令三地各異、system 末塊為語言指令、命盤事實塊不受語言影響)。
   全量 66/66 通過;`next build` 與 `npm run cf:pages` 均成功。
 - 未改:排盤數學、API 形狀(僅新增可選 locale 字段)、樣式、無新 provider、無付費牆。
 
@@ -25,7 +25,7 @@
 - `npm install`(根目錄):179 包,正常。
 - `npm run build -w @numerology/knowledge -w @numerology/engine -w @numerology/ai`:通過。
 - `npm test`(全部 workspace):**57/57 通過**(ai 7 / engine 36 / knowledge 5 / web 9)。
-- `next dev` 本地啓動後 curl 實測見下。
+- `next dev` 本地啟動後 curl 實測見下。
 
 ## 修復的 bug
 
@@ -47,7 +47,7 @@
    新增 `streamToPrimedResponse()`:等待首個文本塊(默認 20s 超時)後才返回 Response;
    首 token 前失敗直接拋給調用方 → 按(2)返回 JSON 錯誤,不再發半截流。
    首塊會被回放,正文不丟失不重複。4 個流式路由(report/fortune/chat/infer-time)已切換。
-   迴歸測試:`apps/web/test/stream.test.mjs`(僞造流:首塊前失敗→拋錯;成功→正文完整;超時→拋錯)。
+   迴歸測試:`apps/web/test/stream.test.mjs`(偽造流:首塊前失敗→拋錯;成功→正文完整;超時→拋錯)。
    API 實測:`POST /api/report` 傳未知 provider → 400 JSON(不 hang);見下。
 
 4. **.env 解析器太弱**(`apps/web/lib/env.ts`)
@@ -67,9 +67,9 @@
    非法閏月(如 2024 年閏二月,該年無此閏月)仍由引擎報 `非法农历日期…`,→ 400。
    迴歸測試:`apps/web/test/lib.test.mjs`;API 實測 `/api/chart` 非法閏月 → 400。
 
-7. **hourToTimeIndex 覈對**(verify-only,**未改代碼**)
+7. **hourToTimeIndex 核對**(verify-only,**未改代碼**)
    與 iztro 自身實現(`iztro/lib/utils/index.js` 的 `timeToIndex`)逐小時比對 24/24 一致;
-   00:30 → 早子(index 0)、23:30 → 晚子(index 12),兩盤時柱皆爲子,
+   00:30 → 早子(index 0)、23:30 → 晚子(index 12),兩盤時柱皆為子,
    且晚子時 bazi/iztro 同步按次日計(iztro 文檔化約定)。無 off-by-one,不改確定性數學。
    迴歸測試:`packages/engine/test/hourindex.test.mjs`。
 
@@ -83,9 +83,9 @@
 - **`openrouter`(已接入並驗證)**:
   `https://openrouter.ai/api/v1`(實測 `/models` 返回 200,共 468 個模型),
   需 key(`OPENROUTER_API_KEY`,註冊免費),`free: true`。
-  默認模型經**實時 `/models` API 覈驗存在且 prompt 價爲 0**:
+  默認模型經**實時 `/models` API 核驗存在且 prompt 價為 0**:
   report=`google/gemma-4-31b-it:free`(262K 上下文),chat=`google/gemma-4-26b-a4b-it:free`;
-  UI 另備選 `nvidia/nemotron-3.5-lightning:free`(1M 上下文,同樣已覈驗)。
+  UI 另備選 `nvidia/nemotron-3.5-lightning:free`(1M 上下文,同樣已核驗)。
   曾考慮但**未採用**的候選:`openai/gpt-oss-20b:free`、`qwen/qwen3.8-27b:free`
   在當前 catalog 中不存在——不要憑記憶寫這些 ID。
   接入點:`packages/ai/src/provider.ts`、SettingsPanel 的 PROVIDERS/MODELS、
@@ -98,7 +98,7 @@
 
 ## Cloudflare Pages (next-on-pages / workerd) 可移植性審計
 
-部署目標爲 Cloudflare Pages(Workers runtime + nodejs_compat),本次**未做部署**。
+部署目標為 Cloudflare Pages(Workers runtime + nodejs_compat),本次**未做部署**。
 要求:不新增 import 時的 node-only API。審計結果:
 
 **import 時(node-only,已存在、未新增):**
@@ -106,7 +106,7 @@
   僅用於 `depVersion()` 讀依賴 package.json 版本號(try/catch 包裹,失敗降級 "unknown")。
   workerd 下 `node:module` 的 createRequire 可用性取決於構建產物形態(next-on-pages
   打包后 `import.meta.url` 語義變化);若部署時排盤 meta 讀不到版本,只會顯示
-  "unknown",不影響排盤本身。**部署前建議驗證**:若 workerd 報錯,改爲構建時注入版本號。
+  "unknown",不影響排盤本身。**部署前建議驗證**:若 workerd 報錯,改為構建時注入版本號。
 - `packages/ai/src/provider.ts`:模塊頂層 `PROVIDERS` 對象字面量內讀取
   `process.env.POLLINATIONS_BASE_URL` / `OLLAMA_BASE_URL` / `OPENROUTER_BASE_URL`
   (本輪新增 openrouter 條目沿用既有模式,未新增類別)。
@@ -119,7 +119,7 @@
   必然走 `catch` 空分支——key 必須走 Cloudflare 環境變量 / 請求級 BYOK。
   本輪重寫的解析器未引入新的 node API。
 - `packages/ai/src/provider.ts` 內其餘 `process.env` 讀取(`activeProviderName`、
-  `resolveDef`、`apiKeyFor`、`modelFor`)均爲函數內惰性讀取,無 import 時副作用。
+  `resolveDef`、`apiKeyFor`、`modelFor`)均為函數內惰性讀取,無 import 時副作用。
 - `apps/web/lib/stream.ts` 新增的預熱邏輯只用 `setTimeout`/`ReadableStream`/
   `TextEncoder`,workerd 原生支持。
 
@@ -144,27 +144,27 @@
 - `POST /api/report`(pollinations 實時成功路徑):本沙箱直連
   `text.pollinations.ai` 的 chat completions POST 會 hang(30s 超時;GET /models 正常),
   故只實測到了故障路徑 → 乾淨 JSON 502,符合驗收標準。
-  **成功出流路徑未在本地實測**(單元測試用僞造流覆蓋了正文完整性)。
+  **成功出流路徑未在本地實測**(單元測試用偽造流覆蓋了正文完整性)。
 - 實測中發現並修復:非法 section 名(`未知报告章节:…`)原先被分到 502,
   已補進 `VALIDATION_RE`(→ 400)。未知 provider 一度因測試用了非法 section 名而
-  誤報 502,換合法 section 後確認爲 400。
+  誤報 502,換合法 section 後確認為 400。
 - Cloudflare Pages 實際部署:按要求未做;可移植性見上節審計,部署前需驗證
-  createRequire 與頂層 `process.env` 在 workerd 產物中的行爲。
+  createRequire 與頂層 `process.env` 在 workerd 產物中的行為。
 - Cloudflare Pages 實際部署:按要求未做;可移植性見上節審計,部署前需驗證
-  createRequire 與頂層 `process.env` 在 workerd 產物中的行爲。
+  createRequire 與頂層 `process.env` 在 workerd 產物中的行為。
 
 ## Cloudflare Pages 部署(2026-10-22,edge 移植)
 
-爲上 Pages(Workers/workerd)做的移植,排盤數學與 UI 未動:
+為上 Pages(Workers/workerd)做的移植,排盤數學與 UI 未動:
 
 - 6 個 API 路由:`runtime = "nodejs"` → `"edge"`,刪除 `maxDuration = 60`(Pages 不支持)。
 - `packages/engine/src/index.ts`:刪掉頂層 `import { createRequire } from "node:module"`;
   新增 `scripts/gen-versions.mjs`(構建時讀已安裝依賴版本號,寫入
-  `src/versions.generated.ts`),`depVersion()` 改爲查表,缺失 → "unknown"。
-  engine 的 build 腳本改爲 `node scripts/gen-versions.mjs && tsc -p tsconfig.json`。
-- `apps/web/lib/env.ts`:刪掉頂層 `node:fs`/`node:path` import;`ensureEnv()` 改爲
+  `src/versions.generated.ts`),`depVersion()` 改為查表,缺失 → "unknown"。
+  engine 的 build 腳本改為 `node scripts/gen-versions.mjs && tsc -p tsconfig.json`。
+- `apps/web/lib/env.ts`:刪掉頂層 `node:fs`/`node:path` import;`ensureEnv()` 改為
   async,內部用 `import(/* webpackIgnore: true */ "node:fs")` 懶加載,
-  Workers 下靜默 no-op(key 走 CF 環境變量 / BYOK)。4 個 AI 路由改爲 `await ensureEnv()`。
+  Workers 下靜默 no-op(key 走 CF 環境變量 / BYOK)。4 個 AI 路由改為 `await ensureEnv()`。
 - 全倉庫 grep:無其它 import 時的 node: API(`provider.ts` 頂層的
   `process.env.*_BASE_URL` 在構建時求值,保留)。
 - 新增 `@cloudflare/next-on-pages@1.13.12`(apps/web devDependency;新版要求
@@ -198,8 +198,8 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
 共享 IP 被限流 429),edge 外直連則正常。改為預設走 Cloudflare Workers AI binding。
 
 ### Workers AI 接入
-- **預熱超時 60s(2026-10-23 補)**:Workers AI 冷啓動首 token 可能 >20s(線上實測 21s+
-  觸發預熱超時 → 502)。`streamToPrimedResponse` 的預熱超時改爲按 provider 區分
+- **預熱超時 60s(2026-10-23 補)**:Workers AI 冷啟動首 token 可能 >20s(線上實測 21s+
+  觸發預熱超時 → 502)。`streamToPrimedResponse` 的預熱超時改為按 provider 區分
   (`apps/web/lib/primeTimeout.ts`):workers-ai 60s,其它保持 20s。4 個 AI 路由已接入。
 
 - **繁中指令前置(2026-10-23 補)**:實測 Llama 3.1 8B 對 system 末尾的 `localeDirective`
@@ -269,7 +269,7 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
 - 待線上驗證(部署後):預設 provider 的真實中文報告流、KV 計數器增長。
 
 ### 設置面板 provider 選擇器改版(2026-10-23,用戶要求)
-- **Tabs 取代下拉**:8 個 provider 爲橫向 tabs,只顯示短名(Workers AI/Pollinations/
+- **Tabs 取代下拉**:8 個 provider 為橫向 tabs,只顯示短名(Workers AI/Pollinations/
   GLM/Gemini/Groq/OpenRouter/Claude/自訂),描述不再塞進選項文字。
 - **Filter chips**(tabs 上方):全部 / 免 key / 免費 / 付費(三語 `settings.filter.*`)。
   免費 = 免 key ∪ 免費額度(workers-ai、pollinations、glm、gemini、groq、openrouter);
@@ -278,7 +278,7 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
 - **屬性面板**(tabs 下方,選中 provider 的結構化展示):API Key(需要/不需要 badge)、
   費用(免費/免費額度/付費 badge)、一行短注(`settings.note.*`):
   workers-ai「經本站 Cloudflare 帳號,每月硬上限 $2,超額自動停用」;
-  pollinations「匿名使用會限速、輸出偏短,填 key 更穩」(key 字段對其爲選填,後端本就優先用用戶 key);
+  pollinations「匿名使用會限速、輸出偏短,填 key 更穩」(key 字段對其為選填,後端本就優先用用戶 key);
   openrouter「免費 :free 模型仍需 API key」;glm/gemini/groq「免費額度,填 key 即用」;
   anthropic「按量付費」;custom「任意 OpenAI 兼容端點」。
 - 動態模型下拉 + 24h 緩存 + 靜態回落保持不變;舊的長描述 `settings.prov.*` /
@@ -296,7 +296,7 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
   整篇模式同樣修:`buildReportUserPrompt` 的章節列表、`buildFortuneReportPrompt` 的
   六個 `##` 標題(含結尾"總體建議"引用)全部走 `segmentTitle`。
 - `packages/ai/src/report.ts`:六處調用點全部傳入 `opts.locale ?? "zht"`。
-- 英文標題爲自然英文(如 "Personality Traits"、"1. Current Overview");zht 爲香港書面繁體。
+- 英文標題為自然英文(如 "Personality Traits"、"1. Current Overview");zht 為香港書面繁體。
 - 測試:新增 `packages/ai/test/segment-titles.test.mjs`(5 項:三地標題齊全非空、
   兩節 builders 三地標題正確、整篇 builders 三地標題正確);`context.test.mjs`
   更新(zhs 顯式傳入保持原斷言,默認 zht 斷言繁體)。105/105 通過。
@@ -311,12 +311,12 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
 
 ### A. 分 provider 記 key(`apps/web/lib/aiSettings.ts`)
 - `AiSettings.apiKey: string` → `keys: Record<string, string>`(provider 名 → key)。
-- 遷移(`migrateAiSettings`,純函數可測試):舊版單 `apiKey` 非空且 `keys` 爲空 →
+- 遷移(`migrateAiSettings`,純函數可測試):舊版單 `apiKey` 非空且 `keys` 為空 →
   歸到當時選中的 provider 名下;保存時丟棄舊字段。
 - `currentKey(s)`:只取當前 provider 名下的 key,沒填 → `""`,絕不拿別的 provider
   的 key 頂替(之前的需求:"if no key inputted, it should be empty input")。
 - `aiRequestParts()`:組裝請求體 `{ ai:{provider,apiKey?,model?,baseURL?}, systemPrompt? }`;
-  key 取當前 provider 的;爲空則省略。StreamedReport/ChatPanel/TimeInferPanel 改用它。
+  key 取當前 provider 的;為空則省略。StreamedReport/ChatPanel/TimeInferPanel 改用它。
 - SettingsPanel 的 key 輸入框綁定 `value.keys[value.provider] ?? ""`;切 tab 自動切換顯示。
 - `/api/models` 的 `X-AI-Key` 頭同樣取當前 provider 的 key。
 
@@ -324,12 +324,12 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
 - SettingsPanel 新增 textarea(「自訂 AI 人設 / 系統提示」)+「重設為預設」按鈕;
   存 `AiSettings.systemPrompt`,空 = 默認。三語 keys:`settings.personaLabel/Ph/Reset`。
 - `packages/ai/src/provider.ts`:`ProviderOptions.customSystemPrompt?`;
-  `applyCustomPrompt()`(已導出供測試)追加爲 system **末塊**(locale 語言指令之後),
+  `applyCustomPrompt()`(已導出供測試)追加為 system **末塊**(locale 語言指令之後),
   `chatComplete`/`chatStream` 三分支(anthropic/openai/workers-ai)全部接入。
 - `apps/web/lib/aiOpts.ts`:`parseAi` 取請求體**頂層** `systemPrompt` 字段
   (與 `locale` 同級——它是每次請求的用戶覆蓋項,保持 `ai` 的 BYOK 形狀穩定);
   `resolveServerAi` 的存在性檢查補上該字段。
-- 前端三個 AI 組件每次請求都帶上(爲空則省略)。
+- 前端三個 AI 組件每次請求都帶上(為空則省略)。
 
 ### C. AI 響應服務端緩存(省 $2 預算)
 - 複用已綁定的 `AI_BUDGET_KV`,鍵前綴 `aicache:`(與 `ai-budget:` 區分),**無新增基建**。
@@ -386,11 +386,11 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
 ### 緩存事故覆盤(2026-10-23,已修復)
 首次上線後線上實測發現:緩存命中的正文每個字符翻倍
 (2858B → 5714B,`## 性格特質` → `## 性格格特特質質`)。
-根因:`teeTextStream` 舊實現爲 wrapper 上的**每個** text 監聽器都在 inner 上
+根因:`teeTextStream` 舊實現為 wrapper 上的**每個** text 監聽器都在 inner 上
 另掛一個累積監聽器;而 `streamToPrimedResponse` 恰好掛兩個(預熱 + 正式),
 故第二塊起被累積兩次。
 修復:inner 上只掛一個監聽器並扇出到所有 wrapper 監聽器,每塊恰好累積一次;
-緩存鍵前綴 bump 爲 `aicache:2:` 使舊壞緩存整體失效。
+緩存鍵前綴 bump 為 `aicache:2:` 使舊壞緩存整體失效。
 迴歸測試:`teeTextStream:wrapper 上挂两个监听器(预热+正式)也不重复累积`。
 教訓:tee/裝飾器包裝流時,累積邏輯必須與監聽器數量解耦。
 
@@ -399,19 +399,19 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
 用戶貼出的《大運流年深析》有三個缺陷,已定位並修復:
 
 1. **年月數字缺失**(如 `戊辰運（- 歲/-）`、`年（辛丑年）`):
-   根因不在引擎——上下文包裏數字本來就是全的(`戊辰(2-11岁/1995-2004)`、
+   根因不在引擎——上下文包裡數字本來就是全的(`戊辰(2-11岁/1995-2004)`、
    `2021(28岁)辛丑`),而是 prompt 從未硬性要求模型寫出數字,模型就輸出了 `-` 占位。
    修復:`prompts.ts` 新增 `FORTUNE_NUMBERS_RULE`(數字鐵律·逐字照抄,大小運/流年標題格式
    + ❌ 禁例),接入 `buildFortuneReportPrompt` 與 `buildFortuneSectionPrompt`。
 
 2. **每步大運重複同一個大限**:
    根因是上下文只帶了*當前*大限(`f.ziwei.decadal`),模型就把它套到每一步。
-   修復:引擎 `analyzeFortune` 現在爲每步大運計算**同期大限**
+   修復:引擎 `analyzeFortune` 現在為每步大運計算**同期大限**
    (`DaYunAnalysis.ziweiDecadal`),取該運中點年份的 `horoscope().decadal`
    (用中點而非起點:首步起點年齡常落在首個大限區間之前,iztro 的 horoscope
    會迴繞到末個大限,給出錯誤結果;中點恆落在某區間內)。
    `context.ts` 把每步的 `└ 大限XX(行YY):禄→.. 权→..` 渲染進動態運勢段,
-   並把原來的"當前大限"行標註爲僅用於總覽、不要混用。
+   並把原來的"當前大限"行標註為僅用於總覽、不要混用。
    迴歸測試:`packages/engine/test/fortune-decadal.test.mjs`(5 項:結構完整、
    與命宮大限區間的獨立交叉驗證、多步不全相同、男女方向、首步不迴繞)。
 
@@ -425,18 +425,18 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
    迴歸測試:`packages/ai/test/fortune-prompt.test.mjs`(7 項 → 8 項)。
    補充對齊外部研究(2026-10-22 晚):`mingli-master` 的 `references/interpretation_guide.md`
    (解讀風格指南:"敢斷、有類比、禁『值得注意的是』式廢話",❌/✅ 例)——
-   其與本 brief 一致的部分收爲 `FORTUNE_STYLE_RULES`:每步/每年先**一句話定性**、
+   其與本 brief 一致的部分收為 `FORTUNE_STYLE_RULES`:每步/每年先**一句話定性**、
    術語首次出現用日常類比翻譯(每節一兩個足矣)、禁用廢話開場
    (「值得注意的是」「總體而言」「整體上是XX的」「需要多加註意」);
    與 brief 衝突的(過度迎合語氣/置信度條)不採納。另採納
-   `Johnson-Jia/ziwei-bazi-reading` 的斷語可信度思想爲**斷語紀律**:絕不編造古籍斷語原文,
-   想借傳統說法必須寫"傳統有此一說"(傳聞口徑,非實證),不許僞引"古書云:……"。
+   `Johnson-Jia/ziwei-bazi-reading` 的斷語可信度思想為**斷語紀律**:絕不編造古籍斷語原文,
+   想借傳統說法必須寫"傳統有此一說"(傳聞口徑,非實證),不許偽引"古書云:……"。
 
 4. **報告章節加 emoji(用戶要求"replace boring text with emoji/icon")**:
    純前端確定性方案,不靠模型:`apps/web/lib/sectionIcons.ts`(13 節 key→emoji,
    如 overview🧭/dayun🕰️/review🔍/future🔮/rhythm🌊/action🎯/personality🪞/
    career💼/wealth💰/relationship❤️/health🌿/luck🌠/advice💡,與語言無關),
-   `StreamedReport` 在渲染時按 section key 把 `## ` 標題行替換爲
+   `StreamedReport` 在渲染時按 section key 把 `## ` 標題行替換為
    `## <icon> <label>`(AI 自帶標題與佔位標題統一處理;歷史記錄存的仍是無圖標原文)。
    迴歸測試:`apps/web/test/section-icons.test.mjs`(6 項:key 齊全、圖標互異、
    未知 key 回落 ✦、標題替換/補全、正文不動)。
@@ -447,10 +447,10 @@ destination=`apps/web/.vercel/output/static`,env:AI_PROVIDER=pollinations,NODE_V
 ### 小標題數字兜底(2026-10-22 深夜,live 實證驅動)
 `mistral-small` 即使給了逐行照抄的【小標題清單】仍輸出 `### 癸未運（–歲／–年）`
 (X-Cache:MISS 的全新生成;且禁例的佔位符形狀會被模型照抄)——純 prompt 手段不可靠。
-改爲服務端確定性後處理:`fixFortuneHeadings()`(`prompts.ts`,純函數)+
+改為服務端確定性後處理:`fixFortuneHeadings()`(`prompts.ts`,純函數)+
 `HeadingFixStream`(`report.ts`,行緩衝 TextStream 包裝,作用於
 `streamFortuneSection`/`streamFortuneReport`;`generateFortuneReport` 對全文應用),
-凡匹配 `### 干支運（` / `### YYYY年（` 形狀的行一律替換爲引擎計算的標準成品行。
+凡匹配 `### 干支運（` / `### YYYY年（` 形狀的行一律替換為引擎計算的標準成品行。
 prompt 側保留清單(移至 prompt 末尾)並刪除了會起反作用的佔位符形狀禁例。
 live 驗證:7 個 `###` 標題全部帶真實數字,全文零佔位符。
 另:`HeadingFixStream` 在緩存 tee 之前生效,故 KV 存的也是修復後文本。

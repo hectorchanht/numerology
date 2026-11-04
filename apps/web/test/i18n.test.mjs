@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { STRINGS, DEFAULT_LOCALE, LOCALES, fmt, setLocale } from "../test-dist/i18n.js";
 
-// —— 默認語言爲繁體 ——
+// —— 默認語言為繁體 ——
 test("i18n:默认语言为 zht,三种语言齐备", () => {
   assert.equal(DEFAULT_LOCALE, "zht");
   assert.deepEqual([...LOCALES].sort(), ["en", "zhs", "zht"]);

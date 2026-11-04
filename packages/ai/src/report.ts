@@ -25,7 +25,7 @@ import { fixFortuneHeadings, makeFortuneLineFixer } from "./prompts.js";
  * 行級小標題修復流(TextStream 包裝)。
  * 背景:弱模型即使 prompt 給了逐行照抄的清單,仍會輸出 `### 癸未運（–歲／–年）`
  * 這類佔位符(2026-10-22 live 實證)——純 prompt 手段不可靠,服務端必須兜底。
- * 按行緩衝轉發(小標題必爲完整單行),其它內容逐行原樣通過;流式體驗不變。
+ * 按行緩衝轉發(小標題必為完整單行),其它內容逐行原樣通過;流式體驗不變。
  */
 class HeadingFixStream implements TextStream {
   private textListeners: Array<(d: string) => void> = [];
@@ -36,7 +36,7 @@ class HeadingFixStream implements TextStream {
     private readonly inner: TextStream,
     private readonly fixLine: (line: string) => string,
   ) {
-    // 構造時即訂閱 inner:inner 是懶啓動(首個 finalMessage() 才真正請求),
+    // 構造時即訂閱 inner:inner 是懶啟動(首個 finalMessage() 才真正請求),
     // 提前訂閱不觸發請求,只註冊監聽。
     inner.on("text", (delta: string) => this.onDelta(delta));
     inner.on("error", (err: unknown) => this.errorListeners.forEach((l) => l(err)));

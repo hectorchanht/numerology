@@ -21,10 +21,10 @@ export const dynamic = "force-dynamic";
  * v5 = 2026-10-23 context-trim:分節生成按 FortuneScope 只喂該節需要的動態數據
  * (overview/action→current, dayun/rhythm→dayun+信號digest, review→已過年, future→未來年),
  * 整份 fortune 不再每節重倒;prompt 指令文字不變。
- * v6 = 2026-11-02 思考捕捉:與 report/v6 同步開啓 captureThinking——生成行爲變了,
- * v5 緩存裏可能有壓制下寫進正文的規劃獨白(無標記、無法可靠分拆),整體失效。
+ * v6 = 2026-11-02 思考捕捉:與 report/v6 同步開啟 captureThinking——生成行為變了,
+ * v5 緩存裡可能有壓制下寫進正文的規劃獨白(無標記、無法可靠分拆),整體失效。
  * v7 = 2026-11-02 harmony 正規化:與 report/v7 同步(provider 補 gpt-oss harmony
- * channel 拆分);v6 緩存裏 MLX gpt-oss 的未正規化原文必須失效。
+ * channel 拆分);v6 緩存裡 MLX gpt-oss 的未正規化原文必須失效。
  * v8 = 2026-11-04 人設擴為多體系。
  */
 const PROMPT_VERSION = "fortune/v8";
@@ -37,7 +37,7 @@ export async function POST(req: Request): Promise<Response> {
     const input = parseBirthInput(body.input);
     const chart = castChart(input);
     const fortune = analyzeFortune(input, { yearsBack: 5, yearsAhead: 8 });
-    // 深析路徑同報告開啓思考捕捉(Hector 2026-11-02):思考分流摺疊呈現,不壓制。
+    // 深析路徑同報告開啟思考捕捉(Hector 2026-11-02):思考分流摺疊呈現,不壓制。
     const ai = { ...resolveServerAi(body), captureThinking: true };
     const section = typeof body.section === "string" && body.section.trim() ? body.section.trim() : undefined;
     const lens = body.lens === "bazi" || body.lens === "ziwei" ? body.lens : "both";

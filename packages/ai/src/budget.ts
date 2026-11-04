@@ -2,13 +2,13 @@
  * Workers AI 用量預算守衛:每月硬上限 $2。
  *
  * 背景:Workers AI 沒有原生的月度 spending cap,超量只會計費($0.011 / 1K neurons)。
- * 這裏在應用層強制執行:每次調用前後經 KV 讀寫當月(UTC)累計 neurons,
+ * 這裡在應用層強制執行:每次調用前後經 KV 讀寫當月(UTC)累計 neurons,
  * 達到上限即拒絕(429),絕不超支。
  *
  * 保守口徑:所有 neurons 都計入 $2(包含每日免費的 10,000 neurons)。
- * 因此實際賬單恆爲 $0 —— 上限(約 181,818 neurons/月)遠低於免費額度總量
+ * 因此實際賬單恆為 $0 —— 上限(約 181,818 neurons/月)遠低於免費額度總量
  * (10,000/天 ≈ 300,000/月),到上限即停,不會產生任何付費用量。
- * KV 爲最終一致性,併發請求可能有輕微超調(文檔見 NOTES.md),可接受。
+ * KV 為最終一致性,併發請求可能有輕微超調(文檔見 NOTES.md),可接受。
  */
 
 /** 每月預算(美元,用戶設定,硬上限)。 */
@@ -31,7 +31,7 @@ export function budgetMonthKey(d: Date = new Date()): string {
   return `ai-budget:${y}-${m}`;
 }
 
-/** 預算耗盡時拋出的錯誤;http.ts 將其分類爲 429(消息含固定標記,勿改)。 */
+/** 預算耗盡時拋出的錯誤;http.ts 將其分類為 429(消息含固定標記,勿改)。 */
 export class BudgetExceededError extends Error {
   readonly usedNeurons: number;
   constructor(usedNeurons: number) {
@@ -53,7 +53,7 @@ async function readTotal(kv: BudgetKV, key: string): Promise<number> {
 
 /**
  * 調用前檢查:返回當前累計;若已達上限則拋 BudgetExceededError。
- * 必須在每次 Workers AI 調用前執行(流式爲懶啓動,放在 run() 內首行)。
+ * 必須在每次 Workers AI 調用前執行(流式為懶啟動,放在 run() 內首行)。
  */
 export async function checkBudget(kv: BudgetKV, now: Date = new Date()): Promise<number> {
   const total = await readTotal(kv, budgetMonthKey(now));

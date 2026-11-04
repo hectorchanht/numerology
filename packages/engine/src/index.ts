@@ -44,7 +44,7 @@ export type {
  * 讀依賴版本,僅作元信息展示。
  * 版本號由構建時腳本 scripts/gen-versions.mjs 注入 src/versions.generated.ts,
  * 運行時只做查表 —— Edge/Workers 沒有 node:module(createRequire),不能在運行時
- * 讀依賴的 package.json。查不到就降級爲 "unknown",絕不影響確定性排盤本身。
+ * 讀依賴的 package.json。查不到就降級為 "unknown",絕不影響確定性排盤本身。
  */
 function depVersion(name: string): string {
   return DEPENDENCY_VERSIONS[name] ?? "unknown";

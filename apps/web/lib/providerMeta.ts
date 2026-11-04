@@ -14,7 +14,7 @@ export interface ProviderMeta {
   name: string;
   /** tab 短名(僅短名,不塞描述)。 */
   shortKey: TKey;
-  /** 選中後屬性面板裏的一行短注。 */
+  /** 選中後屬性面板裡的一行短注。 */
   noteKey: TKey;
   group: ProviderGroup;
   cost: ProviderCost;
@@ -55,7 +55,7 @@ export const PROVIDER_META: ProviderMeta[] = [
 
 /**
  * 屋企 Mac 本地 provider 集合:同一部 headless Mac、同一個 Cloudflare Access app,
- * 共用即時模型列表 / 離線軟回落 / 60s 緩存行爲(與 @numerology/ai 的同名集合保持一致,
+ * 共用即時模型列表 / 離線軟回落 / 60s 緩存行為(與 @numerology/ai 的同名集合保持一致,
  * 兩處增減時同步改)。
  * Mac 只行 Ollama 一個 runtime(MLX 2026-11-02 停用);mac-mlx 是已退役的舊名,
  * 只作 alias 保留 Mac 待遇並在各入口正規化到 mac-llm,新 UI 永不產生它
@@ -66,7 +66,7 @@ export const MAC_PROVIDER_NAMES = ["mac-llm"] as const;
 /** 已退役的舊 provider 名(僅兼容:舊名入到嚟仍按 Mac provider 對待)。 */
 export const MAC_PROVIDER_ALIASES = ["mac-mlx"] as const;
 
-/** 是否爲屋企 Mac 本地 provider(mac-llm,或退役舊名 mac-mlx)。 */
+/** 是否為屋企 Mac 本地 provider(mac-llm,或退役舊名 mac-mlx)。 */
 export function isMacProvider(name: string): boolean {
   const n = name.trim().toLowerCase();
   return (
@@ -98,11 +98,11 @@ export interface FreeFlaggedModel {
  * 模型級 filter:頂部的 全部/免 key/免費/付費 同時作用於模型下拉。
  * 免費/付費是模型層級屬性(OpenRouter 一個 provider 內同時有 :free 和付費模型),
  * 只 filter provider tabs 會漏掉(見截圖:filter=免費卻選中了付費 model)。
- * - free: 只留 free===true;若列表沒有任何 free 信息(靜態表無標記)則回落爲不過濾,
+ * - free: 只留 free===true;若列表沒有任何 free 信息(靜態表無標記)則回落為不過濾,
  *   避免把下拉清空。
- * - paid: 踢掉 free===true(未知視爲候選);無信息時自然全留。
+ * - paid: 踢掉 free===true(未知視為候選);無信息時自然全留。
  * - all/nokey: 不過濾模型(免 key 已在 provider 層過濾)。
- * 結果爲空時回落爲全列表,保證下拉永遠有可選項。
+ * 結果為空時回落為全列表,保證下拉永遠有可選項。
  */
 export function filterModels<T extends FreeFlaggedModel>(
   models: T[],
@@ -125,7 +125,7 @@ export function staticModelEntries(ids: string[]): FreeFlaggedModel[] {
  * 推薦模型(2026-10-23 用 Hector 的 key 實測驗證過可用):
  * - gemini: gemini-3.8-flash(舊 2.0 已被 Google 下架)
  * - openrouter: 三個 :free 模型(實測 200;注意免費額度是按 key 按天限的,超限會 429)
- * - anthropic: 兩個有效 id(該 key 需先充值,餘額爲 0)
+ * - anthropic: 兩個有效 id(該 key 需先充值,餘額為 0)
  * 推薦只做減法:filter 芯片「推薦」把模型下拉過濾到這個表。
  */
 export const RECOMMENDED_MODELS: Record<string, string[]> = {
@@ -139,12 +139,12 @@ export const RECOMMENDED_MODELS: Record<string, string[]> = {
   anthropic: ["claude-sonnet-4-6", "claude-opus-4-8"],
 };
 
-/** 該 provider 下此模型是否在推薦表裏。 */
+/** 該 provider 下此模型是否在推薦表裡。 */
 export function isRecommended(provider: string, id: string): boolean {
   return (RECOMMENDED_MODELS[provider] ?? []).includes(normModelId(id));
 }
 
-/** 模型列表只留推薦(結果爲空時回落爲全列表,保證下拉永遠有可選項)。 */
+/** 模型列表只留推薦(結果為空時回落為全列表,保證下拉永遠有可選項)。 */
 export function filterRecommended<T extends { id: string }>(models: T[], provider: string): T[] {
   const rec = RECOMMENDED_MODELS[provider];
   if (!rec || rec.length === 0) return models;
@@ -154,14 +154,14 @@ export function filterRecommended<T extends { id: string }>(models: T[], provide
 
 /**
  * 規範化模型 id:Gemini 實時列表返回 `models/gemini-3.8-flash` 形式,
- * 與推薦表裏的裸 id 對齊(兩種形式發請求都有效,見 provider.ts)。
+ * 與推薦表裡的裸 id 對齊(兩種形式發請求都有效,見 provider.ts)。
  */
 export function normModelId(id: string): string {
   return id.startsWith("models/") ? id.slice("models/".length) : id;
 }
 
 /**
- * 已下架模型(實測 404,選中必失敗):從列表裏直接移除,不讓用戶選到。
+ * 已下架模型(實測 404,選中必失敗):從列表裡直接移除,不讓用戶選到。
  * - gemini-2.0-flash: Google 已下架("no longer available")
  * - gemini-2.5-flash: 新用戶不可用("no longer available to new users")
  * 用裸 id 存,比對經 normModelId 對齊 `models/` 前綴形式。
@@ -174,7 +174,7 @@ export function filterRetired<T extends { id: string }>(models: T[]): T[] {
   return filtered.length > 0 ? filtered : models;
 }
 
-/** 靜態模型備選(動態拉取失敗/未緩存時的回落;workers-ai 用覈驗表,見 models.ts)。 */
+/** 靜態模型備選(動態拉取失敗/未緩存時的回落;workers-ai 用核驗表,見 models.ts)。 */
 export const STATIC_MODELS: Record<string, string[]> = {
   "workers-ai": [
     "@cf/mistralai/mistral-small-3.1-24b-instruct",

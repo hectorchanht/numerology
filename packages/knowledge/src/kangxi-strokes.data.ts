@@ -1,4 +1,4 @@
-// AUTO-GENERATED from data/kangxi-strokes.json — 內聯爲 TS 模塊,隨 JS 一同打包,
+// AUTO-GENERATED from data/kangxi-strokes.json — 內聯為 TS 模塊,隨 JS 一同打包,
 // 避免運行時 fs 讀取(Vercel serverless / 瀏覽器 均不可靠)。
 // 康熙筆畫 = 康熙部首畫數 + 部外畫數(Unihan kRSUnicode 首值);「巡」按康熙字典巛部三畫取 6。
 // 簡體輸入請先轉繁體再查。若需更新數據,改 data/kangxi-strokes.json 後重新生成本文件。

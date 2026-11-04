@@ -10,8 +10,8 @@ export const DEFAULT_LOCALE: Locale = "zht";
 const LS_KEY = "numerology-locale";
 
 /**
- * 界面文案字典。zht 爲默認語言(香港書面中文,非機械簡繁轉換);
- * zhs 沿用原有簡體文案;en 爲自然英文。
+ * 界面文案字典。zht 為默認語言(香港書面中文,非機械簡繁轉換);
+ * zhs 沿用原有簡體文案;en 為自然英文。
  * 佔位符用 {name} 形式,由 fmt() 填充。
  */
 const zht = {

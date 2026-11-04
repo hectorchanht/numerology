@@ -43,7 +43,7 @@ export interface PrintText {
 }
 
 /**
- * 把一段已渲染的報告 HTML 導出爲 PDF(經瀏覽器打印對話框「另存爲 PDF」)。
+ * 把一段已渲染的報告 HTML 導出為 PDF(經瀏覽器打印對話框「另存為 PDF」)。
  * 文字保持可選可搜索,排版獨立乾淨。
  */
 export function printReport(title: string, contentHtml: string, meta?: string, text: PrintText = {}): void {

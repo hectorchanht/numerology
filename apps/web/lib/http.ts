@@ -9,7 +9,7 @@
  * - 400:請求體非法、出生信息非法、農曆日期非法、未知 provider(客戶端傳錯了名字)。
  * - 502:AI provider 側的失敗——key 缺失/鑑權失敗、模型下架 404、限流、
  *   上游 5xx、網絡/超時/DNS。這些是"我們的下游掛了",不是"用戶傳錯了",
- *   用 502 如實表達,避免把上游故障僞裝成客戶端錯誤。
+ *   用 502 如實表達,避免把上游故障偽裝成客戶端錯誤。
  *
  * 僅服務端調用。分類依據:SDK 錯誤的 `status` 字段(OpenAI/Anthropic SDK 均攜帶)
  * + 錯誤消息的關鍵詞;調用方可用 stage 聲明錯誤發生的階段(AI 階段默認按 502 兜底)。
@@ -19,7 +19,7 @@ export type ErrorStage = "input" | "ai";
 
 interface Classified {
   status: 400 | 429 | 502;
-  /** 真實錯誤消息(不含敏感信息:key 只走請求頭,從不出現在錯誤消息裏) */
+  /** 真實錯誤消息(不含敏感信息:key 只走請求頭,從不出現在錯誤消息裡) */
   message: string;
   /** 機器可讀錯誤碼(MODEL_NOT_FOUND / AI_BUDGET);前端據此做緩存清理、額度提示等動作。 */
   code?: string;
@@ -54,7 +54,7 @@ function statusOf(err: unknown): number | undefined {
   return typeof s === "number" ? s : undefined;
 }
 
-/** 把任意錯誤分類爲 {status, message}。stage="ai" 時,無法識別的錯誤默認 502。 */
+/** 把任意錯誤分類為 {status, message}。stage="ai" 時,無法識別的錯誤默認 502。 */
 export function classifyError(err: unknown, stage: ErrorStage = "input"): Classified {
   const raw = err instanceof Error ? err.message : String(err);
   const status = statusOf(err);

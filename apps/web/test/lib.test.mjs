@@ -48,7 +48,7 @@ test("http:AI 上游错误 → 502 且透出真实消息(REAL-ERROR RULE)", () =
     assert.equal(c.status, 502, `${err.message} 应为 502`);
     assert.ok(c.message.includes(want), `502 信息应透出真实消息(含「${want}」): ${c.message}`);
   }
-  // AI 階段未知錯誤兜底 502;輸入階段未知錯誤保持 400。消息均爲原樣。
+  // AI 階段未知錯誤兜底 502;輸入階段未知錯誤保持 400。消息均為原樣。
   assert.equal(classifyError(new Error("mystery"), "ai").status, 502);
   assert.equal(classifyError(new Error("mystery"), "ai").message, "mystery");
   assert.equal(classifyError(new Error("mystery"), "input").status, 400);

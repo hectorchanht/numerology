@@ -58,7 +58,7 @@ export interface CachedStream {
   stream: TextStream;
   cacheKey: string;
   /**
-   * 在拿到最終 Response 後調用:註冊後臺緩存寫入(waitUntil)。
+   * 在拿到最終 Response 後調用:註冊後台緩存寫入(waitUntil)。
    * 只在流**成功完成**且正文非空時寫入;失敗/截斷/空一律不寫。
    */
   armPersistence: (waitUntil: ((p: Promise<unknown>) => void) | null) => void;
@@ -67,7 +67,7 @@ export interface CachedStream {
 /**
  * 緩存編排:先查 KV,命中直接返回 Response(`X-Cache: HIT`);未命中則創建
  * tee 包裝的流,調用方走完 streamToPrimedResponse 後調 `armPersistence()`
- * 註冊後臺寫入(`X-Cache: MISS`)。
+ * 註冊後台寫入(`X-Cache: MISS`)。
  *
  * `lock`(scriptLocker 出嚟,可選):字形鎖。MISS → 先鎖字再 tee,所以直播同寫入
  * 緩存嘅都係已轉換正文;HIT → 再鎖一次(冪等,順手修正舊緩存),純 CPU 零 AI 調用。

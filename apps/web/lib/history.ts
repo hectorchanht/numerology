@@ -22,7 +22,7 @@ export interface HistorySection {
 }
 
 export interface Reading {
-  /** stableInputHash(input),同一組輸入恆爲同一 id。 */
+  /** stableInputHash(input),同一組輸入恆為同一 id。 */
   id: string;
   createdAt: number;
   updatedAt: number;

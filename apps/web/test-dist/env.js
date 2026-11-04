@@ -31,15 +31,15 @@ export function parseDotEnvLine(line) {
     return [key, v];
 }
 /**
- * 把倉庫根目錄 .env 裏的變量灌進 process.env(只灌尚未設置的)。
+ * 把倉庫根目錄 .env 裡的變量灌進 process.env(只灌尚未設置的)。
  * 多 provider:不同 provider 用不同 key(GLM_API_KEY / GEMINI_API_KEY / GROQ_API_KEY /
- * ANTHROPIC_API_KEY 等),所以這裏不針對單一 key 早退,統一加載即可;
+ * ANTHROPIC_API_KEY 等),所以這裡不針對單一 key 早退,統一加載即可;
  * 具體 provider 的 key 缺失會在解讀層(@numerology/ai)調用時給出明確報錯。
  * 僅服務端、請求時調用(非 import 時)。
  *
  * Edge 說明:node:fs / node:path 採用運行時動態 import(webpackIgnore 讓打包器
  * 原樣保留),Cloudflare Workers 等無文件系統的運行時會直接走 catch 靜默 no-op ——
- * key 必須走平臺環境變量 / 請求級 BYOK。本函數因此是 async,調用方需 await。
+ * key 必須走平台環境變量 / 請求級 BYOK。本函數因此是 async,調用方需 await。
  */
 export async function ensureEnv() {
     if (loaded)

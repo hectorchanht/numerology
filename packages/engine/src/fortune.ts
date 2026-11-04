@@ -105,7 +105,7 @@ export function analyzeFortune(
   const suppliesUseGod = (gan: string, hide: Tiangan[]): boolean =>
     useGods.has(gan) || hide.some((g) => useGods.has(g));
 
-  // —— 紫微排盤(先建,大運循環裏要逐運判定同期大限) ——
+  // —— 紫微排盤(先建,大運循環裡要逐運判定同期大限) ——
   const a = astro.bySolar(
     `${t.year}-${t.month}-${t.day}`,
     hourToTimeIndex(t.hour),
@@ -166,7 +166,7 @@ export function analyzeFortune(
       isCurrent: referenceYear >= startYear && referenceYear <= endYear,
       // 該運中點年份時的紫微大限(四化飛入本命宮)。
       // 用中點而非起點:首步大運的起點年齡常落在首個大限區間之前,
-      // 此時 horoscope 會迴繞到末個大限(iztro 行爲),給出錯誤的大限;
+      // 此時 horoscope 會迴繞到末個大限(iztro 行為),給出錯誤的大限;
       // 中點恆落在某大限區間內,結果穩定。
       ziweiDecadal: toScope(
         "大限",

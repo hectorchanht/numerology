@@ -50,7 +50,7 @@ export function SettingsPanel() {
   }, []);
 
   // 頂部 filter 同時是模型 filter:免費/付費作用於模型下拉;推薦只留實測可用的高性價比模型。
-  // 推薦模型置頂:長列表裏好用的先看到,其餘原序在後(不移除任何選項,不觸發自動切換)。
+  // 推薦模型置頂:長列表裡好用的先看到,其餘原序在後(不移除任何選項,不觸發自動切換)。
   const visibleModels = useMemo(
     () =>
       [...filterModels(models, filter, value.provider)].sort(
@@ -222,7 +222,7 @@ export function SettingsPanel() {
               autoComplete="off"
               placeholder={t("settings.apiKeyPh")}
               aria-label={t("settings.apiKey")}
-              // 每個 provider 各記各的 key;沒填過 → 顯示爲空,絕不顯示別的 provider 的 key。
+              // 每個 provider 各記各的 key;沒填過 → 顯示為空,絕不顯示別的 provider 的 key。
               value={value.keys[value.provider] ?? ""}
               onChange={(e) => set({ keys: { ...value.keys, [value.provider]: e.target.value } })}
             />
@@ -279,7 +279,7 @@ export function SettingsPanel() {
       </div>
       <p className="note">{t(meta.noteKey)}</p>
 
-      {/* 自定義 AI 人設 / 系統提示:空 = 用默認;非空則追加爲 system 末塊,優先級最高 */}
+      {/* 自定義 AI 人設 / 系統提示:空 = 用默認;非空則追加為 system 末塊,優先級最高 */}
       <div className="group-head">
         <h2 className="group-title"><label htmlFor="persona">{t("settings.personaLabel")}</label></h2>
         <button type="button" className="text-btn" onClick={() => set({ systemPrompt: "" })}>

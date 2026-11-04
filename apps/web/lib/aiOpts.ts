@@ -31,7 +31,7 @@ export function parseAi(body: unknown): ProviderOptions | undefined {
 /**
  * 服務端:解析 BYOK,並掛上 Workers AI 的服務端 binding。
  * aiBinding 只存在於服務端內存對象中——parseAi 絕不從請求體讀取它,
- * 故客戶端無法僞造或窺探;也不會被序列化進任何響應。
+ * 故客戶端無法偽造或窺探;也不會被序列化進任何響應。
  */
 export function resolveServerAi(body: unknown): ProviderOptions | undefined {
   const opts: ProviderOptions = parseAi(body) ?? {};

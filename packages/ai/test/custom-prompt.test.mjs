@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { applyCustomPrompt } from "../dist/index.js";
 
-// —— B. 自定義人設:追加爲 system 末塊 ——
+// —— B. 自定義人設:追加為 system 末塊 ——
 test("applyCustomPrompt:非空人设追加为最后一块(语言指令之后)", () => {
   const sys = [{ text: "persona" }, { text: "语言指令:輸出語言…" }];
   const out = applyCustomPrompt(sys, { customSystemPrompt: "  你是一只猫  " });

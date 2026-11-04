@@ -9,7 +9,7 @@ import QIONGTONG_TABLE from "./qiongtong.data.js";
 
 /**
  * 調候用神查詢結果。
- * - `useGods`: 調候用神,按重要性排序,首位爲最急用神。
+ * - `useGods`: 調候用神,按重要性排序,首位為最急用神。
  * - `reviewed`: 該數據是否經人工校對(來自數據文件 meta)。false 時解讀層應標註或降權。
  */
 export interface TiaohouResult {
@@ -20,7 +20,7 @@ export interface TiaohouResult {
 }
 
 /**
- * 在調候表中查詢某日干生於某月支的調候用神。純函數,平臺無關。
+ * 在調候表中查詢某日干生於某月支的調候用神。純函數,平台無關。
  * @throws 當日干 / 月支不合法,或表中缺失對應條目時拋錯(快速失敗,不靜默返回空)。
  */
 export function lookupTiaohou(
@@ -48,8 +48,8 @@ export function lookupTiaohou(
 }
 
 /**
- * 加載調候表。數據已內聯爲 TS 模塊(qiongtong.data.ts)隨包打包,
- * 故平臺無關——Node、Vercel serverless、瀏覽器、小程序均可用,無運行時 fs 依賴。
+ * 加載調候表。數據已內聯為 TS 模塊(qiongtong.data.ts)隨包打包,
+ * 故平台無關——Node、Vercel serverless、瀏覽器、小程序均可用,無運行時 fs 依賴。
  */
 export function loadQiongtongTable(): TiaohouTable {
   return QIONGTONG_TABLE;

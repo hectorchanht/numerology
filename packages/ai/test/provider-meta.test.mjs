@@ -99,9 +99,9 @@ test("provider:MLX 分流已退役:mac-llm 选任何模型都行 Ollama 待遇(r
   const baseURL = `http://127.0.0.1:${server.address().port}`;
   const req = { kind: "chat", maxTokens: 10, system: [], messages: [{ role: "user", content: "hi" }] };
   try {
-    // 就算請求裏還帶着退役的 mlx-community/* 模型 id,也只會落到 def 端點(Ollama,
-    // 這裏被 baseURL 覆蓋到本地替身),並按 Ollama 待遇送 reasoning_effort——
-    // 代碼裏已不存在任何去 MLX 端點的路徑。
+    // 就算請求裡還帶著退役的 mlx-community/* 模型 id,也只會落到 def 端點(Ollama,
+    // 這裡被 baseURL 覆蓋到本地替身),並按 Ollama 待遇送 reasoning_effort——
+    // 代碼裡已不存在任何去 MLX 端點的路徑。
     await chatComplete(req, { provider: "mac-llm", model: "mlx-community/Qwen3-14B-4bit", baseURL });
     await chatComplete(req, { provider: "mac-llm", model: "qwen3:8b", baseURL });
   } finally {

@@ -14,7 +14,7 @@ export interface ContextPack {
  * 動態運勢的作用域——分節生成時只喂該節需要的數據,而不是每次都把整份
  * fortune 倒給模型(2026-10-23 honest finding:模型會把逐運/逐年清單當填空模板
  * 走,越全越罐頭)。結構輸入,而不是加指令。
- * - full: 全部(整篇模式/對話,默認,保持舊行爲)
+ * - full: 全部(整篇模式/對話,默認,保持舊行為)
  * - dayun: 僅八字大運各步(+確定性信號 digest);不要流年
  * - review: 僅已過流年(+年份→大運映射);不要未來年
  * - future: 僅參考年/未來流年(+年份→大運映射);不要已過年
@@ -215,7 +215,7 @@ ${yearlyLines}
 `;
   }
 
-  // full:舊行爲(整篇模式/對話)
+  // full:舊行為(整篇模式/對話)
   const liuNian = f.bazi.liuNian.map(liuNianLine).join(" | ");
   const yearly = f.ziwei.yearly.map(yearlyLine).join("\n");
 

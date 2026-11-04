@@ -29,7 +29,7 @@ export function getServerAiBindings(): ServerAiBindings | null {
  * Mac provider(mac-llm;舊名 mac-mlx 已正規化)的 Cloudflare Access
  * service token headers(僅服務端從 Pages env 讀)。
  * 主路徑:getRequestContext().env;兜底:部分 edge runtime 同步進 globalThis.process.env。
- * 非 Pages 環境或未配置時返回 undefined(保持舊行爲)。
+ * 非 Pages 環境或未配置時返回 undefined(保持舊行為)。
  * secret 絕不進日誌、不進響應,只隨服務端請求發往 ollama.hectorchan.com。
  */
 export function getMacLlmAccessHeaders(): Record<string, string> | undefined {
@@ -56,7 +56,7 @@ export function getMacLlmAccessHeaders(): Record<string, string> | undefined {
 }
 
 /**
- * 取 Cloudflare 的 waitUntil(用於響應返回後繼續做緩存寫入等後臺工作)。
+ * 取 Cloudflare 的 waitUntil(用於響應返回後繼續做緩存寫入等後台工作)。
  * 非 Cloudflare 環境(本地 next dev)返回 null。
  */
 export function getWaitUntil(): ((p: Promise<unknown>) => void) | null {

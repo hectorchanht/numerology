@@ -10,7 +10,7 @@ function jsonResponse(status, body) {
   return { ok: status >= 200 && status < 300, status, json: async () => body };
 }
 
-// —— workers-ai:覈驗表 ——
+// —— workers-ai:核驗表 ——
 test("models:workers-ai 返回 verified-static 核验表", async () => {
   const r = await fetchProviderModels("workers-ai");
   assert.equal(r.source, "verified-static");

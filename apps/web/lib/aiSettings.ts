@@ -2,7 +2,7 @@ export interface AiSettings {
   provider: string;
   /**
    * 每個 provider 各自記住的 key(provider 名 → key)。
-   * 某 provider 沒填過 → 對應輸入框顯示爲空,絕不拿別的 provider 的 key 頂替。
+   * 某 provider 沒填過 → 對應輸入框顯示為空,絕不拿別的 provider 的 key 頂替。
    */
   keys: Record<string, string>;
   model: string;
@@ -49,8 +49,8 @@ export function rescueMacModel(model: string): string {
 }
 
 /**
- * 純函數:把 localStorage 裏讀到的舊對象遷移到新結構(不碰 window,可測試)。
- * - 舊版單 `apiKey` 非空 且 新版 `keys` 爲空 → 歸到當時選中的 provider 名下。
+ * 純函數:把 localStorage 裡讀到的舊對象遷移到新結構(不碰 window,可測試)。
+ * - 舊版單 `apiKey` 非空 且 新版 `keys` 為空 → 歸到當時選中的 provider 名下。
  * - provider="mac-mlx"(已退役的舊名)→ 映射到 "mac-llm"。
  * - Mac provider 下選了 mlx-community/* 模型 → 救濟映射到 Ollama 同級
  *   (見 rescueMacModel;MLX 已停用,原樣保留會打到死端點)。
@@ -78,7 +78,7 @@ export function migrateAiSettings(raw: unknown): AiSettings {
   return out;
 }
 
-/** 讀取瀏覽器裏保存的 AI 設置(隨請求發送,服務端不保存)。 */
+/** 讀取瀏覽器裡保存的 AI 設置(隨請求發送,服務端不保存)。 */
 export function loadAi(): AiSettings {
   if (typeof window === "undefined") return { ...DEFAULT_AI };
   try {
@@ -110,7 +110,7 @@ export function currentKey(s: AiSettings): string {
 /**
  * 組裝發往 API 的請求體片段。
  * - `ai`:BYOK(provider/key/model/baseURL),key 取當前 provider 名下的,沒填則省略。
- * - `systemPrompt`:頂層字段(與 locale 同級),爲空則省略 → 服務端用默認。
+ * - `systemPrompt`:頂層字段(與 locale 同級),為空則省略 → 服務端用默認。
  */
 export function aiRequestParts(): {
   ai: { provider: string; apiKey?: string; model?: string; baseURL?: string };
