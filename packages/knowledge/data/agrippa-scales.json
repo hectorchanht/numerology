@@ -1,0 +1,2088 @@
+{
+  "meta": {
+    "name": "Agrippa, Occult Philosophy — scales of numbers 1–12 (Book II ch. 4–14) and the 72 angels of Shem ha-Mephorash (Book III ch. 25)",
+    "schema": "scales: [{n,chapter,page(s),divineNames:[{name,hebrew,note?,erratum?}],rows:[{world,label,items}]}] ; orphicTwelve ; shemHaMephorash: {verses, rule, angels:[{n,name,triplet,suffix}]}",
+    "source": "Henry Cornelius Agrippa, Three Books of Occult Philosophy, tr. J. F. (London 1651), public domain, via Wikisource Page: namespace of 'Three Books of Occult Philosophy (De Occulta Philosophia) (1651).djvu' (`page` = djvu page). Aquarius angel cross-checked against the 1533 Cologne Latin edition (archive.org DeOccultaPhilosophiaLoc1533). Exodus 14:19–21 consonantal text from Sefaria 'Miqra according to the Masorah', vowels and accents stripped.",
+    "version": "0.1.0",
+    "reviewed": false,
+    "reviewNote": "Scale pages are Wikisource level 1 (raw OCR) except p. 203 (level 3) and pp. 230-231, 240, 244, 246 (level 2). English items are normalised spellings of the printed cells; Hebrew divine names are checked by letter count, the 72 names by derivation from the three verses. The 72-name table on pp. 444-445 has no Hebrew on Wikisource; triplets are derived, not transcribed."
+  },
+  "scales": [
+    {
+      "n": 1,
+      "chapter": 4,
+      "page": 203,
+      "divineNames": [
+        {
+          "name": "name of one simple letter",
+          "hebrew": null,
+          "note": "Hebrew unintelligible on the Wikisource page"
+        }
+      ],
+      "rows": [
+        {
+          "world": "archetypal",
+          "label": "one divine essence",
+          "items": [
+            "God"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "one supreme intelligence",
+          "items": [
+            "soul of the world"
+          ]
+        },
+        {
+          "world": "celestial",
+          "label": "one king of stars",
+          "items": [
+            "Sun"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "one subject of all virtues",
+          "items": [
+            "philosophers' stone"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "first living, last dying",
+          "items": [
+            "heart"
+          ]
+        },
+        {
+          "world": "infernal",
+          "label": "one prince of rebellion",
+          "items": [
+            "Lucifer"
+          ]
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "chapter": 5,
+      "page": 206,
+      "divineNames": [
+        {
+          "name": "names of God of two letters",
+          "hebrew": null,
+          "note": "no name printed in the cell"
+        }
+      ],
+      "rows": [
+        {
+          "world": "intelligible",
+          "label": "two intelligible substances",
+          "items": [
+            "angel",
+            "soul"
+          ]
+        },
+        {
+          "world": "celestial",
+          "label": "two great lights",
+          "items": [
+            "Sun",
+            "Moon"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "two elements producing a living soul",
+          "items": [
+            "earth",
+            "water"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "two principal seats of the soul",
+          "items": [
+            "heart",
+            "brain"
+          ]
+        },
+        {
+          "world": "infernal",
+          "label": "two chief devils",
+          "items": [
+            "Behemoth",
+            "Leviathan"
+          ]
+        },
+        {
+          "world": "infernal",
+          "label": "two threats to the damned",
+          "items": [
+            "weeping",
+            "gnashing of teeth"
+          ]
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "chapter": 6,
+      "page": 209,
+      "divineNames": [
+        {
+          "name": "Shaddai",
+          "hebrew": "שדי"
+        }
+      ],
+      "rows": [
+        {
+          "world": "archetypal",
+          "label": "three persons",
+          "items": [
+            "Father",
+            "Son",
+            "Holy Ghost"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "three hierarchies of angels",
+          "items": [
+            "supreme",
+            "middle",
+            "lowest"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "three degrees of the blessed",
+          "items": [
+            "innocents",
+            "martyrs",
+            "confessors"
+          ]
+        },
+        {
+          "world": "celestial",
+          "label": "three quaternions of signs",
+          "items": [
+            "movable",
+            "fixed",
+            "common"
+          ]
+        },
+        {
+          "world": "celestial",
+          "label": "three quaternions of houses",
+          "items": [
+            "angles",
+            "succedent",
+            "cadent"
+          ]
+        },
+        {
+          "world": "celestial",
+          "label": "three lords of the triplicities",
+          "items": [
+            "diurnal",
+            "nocturnal",
+            "partaking"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "three degrees of elements",
+          "items": [
+            "simple",
+            "compound",
+            "thrice compound"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "three parts of man",
+          "items": [
+            "head",
+            "breast",
+            "belly"
+          ]
+        },
+        {
+          "world": "infernal",
+          "label": "three furies",
+          "items": [
+            "Alecto",
+            "Megaera",
+            "Tisiphone"
+          ]
+        },
+        {
+          "world": "infernal",
+          "label": "three infernal judges",
+          "items": [
+            "Minos",
+            "Aeacus",
+            "Rhadamanthus"
+          ]
+        },
+        {
+          "world": "infernal",
+          "label": "three degrees of the damned",
+          "items": [
+            "wicked",
+            "apostates",
+            "infidels"
+          ]
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "chapter": 7,
+      "pages": [
+        213,
+        214
+      ],
+      "divineNames": [
+        {
+          "name": "Tetragrammaton",
+          "hebrew": "יהוה",
+          "note": "glyphs lost in the Wikisource OCR; the cell is captioned 'the name of God with four letters'"
+        }
+      ],
+      "elements": [
+        "fire",
+        "air",
+        "water",
+        "earth"
+      ],
+      "rows": [
+        {
+          "world": "intelligible",
+          "label": "four triplicities of angelic choirs",
+          "items": [
+            "Seraphim/Cherubim/Thrones",
+            "Dominations/Powers/Virtues",
+            "Principalities/Archangels/Angels",
+            "Innocents/Martyrs/Confessors"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "four angels of the corners of the world",
+          "items": [
+            "Michael",
+            "Raphael",
+            "Gabriel",
+            "Uriel"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "four rulers of the elements",
+          "items": [
+            "Seraph",
+            "Cherub",
+            "Tharsis",
+            "Ariel"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "four holy living creatures",
+          "items": [
+            "lion",
+            "eagle",
+            "man",
+            "calf"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "four evangelists",
+          "items": [
+            "Mark",
+            "John",
+            "Matthew",
+            "Luke"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "four triplicities of the tribes",
+          "items": [
+            "Dan/Asher/Naphtali",
+            "Judah/Issachar/Zebulun",
+            "Manasseh/Benjamin/Ephraim",
+            "Reuben/Simeon/Gad"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "four triplicities of apostles",
+          "items": [
+            "Matthias/Peter/James the elder",
+            "Simon/Bartholomew/Matthew",
+            "John/Philip/James the younger",
+            "Thaddeus/Andrew/Thomas"
+          ]
+        },
+        {
+          "world": "celestial",
+          "label": "four triplicities of signs",
+          "items": [
+            "Aries/Leo/Sagittarius",
+            "Gemini/Libra/Aquarius",
+            "Cancer/Scorpio/Pisces",
+            "Taurus/Virgo/Capricorn"
+          ]
+        },
+        {
+          "world": "celestial",
+          "label": "stars and planets by element",
+          "items": [
+            "Mars, Sun",
+            "Jupiter, Venus",
+            "Saturn, Mercury",
+            "fixed stars, Moon"
+          ]
+        },
+        {
+          "world": "celestial",
+          "label": "qualities of the celestial elements",
+          "items": [
+            "light",
+            "diaphanousness",
+            "agility",
+            "solidity"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "four elements",
+          "items": [
+            "fire",
+            "air",
+            "water",
+            "earth"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "four qualities",
+          "items": [
+            "heat",
+            "moisture",
+            "cold",
+            "dryness"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "four seasons",
+          "items": [
+            "summer",
+            "spring",
+            "winter",
+            "autumn"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "four corners of the world",
+          "items": [
+            "east",
+            "west",
+            "north",
+            "south"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "four kinds of mixed bodies",
+          "items": [
+            "animals",
+            "plants",
+            "metals",
+            "stones"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "four kinds of animals",
+          "items": [
+            "walking",
+            "flying",
+            "swimming",
+            "creeping"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "in plants",
+          "items": [
+            "seeds",
+            "flowers",
+            "leaves",
+            "roots"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "in metals",
+          "items": [
+            "gold, iron",
+            "copper, tin",
+            "quicksilver",
+            "lead, silver"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "in stones",
+          "items": [
+            "bright and burning",
+            "light and transparent",
+            "clear and congealed",
+            "heavy and dark"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "four elements of man",
+          "items": [
+            "mind",
+            "spirit",
+            "soul",
+            "body"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "four powers of the soul",
+          "items": [
+            "intellect",
+            "reason",
+            "phantasy",
+            "sense"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "four judiciary powers",
+          "items": [
+            "faith",
+            "science",
+            "opinion",
+            "experience"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "four moral virtues",
+          "items": [
+            "justice",
+            "temperance",
+            "prudence",
+            "fortitude"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "senses",
+          "items": [
+            "sight",
+            "hearing",
+            "taste and smell",
+            "touch"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "four elements of the body",
+          "items": [
+            "spirit",
+            "flesh",
+            "humours",
+            "bones"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "fourfold spirit",
+          "items": [
+            "animal",
+            "vital",
+            "generative",
+            "natural"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "four humours",
+          "items": [
+            "choler",
+            "blood",
+            "phlegm",
+            "melancholy"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "four complexions",
+          "items": [
+            "violence",
+            "nimbleness",
+            "dullness",
+            "slowness"
+          ]
+        },
+        {
+          "world": "infernal",
+          "label": "four princes of devils in the elements",
+          "items": [
+            "Samael",
+            "Azazel",
+            "Azael",
+            "Mahazael"
+          ]
+        },
+        {
+          "world": "infernal",
+          "label": "four infernal rivers",
+          "items": [
+            "Phlegethon",
+            "Cocytus",
+            "Styx",
+            "Acheron"
+          ]
+        },
+        {
+          "world": "infernal",
+          "label": "four princes of spirits at the corners",
+          "items": [
+            "Oriens",
+            "Paymon",
+            "Egyn",
+            "Amaymon"
+          ]
+        }
+      ],
+      "hebrew": {
+        "Samael": "סמאל",
+        "Azazel": "עזאזל",
+        "Azael": "עזאל",
+        "Mahazael": "מהזאל"
+      }
+    },
+    {
+      "n": 5,
+      "chapter": 8,
+      "page": 217,
+      "divineNames": [
+        {
+          "name": "Elion",
+          "hebrew": "אליון"
+        },
+        {
+          "name": "Elohim",
+          "hebrew": "אלהים",
+          "note": "Wikisource OCR אלהום"
+        },
+        {
+          "name": "Jhesu (name of Christ)",
+          "hebrew": "יהשוה",
+          "note": "Wikisource OCR יושוה"
+        }
+      ],
+      "rows": [
+        {
+          "world": "intelligible",
+          "label": "five intelligible substances",
+          "items": [
+            "spirits of the first hierarchy (gods)",
+            "second hierarchy (intelligences)",
+            "third hierarchy (angels sent)",
+            "souls of celestial bodies",
+            "heroes, blessed souls"
+          ]
+        },
+        {
+          "world": "celestial",
+          "label": "five wandering stars, lords of the terms",
+          "items": [
+            "Saturn",
+            "Jupiter",
+            "Mars",
+            "Venus",
+            "Mercury"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "five kinds of corruptible things",
+          "items": [
+            "water",
+            "air",
+            "fire",
+            "earth",
+            "mixed body"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "five kinds of mixed bodies",
+          "items": [
+            "animal",
+            "plant",
+            "metal",
+            "stone",
+            "plant-animal"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "five senses",
+          "items": [
+            "taste",
+            "hearing",
+            "seeing",
+            "touching",
+            "smelling"
+          ]
+        },
+        {
+          "world": "infernal",
+          "label": "five corporeal torments",
+          "items": [
+            "deadly bitterness",
+            "horrible howling",
+            "terrible darkness",
+            "unquenchable heat",
+            "piercing stink"
+          ]
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "chapter": 9,
+      "page": 219,
+      "divineNames": [
+        {
+          "name": "El Gibor",
+          "hebrew": "אל גבור",
+          "note": "Wikisource OCR גבול"
+        },
+        {
+          "name": "Eloha",
+          "hebrew": "אלוהים",
+          "note": "as printed; six letters"
+        }
+      ],
+      "rows": [
+        {
+          "world": "intelligible",
+          "label": "six orders of angels not sent to inferiors",
+          "items": [
+            "Cherubim",
+            "Thrones",
+            "Dominations",
+            "Powers",
+            "Virtues"
+          ],
+          "note": "only five choirs printed; the sixth cell is empty on Wikisource"
+        },
+        {
+          "world": "celestial",
+          "label": "six planets wandering in latitude",
+          "items": [
+            "Saturn",
+            "Jupiter",
+            "Mars",
+            "Venus",
+            "Mercury",
+            "Moon"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "six substantial qualities of elements",
+          "items": [
+            "rest",
+            "thinness",
+            "sharpness",
+            "dullness",
+            "thickness",
+            "motion"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "six degrees of men",
+          "items": [
+            "intellect",
+            "memory",
+            "sense",
+            "motion",
+            "life",
+            "essence"
+          ]
+        },
+        {
+          "world": "infernal",
+          "label": "six devils, authors of calamities",
+          "items": [
+            "Acteus",
+            "Megalesius",
+            "Ormenus",
+            "Lycus",
+            "Nicon",
+            "Mimon"
+          ]
+        }
+      ]
+    },
+    {
+      "n": 7,
+      "chapter": 10,
+      "pages": [
+        230,
+        231
+      ],
+      "divineNames": [
+        {
+          "name": "Ararita",
+          "hebrew": "אראריתא",
+          "note": "glyphs not transcribed on Wikisource; standard spelling, also named in the 1533 table"
+        },
+        {
+          "name": "Asher Eheieh",
+          "hebrew": "אשר אהיה",
+          "note": "glyphs not transcribed on Wikisource; standard spelling"
+        }
+      ],
+      "planets": [
+        "Saturn",
+        "Jupiter",
+        "Mars",
+        "Sun",
+        "Venus",
+        "Mercury",
+        "Moon"
+      ],
+      "rows": [
+        {
+          "world": "intelligible",
+          "label": "seven angels before God",
+          "items": [
+            "Zaphiel",
+            "Zadkiel",
+            "Camael",
+            "Raphael",
+            "Haniel",
+            "Michael",
+            "Gabriel"
+          ]
+        },
+        {
+          "world": "celestial",
+          "label": "seven planets",
+          "items": [
+            "Saturn",
+            "Jupiter",
+            "Mars",
+            "Sun",
+            "Venus",
+            "Mercury",
+            "Moon"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "birds",
+          "items": [
+            "lapwing",
+            "eagle",
+            "vulture",
+            "swan",
+            "dove",
+            "stork",
+            "owl"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "fish",
+          "items": [
+            "cuttlefish",
+            "dolphin",
+            "pike",
+            "sea-calf",
+            "thymallus",
+            "mullet",
+            "sea-cat"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "animals",
+          "items": [
+            "mole",
+            "hart",
+            "wolf",
+            "lion",
+            "goat",
+            "ape",
+            "cat"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "metals",
+          "items": [
+            "lead",
+            "tin",
+            "iron",
+            "gold",
+            "copper",
+            "quicksilver",
+            "silver"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "stones",
+          "items": [
+            "onyx",
+            "sapphire",
+            "diamond",
+            "carbuncle",
+            "emerald",
+            "agate",
+            "crystal"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "seven integral members",
+          "items": [
+            "right foot",
+            "head",
+            "right hand",
+            "heart",
+            "privy members",
+            "left hand",
+            "left foot"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "seven holes of the head",
+          "items": [
+            "right ear",
+            "left ear",
+            "right nostril",
+            "right eye",
+            "left nostril",
+            "mouth",
+            "left eye"
+          ]
+        },
+        {
+          "world": "infernal",
+          "label": "seven habitations of the infernals (R. Joseph of Castile)",
+          "items": [
+            "hell",
+            "gates of death",
+            "shadow of death",
+            "pit of destruction",
+            "clay of death",
+            "perdition",
+            "depth of the earth"
+          ]
+        }
+      ],
+      "variance": {
+        "Venus": "the scale gives copper; Book I ch. 28 lists silver and yellow or red brass for Venus"
+      }
+    },
+    {
+      "n": 8,
+      "chapter": 11,
+      "page": 233,
+      "divineNames": [
+        {
+          "name": "Eloha Vaddaath",
+          "hebrew": "אלוה ודעת"
+        },
+        {
+          "name": "Jehovah Vedaath",
+          "hebrew": "יהוה ודעת"
+        }
+      ],
+      "rows": [
+        {
+          "world": "intelligible",
+          "label": "eight rewards of the blessed",
+          "items": [
+            "inheritance",
+            "incorruption",
+            "power",
+            "victory",
+            "vision of God",
+            "grace",
+            "a kingdom",
+            "joy"
+          ]
+        },
+        {
+          "world": "celestial",
+          "label": "eight visible heavens",
+          "items": [
+            "starry heaven",
+            "Saturn",
+            "Jupiter",
+            "Mars",
+            "Sun",
+            "Venus",
+            "Mercury",
+            "Moon"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "eight particular qualities",
+          "items": [
+            "dryness of earth",
+            "coldness of water",
+            "moisture of air",
+            "heat of fire",
+            "heat of air",
+            "moisture of water",
+            "dryness of fire",
+            "coldness of earth"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "eight kinds of blessed men",
+          "items": [
+            "peacemakers",
+            "hungering after righteousness",
+            "meek",
+            "persecuted for righteousness",
+            "pure in heart",
+            "merciful",
+            "poor in spirit",
+            "mourners"
+          ]
+        },
+        {
+          "world": "infernal",
+          "label": "eight rewards of the damned",
+          "items": [
+            "prison",
+            "death",
+            "judgement",
+            "wrath of God",
+            "darkness",
+            "indignation",
+            "tribulation",
+            "anguish"
+          ]
+        }
+      ]
+    },
+    {
+      "n": 9,
+      "chapter": 12,
+      "page": 235,
+      "divineNames": [
+        {
+          "name": "Jehovah Sabaoth",
+          "hebrew": "יהוה צבאות"
+        },
+        {
+          "name": "Jehovah Zidkenu",
+          "hebrew": "יהוה צדקנו"
+        },
+        {
+          "name": "Elohim Gibor",
+          "hebrew": "אלהים גבור",
+          "erratum": "printed אלהים גיבור (10 letters); the plene yod breaks the nine-letter count"
+        }
+      ],
+      "rows": [
+        {
+          "world": "intelligible",
+          "label": "nine choirs of angels",
+          "items": [
+            "Seraphim",
+            "Cherubim",
+            "Thrones",
+            "Dominations",
+            "Powers",
+            "Virtues",
+            "Principalities",
+            "Archangels",
+            "Angels"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "nine angels ruling the heavens",
+          "items": [
+            "Metatron",
+            "Ophaniel",
+            "Zaphkiel",
+            "Zadkiel",
+            "Camael",
+            "Raphael",
+            "Haniel",
+            "Michael",
+            "Gabriel"
+          ]
+        },
+        {
+          "world": "celestial",
+          "label": "nine movable spheres",
+          "items": [
+            "primum mobile",
+            "starry heaven",
+            "Saturn",
+            "Jupiter",
+            "Mars",
+            "Sun",
+            "Venus",
+            "Mercury",
+            "Moon"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "nine stones of the choirs",
+          "items": [
+            "sapphire",
+            "emerald",
+            "carbuncle",
+            "beryl",
+            "onyx",
+            "chrysolite",
+            "jasper",
+            "topaz",
+            "sardis"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "nine senses inward and outward",
+          "items": [
+            "memory",
+            "cogitative",
+            "imaginative",
+            "common sense",
+            "hearing",
+            "seeing",
+            "smelling",
+            "tasting",
+            "touching"
+          ]
+        },
+        {
+          "world": "infernal",
+          "label": "nine orders of devils",
+          "items": [
+            "false gods",
+            "lying spirits",
+            "vessels of iniquity",
+            "revengers of wickedness",
+            "jugglers",
+            "aerial powers",
+            "furies",
+            "sifters (triers)",
+            "tempters (ensnarers)"
+          ]
+        }
+      ]
+    },
+    {
+      "n": 10,
+      "chapter": 13,
+      "page": 239,
+      "divineNames": [
+        {
+          "name": "Jehovah collected",
+          "hebrew": "יהוהיהויהי",
+          "note": "יהוה + יהו + יה + י"
+        },
+        {
+          "name": "Jehovah extended",
+          "hebrew": "יוד הא ואו הא",
+          "note": "Wikisource OCR יור"
+        },
+        {
+          "name": "Elohim Sabaoth",
+          "hebrew": "אלהים צבאות"
+        }
+      ],
+      "sephiroth": [
+        "Kether",
+        "Chokmah",
+        "Binah",
+        "Chesed",
+        "Geburah",
+        "Tiphereth",
+        "Netzach",
+        "Hod",
+        "Yesod",
+        "Malkuth"
+      ],
+      "rows": [
+        {
+          "world": "archetypal",
+          "label": "ten names of God",
+          "items": [
+            "Eheieh",
+            "Yah / Iod Jehovah",
+            "Jehovah Elohim",
+            "El",
+            "Elohim Gibor",
+            "Eloha",
+            "Jehovah Sabaoth",
+            "Elohim Sabaoth",
+            "Shaddai",
+            "Adonai Melech"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "ten orders (Dionysius)",
+          "items": [
+            "Seraphim",
+            "Cherubim",
+            "Thrones",
+            "Dominations",
+            "Powers",
+            "Virtues",
+            "Principalities",
+            "Archangels",
+            "Angels",
+            "blessed souls"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "ten orders (tradition)",
+          "items": [
+            "Haioth ha-Kodesh",
+            "Ophanim",
+            "Aralim",
+            "Hashmalim",
+            "Seraphim",
+            "Malachim",
+            "Elohim",
+            "Bene Elohim",
+            "Cherubim",
+            "Issim"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "ten angels ruling",
+          "items": [
+            "Metatron",
+            "Jophiel",
+            "Zaphkiel",
+            "Zadkiel",
+            "Camael",
+            "Raphael",
+            "Haniel",
+            "Michael",
+            "Gabriel",
+            "soul of Messiah"
+          ]
+        },
+        {
+          "world": "celestial",
+          "label": "ten spheres",
+          "items": [
+            "Rashith ha-Gilgalim (primum mobile)",
+            "Mazloth (zodiac)",
+            "Shabbathai (Saturn)",
+            "Tzedek (Jupiter)",
+            "Madim (Mars)",
+            "Shemesh (Sun)",
+            "Nogah (Venus)",
+            "Kokab (Mercury)",
+            "Levanah (Moon)",
+            "Holem Yesodoth (elements)"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "ten animals consecrated to the gods",
+          "items": [
+            "dove",
+            "lizard",
+            "dragon",
+            "eagle",
+            "horse",
+            "lion",
+            "man",
+            "genitals",
+            "bull",
+            "lamb"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "ten inward parts of man",
+          "items": [
+            "spirit",
+            "brain",
+            "spleen",
+            "liver",
+            "gall",
+            "heart",
+            "kidneys",
+            "lungs",
+            "genitals",
+            "matrix"
+          ]
+        },
+        {
+          "world": "infernal",
+          "label": "ten orders of the damned",
+          "items": [
+            "false gods",
+            "lying spirits",
+            "vessels of iniquity",
+            "revengers of wickedness",
+            "jugglers",
+            "aerial powers",
+            "furies",
+            "sifters (triers)",
+            "tempters (ensnarers)",
+            "wicked souls bearing rule"
+          ]
+        }
+      ]
+    },
+    {
+      "n": 12,
+      "chapter": 14,
+      "pages": [
+        243,
+        244
+      ],
+      "note": "Eleven has no scale; ch. 14 treats it in prose only.",
+      "divineNames": [
+        {
+          "name": "Holy, Blessed is He",
+          "hebrew": "הקדוש ברוך הוא",
+          "note": "Wikisource OCR הקרש (11 letters); the twelve-letter count needs plene הקדוש"
+        },
+        {
+          "name": "Father, Son, Holy Ghost",
+          "hebrew": "אב בן ורוח הקדש"
+        }
+      ],
+      "banners": {
+        "page": 243,
+        "note": "the twelve permutations of יהוה. Wikisource OCR prints יוהה twice and omits ויהה; the 8th banner is restored as the only missing permutation.",
+        "items": [
+          "יהוה",
+          "יההו",
+          "יוהה",
+          "הוהי",
+          "הויה",
+          "ההיו",
+          "והיה",
+          "ויהה",
+          "וההי",
+          "היהו",
+          "היוה",
+          "ההוי"
+        ]
+      },
+      "signs": [
+        "Aries",
+        "Taurus",
+        "Gemini",
+        "Cancer",
+        "Leo",
+        "Virgo",
+        "Libra",
+        "Scorpio",
+        "Sagittarius",
+        "Capricorn",
+        "Aquarius",
+        "Pisces"
+      ],
+      "rows": [
+        {
+          "world": "intelligible",
+          "label": "twelve orders of blessed spirits",
+          "items": [
+            "Seraphim",
+            "Cherubim",
+            "Thrones",
+            "Dominations",
+            "Powers",
+            "Virtues",
+            "Principalities",
+            "Archangels",
+            "Angels",
+            "Innocents",
+            "Martyrs",
+            "Confessors"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "twelve angels ruling the signs",
+          "items": [
+            "Malchidiel",
+            "Asmodel",
+            "Ambriel",
+            "Muriel",
+            "Verchiel",
+            "Hamaliel",
+            "Zuriel",
+            "Barbiel",
+            "Adnachiel",
+            "Hanael",
+            "Cambiel",
+            "Barchiel"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "twelve tribes",
+          "items": [
+            "Dan",
+            "Reuben",
+            "Judah",
+            "Manasseh",
+            "Asher",
+            "Simeon",
+            "Issachar",
+            "Benjamin",
+            "Naphtali",
+            "Gad",
+            "Zebulun",
+            "Ephraim"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "twelve prophets",
+          "items": [
+            "Malachi",
+            "Haggai",
+            "Zechariah",
+            "Amos",
+            "Hosea",
+            "Micah",
+            "Jonah",
+            "Obadiah",
+            "Zephaniah",
+            "Nahum",
+            "Habakkuk",
+            "Joel"
+          ]
+        },
+        {
+          "world": "intelligible",
+          "label": "twelve apostles",
+          "items": [
+            "Matthias",
+            "Thaddeus",
+            "Simon",
+            "John",
+            "Peter",
+            "Andrew",
+            "Bartholomew",
+            "Philip",
+            "James the elder",
+            "Thomas",
+            "Matthew",
+            "James the younger"
+          ]
+        },
+        {
+          "world": "celestial",
+          "label": "twelve signs",
+          "items": [
+            "Aries",
+            "Taurus",
+            "Gemini",
+            "Cancer",
+            "Leo",
+            "Virgo",
+            "Libra",
+            "Scorpio",
+            "Sagittarius",
+            "Capricorn",
+            "Aquarius",
+            "Pisces"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "twelve months",
+          "items": [
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+            "January",
+            "February"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "twelve plants",
+          "items": [
+            "sang (bloodwort)",
+            "upright vervain",
+            "bending vervain",
+            "comfrey",
+            "lady's seal",
+            "calamint",
+            "scorpion-grass",
+            "mugwort",
+            "pimpernel",
+            "dock",
+            "dragonwort",
+            "aristolochia"
+          ]
+        },
+        {
+          "world": "elemental",
+          "label": "twelve stones",
+          "items": [
+            "sardonyx",
+            "carnelian",
+            "topaz",
+            "chalcedony",
+            "jasper",
+            "emerald",
+            "beryl",
+            "amethyst",
+            "jacinth",
+            "chrysoprase",
+            "crystal",
+            "sapphire"
+          ]
+        },
+        {
+          "world": "lesser",
+          "label": "twelve principal members",
+          "items": [
+            "head",
+            "neck",
+            "arms",
+            "breast",
+            "heart",
+            "belly",
+            "kidneys",
+            "genitals",
+            "hams",
+            "knees",
+            "legs",
+            "feet"
+          ]
+        },
+        {
+          "world": "infernal",
+          "label": "twelve degrees of the damned",
+          "items": [
+            "false gods",
+            "lying spirits",
+            "vessels of iniquity",
+            "revengers of wickedness",
+            "jugglers",
+            "aerial powers",
+            "furies",
+            "sifters (triers)",
+            "tempters (ensnarers)",
+            "witches",
+            "apostates",
+            "infidels"
+          ]
+        }
+      ],
+      "erratum": "Aquarius angel: Wikisource OCR has Gabriel (p. 243) and Gabiel (p. 244); the 1533 Latin table reads Gambiel, i.e. Cambiel."
+    }
+  ],
+  "orphicTwelve": {
+    "n": 12,
+    "chapter": 14,
+    "pages": [
+      245,
+      246
+    ],
+    "kind": "Orphic",
+    "signs": [
+      "Aries",
+      "Taurus",
+      "Gemini",
+      "Cancer",
+      "Leo",
+      "Virgo",
+      "Libra",
+      "Scorpio",
+      "Sagittarius",
+      "Capricorn",
+      "Aquarius",
+      "Pisces"
+    ],
+    "rows": [
+      {
+        "world": "intelligible",
+        "label": "twelve deities",
+        "items": [
+          "Pallas",
+          "Venus",
+          "Phoebus",
+          "Mercury",
+          "Jupiter",
+          "Ceres",
+          "Vulcan",
+          "Mars",
+          "Diana",
+          "Vesta",
+          "Juno",
+          "Neptune"
+        ]
+      },
+      {
+        "world": "elemental",
+        "label": "twelve consecrated birds",
+        "items": [
+          "owl",
+          "dove",
+          "cock",
+          "ibis",
+          "eagle",
+          "sparrow",
+          "goose",
+          "magpie",
+          "daw",
+          "heron",
+          "peacock",
+          "swan"
+        ]
+      },
+      {
+        "world": "elemental",
+        "label": "twelve consecrated beasts",
+        "items": [
+          "she-goat",
+          "he-goat",
+          "bull",
+          "dog",
+          "hart",
+          "sow",
+          "ass",
+          "wolf",
+          "hind",
+          "lion",
+          "sheep",
+          "horse"
+        ]
+      },
+      {
+        "world": "elemental",
+        "label": "twelve consecrated trees",
+        "items": [
+          "olive",
+          "myrtle",
+          "laurel",
+          "hazel",
+          "aesculus (oak)",
+          "apple",
+          "box",
+          "dogwood",
+          "palm",
+          "pine",
+          "buckthorn",
+          "elm"
+        ]
+      },
+      {
+        "world": "lesser",
+        "label": "twelve members",
+        "items": [
+          "head",
+          "neck",
+          "arms",
+          "breast",
+          "heart",
+          "belly",
+          "kidneys",
+          "genitals",
+          "hams",
+          "knees",
+          "legs",
+          "feet"
+        ]
+      }
+    ]
+  },
+  "shemHaMephorash": {
+    "chapter": 25,
+    "page": 444,
+    "rule": "Exodus 14:19, 14:20, 14:21 have 72 letters each. Name k = letter k of v.19 + letter (73−k) of v.20 + letter k of v.21 (v.20 read backwards); final letter forms are written as ordinary forms. Angel = triplet + יה (names in -iah) or + אל (names in -el).",
+    "verses": [
+      "ויסעמלאךהאלהיםההלךלפנימחנהישראלוילךמאחריהםויסעעמודהענןמפניהםויעמדמאחריהם",
+      "ויבאביןמחנהמצריםוביןמחנהישראלויהיהענןוהחשךויאראתהלילהולאקרבזהאלזהכלהלילה",
+      "ויטמשהאתידועלהיםויולךיהוהאתהיםברוחקדיםעזהכלהלילהוישםאתהיםלחרבהויבקעוהמים"
+    ],
+    "angels": [
+      {
+        "n": 1,
+        "name": "Vehuiah",
+        "triplet": "והו",
+        "suffix": "יה"
+      },
+      {
+        "n": 2,
+        "name": "Ieliel",
+        "triplet": "ילי",
+        "suffix": "אל"
+      },
+      {
+        "n": 3,
+        "name": "Sitael",
+        "triplet": "סיט",
+        "suffix": "אל"
+      },
+      {
+        "n": 4,
+        "name": "Elemiah",
+        "triplet": "עלמ",
+        "suffix": "יה"
+      },
+      {
+        "n": 5,
+        "name": "Mahasiah",
+        "triplet": "מהש",
+        "suffix": "יה"
+      },
+      {
+        "n": 6,
+        "name": "Lelahel",
+        "triplet": "ללה",
+        "suffix": "אל"
+      },
+      {
+        "n": 7,
+        "name": "Achaiah",
+        "triplet": "אכא",
+        "suffix": "יה"
+      },
+      {
+        "n": 8,
+        "name": "Cahethel",
+        "triplet": "כהת",
+        "suffix": "אל"
+      },
+      {
+        "n": 9,
+        "name": "Haziel",
+        "triplet": "הזי",
+        "suffix": "אל"
+      },
+      {
+        "n": 10,
+        "name": "Aladiah",
+        "triplet": "אלד",
+        "suffix": "יה"
+      },
+      {
+        "n": 11,
+        "name": "Lauiah",
+        "triplet": "לאו",
+        "suffix": "יה"
+      },
+      {
+        "n": 12,
+        "name": "Hahaiah",
+        "triplet": "ההע",
+        "suffix": "יה"
+      },
+      {
+        "n": 13,
+        "name": "Ieiazel",
+        "triplet": "יזל",
+        "suffix": "אל",
+        "erratum": "1651 prints Ieiazel (same as no. 40); the triplet יזל gives Iezalel"
+      },
+      {
+        "n": 14,
+        "name": "Mebahel",
+        "triplet": "מבה",
+        "suffix": "אל"
+      },
+      {
+        "n": 15,
+        "name": "Hariel",
+        "triplet": "הרי",
+        "suffix": "אל"
+      },
+      {
+        "n": 16,
+        "name": "Hakamiah",
+        "triplet": "הקמ",
+        "suffix": "יה"
+      },
+      {
+        "n": 17,
+        "name": "Leviah",
+        "triplet": "לאו",
+        "suffix": "יה"
+      },
+      {
+        "n": 18,
+        "name": "Caliel",
+        "triplet": "כלי",
+        "suffix": "אל"
+      },
+      {
+        "n": 19,
+        "name": "Leuuiah",
+        "triplet": "לוו",
+        "suffix": "יה"
+      },
+      {
+        "n": 20,
+        "name": "Pahaliah",
+        "triplet": "פהל",
+        "suffix": "יה"
+      },
+      {
+        "n": 21,
+        "name": "Nelchael",
+        "triplet": "נלכ",
+        "suffix": "אל"
+      },
+      {
+        "n": 22,
+        "name": "Ieiaiel",
+        "triplet": "ייי",
+        "suffix": "אל"
+      },
+      {
+        "n": 23,
+        "name": "Melahel",
+        "triplet": "מלה",
+        "suffix": "אל"
+      },
+      {
+        "n": 24,
+        "name": "Hahuiah",
+        "triplet": "חהו",
+        "suffix": "יה"
+      },
+      {
+        "n": 25,
+        "name": "Nithhaiah",
+        "triplet": "נתה",
+        "suffix": "יה"
+      },
+      {
+        "n": 26,
+        "name": "Haaiah",
+        "triplet": "האא",
+        "suffix": "יה"
+      },
+      {
+        "n": 27,
+        "name": "Ierathel",
+        "triplet": "ירת",
+        "suffix": "אל"
+      },
+      {
+        "n": 28,
+        "name": "Seehiah",
+        "triplet": "שאה",
+        "suffix": "יה"
+      },
+      {
+        "n": 29,
+        "name": "Reiiel",
+        "triplet": "ריי",
+        "suffix": "אל"
+      },
+      {
+        "n": 30,
+        "name": "Omael",
+        "triplet": "אומ",
+        "suffix": "אל"
+      },
+      {
+        "n": 31,
+        "name": "Lecabel",
+        "triplet": "לכב",
+        "suffix": "אל"
+      },
+      {
+        "n": 32,
+        "name": "Vasariah",
+        "triplet": "ושר",
+        "suffix": "יה"
+      },
+      {
+        "n": 33,
+        "name": "Iehuiah",
+        "triplet": "יחו",
+        "suffix": "יה"
+      },
+      {
+        "n": 34,
+        "name": "Lehahiah",
+        "triplet": "להח",
+        "suffix": "יה"
+      },
+      {
+        "n": 35,
+        "name": "Chavakiah",
+        "triplet": "כוק",
+        "suffix": "יה"
+      },
+      {
+        "n": 36,
+        "name": "Monadel",
+        "triplet": "מנד",
+        "suffix": "אל"
+      },
+      {
+        "n": 37,
+        "name": "Aniel",
+        "triplet": "אני",
+        "suffix": "אל"
+      },
+      {
+        "n": 38,
+        "name": "Haamiah",
+        "triplet": "חעמ",
+        "suffix": "יה"
+      },
+      {
+        "n": 39,
+        "name": "Rehael",
+        "triplet": "רהע",
+        "suffix": "אל"
+      },
+      {
+        "n": 40,
+        "name": "Ieiazel",
+        "triplet": "ייז",
+        "suffix": "אל"
+      },
+      {
+        "n": 41,
+        "name": "Hahahel",
+        "triplet": "ההה",
+        "suffix": "אל"
+      },
+      {
+        "n": 42,
+        "name": "Michael",
+        "triplet": "מיכ",
+        "suffix": "אל"
+      },
+      {
+        "n": 43,
+        "name": "Vevaliah",
+        "triplet": "וול",
+        "suffix": "יה"
+      },
+      {
+        "n": 44,
+        "name": "Ielahiah",
+        "triplet": "ילה",
+        "suffix": "יה"
+      },
+      {
+        "n": 45,
+        "name": "Sealiah",
+        "triplet": "סאל",
+        "suffix": "יה"
+      },
+      {
+        "n": 46,
+        "name": "Ariel",
+        "triplet": "ערי",
+        "suffix": "אל"
+      },
+      {
+        "n": 47,
+        "name": "Asaliah",
+        "triplet": "עשל",
+        "suffix": "יה"
+      },
+      {
+        "n": 48,
+        "name": "Mihael",
+        "triplet": "מיה",
+        "suffix": "אל"
+      },
+      {
+        "n": 49,
+        "name": "Vehuel",
+        "triplet": "והו",
+        "suffix": "אל"
+      },
+      {
+        "n": 50,
+        "name": "Daniel",
+        "triplet": "דני",
+        "suffix": "אל"
+      },
+      {
+        "n": 51,
+        "name": "Hahasiah",
+        "triplet": "החש",
+        "suffix": "יה"
+      },
+      {
+        "n": 52,
+        "name": "Imamiah",
+        "triplet": "עממ",
+        "suffix": "יה"
+      },
+      {
+        "n": 53,
+        "name": "Nanael",
+        "triplet": "ננא",
+        "suffix": "אל"
+      },
+      {
+        "n": 54,
+        "name": "Nithael",
+        "triplet": "נית",
+        "suffix": "אל"
+      },
+      {
+        "n": 55,
+        "name": "Mebahiah",
+        "triplet": "מבה",
+        "suffix": "יה"
+      },
+      {
+        "n": 56,
+        "name": "Poiel",
+        "triplet": "פוי",
+        "suffix": "אל"
+      },
+      {
+        "n": 57,
+        "name": "Nemamiah",
+        "triplet": "נממ",
+        "suffix": "יה"
+      },
+      {
+        "n": 58,
+        "name": "Ieialel",
+        "triplet": "ייל",
+        "suffix": "אל"
+      },
+      {
+        "n": 59,
+        "name": "Harahel",
+        "triplet": "הרח",
+        "suffix": "אל"
+      },
+      {
+        "n": 60,
+        "name": "Mizrael",
+        "triplet": "מצר",
+        "suffix": "אל"
+      },
+      {
+        "n": 61,
+        "name": "Umabel",
+        "triplet": "ומב",
+        "suffix": "אל"
+      },
+      {
+        "n": 62,
+        "name": "Iahhel",
+        "triplet": "יהה",
+        "suffix": "אל"
+      },
+      {
+        "n": 63,
+        "name": "Annauel",
+        "triplet": "ענו",
+        "suffix": "אל"
+      },
+      {
+        "n": 64,
+        "name": "Mehekiel",
+        "triplet": "מחי",
+        "suffix": "אל"
+      },
+      {
+        "n": 65,
+        "name": "Damabiah",
+        "triplet": "דמב",
+        "suffix": "יה"
+      },
+      {
+        "n": 66,
+        "name": "Meniel",
+        "triplet": "מנק",
+        "suffix": "אל"
+      },
+      {
+        "n": 67,
+        "name": "Eiael",
+        "triplet": "איע",
+        "suffix": "אל"
+      },
+      {
+        "n": 68,
+        "name": "Habuiah",
+        "triplet": "חבו",
+        "suffix": "יה"
+      },
+      {
+        "n": 69,
+        "name": "Roehel",
+        "triplet": "ראה",
+        "suffix": "אל"
+      },
+      {
+        "n": 70,
+        "name": "Iibamiah",
+        "triplet": "יבמ",
+        "suffix": "יה"
+      },
+      {
+        "n": 71,
+        "name": "Haiaiel",
+        "triplet": "היי",
+        "suffix": "אל"
+      },
+      {
+        "n": 72,
+        "name": "Mumiah",
+        "triplet": "מומ",
+        "suffix": "יה"
+      }
+    ]
+  }
+}
