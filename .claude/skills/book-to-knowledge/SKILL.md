@@ -100,5 +100,11 @@ Write a short overview in our own words: how the system works, then the tables g
 ## OCR lessons
 
 - MinerU's VLM can invent filler on blank pages ("The image contains no text…"). Drop it, never treat it as source.
+- PaddleOCR vs MinerU A/B test (2026-11-04) on the 1533 kamea pages, PP-OCRv5 server models via `uv run --no-project --python 3.12 --with paddleocr --with paddlepaddle`:
+  - **Accuracy on tables both engines read:** MinerU got 152/155 cells right and PaddleOCR 131/155. PaddleOCR often confuses 3 and 5 in old type.
+  - **Missed tables:** MinerU skipped the whole Sun square on p. 166, while PaddleOCR read 35/36 cells of it.
+  - **Agreement:** every cell where the two engines agreed was correct, and the cells where they disagreed caught all of MinerU's errors.
+  - **Hebrew:** PaddleOCR has no Hebrew model and turns the glyphs into CJK look-alikes.
+  - **Use:** keep MinerU as the main engine. Run PaddleOCR only on number-grid pages, check every cell where they disagree against the page image, and use PaddleOCR to find tables MinerU dropped.
 - When a table's glyphs are missing but the book gives the rule that generates them, derive them instead of guessing, and let the test re-derive them. Examples: the 72 Shem ha-Mephorash triplets come from Exodus 14:19–21 (72 letters per verse; Sefaria API `api/v3/texts/Exodus.14.19-21?version=hebrew`, strip vowels). The twelve banners are the 12 distinct permutations of יהוה. A divine name in the scale of n has n Hebrew letters.
 - Non-Latin glyphs inside tables (Hebrew) may come out as `✕`. Check the page image and supply the glyphs from the standard alphabet. A test then checks them against known values (e.g. נכיאל = 111, סורת = 666).
