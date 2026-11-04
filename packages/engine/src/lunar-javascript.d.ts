@@ -18,6 +18,10 @@ declare module "lunar-javascript" {
     getDay(): number;
     toYmd(): string;
     toYmdHms(): string;
+    static fromYmd(year: number, month: number, day: number): Solar;
+    getHour(): number;
+    getMinute(): number;
+    getSecond(): number;
   }
 
   export interface NineStar {
@@ -47,6 +51,11 @@ declare module "lunar-javascript" {
     getYearShengXiao(): string;
     /** 上一個節氣(如立春/驚蟄等,含節) */
     getPrevJieQi(): JieQi;
+    /**
+     * 本農曆年節氣表(公曆時刻)。鍵含中文名與拼音大寫:
+     * "冬至" = 上一個冬至(前一公曆年 12 月),"DONG_ZHI" = 本年 12 月冬至。
+     */
+    getJieQiTable(): Record<string, Solar>;
   }
 
   export class JieQi {
