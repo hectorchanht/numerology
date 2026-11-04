@@ -239,6 +239,8 @@ ${yearly}
 const SYS_ZH: Record<string, string> = { bazi: "八字日主", ziwei: "紫微五行局", ninestar: "九星年星", lifepath: "生命靈數" };
 const REL_ZH: Record<string, string> = { same: "印證(同五行)", sheng: "相生", ke: "分歧(相剋)" };
 const TIER_ZH: Record<string, string> = { classical: "原典", scholarly: "學者詮釋", modern: "近現代", science: "科學研究" };
+const FIT_ZH: Record<string, string> = { favorable: "喜", unfavorable: "忌", neutral: "閒" };
+const VERDICT_ZH: Record<string, string> = { strong: "身強", weak: "身弱", neutral: "中和" };
 
 /**
  * 多體系事實區塊(Markdown):只列引擎已算好的事實,不含解讀。
@@ -251,9 +253,25 @@ export function crossSystemFacts(
 ): string {
   const cite = (c: { work: string; author?: string; year?: number | string; locator?: string }) =>
     [c.author, c.work, c.year, c.locator].filter(Boolean).join(",");
+  const f = r.fuyi;
+  const neutral = f.verdict === "neutral";
+  // 中和盤不定喜忌,各體系一律為閒(與頁面對照卡同一規則)。
+  const fitOf = (s: CrossSystemResult["signals"][number]) =>
+    s.system === "bazi" ? "錨點" : neutral ? "閒" : FIT_ZH[s.fit ?? "neutral"];
   const rows = r.signals.map((s) =>
-    `| ${SYS_ZH[s.system] ?? s.system} | ${s.value} | ${s.wuxing} | ${s.relation ? REL_ZH[s.relation] : "錨點"} | ${s.bridge ? `經${s.bridge}橋接` : "—"} | ${s.tier ? TIER_ZH[s.tier] : "未分級"} | ${cite(s.cite)} |`,
+    `| ${SYS_ZH[s.system] ?? s.system} | ${s.value} | ${s.wuxing} | ${s.relation ? REL_ZH[s.relation] : "錨點"} | ${fitOf(s)} | ${s.bridge ? `經${s.bridge}橋接` : "—"} | ${s.tier ? TIER_ZH[s.tier] : "未分級"} | ${cite(s.cite)} |`,
   );
+  const score = f.score >= 0 ? `+${f.score}` : `−${-f.score}`;
+  const fuyiLines = [
+    `- 判定:${VERDICT_ZH[f.verdict]},評分 ${score}(> +1.5 身強,< −1.5 身弱,其間中和)。層級 ${TIER_ZH[f.tier]};出處 ${cite(f.cite)}。`,
+    neutral
+      ? "- 喜忌:中和,以調候為參,不定喜忌;各體系「對八字喜忌」皆為閒,不計第二軸基率。"
+      : `- 喜忌:喜用 ${f.favorable.join("、")};忌 ${f.unfavorable.join("、")}。\n`
+        + `- 第二軸基率(按此盤):任一體系隨機落喜用約 ${f.favorable.length}/5,落忌約 ${f.unfavorable.length}/5。`,
+    `- 可能從格:${f.possibleCong ? "是(評分達 ±6,從格喜忌與扶抑相反,本節結論僅供參考)" : "否"}。`,
+    "- 步驟:",
+    ...f.steps.map((x) => `  - ${x}`),
+  ];
   const k = r.kamea;
   const marks = k.marks.map((m) => `${m.system === "lifepath" ? "生命靈數" : "九星年星"} ${m.value} 落第 ${m.row + 1} 行第 ${m.col + 1} 列`);
   const dist = Object.entries(r.distribution).map(([w, n]) => `${w} ${n}`).join("、");
@@ -276,11 +294,14 @@ ${step(m.steps)}`;
 
 錨點:八字日主五行 ${r.anchor}。各體系按自身規則求出核心五行,再與錨點比對。
 
-| 體系 | 計出值 | 五行 | 與日主關係 | 橋接 | 層級 | 出處 |
-|---|---|---|---|---|---|---|
+| 體系 | 計出值 | 五行 | 與日主關係 | 對八字喜忌 | 橋接 | 層級 | 出處 |
+|---|---|---|---|---|---|---|---|
 ${rows.join("\n")}
 
 - 五行分佈:${dist}
+
+## 扶抑喜忌(第二軸;本站簡化評分,非古籍原文)
+${fuyiLines.join("\n")}
 
 ## 宇宙幾何(本節可用的數)
 - 洛書(即 Saturn 3 階幻方):每行和 15,總和 45。

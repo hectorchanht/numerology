@@ -111,3 +111,46 @@ test("crosssystem 指令:太玄與瑪雅只作週期定位", () => {
     assert.ok(p.includes(must), `缺條款: ${must}`);
   }
 });
+
+const signedScore = (n) => (n >= 0 ? `+${n}` : `−${-n}`);
+const FIT_LABEL = { favorable: "喜", unfavorable: "忌", neutral: "閒" };
+const REL_LABEL = { same: "印證(同五行)", sheng: "相生", ke: "分歧(相剋)" };
+
+test("crossSystemFacts:第二軸扶抑喜忌(身強弱、評分、喜忌五行、各 signal fit、按盤基率)", () => {
+  const f = cross.fuyi;
+  assert.ok(facts.includes("扶抑喜忌"));
+  assert.ok(facts.includes("本站簡化評分"));
+  assert.ok(facts.includes({ strong: "身強", weak: "身弱", neutral: "中和" }[f.verdict]));
+  assert.ok(facts.includes(`評分 ${signedScore(f.score)}`));
+  assert.ok(facts.includes("對八字喜忌"), "表格新欄");
+  for (const s of cross.signals) {
+    if (s.system === "bazi") continue;
+    assert.ok(facts.includes(`| ${s.wuxing} | ${REL_LABEL[s.relation]} | ${FIT_LABEL[s.fit]} |`), `缺 ${s.system} fit`);
+  }
+  if (f.verdict !== "neutral") {
+    assert.ok(facts.includes(`喜用 ${f.favorable.join("、")}`));
+    assert.ok(facts.includes(`忌 ${f.unfavorable.join("、")}`));
+    assert.ok(facts.includes(`${f.favorable.length}/5`) && facts.includes(`${f.unfavorable.length}/5`));
+  }
+  for (const st of f.steps) assert.ok(facts.includes(st), "扶抑步驟");
+});
+
+test("crossSystemFacts:中和盤不列基率,可能從格時標明", () => {
+  const neutral = { ...cross, fuyi: { ...cross.fuyi, verdict: "neutral", favorable: [], unfavorable: [], possibleCong: false } };
+  const n = crossSystemFacts(neutral, "zht");
+  assert.ok(n.includes("中和") && n.includes("不定喜忌"));
+  assert.ok(!n.includes("第二軸基率(按此盤)"), "中和不列第二軸基率");
+  assert.ok(!n.includes("可能從格:是"));
+  for (const s of neutral.signals.filter((x) => x.system !== "bazi")) {
+    assert.ok(n.includes(`| ${s.wuxing} | ${REL_LABEL[s.relation]} | 閒 |`), "中和時各體系皆為閒");
+  }
+  const cong = { ...cross, fuyi: { ...cross.fuyi, verdict: "weak", score: -6.5, possibleCong: true } };
+  assert.ok(crossSystemFacts(cong, "zht").includes("可能從格:是"));
+});
+
+test("crosssystem 指令:第二軸說明、按盤基率、從格警示、不自行計算扶抑", () => {
+  const p = buildReportSectionPrompt([], seg, "both", "zht", facts);
+  for (const must of ["第二軸", "對八字喜忌", "照抄事實區塊", "按此盤", "可能從格", "從格喜忌與扶抑相反", "本站簡化評分、非古籍原文", "各體系皆為閒"]) {
+    assert.ok(p.includes(must), `缺條款: ${must}`);
+  }
+});
