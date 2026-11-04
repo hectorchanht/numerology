@@ -50,6 +50,7 @@
     "lib/dragScroll.ts",
     "lib/fortuneBlocks.ts",
     "lib/script.ts",
-    "lib/locations.ts"
+    "lib/locations.ts",
+    "lib/crossView.ts"
   ]
 }

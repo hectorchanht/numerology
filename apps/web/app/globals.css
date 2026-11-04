@@ -543,6 +543,43 @@ button.sec-h { min-height: 44px; margin: -8px 0; }
 .yb-col.cur .yb-yr { color: var(--accent-text); }
 .viz + .list { margin-top: 12px; }
 .tag.sig-tag.sig-2 { background: var(--accent-soft); color: var(--accent-text); }
+
+/* 多體系對照卡:全用主題 token,明暗兩套自動跟;標記以形狀區分,不單靠顏色。 */
+.xs { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.xs-h { font-size: 15px; font-weight: 600; margin: 6px 0 0; }
+.xs-sub, .xs-note { font-size: 13px; color: var(--label-2); margin: 0; line-height: 1.6; }
+.xs-grid { display: block; width: 100%; height: auto; }
+.xs-luoshu { max-width: 220px; }
+.xs-kamea { max-width: 360px; }
+.xs-cell { fill: var(--card); stroke: var(--sep); stroke-width: 1; }
+.xs-cell.hit { fill: var(--accent-soft); }
+.xs-num { fill: var(--label); text-anchor: middle; dominant-baseline: central; font-variant-numeric: tabular-nums; }
+.xs-mk { fill: none; stroke-width: 2.5; }
+.xs-mk-year { fill: var(--accent-soft); stroke: var(--accent); }
+.xs-mk-month { stroke: var(--accent-line); stroke-dasharray: 4 3; }
+.xs-mk-lp { stroke: var(--ok); }
+.viz-legend .sw.xs-sw-year { background: var(--accent-soft); box-shadow: inset 0 0 0 2px var(--accent); border-radius: 50%; }
+.viz-legend .sw.xs-sw-month { box-shadow: inset 0 0 0 2px var(--accent-line); border-radius: 50%; }
+.viz-legend .sw.xs-sw-lp { box-shadow: inset 0 0 0 2px var(--ok); border-radius: 2px; }
+.xs-matrix { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.xs-row { background: var(--card); border-radius: var(--r); padding: 10px 12px; min-width: 0; }
+.xs-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 15px; }
+.xs-sys { color: var(--label-2); font-size: 13px; flex-basis: 100%; }
+.xs-val { font-weight: 600; overflow-wrap: anywhere; }
+.xs-wx small { font-size: 11px; color: var(--label-2); margin-left: 2px; }
+.xs-rel { margin-left: auto; display: inline-flex; gap: 4px; font-size: 13px; color: var(--label-2); white-space: nowrap; }
+.rel-anchor .xs-rel, .rel-same .xs-rel { color: var(--accent-text); }
+.rel-sheng .xs-rel { color: var(--ok-text); }
+.rel-ke .xs-rel { color: var(--warn-text); }
+.xs-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; }
+.xs-tier, .xs-basis { padding: 1px 7px; border-radius: 999px; background: var(--fill); color: var(--label-2); white-space: nowrap; }
+.xs-tier.tier-classical { background: var(--accent-soft); color: var(--accent-text); }
+.xs-tier.tier-science { background: var(--ok-soft); color: var(--ok-text); }
+.xs-cite { font: inherit; font-size: 11px; color: var(--accent-text); background: none; border: 0; padding: 1px 2px;
+  border-bottom: 1px solid var(--accent-line); cursor: help; }
+.xs-steps { margin-top: 6px; font-size: 12px; color: var(--label-2); }
+.xs-steps summary { cursor: pointer; }
+.xs-steps ol { margin: 6px 0 0; padding-left: 1.3em; line-height: 1.6; overflow-wrap: anywhere; }
 .tag.sig-tag.sig-1 { background: var(--fill); color: var(--label-2); }
 
 /* 桌面滑鼠:橫向 strip 可拖拽捲動(lib/dragScroll.ts);觸控唔受影響 */

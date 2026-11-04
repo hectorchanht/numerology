@@ -23,6 +23,7 @@ import { FortuneTimeline } from "@/components/FortuneTimeline";
 import { FortuneDayun, FortuneYears, FortuneRhythm } from "@/components/FortuneSections";
 import { ChartSummary, WuxingChart } from "@/components/Charts";
 import { SectionBasis } from "@/components/SectionBasis";
+import { CrossSystemCard } from "@/components/CrossSystemCard";
 import { Icon } from "@/components/Icon";
 import { EmptyChart, ScreenNav, Seg } from "@/components/ui";
 import { loadAi } from "@/lib/aiSettings";
@@ -422,6 +423,8 @@ export default function Home() {
               <ChartSummary chart={ready.chart} />
               <h2 className="group-title">{t("chart.wuxing")}</h2>
               <WuxingChart chart={ready.chart} />
+              <h2 className="group-title">{t("cross.title")}</h2>
+              <CrossSystemCard chart={ready.chart} />
 
               <Seg
                 label={t("chart.sysLabel")}
