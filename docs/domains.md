@@ -17,7 +17,7 @@
 | Greek gematria | 已入庫 | Fideler 等事實 + 頁碼`greek-gematria.json` | 是 | 365、729 等數的希臘字母值,與九宮 / 365 日對看 |
 | Agrippa correspondences / cabala | 已入庫 | Agrippa 卷 II–III:行星神名 / 智靈 / 靈、28 月宿、十 Sephiroth(`agrippa-correspondences.json`、`agrippa-cabala.json`) | 是(查表) | 行星神名值與幻方行和 / 總和相扣 |
 | 康熙筆畫 | 已入庫 | 康熙字典筆畫(`kangxi-strokes.json`) | 是 | 姓名筆畫數化簡後可落九宮 |
-| 科學筆記 | 已入庫 | `science-notes.json`(同行評審條目) | 否(文獻) | 無直接連結;供報告「現代科學角度」 |
+| 科學筆記 | 已入庫(待校對,reviewed: false) | `science-notes.json`(同行評審條目) | 否(文獻) | 無直接連結;供報告「現代科學角度」 |
 
 ## 進行中
 

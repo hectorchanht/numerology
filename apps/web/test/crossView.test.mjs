@@ -35,3 +35,10 @@ test("luoshuMarks:年星 1 → row 2 col 1;靈數 33 化簡為 6 → row 2 col 2
   assert.deepEqual(m.find((x) => x.system === "ninestar-month"), { value: 5, system: "ninestar-month", row: 1, col: 1 });
   assert.deepEqual(m.find((x) => x.system === "lifepath"), { value: 6, system: "lifepath", row: 2, col: 2 });
 });
+
+test("crossRows:非八字缺 relation 的列不虛報印證,直接略去", () => {
+  const bad = { ...r, signals: r.signals.map((s) => (s.system === "lifepath" ? { ...s, relation: undefined } : s)) };
+  const rows = crossRows(bad);
+  assert.ok(!rows.some((x) => x.system === "lifepath"));
+  assert.equal(rows.length, r.signals.length - 1);
+});

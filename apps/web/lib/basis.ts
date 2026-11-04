@@ -110,11 +110,14 @@ export function sectionBasis(chart: ChartResult, year = new Date().getFullYear()
       },
     ],
     // 多體系交叉:各體系計出值與五行(含與日主關係、河圖橋接)。
-    crosssystem: castCrossSystem(chart).signals.map((s) => ({
-      label: { kind: "crossSignal", system: s.system },
-      value: s.value,
-      vars: { wuxing: s.wuxing, relation: s.relation ?? "anchor", ...(s.bridge ? { bridge: s.bridge } : {}) },
-    })),
+    // getter:只在讀取 crosssystem 時才計算,其餘節不付代價。
+    get crosssystem(): BasisFact[] {
+      return castCrossSystem(chart).signals.map((s) => ({
+        label: { kind: "crossSignal", system: s.system },
+        value: s.value,
+        vars: { wuxing: s.wuxing, relation: s.relation ?? "anchor", ...(s.bridge ? { bridge: s.bridge } : {}) },
+      }));
+    },
     advice: [useGod, dayMaster],
   };
 }

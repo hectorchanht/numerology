@@ -75,3 +75,15 @@ test("其他節與 buildCachedSystem 不含多體系區塊", () => {
   assert.ok(!sys.includes(HEAD));
   assert.ok(!sys.includes("science-notes"));
 });
+
+test("crosssystem 指令:幻方落點只稱巧合或象徵,不下統計結論", () => {
+  const p = buildReportSectionPrompt([], seg, "both", "zht", facts);
+  assert.ok(p.includes("巧合或象徵"));
+  assert.ok(p.includes("不得宣稱「非隨機」"));
+});
+
+test("非 crosssystem 節不含多體系事實區塊", () => {
+  const personality = REPORT_SEGMENTS.find((s) => s.key === "personality");
+  const p = buildReportSectionPrompt([], personality, "both", "zht");
+  assert.ok(!p.includes(HEAD));
+});

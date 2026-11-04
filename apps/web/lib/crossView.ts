@@ -19,17 +19,22 @@ export interface CrossRow {
 }
 
 export function crossRows(r: CrossSystemResult): CrossRow[] {
-  return r.signals.map((s) => ({
-    system: s.system,
-    value: s.value,
-    wuxing: s.wuxing,
-    bridge: s.bridge,
-    relation: s.system === "bazi" ? "anchor" : (s.relation ?? "same"),
-    tier: s.tier ?? "unrated",
-    cite: s.cite,
-    steps: s.steps,
-    dateBasis: s.system === "lifepath" ? "civil" : "solar",
-  }));
+  // 非八字而缺 relation → 無從比對,整列略去,不虛報「印證」。
+  return r.signals.flatMap((s): CrossRow[] => {
+    const relation = s.system === "bazi" ? "anchor" : s.relation;
+    if (!relation) return [];
+    return [{
+      system: s.system,
+      value: s.value,
+      wuxing: s.wuxing,
+      bridge: s.bridge,
+      relation,
+      tier: s.tier ?? "unrated",
+      cite: s.cite,
+      steps: s.steps,
+      dateBasis: s.system === "lifepath" ? "civil" : "solar",
+    }];
+  });
 }
 
 /** 洛書(即 Saturn 方陣),上南下北。 */

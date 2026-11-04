@@ -40,7 +40,8 @@ export async function POST(req: Request): Promise<Response> {
     // 供前端折叠呈现,不再压制 reasoning。chat 等其它路径不开,维持原行为。
     const ai = { ...resolveServerAi(body), captureThinking: true };
     const section = typeof body.section === "string" && body.section.trim() ? body.section.trim() : undefined;
-    const lens = body.lens === "bazi" || body.lens === "ziwei" ? body.lens : "both";
+    // 多體系一節不受 lens 隔離 → 一律 "both",避免同內容因 lens 不同而分裂快取。
+    const lens = section !== "crosssystem" && (body.lens === "bazi" || body.lens === "ziwei") ? body.lens : "both";
     const locale = body.locale === "zhs" || body.locale === "en" ? body.locale : "zht";
     // AI 响应缓存:同一输入+同一配置直接复用 KV 中的上次结果,不再烧预算。
     // 键含 provider/model/locale/lens/section/输入哈希/人设哈希;只缓存完整成功的响应。

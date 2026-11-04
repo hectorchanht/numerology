@@ -87,7 +87,7 @@ function Matrix({ rows }: { rows: CrossRow[] }) {
           <div className="xs-head">
             <span className="xs-sys">{t(`cross.sys.${r.system}` as TKey)}</span>
             <span className="xs-val">{z(r.value)}</span>
-            <span className="xs-wx">{r.wuxing}{r.bridge ? <small>({r.bridge})</small> : null}</span>
+            <span className="xs-wx">{z(r.wuxing)}{r.bridge ? <small>({z(r.bridge)})</small> : null}</span>
             <span className="xs-rel"><span aria-hidden="true">{REL_ICON[r.relation]}</span>{t(`cross.rel.${r.relation}` as TKey)}</span>
           </div>
           <div className="xs-meta">
@@ -112,7 +112,7 @@ function Kamea({ k }: { k: KameaResult }) {
   const vars = { planet, n: k.order, line: k.lineSum, total: k.total };
   const label = t("cross.kameaAria", {
     ...vars,
-    marks: k.marks.map((m) => `${t(m.system === "lifepath" ? "cross.mkLp" : "cross.mkYear")} ${m.value}`).join("、") || "-",
+    marks: k.marks.map((m) => `${t(m.system === "lifepath" ? "cross.mkLpPlain" : "cross.mkYear")} ${m.value}`).join("、") || "-",
   });
   const size = CELL * k.order;
   const fs = Math.max(14, 30 - k.order * 2);
