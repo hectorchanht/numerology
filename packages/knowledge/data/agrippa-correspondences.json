@@ -91,7 +91,7 @@
       "plants": ["hazel", "cinquefoil", "herb mercury", "fumitory", "pimpernel", "marjoram", "parsley"],
       "animals": ["dog", "weasel", "ape", "fox", "hart", "mule", "hare", "civet"],
       "birds": ["linnet", "nightingale", "blackbird", "lark", "thrush", "parrot", "magpie", "ibis"],
-      "fish": ["octopus (pourcontrol)", "fork-fish", "mullet"],
+      "fish": ["octopus (pourcontrel)", "fork-fish", "mullet"],
       "herbApuleius": "mullein", "herbHermes": "cinquefoil",
       "fume": { "page": 148, "compound": ["mastic", "frankincense", "cloves", "cinquefoil", "agate"], "class": "peels and odoriferous seeds", "sevenAromatics": "cinnamon" },
       "places": ["shops", "schools", "warehouses", "merchants' exchanges"],
