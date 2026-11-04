@@ -106,3 +106,5 @@ export {
   sancaiSize,
   type SancaiResult,
 } from "./sancai.js";
+
+export { castNineStar, type NineStarInfo, type NineStarResult } from "./ninestar.js";

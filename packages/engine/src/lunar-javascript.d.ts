@@ -20,11 +20,21 @@ declare module "lunar-javascript" {
     toYmdHms(): string;
   }
 
+  export interface NineStar {
+    getNumber(): string;
+    getColor(): string;
+    getWuXing(): string;
+    getPosition(): string;
+    getPositionDesc(): string;
+  }
+
   export class Lunar {
     /** month 为负数表示闰月(如 -2 = 闰二月) */
     static fromYmd(year: number, month: number, day: number): Lunar;
     getSolar(): Solar;
     getEightChar(): EightChar;
+    getYearNineStar(): NineStar;
+    getMonthNineStar(): NineStar;
     toString(): string;
     getYearInGanZhi(): string;
     /** 农历年/月/日数字(月为负=闰月) */
