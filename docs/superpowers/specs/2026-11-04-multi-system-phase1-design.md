@@ -1,0 +1,143 @@
+# 多體系交叉驗證 · 第一期設計
+
+日期:2026-11-04 · 狀態:待批
+
+## 意圖
+
+網站目前只用中國命理(八字、紫微、易經、河洛)。目標是讓用戶從**古今中外多個數理體系**同時看同一個生辰,
+彼此**印證或反駁**,自行交叉驗證——全面而不偏頗。解讀意思互相矛盾也照樣呈現,作為參考。
+
+主軸:3×3 洛書(地球時空微模型)→ 行星幻方(Saturn 3×3 即洛書,Sun 6×6 = 666)→ 西方數理 / 基督教 Gematria(Fideler)→ 其他古文明 → 現代科學。
+
+## 原則(整個項目適用,不止第一期)
+
+1. **能算的由前端 deterministic 算**(`packages/engine` 純函數,有測試);AI 只解讀已算好的結果,不得自行計數。
+2. **能用圖表就不用文字**:計算結果全部視覺化;AI 文字只負責「為什麼」與「怎麼做」。
+3. **每條理論 / 文本有出處**,並標明可信層級(見下)。
+4. **不偏頗**:每個體系各按各自規則出結論;一致則標「印證」,矛盾則標「分歧」,不強行圓說。
+5. **現代科學角度**:報告中有相關才出現;學院長期設科學專區(第二期)。
+6. 版權:現代著作(如 Fideler 1993)只取事實與摘要 + 頁碼,不搬原文。古籍原文屬公有領域可引。
+
+## 目標(第一期)
+
+1. 全站文風改為「通俗簡練」:略帶古雅、現代人一讀就懂;zht / zhs / en 三版一致。
+2. 知識庫統一格式 + 可信層級 + domain todo 清單。
+3. 新增三個 deterministic 體系:九星本命星、畢氏生命靈數、行星幻方定位。
+4. 命盤頁新增「多體系對照」視覺卡(八字、紫微 + 上述三體系)。
+5. AI 報告新增一節「多體系交叉」,讀對照結果做解讀;相關時帶出科學角度(只可引用知識庫內已收錄的研究)。
+
+## 非目標(第一期不做)
+
+- 廣東話版(`yue` locale)——todo。
+- 太玄經、皇極經世、河洛理數、瑪雅、埃及、卡巴拉、西洋占星本命盤、吠陀等——todo,見 domain 清單。
+- 學院科學專區、新工具頁——第二期。
+- 易經學院課文的 zhs / en 翻譯——第二期(目前回落 zht,維持現狀)。
+
+## 反目標(做到但仍算失敗)
+
+- AI 說出命盤 / 對照矩陣以外的數字,或引用知識庫以外的「研究」「古書云」。
+- 把一個體系的結論包裝成另一個體系的結論(如把畢氏靈數說成五行)而不標明橋接。
+- 西方 / 新紀元理論被寫得比原典更權威;或把現代發明(如 Dreamspell)當古法。
+- 純文字長篇取代可以畫成圖的內容。
+
+## 一、語言與文風
+
+- Locale 代號不變:`zht` / `zhs` / `en`(`apps/web/lib/i18n.ts` 的 `Locale`、`packages/ai` 的 `AiLocale`)。
+- **文風定義(通俗簡練)**:句短、詞準、略帶古雅(四字詞、對仗可用但不堆砌),不用文言虛詞堆砌(之乎者也),
+  不用粵語口語字(嘅、咗、喺)。現代人一讀就懂。en 版對應為 plain, concise, slightly elevated English。
+- 改動範圍:
+  - `localeDirective()` 三語各自寫入文風定義;`SYSTEM_PERSONA` 與 `STYLE_DIRECTIVES`/`STYLE_EXEMPLAR` 改寫成同一文風(現時示範句偏口語)。
+  - `i18n.ts` 的 zht 字串:去除粵語口語字,統一為通俗簡練;zhs 同步;en 檢視語氣。
+  - 新增字串三語齊備(i18n 測試已檢查三地 key 集合一致)。
+- 修改任何 LLM prompt 前,先讀並套用 `~/.claude/prompting-best-practices.md`。
+
+## 二、知識庫格式
+
+沿用現有約定(`docs/knowledge-base.md`:data JSON 帶 `meta.source / version / reviewed`),並沿用
+Fideler 已入庫資料的形式(`packages/knowledge/data/greek-gematria.json` + `docs/greek-gematria.md`:事實 + 頁碼,值由測試重算)。新增:
+
+- `meta.tier`:整份資料的可信層級,四選一:
+  - `classical` 原典(古籍、古代文獻)
+  - `scholarly` 學者詮釋(如 Fideler、Agrippa 屬文藝復興原典但其行星對應屬詮釋——逐條標)
+  - `modern` 近現代發明 / 爭議(如畢氏生命靈數的現代算法、Dreamspell)
+  - `science` 同行評審研究
+- 單條可覆寫 `tier`,並帶 `cite: { work, author, year, locator }`(locator = 頁碼 / 章節 / URL)。
+- **Domain 清單** `docs/domains.md`:每個體系一行——名稱、狀態(todo / 進行中 / 已入庫)、主要出處、可否 deterministic、與洛書主軸的連結。
+  首批寫入上一輪討論的全部候選(太玄經 729 贊、皇極經世、河洛理數、律呂三分損益、十九年七閏 / Metonic、Agrippa、Timaeus、Nicomachus / Iamblichus、Kepler、卡巴拉、Abjad、西洋占星、Chaldean、塔羅、埃及旬星 / 民用曆、瑪雅 Tzolk'in / Haab、藏曆 mewa、九星氣學、Jyotish 27 宿、巴比倫六十進制、廣東話版、科學各項)。
+- 科學資料 `packages/knowledge/data/science-notes.json`(tier `science`):第一期收錄三條,AI 只可引用此檔內條目:
+  - Forer, B. R. (1949). *J. Abnormal and Social Psychology* 44(1):118–123 — 巴納姆效應。
+  - Carlson, S. (1985). *Nature* 318:419–425 — 占星雙盲實驗。
+  - Dean, G. & Kelly, I. W. (2003). *J. Consciousness Studies* 10(6–7):175–198 — 時間雙胞胎。
+  每條含:一句結論、與哪類主張相關(性格描述 / 出生時刻)、引用。實作時須逐條核對原文出處後才設 `reviewed: true`。
+
+## 三、新 deterministic 體系(`packages/engine`)
+
+全部為純函數,輸入 `BirthInput`(已有真太陽時校正 `resolveBirthDateTime`),每個體系一個檔 + 一個測試檔。
+
+### 3.1 九星本命星(`ninestar.ts`)
+- 用 `lunar-javascript` 已有的 `getYearNineStar()` / `getMonthNineStar()`(立春分界由該庫處理)。不自行實作公式。
+- 輸出:年星、月星(數字 1–9、名稱如「九紫」、五行、洛書方位)。
+- 層級:年 / 月九星屬 `classical`(玄空 / 九宮);「本命星性格論」屬日本九星氣學 `modern`,解讀時標明。
+
+### 3.2 畢氏生命靈數(`lifepath.ts`)
+- 生命靈數:用 **年、月、日分別化簡再相加再化簡** 的算法,保留主數 11 / 22 / 33 不化簡。
+- 另出「全部數字直接相加」的結果;兩法不同時,兩個都列出並標「算法分歧」(算法本身就是交叉驗證的一部分)。
+- 層級 `modern`:現代算法源自 20 世紀初(L. Dow Balliett 等),「畢達哥拉斯」屬託名;數的性質引 Iamblichus / Nicomachus(`classical`)作對照。
+- 數的性質資料:`packages/knowledge/data/pythagorean-numbers.json`(1–9 + 11/22/33,每條附 cite)。
+
+### 3.3 行星幻方定位(`kamea.ts`)
+- 出生**星期**(以校正後的出生日期計)→ 古典星期守護行星(日=Sun、一=Moon、二=Mars、三=Mercury、四=Jupiter、五=Venus、六=Saturn)→ 對應幻方(資料取自已入庫的 `planetary-squares.json`)。
+- 輸出:行星、階數 n、行和、總和、並在該方陣上標出用戶的「生命靈數」與「年九星數」所在格(數字 ≤ n² 時)。
+- 洛書即 Saturn 方陣:年九星數必落在 Saturn 方陣上,作為主軸接駁點。
+- 層級:星期守護 `classical`(希臘化時期);幻方 Agrippa 1533 `scholarly`。
+
+### 3.4 對照矩陣(`crosssystem.ts`)
+- 每個體系輸出統一 signal:`{ system, value, label, wuxing?, bridge?, tier, cite }`。
+- 比對軸(第一期只做一條):**核心五行——「你是什麼人」**(用戶已定:A 方案)。每個體系給出用戶的核心五行:
+  - 八字:日主五行(**錨點**)。
+  - 紫微:五行局所屬五行。
+  - 九星:年星五行(月星一併顯示,但不參與判定)。
+  - 生命靈數 → 五行:經 **河圖** 數配五行(1、6 水;2、7 火;3、8 木;4、9 金;5 土;主數先化簡)。這是**跨體系橋接**,`bridge: "河圖"`,UI 與 AI 都必須標明。
+- 判定(各體系對錨點):同五行 →「印證」;相生 →「相生」(中性偏合);相剋 →「分歧」。另出全部 signal 的五行分佈,供圖表顯示。規則為純函數,有測試。
+- 「比喜忌」(B 方案:與八字喜用神比對)屬第二期,需先建扶抑喜忌引擎。
+
+## 四、命盤頁「多體系對照」卡(`apps/web`)
+
+- 位置:命盤結果頁,在現有圖表區之後。
+- 視覺(圖優先):
+  1. **洛書九宮圖**:用戶年九星、月九星、生命靈數(化簡後)在九宮上同時高亮,不同體系不同標記。
+  2. **對照矩陣**:列 = 體系,欄 = 計出值 / 五行 / 與八字喜用關係(印證 / 分歧 / 中性 圖示)/ 層級徽章 / 出處(點按彈出 cite,複用現有 quoteRef 彈窗模式)。
+  3. **行星幻方**:顯示出生星期對應方陣,高亮落點,標行和 / 總和(Sun 方陣即顯示 111 / 666)。
+- 三語字串齊備;樣式沿用現有 `card viz` 與主題 token(明暗模式)。
+
+## 五、AI 解讀
+
+- `buildContextPack` 新增「多體系」區塊:由 `crosssystem` 輸出序列化而成(值、五行、橋接、層級、印證 / 分歧),只給事實不給解讀。
+- 新報告節 `crosssystem`(加入 `REPORT_SEGMENTS`、`SEGMENT_TITLES` 三語標題、`SectionBasis` 依據):
+  - 先一句定性:幾個體系指向同一方向、哪個相反。
+  - 交匯 / 分歧逐點講機制;經橋接的結論須說明「經河圖橋接」。
+  - 宇宙幾何對照:只可使用知識庫已有的數(洛書 45 / 15、Sun 方陣 111 / 666、Fideler 資料檔內數值),不得引入其他數字。
+  - 科學角度:有相關才寫,只可引 `science-notes.json` 條目。
+  - 對照表由前端畫,AI 不重畫表格。
+- `SYSTEM_PERSONA` 由「八字 + 紫微解讀師」擴為「多體系解讀師」;原「诚实」條款保留並延伸:不得引用知識庫外的研究或古書。
+- `lens` 維持 `bazi | ziwei | both`;`crosssystem` 一節不受 lens 隔離影響(它本身就是多體系)。
+
+## 測試
+
+- engine:每個新體系一個 `test/*.test.mjs`,含邊界(立春前後、主數 11/22/33、兩種生命靈數算法分歧、星期跨日的真太陽時校正)。
+- knowledge:新 JSON 數值由測試重算(沿用 greek-gematria 測試做法)。
+- ai:context 測試覆蓋多體系區塊;prompt 測試確認新節標題三語、科學引用只來自 science-notes。
+- web:i18n 三地 key 一致測試照跑;`next build` 通過。
+
+## 設計者自行決定的事項(可推翻)
+
+- **日期基準**:西方體系(生命靈數、出生星期)用**民用曆日期**(出生證明上的日期,即西方傳統做法);中國體系(九星)沿用真太陽時校正後的日期。兩者在午夜附近可能不同,UI 標明各自基準。
+- **AI 上下文**:多體系區塊**只放進 `crosssystem` 一節的 user prompt**,不放入共用的 cached system。這樣其他節的 lens 隔離與 prompt cache 都不受影響。`crosssystem` 一節不論 lens 是什麼都會出現。
+- **科學條目**:沿用現有做法,以 `reviewed: false` 上線,並附「待校對」caveat;核對完原文後再改為 `true`。
+- **舊紀錄**:不做遷移。舊的已存解讀會出現未生成的 `crosssystem` 一節,用戶按需生成(與現時各節按需生成相同)。
+
+## 留給實作者的決定
+
+- 卡片內部排版細節、圖示樣式。
+- `pythagorean-numbers.json` 每數的釋義措辭(需附 cite)。
+- i18n 文風改寫的逐句措辭。
