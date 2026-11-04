@@ -80,6 +80,14 @@ Write a short overview in our own words: how the system works, then the tables g
 | Fideler, *Jesus Christ, Sun of God* (1993, in copyright, libgen copy) | facts only | `greek-gematria.json`, `planetary-squares.json`, `docs/greek-gematria.md` |
 | Agrippa, *Three Books of Occult Philosophy*, 1898 Cornell scan (public domain; **Book I only**) | facts | `agrippa-correspondences.json`, `docs/agrippa-correspondences.md`. Hebrew glyphs OCR'd as ✕; fixed by checking the page image (p. 258) |
 
+| Agrippa, *Three Books*, 1651 tr. via Wikisource (public domain; all 3 books) | facts + cross-check | Book I re-checked against 1651 text (herbs, fumes, stars match). Book II kameas match `planetary-squares.json` cell-for-cell (Moon table missing on Wikisource). New `agrippa-cabala.json` (planetary names, 28 mansions, Sephiroth), `docs/agrippa-cabala.md`. **Not yet extracted:** Book II scales of numbers ch. 4–14, Book III angel names (72 Shem ha-Mephorash, ch. 24–27) |
+
+## Wikisource lessons
+
+- A Wikisource epub export can be **truncated**: it only contains what is transcluded into mainspace subpages, e.g. Book II ch. 1–3 only. The full text lives in the `Page:` namespace of the scan's djvu index. Fetch it with the MediaWiki API: `list=allpages&apnamespace=104&apprefix=<djvu name>/`, then `prop=revisions&rvslots=main` in batches of 50 titles. Send a User-Agent and sleep 1 s between batches.
+- Check `<pagequality level="N">` per page: 1 = raw OCR (not proofread), 3 = proofread, 4 = validated. Report the mix to the user, and treat level-1 pages like any OCR.
+- Wiki tables (`{| … |}`) parse cleanly into number grids. `{{missing table}}` / `{{missing image}}` means no data, so say so instead of guessing.
+
 ## OCR lessons
 
 - MinerU's VLM can invent filler on blank pages ("The image contains no text…"). Drop it, never treat it as source.
