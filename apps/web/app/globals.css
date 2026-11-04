@@ -577,6 +577,15 @@ button.sec-h { min-height: 44px; margin: -8px 0; }
 .xs-tier.tier-science { background: var(--ok-soft); color: var(--ok-text); }
 .xs-cite { font: inherit; font-size: 11px; color: var(--accent-text); background: none; border: 0; padding: 1px 2px;
   border-bottom: 1px solid var(--accent-line); cursor: help; }
+.cy-val { margin: 0; font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+.cy-taixuan { max-width: 270px; }
+.cy-tzolkin { max-width: 420px; }
+.xs-cell.cy-hit { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.cy-hit-num { fill: var(--accent-text); font-weight: 700; }
+.cy-pin { fill: var(--accent); }
+.cy-axis { fill: var(--label-2); text-anchor: middle; dominant-baseline: central; font-variant-numeric: tabular-nums; }
+.cy-legend { margin: 0; padding-left: 1.8em; columns: 4 5.5em; column-gap: 12px; font-size: 11px; color: var(--label-2); line-height: 1.6; }
+.cy-legend li.on { color: var(--accent-text); font-weight: 700; }
 .xs-steps { margin-top: 6px; font-size: 12px; color: var(--label-2); }
 .xs-steps summary { cursor: pointer; }
 .xs-steps ol { margin: 6px 0 0; padding-left: 1.3em; line-height: 1.6; overflow-wrap: anywhere; }

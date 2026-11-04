@@ -581,6 +581,20 @@ const zht = {
   "cross.planet.Jupiter": "木星",
   "cross.planet.Venus": "金星",
   "cross.planet.Saturn": "土星",
+  "cycle.title": "時間週期",
+  "cycle.intro": "太玄以出生前最近的冬至起算,每半日一贊,定出落在 81 首哪一首、第幾贊;瑪雅曆以出生日期換算長紀曆、Tzolk'in(260 日)與 Haab(365 日)。全部為確定性計算。",
+  "cycle.taixuan": "太玄經",
+  "cycle.taixuanVal": "第 {head} 首「{name}」· 第 {zan} 贊",
+  "cycle.taixuanExtra": "{extra}(81 首 729 贊之外的附贊)",
+  "cycle.taixuanAria": "太玄 81 首九乘九格,標出第 {head} 首「{name}」,第 {zan} 贊",
+  "cycle.taixuanAriaExtra": "太玄 81 首九乘九格,出生落在{extra},不在 81 首之內",
+  "cycle.basis.clock": "鐘面時間",
+  "cycle.maya": "瑪雅曆",
+  "cycle.tzolkin": "Tzolk'in {n} {name}",
+  "cycle.longCount": "長紀曆 {lc}",
+  "cycle.haab": "Haab {d} {name}",
+  "cycle.tzolkinAria": "Tzolk'in 十三乘二十格,標出 {n} {name}(第 {n} 列,第 {col} 欄)",
+  "cycle.dreamspell": "坊間的「13 月亮曆」Dreamspell(Argüelles 1987)是現代體系,與傳統瑪雅計日不同,本站不計算。",
 } as const;
 
 export type TKey = keyof typeof zht;
@@ -1153,6 +1167,20 @@ const zhs: Record<TKey, string> = {
   "cross.planet.Jupiter": "木星",
   "cross.planet.Venus": "金星",
   "cross.planet.Saturn": "土星",
+  "cycle.title": "时间周期",
+  "cycle.intro": "太玄以出生前最近的冬至起算,每半日一赞,定出落在 81 首哪一首、第几赞;玛雅历以出生日期换算长纪历、Tzolk'in(260 日)与 Haab(365 日)。全部为确定性计算。",
+  "cycle.taixuan": "太玄经",
+  "cycle.taixuanVal": "第 {head} 首「{name}」· 第 {zan} 赞",
+  "cycle.taixuanExtra": "{extra}(81 首 729 赞之外的附赞)",
+  "cycle.taixuanAria": "太玄 81 首九乘九格,标出第 {head} 首「{name}」,第 {zan} 赞",
+  "cycle.taixuanAriaExtra": "太玄 81 首九乘九格,出生落在{extra},不在 81 首之内",
+  "cycle.basis.clock": "钟面时间",
+  "cycle.maya": "玛雅历",
+  "cycle.tzolkin": "Tzolk'in {n} {name}",
+  "cycle.longCount": "长纪历 {lc}",
+  "cycle.haab": "Haab {d} {name}",
+  "cycle.tzolkinAria": "Tzolk'in 十三乘二十格,标出 {n} {name}(第 {n} 行,第 {col} 列)",
+  "cycle.dreamspell": "坊间的「13 月亮历」Dreamspell(Argüelles 1987)是现代体系,与传统玛雅计日不同,本站不计算。",
 };
 
 /** 英文:自然英文翻译。 */
@@ -1723,6 +1751,20 @@ const en: Record<TKey, string> = {
   "cross.planet.Jupiter": "Jupiter",
   "cross.planet.Venus": "Venus",
   "cross.planet.Saturn": "Saturn",
+  "cycle.title": "Time cycles",
+  "cycle.intro": "Taixuan counts half-days from the last winter solstice before birth, one verse (zan) per half-day, to find which of the 81 heads and which verse you fall on. The Maya calendar converts the birth date to the Long Count, the Tzolk'in (260 days) and the Haab (365 days). All values are computed deterministically.",
+  "cycle.taixuan": "Taixuan jing",
+  "cycle.taixuanVal": "Head {head} “{name}” · verse {zan}",
+  "cycle.taixuanExtra": "{extra} (extra verse beyond the 81 heads × 9 verses)",
+  "cycle.taixuanAria": "Taixuan 9 by 9 grid of 81 heads, marking head {head} “{name}”, verse {zan}",
+  "cycle.taixuanAriaExtra": "Taixuan 9 by 9 grid of 81 heads; birth falls on {extra}, outside the 81 heads",
+  "cycle.basis.clock": "Clock time",
+  "cycle.maya": "Maya calendar",
+  "cycle.tzolkin": "Tzolk'in {n} {name}",
+  "cycle.longCount": "Long Count {lc}",
+  "cycle.haab": "Haab {d} {name}",
+  "cycle.tzolkinAria": "Tzolk'in 13 by 20 grid, marking {n} {name} (row {n}, column {col})",
+  "cycle.dreamspell": "The popular “13 Moon” Dreamspell calendar (Argüelles 1987) is a modern system that differs from the traditional Maya day count; it is not computed here.",
 };
 
 export const STRINGS: Record<Locale, Record<TKey, string>> = { zht, zhs, en };

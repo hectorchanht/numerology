@@ -51,6 +51,7 @@
     "lib/fortuneBlocks.ts",
     "lib/script.ts",
     "lib/locations.ts",
-    "lib/crossView.ts"
+    "lib/crossView.ts",
+    "lib/cycleView.ts"
   ]
 }

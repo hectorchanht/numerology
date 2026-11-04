@@ -56,11 +56,11 @@ function Luoshu({ marks }: { marks: ReturnType<typeof luoshuMarks> }) {
   );
 }
 
-function CitePop({ row }: { row: CrossRow }) {
+export function CitePop({ cite }: { cite: CrossRow["cite"] }) {
   const { t } = useLocale();
   const anchorRef = useRef<HTMLButtonElement | null>(null);
   const { open, setOpen, floatingRef, floatingStyles } = useFloatPopup(anchorRef);
-  const { work, author, year, locator } = row.cite;
+  const { work, author, year, locator } = cite;
   return (
     <>
       <button ref={anchorRef} type="button" className="xs-cite" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
@@ -93,7 +93,7 @@ function Matrix({ rows }: { rows: CrossRow[] }) {
           <div className="xs-meta">
             <span className={`xs-tier tier-${r.tier}`}>{t(`cross.tier.${r.tier}` as TKey)}</span>
             <span className="xs-basis">{t(`cross.basis.${r.dateBasis}` as TKey)}</span>
-            <CitePop row={r} />
+            <CitePop cite={r.cite} />
           </div>
           <details className="xs-steps">
             <summary>{t("cross.steps")}</summary>

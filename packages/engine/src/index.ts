@@ -113,3 +113,5 @@ export { castKamea, type KameaMark, type KameaResult } from "./kamea.js";
 export { castCrossSystem, wuxingRelation, type CrossSystemResult, type CrossSignal, type CrossSystemId, type Relation } from "./crosssystem.js";
 export { castTaixuan, type TaixuanResult } from "./taixuan.js";
 export { castMaya, type MayaResult } from "./maya.js";
+// web 不直接依賴 knowledge,瑪雅 tier 與日名表經此轉出。
+export { MAYA_META, TZOLKIN_DAY_NAMES } from "@numerology/knowledge";
