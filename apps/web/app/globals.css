@@ -588,6 +588,21 @@ button.sec-h { min-height: 44px; margin: -8px 0; }
 .cy-legend li.on { color: var(--accent-text); font-weight: 700; }
 .xs-steps { margin-top: 6px; font-size: 12px; color: var(--label-2); }
 .xs-steps summary { cursor: pointer; }
+/* 扶抑評分條:有意義的圖形用 *-text token,對比 ≥ 3:1;軌道與中和區只作底。 */
+.xs-fy { display: block; width: 100%; max-width: 343px; height: auto; }
+.xs-fy-track { fill: var(--fill); }
+.xs-fy-band { fill: var(--sep); }
+.xs-fy-bar { fill: var(--accent-text); }
+.xs-fy-tick { stroke: var(--label); stroke-width: 1.5; }
+.xs-fy-dot { fill: var(--accent-text); stroke: var(--card); stroke-width: 2; }
+.xs-fy-lbl { fill: var(--label-2); font-size: 11px; }
+.xs-fy-verdict { margin: 0; font-size: 15px; font-weight: 600; }
+.xs-warn { margin: 0; padding: 6px 10px; font-size: 13px; line-height: 1.6; border-radius: var(--r);
+  background: var(--warn-soft); color: var(--warn-text); }
+.xs-fit { padding: 1px 7px; border-radius: 999px; background: var(--fill); color: var(--label-2); white-space: nowrap; }
+.xs-fit b { font-weight: 700; }
+.xs-fit.fit-favorable { background: var(--ok-soft); color: var(--ok-text); }
+.xs-fit.fit-unfavorable { background: var(--warn-soft); color: var(--warn-text); }
 /* 學院科學專區:基率模擬器長條圖(左模擬、右解析解)、滑桿、筆記引文。 */
 .sci-chart { max-width: 343px; }
 .sci-gridline { stroke: var(--sep); stroke-width: 1; }

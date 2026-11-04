@@ -42,3 +42,22 @@ test("crossRows:非八字缺 relation 的列不虛報印證,直接略去", () =>
   assert.ok(!rows.some((x) => x.system === "lifepath"));
   assert.equal(rows.length, r.signals.length - 1);
 });
+
+test("crossRows:每列帶 fit,八字為 anchor,其餘依引擎喜忌", () => {
+  const rows = crossRows(r);
+  assert.equal(rows[0].fit, "anchor");
+  const bySys = Object.fromEntries(r.signals.map((s) => [s.system, s]));
+  for (const x of rows.slice(1)) {
+    assert.ok(["favorable", "unfavorable", "neutral"].includes(x.fit));
+    assert.equal(x.fit, bySys[x.system].fit);
+  }
+});
+
+test("crossRows:八字中和時非錨點列 fit 全為 neutral", () => {
+  const neutral = {
+    ...r,
+    fuyi: { ...r.fuyi, verdict: "neutral", favorable: [], unfavorable: [] },
+    signals: r.signals.map((s) => (s.system === "bazi" ? s : { ...s, fit: "favorable" })),
+  };
+  assert.ok(crossRows(neutral).slice(1).every((x) => x.fit === "neutral"));
+});

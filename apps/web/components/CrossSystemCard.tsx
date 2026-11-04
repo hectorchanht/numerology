@@ -1,14 +1,14 @@
 "use client";
 
 import { useMemo, useRef } from "react";
-import { castCrossSystem, type ChartResult, type KameaResult } from "@numerology/engine";
+import { castCrossSystem, type ChartResult, type FuyiResult, type KameaResult } from "@numerology/engine";
 import { useLocale, useScript, type TKey } from "@/lib/i18n";
 import { crossRows, luoshuMarks, LUOSHU, type CrossRow, type LuoshuSystem } from "@/lib/crossView";
 import { FloatingCard, useFloatPopup } from "@/lib/floatPopup";
 
 /*
  * 多體系對照卡:全部由引擎確定性計算,零 AI。
- * 三塊:洛書九宮(三種標記)、對照矩陣(關係 / 層級 / 出處 / 步驟)、行星幻方。
+ * 四塊:洛書九宮(三種標記)、扶抑喜忌(第二軸)、對照矩陣(關係 / 喜忌 / 層級 / 出處 / 步驟)、行星幻方。
  * 舊歷史紀錄只存 chart,於此即場重算,同樣可顯示。
  */
 
@@ -77,7 +77,59 @@ export function CitePop({ cite }: { cite: CrossRow["cite"] }) {
   );
 }
 
-function Matrix({ rows }: { rows: CrossRow[] }) {
+const signed = (n: number) => (n >= 0 ? `+${n}` : `−${-n}`);
+/** 評分條刻度 ±10;超出者貼邊顯示,數值仍見文字與步驟。 */
+const FY_MAX = 10;
+const FY_W = 300;
+const FY_H = 44;
+const fyX = (v: number) => ((Math.max(-FY_MAX, Math.min(FY_MAX, v)) + FY_MAX) / (FY_MAX * 2)) * FY_W;
+
+function Fuyi({ f }: { f: FuyiResult }) {
+  const { t } = useLocale();
+  const { z } = useScript();
+  const v = t(`cross.fuyiVerdict.${f.verdict}` as TKey);
+  const s = signed(f.score);
+  const label = t("cross.fuyiAria", { s, v });
+  const x0 = fyX(0);
+  const x = fyX(f.score);
+  return (
+    <>
+      <p className="xs-sub">{t("cross.fuyiSub")}</p>
+      <p className="xs-fy-verdict">{t("cross.fuyiScore", { v, s })}</p>
+      <svg className="xs-fy" viewBox={`0 0 ${FY_W} ${FY_H}`} role="img" aria-label={label}>
+        <title>{label}</title>
+        <rect className="xs-fy-track" x={0} y={8} width={FY_W} height={12} rx={6} />
+        <rect className="xs-fy-band" x={fyX(-1.5)} y={8} width={fyX(1.5) - fyX(-1.5)} height={12} />
+        <rect className="xs-fy-bar" x={Math.min(x0, x)} y={8} width={Math.abs(x - x0)} height={12} />
+        <line className="xs-fy-tick" x1={x0} x2={x0} y1={4} y2={24} />
+        <circle className="xs-fy-dot" cx={x} cy={14} r={7} />
+        <text className="xs-fy-lbl" x={0} y={38}>{t("cross.fuyiVerdict.weak")}</text>
+        <text className="xs-fy-lbl" x={x0} y={38} textAnchor="middle">0</text>
+        <text className="xs-fy-lbl" x={FY_W} y={38} textAnchor="end">{t("cross.fuyiVerdict.strong")}</text>
+      </svg>
+      {f.verdict === "neutral" ? (
+        <p className="xs-sub">{t("cross.fuyiNeutral")}</p>
+      ) : (
+        <>
+          <p className="xs-sub">{z(t("cross.fuyiFav", { f: f.favorable.join("、"), u: f.unfavorable.join("、") }))}</p>
+          <p className="xs-note">{t("cross.fuyiBase", { nf: f.favorable.length, nu: f.unfavorable.length })}</p>
+        </>
+      )}
+      {f.possibleCong ? <p className="xs-warn" role="note">{t("cross.fuyiCong")}</p> : null}
+      <div className="xs-meta">
+        <span className={`xs-tier tier-${f.tier}`}>{t(`cross.tier.${f.tier}` as TKey)}</span>
+        <span className="xs-basis">{t("cross.fuyiTier")}</span>
+        <CitePop cite={f.cite} />
+      </div>
+      <details className="xs-steps">
+        <summary>{t("cross.steps")}</summary>
+        <ol>{f.steps.map((st, i) => <li key={i}>{z(st)}</li>)}</ol>
+      </details>
+    </>
+  );
+}
+
+function Matrix({ rows, neutral }: { rows: CrossRow[]; neutral: boolean }) {
   const { t } = useLocale();
   const { z } = useScript();
   return (
@@ -91,6 +143,11 @@ function Matrix({ rows }: { rows: CrossRow[] }) {
             <span className="xs-rel"><span aria-hidden="true">{REL_ICON[r.relation]}</span>{t(`cross.rel.${r.relation}` as TKey)}</span>
           </div>
           <div className="xs-meta">
+            {r.fit === "anchor" ? null : (
+              <span className={`xs-fit fit-${r.fit}`}>
+                {t("cross.fitQ")} <b>{t(neutral ? "cross.fit.neutralChart" : (`cross.fit.${r.fit}` as TKey))}</b>
+              </span>
+            )}
             <span className={`xs-tier tier-${r.tier}`}>{t(`cross.tier.${r.tier}` as TKey)}</span>
             <span className="xs-basis">{t(`cross.basis.${r.dateBasis}` as TKey)}</span>
             <CitePop cite={r.cite} />
@@ -153,8 +210,10 @@ export function CrossSystemCard({ chart }: { chart: ChartResult }) {
       <h3 className="xs-h">{t("cross.luoshu")}</h3>
       <Legend />
       <Luoshu marks={marks} />
+      <h3 className="xs-h">{t("cross.fuyi")}</h3>
+      <Fuyi f={r.fuyi} />
       <h3 className="xs-h">{t("cross.matrix")}</h3>
-      <Matrix rows={rows} />
+      <Matrix rows={rows} neutral={r.fuyi.verdict === "neutral"} />
       <p className="xs-note">{t("cross.bridge")}</p>
       <h3 className="xs-h">{t("cross.kamea")}</h3>
       <Kamea k={r.kamea} />

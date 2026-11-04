@@ -11,6 +11,8 @@ export interface CrossRow {
   wuxing: string;
   bridge?: "河圖";
   relation: Relation | "anchor";
+  /** 對八字扶抑喜忌:八字列為錨點;中和盤一律 neutral。 */
+  fit: NonNullable<CrossSignal["fit"]> | "anchor";
   tier: KnowledgeTier | "unrated";
   cite: Cite;
   steps: string[];
@@ -29,6 +31,7 @@ export function crossRows(r: CrossSystemResult): CrossRow[] {
       wuxing: s.wuxing,
       bridge: s.bridge,
       relation,
+      fit: s.system === "bazi" ? "anchor" : r.fuyi.verdict === "neutral" ? "neutral" : s.fit ?? "neutral",
       tier: s.tier ?? "unrated",
       cite: s.cite,
       steps: s.steps,
