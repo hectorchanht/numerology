@@ -32,7 +32,7 @@ export const WORKERS_AI_MODELS: WorkersAiModelInfo[] = [
   {
     // 默认(2026-10-23 起):唯一在「长简体 prompt + 繁体指令」下稳定输出繁体的模型。
     // 实测:Llama 3.1 8B 会被 prompt 中的简体锚定、无视语言指令;Mistral Small 3.1
-    // 严格遵循 localeDirective,输出干净繁体(香港用语),response 字段直接可用,
+    // 严格遵循 localeDirective,输出干净繁体,response 字段直接可用,
     // usage 带 neurons。代价是 neurons/token 约为 Llama 8B 的 3 倍,$2 预算约
     // 75 次完整解读/月(个人用仍绰绰有余,预算守卫是硬上限)。
     id: "@cf/mistralai/mistral-small-3.1-24b-instruct",

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { castChart } from "@numerology/engine";
-import { localeDirective, buildCachedSystem, buildHourInferSystem } from "../dist/index.js";
+import { localeDirective, buildCachedSystem, buildHourInferSystem, SYSTEM_PERSONA } from "../dist/index.js";
 
 const birth = { year: 1990, month: 3, day: 18, hour: 14, minute: 0, gender: "男" };
 const chart = castChart(birth);
@@ -28,4 +28,16 @@ test("buildHourInferSystem:默认 zht,末块为语言指令", () => {
   assert.ok(sys[2].text.includes("繁體中文"));
   const sysEn = buildHourInferSystem([], "en");
   assert.ok(sysEn[2].text.includes("English"));
+});
+
+test("文風:三地指令寫明通俗簡練,人設含基率與不製造恐懼", () => {
+  const zht = localeDirective("zht");
+  assert.ok(zht.includes("通俗簡練"));
+  assert.ok(!zht.includes("香港用語"));
+  for (const ch of ["嘅", "咗", "喺", "唔", "嚟", "佢", "啲"]) assert.ok(zht.includes(ch), `zht 指令須列出禁用字 ${ch}`);
+  assert.ok(localeDirective("zhs").includes("通俗简练"));
+  const en = localeDirective("en");
+  assert.ok(en.includes("plain") && en.includes("concise"));
+  assert.ok(SYSTEM_PERSONA.includes("基率"));
+  assert.ok(SYSTEM_PERSONA.includes("不製造恐懼") || SYSTEM_PERSONA.includes("不制造恐惧"));
 });
