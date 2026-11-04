@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { castChart, castCrossSystem } from "@numerology/engine";
 import { SCIENCE_NOTES } from "@numerology/knowledge";
 import {
+  SYSTEM_PERSONA,
   REPORT_SEGMENTS,
   SEGMENT_TITLES,
   buildReportSectionPrompt,
@@ -14,7 +15,7 @@ const chart = castChart({ year: 1990, month: 3, day: 18, hour: 14, minute: 0, ge
 const cross = castCrossSystem(chart);
 const facts = crossSystemFacts(cross, "zht");
 const seg = REPORT_SEGMENTS.find((s) => s.key === "crosssystem");
-const HEAD = "多體系事實";
+const HEAD = "# 多體系事實(";
 
 test("crosssystem 節:三語標題,位於 advice 之前", () => {
   const t = SEGMENT_TITLES.crosssystem;
@@ -53,6 +54,18 @@ test("crosssystem prompt 條款:只引事實區塊、基率、河圖橋接、666
   for (const must of ["只取自", "science-notes", "基率", "經河圖橋接", "666", "中性", "不重畫表格"]) {
     assert.ok(p.includes(must), `缺條款: ${must}`);
   }
+  assert.ok(p.includes("同五行的機會約五分之一"), "同五行基率");
+  assert.ok(p.includes("含相生在內的「同向」約五分之三"), "同向基率");
+});
+
+test("crosssystem 缺 extraFacts 時報錯", () => {
+  assert.throws(() => buildReportSectionPrompt([], seg, "both", "zht"), /extraFacts/);
+  assert.throws(() => buildReportSectionPrompt([], seg, "both", "zht", "  "), /extraFacts/);
+});
+
+test("人設限定:無多體系事實區塊時不提、不自行推算", () => {
+  assert.ok(SYSTEM_PERSONA.includes("只在隨附「多體系事實」區塊時才對照"));
+  assert.ok(SYSTEM_PERSONA.includes("沒有該區塊時一律不提、不自行推算"));
 });
 
 test("其他節與 buildCachedSystem 不含多體系區塊", () => {

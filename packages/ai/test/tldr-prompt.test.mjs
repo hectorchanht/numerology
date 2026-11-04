@@ -14,10 +14,10 @@ test("TL;DR 标记为固定 ASCII(三地共用,前端据此切摘要)", () => {
   assert.equal(TLDR_MARKER, "TL;DR");
 });
 
-test("13 节分段指令都要求小标题后第一行输出 TL;DR(三地)", () => {
+test("14 节分段指令都要求小标题后第一行输出 TL;DR(三地)", () => {
   for (const loc of ["zht", "zhs", "en"]) {
     for (const seg of REPORT_SEGMENTS) {
-      const p = buildReportSectionPrompt([], seg, "both", loc);
+      const p = buildReportSectionPrompt([], seg, "both", loc, seg.key === "crosssystem" ? "# 多體系事實" : undefined);
       assert.ok(p.includes(`${TLDR_MARKER}:`), `report/${seg.key}/${loc} 缺 TL;DR 指令`);
     }
     for (const seg of FORTUNE_SEGMENTS) {
