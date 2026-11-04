@@ -70,4 +70,5 @@ test("可能從格(≥ +6):庚申 乙酉 辛丑 己丑(日主辛金)", () => {
   assert.equal(r.score, 6.4);
   assert.equal(r.verdict, "strong");
   assert.equal(r.possibleCong, true);
+  assert.ok(r.steps.some((s) => s.includes("可能從格")));
 });

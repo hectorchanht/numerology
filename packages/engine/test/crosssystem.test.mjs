@@ -46,12 +46,22 @@ test("第二軸:fit 依扶抑喜忌", () => {
     const want = r.fuyi.favorable.includes(s.wuxing) ? "favorable"
       : r.fuyi.unfavorable.includes(s.wuxing) ? "unfavorable" : "neutral";
     assert.equal(s.fit, want);
-    assert.ok(s.steps.some((t) => t.includes("2/5") && t.includes("3/5")));
+    const base = `喜用約 ${r.fuyi.favorable.length}/5、忌約 ${r.fuyi.unfavorable.length}/5`;
+    assert.ok(s.steps.some((t) => t.includes(base)));
   }
+});
+test("第二軸:身強盤基率 3/5、2/5", () => {
+  // 1980-08-05 09:00 扶抑總分 +5 身強(見 fuyi.test.mjs)
+  const r = castCrossSystem(castChart({ year: 1980, month: 8, day: 5, hour: 9, minute: 0, gender: "男" }));
+  assert.equal(r.fuyi.verdict, "strong");
+  for (const s of r.signals.slice(1)) assert.ok(s.steps.some((t) => t.includes("喜用約 3/5、忌約 2/5")));
 });
 test("第二軸:中和盤全部 neutral", () => {
   // 1980-04-05 13:00 扶抑總分 0(見 fuyi.test.mjs)
   const r = castCrossSystem(castChart({ year: 1980, month: 4, day: 5, hour: 13, minute: 0, gender: "男" }));
   assert.equal(r.fuyi.verdict, "neutral");
-  for (const s of r.signals.slice(1)) assert.equal(s.fit, "neutral");
+  for (const s of r.signals.slice(1)) {
+    assert.equal(s.fit, "neutral");
+    assert.ok(!s.steps.some((t) => t.includes("基率")));
+  }
 });

@@ -98,10 +98,10 @@ export function castCrossSystem(chart: ChartResult): CrossSystemResult {
     s.steps.push(`與日主五行 ${anchor} 比對:${REL_ZH[s.relation]}`);
     s.fit = fuyi.favorable.includes(s.wuxing) ? "favorable"
       : fuyi.unfavorable.includes(s.wuxing) ? "unfavorable" : "neutral";
-    const why = fuyi.verdict === "neutral"
-      ? "八字中和,不定喜忌 → 閒"
-      : `五行 ${s.wuxing} ${FIT_ZH[s.fit]}(喜用 ${fuyi.favorable.join("、")};忌 ${fuyi.unfavorable.join("、")})`;
-    s.steps.push(`對八字扶抑喜忌:${why};基率:喜用通常 2 個五行,隨機落喜用約 2/5、忌約 3/5`);
+    s.steps.push(fuyi.verdict === "neutral"
+      ? "對八字扶抑喜忌:八字中和,不定喜忌 → 閒"
+      : `對八字扶抑喜忌:五行 ${s.wuxing} ${FIT_ZH[s.fit]}(喜用 ${fuyi.favorable.join("、")};忌 ${fuyi.unfavorable.join("、")});`
+        + `基率:隨機落喜用約 ${fuyi.favorable.length}/5、忌約 ${fuyi.unfavorable.length}/5`);
   }
 
   const distribution = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 } as Record<Wuxing5, number>;
