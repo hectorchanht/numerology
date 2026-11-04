@@ -107,6 +107,7 @@ function Matrix({ rows }: { rows: CrossRow[] }) {
 
 function Kamea({ k }: { k: KameaResult }) {
   const { t } = useLocale();
+  const { z } = useScript();
   const planet = t(`cross.planet.${k.planet}` as TKey);
   const vars = { planet, n: k.order, line: k.lineSum, total: k.total };
   const label = t("cross.kameaAria", {
@@ -133,6 +134,10 @@ function Kamea({ k }: { k: KameaResult }) {
           );
         }))}
       </svg>
+      <details className="xs-steps">
+        <summary>{t("cross.steps")}</summary>
+        <ol>{k.steps.map((s, i) => <li key={i}>{z(s)}</li>)}</ol>
+      </details>
     </>
   );
 }
