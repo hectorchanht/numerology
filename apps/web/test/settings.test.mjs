@@ -191,6 +191,22 @@ test("prepareCachedStream:MISS 返回 miss,armPersistence(null) 不抛错", asyn
   r.miss.armPersistence(null); // 無 waitUntil → 靜默跳過
 });
 
+test("prepareCachedStream:fresh 跳過讀取,即使 KV 有舊結果都生成新流", async () => {
+  const kv = {
+    get: async () => {
+      throw new Error("fresh 時不應讀取");
+    },
+    put: async () => {},
+  };
+  let created = false;
+  const r = await prepareCachedStream(kv, baseParts, () => {
+    created = true;
+    return fakeStream(["x"]);
+  }, null, true);
+  assert.ok("miss" in r);
+  assert.ok(created);
+});
+
 // —— D. 歷史純邏輯 ——
 test("mergeSectionInto:合并章节,不污染原对象", () => {
   const r = {

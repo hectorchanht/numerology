@@ -69,6 +69,8 @@ export interface CachedStream {
  * tee 包裝的流,調用方走完 streamToPrimedResponse 後調 `armPersistence()`
  * 註冊後台寫入(`X-Cache: MISS`)。
  *
+ * `fresh`:用戶撳「重新生成」→ 跳過讀取(唔再出返同一份),新結果照寫入覆蓋舊緩存。
+ *
  * `lock`(scriptLocker 出嚟,可選):字形鎖。MISS → 先鎖字再 tee,所以直播同寫入
  * 緩存嘅都係已轉換正文;HIT → 再鎖一次(冪等,順手修正舊緩存),純 CPU 零 AI 調用。
  */
@@ -77,9 +79,10 @@ export async function prepareCachedStream(
   parts: AiCacheKeyParts,
   makeStream: () => TextStream,
   lock: ((s: string) => string) | null = null,
+  fresh = false,
 ): Promise<{ hit: Response } | { miss: CachedStream }> {
   const key = await aiCacheKey(parts);
-  if (kv) {
+  if (kv && !fresh) {
     try {
       const raw = await kv.get(key);
       const hit = raw && lock ? lock(raw) : raw;

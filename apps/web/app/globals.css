@@ -318,6 +318,12 @@ label.row { cursor: pointer; }
   border: 0; background: none; color: var(--label-2); padding: 0; min-height: 32px; border-radius: 0;
   overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .report-controls .ai-pills .pill + .pill::before { content: "·"; margin: 0 6px; color: var(--label-2); }
+/* 已生成:左 AI pills、右「重新生成」,換模型同重生喺同一行 */
+.regen-row { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.regen-row .ai-pills { flex: 1; min-width: 0; }
+.regen-row .btn { flex: none; color: var(--label-2); }
+/* 窄屏收成淨 icon,讓位畀模型名(換模型先睇得清) */
+@media (max-width: 479px) { .regen-row .btn { padding: 0 10px; } .regen-row .regen-lbl { display: none; } }
 /* pill picker 內容(用 FloatingCard 定位,點別處 / Escape 即關) */
 .ai-picker { display: flex; flex-direction: column; gap: 2px; }
 .ai-picker .hd { font-size: 11px; font-weight: 600; color: var(--label-2); padding: 2px 4px 6px; }

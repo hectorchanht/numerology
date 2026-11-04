@@ -154,7 +154,8 @@ export function StreamedReport({
     return { input, ai, locale: loc, ...(systemPrompt ? { systemPrompt } : {}), ...extra };
   };
 
-  const generate = async (useLens: Lens) => {
+  /** fresh:用戶主動重新生成 → 服務端跳過 KV 緩存,同一模型都會出新一份。 */
+  const generate = async (useLens: Lens, fresh = false) => {
     const myRun = ++run.current;
     const live = () => run.current === myRun;
     generating.current = true;
@@ -166,7 +167,7 @@ export function StreamedReport({
 
     await Promise.all(
       segments.map((seg, i) =>
-        streamPost(endpoint, postBody({ section: seg.key, lens: useLens }, locale), (full) => {
+        streamPost(endpoint, postBody({ section: seg.key, lens: useLens, ...(fresh ? { fresh } : {}) }, locale), (full) => {
           local[i] = { ...local[i]!, text: full };
           if (live()) setSlots([...local]);
         })
@@ -346,7 +347,7 @@ export function StreamedReport({
         />
       </div>
       {slots ? (
-        <button type="button" className="btn secondary small" onClick={() => generate(lens)} disabled={running}>
+        <button type="button" className="btn secondary small" onClick={() => generate(lens, true)} disabled={running}>
           <Icon name="refresh" />
           {t("report.regenThis")}
         </button>
@@ -381,7 +382,25 @@ export function StreamedReport({
             {t("report.generateLens", { lens: lensLabel(lens) })}
           </button>
         ) : null}
-        <AiModelNote />
+        {slots && !budget ? (
+          // 已生成:模型 pill 隔籬即刻重新生成(換咗模型或者同一模型再嚟一次都得)。
+          <div className="regen-row">
+            <AiModelNote />
+            <button
+              type="button"
+              className="btn secondary small"
+              onClick={() => generate(shownLens ?? lens, true)}
+              disabled={running}
+              title={t("report.regenModel")}
+              aria-label={t("report.regenShort")}
+            >
+              <Icon name="refresh" />
+              <span className="regen-lbl">{t("report.regenShort")}</span>
+            </button>
+          </div>
+        ) : (
+          <AiModelNote />
+        )}
       </div>
 
       {!slots ? (

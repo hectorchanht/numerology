@@ -32,7 +32,7 @@ const PROMPT_VERSION = "report/v8";
 export async function POST(req: Request): Promise<Response> {
   try {
     await ensureEnv();
-    const body = (await req.json()) as { input?: unknown; ai?: unknown; section?: unknown; lens?: unknown; locale?: unknown };
+    const body = (await req.json()) as { input?: unknown; ai?: unknown; section?: unknown; lens?: unknown; locale?: unknown; fresh?: unknown };
     const input = parseBirthInput(body.input);
     const chart = castChart(input);
     const fortune = analyzeFortune(input, { yearsBack: 5, yearsAhead: 8 });
@@ -62,6 +62,7 @@ export async function POST(req: Request): Promise<Response> {
           ? streamReportSection(chart, section, { fortune, ai, lens, locale })
           : streamReport(chart, { fortune, ai, locale }),
       await scriptLocker(locale),
+      body.fresh === true,
     );
     if ("hit" in cached) return cached.hit;
     // section 存在 → 只生成該節(分段模式,每節 <60s,繞開 Vercel 函數上限);缺省 → 整篇(CLI 兼容)。
