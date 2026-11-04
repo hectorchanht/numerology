@@ -112,3 +112,4 @@ export { reduceNumber, lifePath, hetuWuxing, type LifePathResult } from "./lifep
 export { castKamea, type KameaMark, type KameaResult } from "./kamea.js";
 export { castCrossSystem, wuxingRelation, type CrossSystemResult, type CrossSignal, type CrossSystemId, type Relation } from "./crosssystem.js";
 export { castTaixuan, type TaixuanResult } from "./taixuan.js";
+export { castMaya, type MayaResult } from "./maya.js";
