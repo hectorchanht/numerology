@@ -28,7 +28,7 @@ const SYS: Record<string, string> = {
 export async function POST(req: Request): Promise<Response> {
   try {
     await ensureEnv();
-    const body = (await req.json()) as { text?: unknown; locale?: unknown };
+    const body = (await req.json()) as { text?: unknown; locale?: unknown; fresh?: unknown };
     const text = typeof body.text === "string" ? body.text.trim() : "";
     const locale = body.locale === "zhs" || body.locale === "en" ? body.locale : "zht";
     if (!text || text.length < 2) throw new Error("請選取至少兩個字");
@@ -38,7 +38,8 @@ export async function POST(req: Request): Promise<Response> {
     const lock = (await scriptLocker(locale)) ?? ((s: string) => s);
     const kv = (getServerAiBindings()?.kv ?? null) as KvLike | null;
     const cacheKey = `explain:1:${await sha256hex(`${PROMPT_VERSION}|${locale}|${text}`)}`;
-    if (kv) {
+    // fresh = 用戶撳「重新生成」:唔讀舊答案,新答案照寫入覆蓋。
+    if (kv && body.fresh !== true) {
       try {
         const hit = await kv.get(cacheKey);
         if (hit) return Response.json({ answer: lock(hit), cached: true });

@@ -11,7 +11,7 @@ import { stripLeadingHeading } from "@/lib/sectionIcons";
 import { splitThinking } from "@/lib/thinking";
 import { SectionBodyView } from "@/components/SectionBody";
 import { Icon, SECTION_ICON } from "@/components/Icon";
-import { AiModelNote } from "@/components/AiModelNote";
+import { AiModelNote, AiModelRegen } from "@/components/AiModelNote";
 import { Seg, ScreenNav } from "@/components/ui";
 import { go } from "@/lib/nav";
 import { PronounceButton } from "@dawn-studio/pronounce";
@@ -384,20 +384,7 @@ export function StreamedReport({
         ) : null}
         {slots && !budget ? (
           // 已生成:模型 pill 隔籬即刻重新生成(換咗模型或者同一模型再嚟一次都得)。
-          <div className="regen-row">
-            <AiModelNote />
-            <button
-              type="button"
-              className="btn secondary small"
-              onClick={() => generate(shownLens ?? lens, true)}
-              disabled={running}
-              title={t("report.regenModel")}
-              aria-label={t("report.regenShort")}
-            >
-              <Icon name="refresh" />
-              <span className="regen-lbl">{t("report.regenShort")}</span>
-            </button>
-          </div>
+          <AiModelRegen onRegen={() => generate(shownLens ?? lens, true)} disabled={running} />
         ) : (
           <AiModelNote />
         )}

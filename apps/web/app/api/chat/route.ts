@@ -32,6 +32,7 @@ export async function POST(req: Request): Promise<Response> {
       ai?: unknown;
       locale?: unknown;
       systemPrompt?: unknown;
+      fresh?: unknown;
     };
     const input = parseBirthInput(body.input);
     const question = typeof body.question === "string" ? body.question.trim() : "";
@@ -48,7 +49,7 @@ export async function POST(req: Request): Promise<Response> {
       kv,
       {
         provider: activeProviderName(ai),
-        model: "",
+        model: ai?.model?.trim() ?? "",
         locale,
         section: "chat",
         inputHash: await sha256hex(JSON.stringify({ i: input, h: history, q: question })),
@@ -56,6 +57,7 @@ export async function POST(req: Request): Promise<Response> {
       },
       () => streamFollowUp(chart, history, question, { fortune, ai, locale }),
       await scriptLocker(locale),
+      body.fresh === true,
     );
     if ("hit" in cached) return cached.hit;
     const resp = await streamToPrimedResponse(cached.miss.stream, primeTimeoutMs(ai));

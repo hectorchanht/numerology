@@ -18,6 +18,7 @@ import { aiNoteParts, shortModelName } from "@/lib/aiNote";
 import { readModelsCache, writeModelsCache } from "@/lib/modelsCache";
 import { FloatingCard, useFloatPopup } from "@/lib/floatPopup";
 import { go } from "@/lib/nav";
+import { Icon } from "@/components/Icon";
 
 interface ModelOption {
   id: string;
@@ -288,6 +289,30 @@ export function AiModelNote({ style }: { style?: CSSProperties }) {
           </div>
         </FloatingCard>
       )}
+    </div>
+  );
+}
+
+/**
+ * 已有 AI 結果時:左邊模型 pills(可即場換模型)、右邊「重新生成」。
+ * onRegen 由調用方帶 fresh 旗,服務端跳過緩存,同一模型都會出新一份。
+ */
+export function AiModelRegen({ onRegen, disabled }: { onRegen: () => void; disabled?: boolean }) {
+  const { t } = useLocale();
+  return (
+    <div className="regen-row">
+      <AiModelNote />
+      <button
+        type="button"
+        className="btn secondary small"
+        onClick={onRegen}
+        disabled={disabled}
+        title={t("report.regenModel")}
+        aria-label={t("report.regenShort")}
+      >
+        <Icon name="refresh" />
+        <span className="regen-lbl">{t("report.regenShort")}</span>
+      </button>
     </div>
   );
 }

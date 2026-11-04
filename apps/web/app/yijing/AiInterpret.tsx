@@ -6,7 +6,7 @@ import type { CoinLine } from "@numerology/engine";
 import { streamPost } from "@/lib/streamClient";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { useLocale } from "@/lib/i18n";
-import { AiModelNote } from "@/components/AiModelNote";
+import { AiModelNote, AiModelRegen } from "@/components/AiModelNote";
 import { Icon } from "@/components/Icon";
 import { aiRequestParts, loadAi, DEFAULT_AI } from "@/lib/aiSettings";
 import { go } from "@/lib/nav";
@@ -39,7 +39,8 @@ export function AiInterpret(
   const [text, setText] = useState("");
   const [err, setErr] = useState<{ message: string; code?: string } | null>(null);
 
-  const start = async () => {
+  /** fresh:已有結果再生成 → 服務端跳過緩存。 */
+  const start = async (fresh = false) => {
     setState("loading");
     setText("");
     setErr(null);
@@ -48,7 +49,7 @@ export function AiInterpret(
         "endpoint" in props
           ? [props.endpoint, props.body]
           : ["/api/yijing/interpret", { hexagram: props.hexagram, lines: props.lines, question: props.question }];
-      await streamPost(url, { ...body, locale, ...aiRequestParts() }, (full) => setText(full));
+      await streamPost(url, { ...body, locale, ...aiRequestParts(), ...(fresh ? { fresh } : {}) }, (full) => setText(full));
       setState("done");
     } catch (e) {
       const code = (e as { code?: string } | null)?.code;
@@ -67,7 +68,7 @@ export function AiInterpret(
   return (
     <div className="yj-ai">
       {state === "idle" && (
-        <button type="button" className="btn block" onClick={start}>
+        <button type="button" className="btn block" onClick={() => start()}>
           <Icon name="spark" />
           {yjT("ai.interpret", locale)}
         </button>
@@ -81,11 +82,6 @@ export function AiInterpret(
         <div className="yj-sub" aria-busy={state === "loading"}>
           <h3 className="yj-sub-h">{yjT("ai.interpretTitle", locale)}</h3>
           <p className="yj-ai-text">{text}</p>
-          {state === "done" && (
-            <button type="button" className="text-btn" onClick={start}>
-              {yjT("ai.retry", locale)}
-            </button>
-          )}
         </div>
       )}
       {state === "error" && err && (
@@ -105,7 +101,7 @@ export function AiInterpret(
               {/* 用緊預設免費 AI 就唔好叫人查 API key;自訂 provider 先提設定 */}
               <p className="note">{yjT(custom ? "ai.failCustom" : "ai.failBody", locale)}</p>
               <div className="btn-row">
-                <button type="button" className="btn secondary" onClick={start}>
+                <button type="button" className="btn secondary" onClick={() => start()}>
                   <Icon name="refresh" />
                   {yjT("ai.retry", locale)}
                 </button>
@@ -124,7 +120,7 @@ export function AiInterpret(
           </details>
         </div>
       )}
-      <AiModelNote />
+      {state === "done" ? <AiModelRegen onRegen={() => start(true)} /> : <AiModelNote />}
     </div>
   );
 }

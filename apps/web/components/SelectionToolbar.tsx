@@ -110,6 +110,8 @@ export function SelectionToolbar() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
   const [copied, setCopied] = useState(false);
+  /** 撳「重新生成」+1:重跑解釋並跳過緩存。 */
+  const [regen, setRegen] = useState(0);
   const viewRef = useRef<View>(null);
   viewRef.current = view;
 
@@ -154,6 +156,7 @@ export function SelectionToolbar() {
       }
       rectRef.current = hit.rect;
       setSel({ text: hit.text });
+      setRegen(0); // 新選詞:照常用緩存
       setView("toolbar");
     };
     const onMouseUp = () => requestAnimationFrame(update);
@@ -205,7 +208,7 @@ export function SelectionToolbar() {
     fetch("/api/explain", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: sel.text, locale }),
+      body: JSON.stringify({ text: sel.text, locale, ...(regen ? { fresh: true } : {}) }),
     })
       .then(async (r) => {
         const d = (await r.json().catch(() => ({}))) as {
@@ -231,7 +234,7 @@ export function SelectionToolbar() {
       dead = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view === "explain" ? sel?.text : null]);
+  }, [view === "explain" ? sel?.text : null, regen]);
 
   const toggleSpeak = (lang: SpeechLang) => {
     if (!sel) return;
@@ -416,6 +419,14 @@ export function SelectionToolbar() {
             style={{ ...BTN_STYLE, color: "var(--label-2)" }}
           >
             {copied ? `✓ ${t("select.copied")}` : t("select.copy")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setRegen((n) => n + 1)}
+            title={t("report.regenModel")}
+            style={{ ...BTN_STYLE, color: "var(--label-2)" }}
+          >
+            {t("report.regenShort")}
           </button>
         </div>
       ) : null}

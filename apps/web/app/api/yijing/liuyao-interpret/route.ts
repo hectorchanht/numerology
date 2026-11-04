@@ -33,6 +33,7 @@ export async function POST(req: Request): Promise<Response> {
       lines?: unknown;
       date?: unknown;
       locale?: unknown;
+      fresh?: unknown;
     };
     const lines = body.lines;
     const locale = body.locale === "zhs" || body.locale === "en" ? body.locale : "zht";
@@ -92,6 +93,7 @@ export async function POST(req: Request): Promise<Response> {
         ),
       // SYS 固定要求繁體 → zhs 頁面靠字形鎖轉返簡體
       await scriptLocker(locale),
+      body.fresh === true,
     );
     if ("hit" in cached) return cached.hit;
     const resp = await streamToPrimedResponse(cached.miss.stream, primeTimeoutMs(ai));

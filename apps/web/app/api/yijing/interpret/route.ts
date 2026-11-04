@@ -67,6 +67,7 @@ export async function POST(req: Request): Promise<Response> {
       lines?: unknown;
       locale?: unknown;
       question?: unknown;
+      fresh?: unknown;
     };
     const hexNum = body.hexagram;
     const lines = body.lines;
@@ -119,6 +120,7 @@ export async function POST(req: Request): Promise<Response> {
         ),
       // SYS 固定要求繁體 → zhs 頁面靠字形鎖轉返簡體
       await scriptLocker(locale),
+      body.fresh === true,
     );
     if ("hit" in cached) return cached.hit;
     const resp = await streamToPrimedResponse(cached.miss.stream, primeTimeoutMs(ai));

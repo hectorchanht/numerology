@@ -10,7 +10,7 @@ import { aiRequestParts } from "@/lib/aiSettings";
 import { useLocale, useScript } from "@/lib/i18n";
 import { yjT } from "@/lib/yijingStrings";
 import { LocationPicker } from "@/components/LocationPicker";
-import { AiModelNote } from "@/components/AiModelNote";
+import { AiModelNote, AiModelRegen } from "@/components/AiModelNote";
 import { Icon } from "@/components/Icon";
 import { Seg, ToggleRow } from "@/components/ui";
 
@@ -126,6 +126,22 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
     }
   };
 
+  /** 重答最後一輪:截走舊答案,用同一句(開場則空)再問;推斷對話唔落緩存,唔使 fresh。 */
+  const regenLast = async () => {
+    if (busy || log.at(-1)?.role !== "assistant") return;
+    const prev = log.slice(0, -1);
+    const lastUser = prev.at(-1)?.role === "user";
+    setBusy(true);
+    setError("");
+    try {
+      await send(lastUser ? prev.at(-1)!.content : "", lastUser ? prev.slice(0, -1) : prev);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t("infer.chatFail"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const adopt = (hour: number) => {
     onAdopt({
       year: Number(v.year), month: Number(v.month), day: Number(v.day),
@@ -228,6 +244,7 @@ export function TimeInferPanel({ onAdopt }: { onAdopt: (input: BirthFormValue) =
           <Icon name="send" />
         </button>
       </form>
+      {!busy && log.at(-1)?.content ? <AiModelRegen onRegen={() => void regenLast()} /> : null}
 
       <h2 className="group-title">{t("infer.adoptHint")}</h2>
       <div className="strip">

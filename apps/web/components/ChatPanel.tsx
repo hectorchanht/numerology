@@ -8,7 +8,7 @@ import { streamPost } from "@/lib/streamClient";
 import { aiRequestParts } from "@/lib/aiSettings";
 import { useLocale } from "@/lib/i18n";
 import { Icon } from "@/components/Icon";
-import { AiModelNote } from "@/components/AiModelNote";
+import { AiModelNote, AiModelRegen } from "@/components/AiModelNote";
 import { markdownTermComponents } from "@/lib/highlightTerms";
 import { onChatAskRequest, takePendingChatAsk } from "@/lib/chatJump";
 
@@ -24,17 +24,18 @@ export function ChatPanel({ input }: { input: BirthInput }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const ask = async (question: string) => {
+  /** base:問題之前嘅對話(重新生成最後一答時傳入,截走舊答案);fresh 跳過緩存。 */
+  const ask = async (question: string, base: Turn[] = log, fresh = false) => {
     const q = question.trim();
     if (!q || busy) return;
     setError("");
     setDraft("");
-    const history = log;
-    setLog((l) => [...l, { role: "user", content: q }, { role: "assistant", content: "" }]);
+    const history = base;
+    setLog([...history, { role: "user", content: q }, { role: "assistant", content: "" }]);
     setBusy(true);
     try {
       const { ai, systemPrompt } = aiRequestParts();
-      await streamPost("/api/chat", { input, history, question: q, ai, locale, ...(systemPrompt ? { systemPrompt } : {}) }, (full) => {
+      await streamPost("/api/chat", { input, history, question: q, ai, locale, ...(systemPrompt ? { systemPrompt } : {}), ...(fresh ? { fresh } : {}) }, (full) => {
         setLog((l) => {
           const next = [...l];
           next[next.length - 1] = { role: "assistant", content: full };
@@ -108,7 +109,12 @@ export function ChatPanel({ input }: { input: BirthInput }) {
           <Icon name="send" />
         </button>
       </form>
-      <AiModelNote />
+      {/* 最後一答完成:可用同一 / 另一模型重答同一條問題 */}
+      {!busy && log.length >= 2 && log.at(-1)?.role === "assistant" && log.at(-2)?.role === "user" ? (
+        <AiModelRegen onRegen={() => void ask(log.at(-2)!.content, log.slice(0, -2), true)} />
+      ) : (
+        <AiModelNote />
+      )}
     </div>
   );
 }
