@@ -29,6 +29,9 @@ test-dist/
 apps/web/.impeccable/hook.cache.json
 apps/web/.impeccable/live/
 .impeccable/hook.cache.json
+.codegraph/
 raw_pdf/
 blobs/
 .mineru-service.lock
+.claude/worktrees/
+.superpowers/
