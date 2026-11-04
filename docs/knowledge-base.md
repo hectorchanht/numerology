@@ -32,3 +32,22 @@ packages/knowledge/
 
 每个结构化数据文件带元信息:`source`(出处)、`version`、`reviewed`(是否经人工校对)。
 未经人工校对的 AI 抽取数据,`reviewed: false`,在解读层需降权或标注。
+
+## 層級(tier)與出處(cite)約定
+
+- `meta.tier`:整份資料的可信層級,四選一:
+  - `classical` 原典(古籍、古代文獻)
+  - `scholarly` 學者詮釋(如 Fideler;Agrippa 屬文藝復興原典,但其行星對應屬詮釋,逐條標)
+  - `modern` 近現代發明或有爭議(如畢氏生命靈數的現代算法、Dreamspell)
+  - `science` 同行評審研究
+- 單條可覆寫 `tier`,並帶 `cite: { work, author, year, locator }`,locator 為頁碼、章節或 URL。
+- `tier` 為選填;缺省時 UI 顯示「未分級」,不得猜一個層級填入。
+- 現代著作(如 Fideler 1993)只取事實與摘要加頁碼,不搬原文;古籍原文屬公有領域可引。
+- 各體系一覽與狀態見 `docs/domains.md`。
+
+## 並行工作協調
+
+`packages/knowledge/` 由另一工作流持續加入資料(如 `greek-gematria.json`、`planetary-squares.json`、`agrippa-*.json`)。
+多體系功能只**讀取**這些檔案,不改其內容;資料衝突時以並行工作的版本為準。
+`pythagorean-numbers.json`、`science-notes.json` 若與並行工作重名,改為讀取對方版本。
+內聯模組(`src/*.data.ts`)由 JSON 生成,JSON 更新後須重新生成,並由測試比對整份匯出與 JSON 一致。
