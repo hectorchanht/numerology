@@ -52,6 +52,7 @@
     "lib/script.ts",
     "lib/locations.ts",
     "lib/crossView.ts",
-    "lib/cycleView.ts"
+    "lib/cycleView.ts",
+    "lib/baseRate.ts"
   ]
 }

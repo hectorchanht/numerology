@@ -588,6 +588,17 @@ button.sec-h { min-height: 44px; margin: -8px 0; }
 .cy-legend li.on { color: var(--accent-text); font-weight: 700; }
 .xs-steps { margin-top: 6px; font-size: 12px; color: var(--label-2); }
 .xs-steps summary { cursor: pointer; }
+/* 學院科學專區:基率模擬器長條圖(左模擬、右解析解)、滑桿、筆記引文。 */
+.sci-chart { max-width: 343px; }
+.sci-gridline { stroke: var(--sep); stroke-width: 1; }
+.sci-bar-sim { fill: var(--accent); }
+.sci-bar-exact { fill: var(--ok); }
+.viz-legend .sw.sci-sw-sim { background: var(--accent); }
+.viz-legend .sw.sci-sw-exact { background: var(--ok); }
+.sci-range { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.sci-range input { width: 100%; accent-color: var(--accent); }
+.sci-claim { margin: 0; font-size: 14px; line-height: 1.6; }
+.sci-quote { margin: 4px 0 0; padding: 8px 12px; border-left: 3px solid var(--accent-line); background: var(--fill); border-radius: 0 var(--r) var(--r) 0; }
 .xs-steps ol { margin: 6px 0 0; padding-left: 1.3em; line-height: 1.6; overflow-wrap: anywhere; }
 .tag.sig-tag.sig-1 { background: var(--fill); color: var(--label-2); }
 

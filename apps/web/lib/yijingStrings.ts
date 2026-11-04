@@ -24,6 +24,7 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "nav.hepan": S("紫微合盤", "紫微合盘", "Synastry"),
   "nav.qimen": S("奇門遁甲", "奇门遁甲", "Qimen Dunjia"),
   "nav.fengshui": S("玄空飛星", "玄空飞星", "Flying Stars"),
+  "nav.science": S("科學專區", "科学专区", "Science Corner"),
   /* —— 側欄工具分組 —— */
   "nav.group.divine": S("問卜", "问卜", "Divination"),
   "nav.group.destiny": S("命理", "命理", "Destiny"),

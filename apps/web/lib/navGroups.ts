@@ -41,6 +41,7 @@ export const SUB_GROUPS: SubGroup[] = [
       { href: "/yijing/academy", id: "nav.academy", icon: "bulb" },
       { href: "/yijing/gua", id: "nav.gua", icon: "book" },
       { href: "/yijing/cases", id: "nav.cases", icon: "history" },
+      { href: "/science", id: "nav.science", icon: "gauge" },
     ],
   },
   {
@@ -64,5 +65,5 @@ export const CASTING_TABS: SubLink[] = groupLinks("nav.group.divine").filter((l)
   ["/yijing", "/yijing/meihua", "/yijing/liuyao"].includes(l.href),
 );
 
-/** 學苑分頁 strip(GroupTabs 用):學院 / 六十四卦 / 佔例庫。 */
+/** 學苑分頁 strip(GroupTabs 用):學院 / 六十四卦 / 佔例庫 / 科學專區。 */
 export const STUDY_TABS: SubLink[] = groupLinks("nav.group.study");
