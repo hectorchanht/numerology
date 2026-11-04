@@ -410,6 +410,9 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* 八字四柱:一入命盤就見,唔使揀分頁 */}
+              <BaziTable bazi={ready.chart.bazi} />
+
               {/* 本畫面主行動:排完盤下一步就係 AI 解讀 */}
               <button
                 type="button"
@@ -441,7 +444,6 @@ export default function Home() {
               />
 
               <div hidden={sys !== "bazi"}>
-                <BaziTable bazi={ready.chart.bazi} />
                 <BaziDetail bazi={ready.chart.bazi} />
               </div>
               <div hidden={sys !== "ziwei"}>
