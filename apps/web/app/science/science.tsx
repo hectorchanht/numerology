@@ -109,6 +109,7 @@ function Simulator() {
 export default function ScienceTool() {
   const { locale, t } = useLocale();
   const look = SCIENCE_NOTES.find((n) => n.id === "look-elsewhere");
+  const lookP = atLeastOneProb(4, 5);
   return (
     <>
       <GroupTabs links={STUDY_TABS} label={yjT("nav.group.study", locale as YijingLocale)} />
@@ -131,9 +132,14 @@ export default function ScienceTool() {
 
       <div className="card viz xs">
         <h2 className="xs-h">{t("science.lookTitle")}</h2>
-        <p className="xs-sub">{t("science.lookBody")}</p>
+        <p className="xs-sub">{t("science.lookBody", { p: pct(lookP, 2) })}</p>
+        <details className="xs-steps">
+          <summary>{t("cross.steps")}</summary>
+          <ol><li>{t("science.lookStep", { exact: lookP.toFixed(4), p: pct(lookP, 2) })}</li></ol>
+        </details>
         {look ? (
           <blockquote className="sci-quote">
+            <p className="sci-quote-label">{t("science.quoteLabel")}</p>
             <p className="sci-claim">{look.claim[locale]}</p>
             <NoteMeta note={look} />
           </blockquote>

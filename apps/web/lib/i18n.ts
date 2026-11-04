@@ -614,7 +614,9 @@ const zht = {
   "science.step3": "至少一個同類 = 1 − P(0) = 1 − (1 − 1/{m})^{k} = {exact}。",
   "science.step4": "模擬:mulberry32 偽亂數,種子 {seed},每次為錨點與 k 個體系各抽一類,共 {n} 次,統計各 j 的比例。同一輸入必得同一結果。",
   "science.lookTitle": "看別處效應(look-elsewhere effect)",
-  "science.lookBody": "對照的體系越多、類別越少,「有幾個體系說法一致」就越容易純屬巧合。以 k = 4、m = 5 為例,至少一個相同的機率已達 59%。看到吻合時,先問基準率是多少。",
+  "science.lookStep": "k = 4、m = 5:1 − (1 − 1/5)^4 = 1 − 0.8^4 = {exact} ≈ {p}。",
+  "science.quoteLabel": "研究引文",
+  "science.lookBody": "對照的體系越多、類別越少,「有幾個體系說法一致」就越容易純屬巧合。以 k = 4、m = 5 為例,至少一個相同的機率已達 {p}。看到吻合時,先問基準率是多少。",
 } as const;
 
 export type TKey = keyof typeof zht;
@@ -1220,7 +1222,9 @@ const zhs: Record<TKey, string> = {
   "science.step3": "至少一个同类 = 1 − P(0) = 1 − (1 − 1/{m})^{k} = {exact}。",
   "science.step4": "模拟:mulberry32 伪随机数,种子 {seed},每次为锚点与 k 个体系各抽一类,共 {n} 次,统计各 j 的比例。同一输入必得同一结果。",
   "science.lookTitle": "看别处效应(look-elsewhere effect)",
-  "science.lookBody": "对照的体系越多、类别越少,「有几个体系说法一致」就越容易纯属巧合。以 k = 4、m = 5 为例,至少一个相同的概率已达 59%。看到吻合时,先问基准率是多少。",
+  "science.lookStep": "k = 4、m = 5:1 − (1 − 1/5)^4 = 1 − 0.8^4 = {exact} ≈ {p}。",
+  "science.quoteLabel": "研究引文",
+  "science.lookBody": "对照的体系越多、类别越少,「有几个体系说法一致」就越容易纯属巧合。以 k = 4、m = 5 为例,至少一个相同的概率已达 {p}。看到吻合时,先问基准率是多少。",
 };
 
 /** 英文:自然英文翻译。 */
@@ -1824,7 +1828,9 @@ const en: Record<TKey, string> = {
   "science.step3": "At least one match = 1 − P(0) = 1 − (1 − 1/{m})^{k} = {exact}.",
   "science.step4": "Simulation: mulberry32 PRNG, seed {seed}; each run draws a category for the anchor and each of the k systems, {n} runs in total, then tallies each j. Same input, same output.",
   "science.lookTitle": "The look-elsewhere effect",
-  "science.lookBody": "The more systems you compare and the fewer the categories, the more likely a few systems agree by pure chance. With k = 4 and m = 5, the chance of at least one match is already 59%. When you see agreement, ask what the base rate is first.",
+  "science.lookStep": "k = 4, m = 5: 1 − (1 − 1/5)^4 = 1 − 0.8^4 = {exact} ≈ {p}.",
+  "science.quoteLabel": "From the research",
+  "science.lookBody": "The more systems you compare and the fewer the categories, the more likely a few systems agree by pure chance. With k = 4 and m = 5, the chance of at least one match is already {p}. When you see agreement, ask what the base rate is first.",
 };
 
 export const STRINGS: Record<Locale, Record<TKey, string>> = { zht, zhs, en };
