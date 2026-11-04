@@ -53,10 +53,19 @@ test("第 729 個半日 → 踦,第 730 → 嬴", () => {
   assert.equal(at(B + 730 * H + MIN).extra, "嬴");
 });
 
-test("冬至前 1 分 → 屬上一個冬至週期", () => {
+test("冬至前 1 分 → 屬上一個冬至週期(2022 冬至,序 730 嬴)", () => {
   const r = at(T - MIN);
   assert.equal(r.winterSolstice.year, 2022);
-  assert.ok(r.halfDayIndex >= 729 || r.head === 81);
+  assert.equal(r.halfDayIndex, 730);
+  assert.equal(r.head, null);
+  assert.equal(r.extra, "嬴");
+});
+
+test("序 731 確會出現:2024-12-21 17:19(冬至 17:20 前)→ 嬴", () => {
+  const r = castTaixuan({ year: 2024, month: 12, day: 21, hour: 17, minute: 19, gender: "男" });
+  assert.equal(r.winterSolstice.year, 2023);
+  assert.equal(r.halfDayIndex, 731);
+  assert.equal(r.extra, "嬴");
 });
 
 test("steps 含冬至、半日、子夜,無粵語字", () => {
@@ -65,10 +74,23 @@ test("steps 含冬至、半日、子夜,無粵語字", () => {
   assert.ok(!r.steps.some((x) => /[嘅咗喺唔嚟佢啲睇撳冇揀㗎]|而家/.test(x)));
 });
 
-test("真太陽時校正改變落點", () => {
-  // 東經 135 比標準經線早約一小時:11:30 校正後越過正午,半日序加一
-  const base = { year: 2024, month: 1, day: 10, hour: 11, minute: 30, gender: "男" };
-  const a = castTaixuan(base);
-  const b = castTaixuan({ ...base, longitude: 135 });
-  assert.equal(b.halfDayIndex, a.halfDayIndex + 1);
+test("有經度時冬至同換真太陽時:東經 135,2023 冬至約 12:28,起點改取正午", () => {
+  // 東經 135 當日校正 +61 分(經度 +60、均時差 +1):鐘面 11:08 → 真太陽時 12:09,早於冬至 → 上一週期
+  const before = castTaixuan({ year: 2023, month: 12, day: 22, hour: 11, minute: 8, gender: "男", longitude: 135 });
+  assert.equal(before.winterSolstice.year, 2022);
+  // 鐘面 11:38 → 真太陽時 12:39,已過冬至,冬至落在正午後半日 → 首 1 贊 1
+  const after = castTaixuan({ year: 2023, month: 12, day: 22, hour: 11, minute: 38, gender: "男", longitude: 135 });
+  assert.deepEqual(after.winterSolstice, { year: 2023, month: 12, day: 22, hour: 12, minute: 28 });
+  assert.equal(after.halfDayIndex, 0);
+  assert.equal(after.head, 1);
+  assert.equal(after.zan, 1);
+  assert.ok(after.steps.some((x) => x.includes("真太陽時")));
+});
+
+test("真太陽時跨子夜:東經 90,鐘面 2024-01-11 00:30 退回 1 月 10 日晚,半日序少一", () => {
+  const base = { year: 2024, month: 1, day: 11, hour: 0, minute: 30, gender: "男" };
+  const clock = castTaixuan(base);
+  const solar = castTaixuan({ ...base, longitude: 90 });
+  assert.equal(clock.halfDayIndex, 40);
+  assert.equal(solar.halfDayIndex, 39);
 });
