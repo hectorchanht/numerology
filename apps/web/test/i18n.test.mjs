@@ -56,3 +56,9 @@ test("i18n:settings.filter.recommended 三语齐备", () => {
   assert.equal(STRINGS.zhs["settings.filter.recommended"], "推荐");
   assert.equal(STRINGS.en["settings.filter.recommended"], "Recommended");
 });
+
+// —— 文風:zht 用通俗簡練的書面語,不含粵語口語字 ——
+test("i18n:zht 文案不含粵語口語字", () => {
+  const bad = Object.entries(STRINGS.zht).filter(([, v]) => /[嘅咗喺唔嚟佢啲]/.test(v));
+  assert.deepEqual(bad, []);
+});
