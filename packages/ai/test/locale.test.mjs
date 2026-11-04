@@ -40,4 +40,6 @@ test("文風:三地指令寫明通俗簡練,人設含基率與不製造恐懼", 
   assert.ok(en.includes("plain") && en.includes("concise"));
   assert.ok(SYSTEM_PERSONA.includes("基率"));
   assert.ok(SYSTEM_PERSONA.includes("不製造恐懼") || SYSTEM_PERSONA.includes("不制造恐惧"));
+  // 起源地與年代只能取自隨附事實,未附則不寫(防止模型自填未經核對的年代)
+  assert.ok(SYSTEM_PERSONA.includes("起源地与年代以随附事实为准,未附则不写"));
 });
