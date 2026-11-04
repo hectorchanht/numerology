@@ -43,7 +43,7 @@ export function castMaya(year: number, month: number, day: number): MayaResult {
   const haab = { day: pos % 20, monthIndex, monthName: HAAB_MONTHS[monthIndex]!.name };
 
   const steps = [
-    `取用出生民用日期 ${year}-${month}-${day}(公曆),以標準整數公式換算儒略日數 JDN = ${jdn}。`,
+    `取用出生民用日期 ${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}(公曆),以標準整數公式換算儒略日數 JDN = ${jdn}。`,
     `採學界通用 GMT 對應常數 584283(另有 584285 一說,相差 2 日,屬學界爭議):距長紀曆紀元 ${jdn} − 584283 = ${days} 日。`,
     `長紀曆以 144000/7200/360/20/1 日進位(20、18、20、20 進):${longCount.join(".")}。`,
     `紀元日為 4 Ajaw 8 Kumk'u。Tzolk'in 數字 = (${days} + 3) mod 13 + 1 = ${number},日名序 = (${days} + 19) mod 20 = ${dayIndex}(${tzolkin.dayName})。`,

@@ -18,8 +18,8 @@
 | Agrippa correspondences / cabala | 已入庫 | Agrippa 卷 II–III:行星神名 / 智靈 / 靈、28 月宿、十 Sephiroth(`agrippa-correspondences.json`、`agrippa-cabala.json`) | 是(查表) | 行星神名值與幻方行和 / 總和相扣 |
 | 康熙筆畫 | 已入庫 | 康熙字典筆畫(`kangxi-strokes.json`) | 是 | 姓名筆畫數化簡後可落九宮 |
 | 科學筆記 | 已入庫(待校對,reviewed: false) | `science-notes.json`(同行評審條目) | 否(文獻) | 無直接連結;供報告「現代科學角度」 |
-| 太玄經 729 贊 | 已入庫(首名對照維基文庫、待校對) | 揚雄《太玄經》(約 4 BCE–AD 2) | 是(首 / 贊由數起) | 三分九天 × 81 首 × 9 贊 = 729,九宮自相乘三次 |
-| 瑪雅 Tzolk'in / Haab | 已入庫(GMT 584283;Dreamspell 不計算;名稱來源 Wikipedia,待校對) | 瑪雅曆(古典期) | 是 | 260 / 365 日週期;13 × 20 |
+| 太玄經 729 贊 | 已入庫(首名對照維基文庫、待校對) | 揚雄《太玄經》(約 4 BCE–AD 2;`taixuan.json`) | 是(首 / 贊由數起) | 三分九天 × 81 首 × 9 贊 = 729,九宮自相乘三次 |
+| 瑪雅 Tzolk'in / Haab | 已入庫(GMT 584283;Dreamspell 不計算;名稱來源 Wikipedia,待校對) | 瑪雅曆(古典期;`maya.json`) | 是 | 260 / 365 日週期;13 × 20 |
 | 學院科學專區 | 已入庫(路徑 `/science`,含基率模擬器) | 同行評審研究(`science` 層) | 不適用 | 無 |
 
 ## 進行中

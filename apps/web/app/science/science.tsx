@@ -83,7 +83,7 @@ function Simulator() {
         <span>{t("science.m", { m })}</span>
         <input type="range" min={2} max={12} step={1} value={m} onChange={(e) => setM(Number(e.target.value))} />
       </label>
-      <p className="cy-val">{t("science.atLeastOne", { sim: pct(1 - sim[0]!, 2), exact: pct(atLeast, 2) })}</p>
+      <p className="cy-val" aria-live="polite">{t("science.atLeastOne", { sim: pct(1 - sim[0]!, 2), exact: pct(atLeast, 2) })}</p>
       <div className="viz-legend" aria-hidden="true">
         <span><i className="sw sci-sw-sim" />{t("science.legendSim")}</span>
         <span><i className="sw sci-sw-exact" />{t("science.legendExact")}</span>
@@ -96,6 +96,7 @@ function Simulator() {
           <li>{t("science.step1", { m })}</li>
           <li>{t("science.step2", { k })}</li>
           <li>{t("science.step3", { k, m, exact: atLeast.toFixed(4) })}</li>
+          <li>{t("science.step3b", { sim: (1 - sim[0]!).toFixed(4) })}</li>
           <li>{t("science.step4", { seed: SEED, n: N })}</li>
           {sim.map((s, j) => (
             <li key={j}>{t("science.chartRow", { j, sim: pct(s, 2), exact: pct(exact[j]!, 2) })}</li>
