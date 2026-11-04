@@ -14,8 +14,20 @@ export function isDizhi(x: string): x is Dizhi {
   return (DIZHI as readonly string[]).includes(x);
 }
 
+/** 知識分級:古典 / 學術 / 現代 / 科學。缺省時 UI 顯示「未分級」。 */
+export type KnowledgeTier = "classical" | "scholarly" | "modern" | "science";
+
+/** 出處引用 */
+export interface Cite {
+  work: string;
+  author?: string;
+  year?: number | string;
+  locator?: string;
+}
+
 /** 知识库数据文件通用元信息 */
 export interface KnowledgeMeta {
+  tier?: KnowledgeTier;
   name: string;
   schema: string;
   source: string;
