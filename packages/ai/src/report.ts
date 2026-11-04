@@ -1,4 +1,4 @@
-import { castCrossSystem, type ChartResult, type FortuneAnalysis } from "@numerology/engine";
+import { castCrossSystem, castMaya, castTaixuan, type ChartResult, type FortuneAnalysis } from "@numerology/engine";
 import { buildContextPack, crossSystemFacts, type FortuneScope } from "./context.js";
 import {
   buildReportUserPrompt,
@@ -193,7 +193,12 @@ export function streamReportSection(chart: ChartResult, sectionKey: string, opts
   const { caveats } = buildContextPack(chart, opts.fortune, { fortuneScope: scope });
   const locale = opts.locale ?? "zht";
   // 多體系事實只進本節 user prompt,system 不變(prompt cache 照常命中)。
-  const facts = seg.key === "crosssystem" ? crossSystemFacts(castCrossSystem(chart), locale) : undefined;
+  const facts = seg.key === "crosssystem"
+    ? crossSystemFacts(castCrossSystem(chart), locale, {
+        taixuan: castTaixuan(chart.input),
+        maya: castMaya(chart.input.year, chart.input.month, chart.input.day),
+      })
+    : undefined;
   return chatStream({
     kind: "report",
     maxTokens: opts.maxTokens ?? SECTION_MAX_TOKENS,

@@ -1,4 +1,4 @@
-import { favorableDirections, type ChartResult, type CrossSystemResult, type FortuneAnalysis } from "@numerology/engine";
+import { favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type FortuneAnalysis, type MayaResult, type TaixuanResult } from "@numerology/engine";
 import { SCIENCE_NOTES } from "@numerology/knowledge";
 import type { AiLocale } from "./prompts.js";
 
@@ -244,7 +244,11 @@ const TIER_ZH: Record<string, string> = { classical: "原典", scholarly: "學�
  * 多體系事實區塊(Markdown):只列引擎已算好的事實,不含解讀。
  * 只附在 crosssystem 一節的 user prompt,不進 system(保持 prompt cache 前綴不變、其他節不受影響)。
  */
-export function crossSystemFacts(r: CrossSystemResult, locale: AiLocale): string {
+export function crossSystemFacts(
+  r: CrossSystemResult,
+  locale: AiLocale,
+  cycles?: { taixuan: TaixuanResult; maya: MayaResult },
+): string {
   const cite = (c: { work: string; author?: string; year?: number | string; locator?: string }) =>
     [c.author, c.work, c.year, c.locator].filter(Boolean).join(",");
   const rows = r.signals.map((s) =>
@@ -254,6 +258,20 @@ export function crossSystemFacts(r: CrossSystemResult, locale: AiLocale): string
   const marks = k.marks.map((m) => `${m.system === "lifepath" ? "生命靈數" : "九星年星"} ${m.value} 落第 ${m.row + 1} 行第 ${m.col + 1} 列`);
   const dist = Object.entries(r.distribution).map(([w, n]) => `${w} ${n}`).join("、");
   const notes = SCIENCE_NOTES.map((n) => `- [${n.id}] ${n.claim[locale]}(${cite(n.cite)})${n.reviewed ? "" : "(待校對)"}`);
+  // 時間週期:與頁面週期卡同一引擎結果;只作位置對照,不進上方五行表。
+  let cycleBlock = "";
+  if (cycles) {
+    const { taixuan: tx, maya: m } = cycles;
+    const pos = tx.head ? `第 ${tx.head} 首「${tx.headName}」第 ${tx.zan} 贊` : `${tx.extra}(81 首 × 9 贊之外)`;
+    const step = (xs: string[]) => xs.map((x) => `  - ${x}`).join("\n");
+    cycleBlock = `
+
+## 時間週期(週期定位,不入五行比對)
+- 太玄:${pos};半日序 ${tx.halfDayIndex}。層級 ${TIER_ZH[tx.tier]};出處 ${cite(tx.cite)}。
+${step(tx.steps)}
+- 瑪雅:長紀曆 ${m.longCount.join(".")};Tzolk'in ${m.tzolkin.number} ${m.tzolkin.dayName};Haab ${m.haab.day} ${m.haab.monthName};GMT 對應常數 ${m.correlation}。層級 ${MAYA_META.tier ? TIER_ZH[MAYA_META.tier] : "未分級"};出處 ${cite(m.cite)}。
+${step(m.steps)}`;
+  }
   return `# 多體系事實(確定性計算結果,勿改動數字)
 
 錨點:八字日主五行 ${r.anchor}。各體系按自身規則求出核心五行,再與錨點比對。
@@ -270,5 +288,5 @@ ${rows.join("\n")}
 ${marks.length ? `- 落點:${marks.join(";")}。` : "- 落點:無(數值超出方陣範圍)。"}
 
 ## 科學研究條目(science-notes,本站唯一可引用的研究)
-${notes.join("\n")}`;
+${notes.join("\n")}${cycleBlock}`;
 }

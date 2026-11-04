@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { castChart, castCrossSystem } from "@numerology/engine";
+import { castChart, castCrossSystem, castTaixuan, castMaya } from "@numerology/engine";
 import { SCIENCE_NOTES } from "@numerology/knowledge";
 import {
   SYSTEM_PERSONA,
@@ -86,4 +86,28 @@ test("非 crosssystem 節不含多體系事實區塊", () => {
   const personality = REPORT_SEGMENTS.find((s) => s.key === "personality");
   const p = buildReportSectionPrompt([], personality, "both", "zht");
   assert.ok(!p.includes(HEAD));
+});
+
+test("crossSystemFacts:附太玄與瑪雅週期定位,標明不入五行比對", () => {
+  const taixuan = castTaixuan(chart.input);
+  const maya = castMaya(chart.input.year, chart.input.month, chart.input.day);
+  const f = crossSystemFacts(cross, "zht", { taixuan, maya });
+  assert.ok(f.startsWith(HEAD), "仍在同一多體系事實區塊");
+  assert.ok(f.includes("週期定位,不入五行比對"));
+  assert.ok(f.includes("太玄") && f.includes(taixuan.headName ?? taixuan.extra), "太玄首名或踦嬴");
+  if (taixuan.zan) assert.ok(f.includes(`第 ${taixuan.zan} 贊`));
+  assert.ok(f.includes("冬至"), "冬至基準步驟");
+  assert.ok(f.includes("Tzolk'in") && f.includes(`${maya.tzolkin.number} ${maya.tzolkin.dayName}`));
+  assert.ok(f.includes(maya.longCount.join(".")) && f.includes(`${maya.haab.day} ${maya.haab.monthName}`));
+  assert.ok(f.includes("584283"));
+  assert.ok(f.includes("原典") && f.includes("學者詮釋"), "tier");
+  assert.ok(f.includes("揚雄") || f.includes("太玄經"), "太玄出處");
+  assert.ok(!facts.includes("Tzolk'in"), "未傳入週期時不附");
+});
+
+test("crosssystem 指令:太玄與瑪雅只作週期定位", () => {
+  const p = buildReportSectionPrompt([], seg, "both", "zht", facts);
+  for (const must of ["週期定位", "不推五行", "不作吉凶斷語", "贊辭", "Dreamspell"]) {
+    assert.ok(p.includes(must), `缺條款: ${must}`);
+  }
 });
