@@ -76,3 +76,11 @@ test("元氣:甲子年 → 天元氣乾、地元氣坎", () => {
   assert.equal(r.yuanqi.branch, "坎");
   assert.equal(r.yuanqi.tian, true); // 姤上卦乾
 });
+
+test("《天網搜奇錄》周姓命例 壬戌 己酉 癸卯 丙辰 男:遯初爻,後天大有(書 p. 34)", () => {
+  const r = cast(1922, 10, 2, 8);
+  assert.deepEqual(r.pillars, ["壬戌", "己酉", "癸卯", "丙辰"]);
+  assert.equal(r.xiantian.name, "遯");
+  assert.equal(r.yuantang, 1);
+  assert.equal(r.houtian.name, "大有");
+});
