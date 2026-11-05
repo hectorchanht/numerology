@@ -31,11 +31,11 @@ const GUOYIN: GanMap = {
   甲: ["戌"], 乙: ["亥"], 丙: ["丑"], 丁: ["寅"], 戊: ["丑"], 己: ["寅"],
   庚: ["辰"], 辛: ["巳"], 壬: ["未"], 癸: ["申"],
 };
-const LUSHEN: GanMap = {
+export const LUSHEN: GanMap = {
   甲: ["寅"], 乙: ["卯"], 丙: ["巳"], 戊: ["巳"], 丁: ["午"], 己: ["午"],
   庚: ["申"], 辛: ["酉"], 壬: ["亥"], 癸: ["子"],
 };
-const YANGREN: GanMap = {
+export const YANGREN: GanMap = {
   甲: ["卯"], 丙: ["午"], 戊: ["午"], 庚: ["酉"], 壬: ["子"],
 };
 const JINYU: GanMap = {

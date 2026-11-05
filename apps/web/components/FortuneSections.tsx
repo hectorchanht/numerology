@@ -205,6 +205,7 @@ export function FortuneDayun({
           </section>
         );
       })}
+      {lens !== "ziwei" ? <FortuneMonths fortune={fortune} /> : null}
     </>
   );
 }

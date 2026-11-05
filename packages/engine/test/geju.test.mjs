@@ -34,3 +34,23 @@ test("castChart 帶入 castFuyi 的 possibleCong", () => {
     assert.equal(c.bazi.geju.possibleCong, castFuyi(c).possibleCong);
   }
 });
+
+test("建祿陽刃按祿刃位取格(非本氣十神)", () => {
+  for (const [dm, zhi, main] of [["戊", "巳", "建禄格"], ["己", "午", "建禄格"], ["戊", "午", "阳刃格"]]) {
+    const r = castGeju(dm, zhi, []);
+    assert.equal(r.main, main, dm + zhi);
+    assert.equal(r.basis, "禄刃");
+  }
+  // 本氣為比劫但非祿刃位 → 比劫不取格,取首個非比劫藏干(本气未透)
+  const a = castGeju("戊", "辰", []);
+  assert.notEqual(a.main, "建禄格");
+  assert.equal(a.main, "正官格");
+  assert.equal(a.basis, "本气未透");
+  assert.notEqual(castGeju("戊", "丑", []).main, "阳刃格");
+  // 己戌:戊為劫財(陰干月劫),屬月劫格,非建祿/陽刃
+  assert.equal(castGeju("己", "戌", []).main, "月劫格");
+  assert.equal(castGeju("乙", "寅", []).main, "月劫格");
+  const b = castGeju("己", "未", []);
+  assert.notEqual(b.main, "建禄格");
+  assert.equal(b.basis, "本气未透");
+});

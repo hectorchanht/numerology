@@ -228,8 +228,10 @@ export function analyzeFortune(
 
   // —— 流月:referenceYear 嗰年(搵遍所有原始大運,包括虛運) ——
   const refLiuNian = rawDaYun.flatMap((d) => d.getLiuNian()).find((y) => y.getYear() === referenceYear);
-  const nowZhi = referenceYear === new Date().getFullYear()
-    ? Solar.fromYmd(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate()).getLunar().getEightChar().getMonthZhi()
+  const now = new Date();
+  // ponytail: 立春前(子/丑月)而 referenceYear=曆年時,高亮格會錯位;升級:比對實際節起始日
+  const nowZhi = referenceYear === now.getFullYear()
+    ? Solar.fromYmd(now.getFullYear(), now.getMonth() + 1, now.getDate()).getLunar().getEightChar().getMonthZhi()
     : undefined;
   const liuYue: LiuYueAnalysis[] = (refLiuNian?.getLiuYue() ?? []).map((m) => {
     const ganZhi = m.getGanZhi();
