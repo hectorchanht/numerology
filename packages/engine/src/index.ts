@@ -1,6 +1,7 @@
 import { DEPENDENCY_VERSIONS } from "./versions.generated.js";
 import { castBazi } from "./bazi.js";
 import { castZiwei } from "./ziwei.js";
+import { castFuyi } from "./fuyi.js";
 import { validateBirthInput } from "./time.js";
 import { resolveBirthDateTime } from "./solartime.js";
 import type { ChartResult, BirthInput } from "./types.js";
@@ -58,7 +59,7 @@ function depVersion(name: string): string {
 export function castChart(input: BirthInput): ChartResult {
   validateBirthInput(input);
   const { correction } = resolveBirthDateTime(input);
-  return {
+  const chart: ChartResult = {
     input,
     meta: {
       trueSolarTimeApplied: correction.applied,
@@ -71,6 +72,11 @@ export function castChart(input: BirthInput): ChartResult {
     bazi: castBazi(input),
     ziwei: castZiwei(input),
   };
+  if (castFuyi(chart).possibleCong) {
+    chart.bazi.geju.possibleCong = true;
+    chart.bazi.geju.steps.push("扶抑總分達 ±6,可能從格,格局僅供參考");
+  }
+  return chart;
 }
 
 export {
@@ -123,4 +129,5 @@ export { MAYA_META, TZOLKIN_DAY_NAMES } from "@numerology/knowledge";
 // 學院科學專區的科學筆記亦經此轉出。
 export { SCIENCE_NOTES, type ScienceNote } from "@numerology/knowledge";
 export { castFuyi, type FuyiResult } from "./fuyi.js";
+export { castGeju, type GejuResult } from "./geju.js";
 export { castNumberLore, castBirthLore, classifyNumber, starLongitude, type NumberLoreResult, type NumberLoreItem, type NumberClass, type BirthLoreResult, type StarHit, type LoreSource } from "./lore.js";

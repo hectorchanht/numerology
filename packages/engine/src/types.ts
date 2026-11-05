@@ -1,5 +1,6 @@
 import type { Dizhi, Tiangan, TiaohouResult } from "@numerology/knowledge";
 import type { GanzhiRelation } from "./relations.js";
+import type { GejuResult } from "./geju.js";
 
 export type Gender = "男" | "女";
 
@@ -71,6 +72,8 @@ export interface BaziChart {
   tiaohou: TiaohouResult;
   /** 胎元 / 胎息 / 命宮 / 身宮(干支 + 納音) */
   extraPalaces: Record<"taiYuan" | "taiXi" | "mingGong" | "shenGong", { ganZhi: string; naYin: string }>;
+  /** 格局(《子平真詮》月令取格簡化) */
+  geju: GejuResult;
   /** 原局四柱干支關係(合沖刑害破會) */
   relations: GanzhiRelation[];
   startLuck: { description: string; solarDate: string };

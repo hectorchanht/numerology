@@ -12,6 +12,7 @@ import { validateBirthInput } from "./time.js";
 import { changSheng } from "./changsheng.js";
 import { shenShaForPillar, type ShenShaContext } from "./shensha.js";
 import { natalRelations } from "./relations.js";
+import { castGeju } from "./geju.js";
 import { resolveBirthDateTime } from "./solartime.js";
 
 /** 排八字四柱,並接入窮通寶鑑調候用神。 */
@@ -71,6 +72,15 @@ export function castBazi(input: BirthInput): BaziChart {
     fourPillars,
     extraPalaces,
     relations: natalRelations(fourPillars),
+    // possibleCong 需完整命盤,由 castChart 經 castFuyi 補上
+    geju: {
+      ...castGeju(dayGan, monthZhi, [
+        { pos: "year", gan: fourPillars.year.gan },
+        { pos: "month", gan: fourPillars.month.gan },
+        { pos: "hour", gan: fourPillars.hour.gan },
+      ]),
+      possibleCong: false,
+    },
     dayMaster: dayGan,
     monthBranch: monthZhi,
     dayWuXing: ec.getDayWuXing(),
