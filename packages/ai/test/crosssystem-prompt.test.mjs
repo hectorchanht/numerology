@@ -212,7 +212,7 @@ test("曆法三系:事實區塊附宿位、Vimshottari、民用曆、金數;指�
   const f = crossSystemFacts(cross, "zht", {
     taixuan: castTaixuan(chart.input),
     maya: castMaya(1990, 3, 18),
-    calendars: { jyotish: castJyotish(sky), egyptian: castEgyptian(chart.input, sky), metonic: castMetonic(1990) },
+    calendars: { jyotish: castJyotish(sky), egyptian: castEgyptian(chart.input, sky), metonic: castMetonic({ year: 1990, month: 3, day: 18 }) },
   });
   assert.ok(f.includes("## 曆法三系"));
   assert.ok(f.includes("Vimshottari 大運"));

@@ -35,13 +35,16 @@ test("埃及民用曆:紀元日為第 1 年 Thoth 1;已知換算", () => {
 });
 
 test("Metonic:金數、epact、復活節", () => {
-  const r = castMetonic(2026);
+  const r = castMetonic({ year: 2026, month: 6, day: 1 });
   assert.equal(r.golden, 13);
   assert.equal(r.epact, 11);
   assert.deepEqual(r.easter, { month: 4, day: 5 });
-  assert.deepEqual(castMetonic(2000).easter, { month: 4, day: 23 });
-  assert.deepEqual(castMetonic(1990).easter, { month: 4, day: 15 });
+  assert.deepEqual(castMetonic({ year: 2000, month: 6, day: 1 }).easter, { month: 4, day: 23 });
+  assert.deepEqual(castMetonic({ year: 1990, month: 6, day: 1 }).easter, { month: 4, day: 15 });
   assert.equal(r.leaps.length, 19);
+  // 春節前出生:農曆年為上一年,閏月列表由此起
+  const jan = castMetonic({ year: 1990, month: 1, day: 10 });
+  assert.deepEqual([jan.golden, jan.lunarYear, jan.leaps[0].year], [15, 1989, 1989]);
   assert.ok(r.leapCount >= 6 && r.leapCount <= 8, String(r.leapCount));
   assert.ok(r.driftHours > 1.5 && r.driftHours < 2.5);
 });

@@ -791,11 +791,13 @@ const zht = {
   "cal.yearAria": "民用曆一年:12 個 30 日月加 5 個閏餘日;出生日在第 {doy} 日",
   "cal.metonic": "十九年週期",
   "cal.metonicVal": "金數 {g}、epact {e};{y} 年復活節 {em} 月 {ed} 日",
-  "cal.leapVal": "自出生年起 19 年,現行農曆實有閏月 {n} 個(四分曆章法:7 個)",
+  "cal.leapVal": "自農曆 {ly} 年起 19 年,現行農曆實有閏月 {n} 個(四分曆章法:7 個)",
   "cal.gridAria": "十九年格:{rows}",
   "cal.leapShort": "閏{m}",
-  "cal.legendBirth": "出生年",
+  "cal.legendBirth": "出生農曆年",
   "cal.legendLeap": "有閏月",
+  "cross.planet.Rahu": "羅睺",
+  "cross.planet.Ketu": "計都",
 } as const;
 
 export type TKey = keyof typeof zht;
@@ -1578,11 +1580,13 @@ const zhs: Record<TKey, string> = {
   "cal.yearAria": "民用历一年:12 个 30 日月加 5 个闰余日;出生日在第 {doy} 日",
   "cal.metonic": "十九年周期",
   "cal.metonicVal": "金数 {g}、epact {e};{y} 年复活节 {em} 月 {ed} 日",
-  "cal.leapVal": "自出生年起 19 年,现行农历实有闰月 {n} 个(四分历章法:7 个)",
+  "cal.leapVal": "自农历 {ly} 年起 19 年,现行农历实有闰月 {n} 个(四分历章法:7 个)",
   "cal.gridAria": "十九年格:{rows}",
   "cal.leapShort": "闰{m}",
-  "cal.legendBirth": "出生年",
+  "cal.legendBirth": "出生农历年",
   "cal.legendLeap": "有闰月",
+  "cross.planet.Rahu": "罗睺",
+  "cross.planet.Ketu": "计都",
 };
 
 /** 英文:自然英文翻譯。 */
@@ -2363,11 +2367,13 @@ const en: Record<TKey, string> = {
   "cal.yearAria": "The civil year: twelve 30-day months plus five epagomenal days; birth falls on day {doy}",
   "cal.metonic": "The nineteen-year cycle",
   "cal.metonicVal": "Golden number {g}, epact {e}; Easter {y}: {em}/{ed}",
-  "cal.leapVal": "In the 19 years from your birth year, the Chinese calendar actually has {n} leap months (the old Sifen rule: 7)",
+  "cal.leapVal": "In the 19 lunar years from {ly}, the Chinese calendar actually has {n} leap months (the old Sifen rule: 7)",
   "cal.gridAria": "Nineteen-year grid: {rows}",
   "cal.leapShort": "leap {m}",
-  "cal.legendBirth": "Birth year",
+  "cal.legendBirth": "Lunar birth year",
   "cal.legendLeap": "Has a leap month",
+  "cross.planet.Rahu": "Rahu",
+  "cross.planet.Ketu": "Ketu",
 };
 
 export const STRINGS: Record<Locale, Record<TKey, string>> = { zht, zhs, en };

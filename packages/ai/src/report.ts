@@ -203,7 +203,7 @@ export function streamReportSection(chart: ChartResult, sectionKey: string, opts
         ephemeris: sky,
         heluo: castHeluo(chart.input),
         lore: { numbers: castNumberLore(chart), birth: castBirthLore(chart, sky) },
-        calendars: { jyotish: castJyotish(sky), egyptian: castEgyptian(chart.input, sky), metonic: castMetonic(chart.input.year) },
+        calendars: { jyotish: castJyotish(sky), egyptian: castEgyptian(chart.input, sky), metonic: castMetonic(chart.input) },
       })
     : undefined;
   return chatStream({

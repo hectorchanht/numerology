@@ -39,8 +39,9 @@ const W = 343, L = 70, SPAN = 100;
 
 /** 公曆年時間條:上 Vimshottari、下八字大運,豎線標今年。 */
 function Timeline({ r, chart }: { r: JyotishResult; chart: ChartResult }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { z } = useScript();
+  const short = (s: string) => (locale === "en" ? s.slice(0, 2) : s[0]!);
   const y0 = chart.input.year;
   const x = (y: number) => L + ((y - y0) / SPAN) * (W - L - 4);
   const yearOf = (iso: string) => { const d = new Date(iso); return d.getUTCFullYear() + d.getUTCMonth() / 12 + (d.getUTCDate() - 1) / 365; };
@@ -48,7 +49,7 @@ function Timeline({ r, chart }: { r: JyotishResult; chart: ChartResult }) {
   const bazi = chart.bazi.daYun.filter((d) => d.ganZhi).map((d) => ({ g: d.ganZhi, a: d.startYear, b: d.startYear + d.endAge - d.startAge + 1 })).filter((d) => d.a < y0 + SPAN);
   const now = new Date().getFullYear();
   const label = t("cal.timelineAria", {
-    d: dashas.map((d) => `${d.lord} ${Math.floor(d.a)}–${Math.floor(d.b)}`).join(", "),
+    d: dashas.map((d) => `${t(`cross.planet.${d.lord}` as TKey)} ${Math.floor(d.a)}–${Math.floor(d.b)}`).join(", "),
     b: bazi.map((d) => `${z(d.g)} ${d.a}–${d.b - 1}`).join(", "),
   });
   const row = (y: number, items: { key: string; a: number; b: number; text: string }[]) => items.map((it, i) => {
@@ -65,10 +66,10 @@ function Timeline({ r, chart }: { r: JyotishResult; chart: ChartResult }) {
       <title>{label}</title>
       <text className="xs-fy-lbl" x={0} y={21} dominantBaseline="central">{t("cal.rowDasha")}</text>
       <text className="xs-fy-lbl" x={0} y={51} dominantBaseline="central">{t("cal.rowBazi")}</text>
-      {row(10, dashas.map((d) => ({ key: d.lord, a: d.a, b: d.b, text: d.lord.slice(0, 2) })))}
+      {row(10, dashas.map((d) => ({ key: d.lord, a: d.a, b: d.b, text: short(t(`cross.planet.${d.lord}` as TKey)) })))}
       {row(40, bazi.map((d) => ({ key: d.g, a: d.a, b: d.b, text: z(d.g) })))}
       {[0, 25, 50, 75, 100].map((k) => (
-        <text key={k} className="cy-axis" x={x(y0 + k)} y={80} fontSize={9}>{y0 + k}</text>
+        <text key={k} className="cy-axis" x={x(y0 + k)} y={80} fontSize={9} textAnchor={k === 100 ? "end" : k === 0 ? "start" : "middle"}>{y0 + k}</text>
       ))}
       {now >= y0 && now <= y0 + SPAN ? (
         <g>
@@ -87,7 +88,7 @@ function Jyotish({ r, chart }: { r: JyotishResult; chart: ChartResult }) {
   return (
     <>
       <h3 className="xs-h">{t("cal.jyotish")}</h3>
-      <p className="cy-val">{t("cal.nakVal", { n: n.n, name: n.iast, deva: n.devanagari, pct: `${(r.elapsed * 100).toFixed(1)}%`, lord: n.lord })}</p>
+      <p className="cy-val">{t("cal.nakVal", { n: n.n, name: n.iast, deva: n.devanagari, pct: `${(r.elapsed * 100).toFixed(1)}%`, lord: t(`cross.planet.${n.lord}` as TKey) })}</p>
       <p className="xs-note">{t("cal.ayanamsa", { a })}</p>
       <Meta tier={r.tier} cites={[r.cite, r.ayanamsaCite]} />
       <h3 className="xs-h">{t("cal.timeline")}</h3>
@@ -108,8 +109,9 @@ function Egypt({ r }: { r: EgyptianResult }) {
     <>
       <h3 className="xs-h">{t("cal.egypt")}</h3>
       <p className="cy-val">{t("cal.egyptVal", { y: r.year, m: r.month, d: r.day })}</p>
-      <p className="xs-note">{t("cal.faceVal", { sign: r.face.sign, i: r.face.index + 1, ruler: r.face.ruler })}</p>
-      <Meta tier={r.tier} cites={[r.cite, r.faceCite]} />
+      <p className="xs-note">{t("cal.faceVal", { sign: r.face.sign, i: r.face.index + 1, ruler: t(`cross.planet.${r.face.ruler}` as TKey) })}</p>
+      <Meta tier={r.tier} cites={[r.cite]} />
+      <Meta tier={r.faceTier} cites={[r.faceCite]} />
       <svg className="xs-grid cal-year" viewBox={`0 0 ${W} 44`} role="img" aria-label={label}>
         <title>{label}</title>
         {Array.from({ length: 13 }, (_, i) => (
@@ -133,7 +135,7 @@ function Metonic({ r, year }: { r: MetonicResult; year: number }) {
     <>
       <h3 className="xs-h">{t("cal.metonic")}</h3>
       <p className="cy-val">{t("cal.metonicVal", { g: r.golden, e: r.epact, y: year, em: r.easter.month, ed: r.easter.day })}</p>
-      <p className="xs-note">{t("cal.leapVal", { n: r.leapCount })}</p>
+      <p className="xs-note">{t("cal.leapVal", { n: r.leapCount, ly: r.lunarYear })}</p>
       <Meta tier={r.tier} cites={[r.cite, r.chineseCite]} />
       <svg className="xs-grid cal-grid" viewBox={`0 0 ${W} 46`} role="img" aria-label={label}>
         <title>{label}</title>
@@ -159,7 +161,7 @@ export function CalendarCard({ chart }: { chart: ChartResult }) {
   const sky = useMemo(() => castEphemeris(chart.input), [chart]);
   const jy = useMemo(() => castJyotish(sky), [sky]);
   const eg = useMemo(() => castEgyptian(chart.input, sky), [chart, sky]);
-  const me = useMemo(() => castMetonic(chart.input.year), [chart]);
+  const me = useMemo(() => castMetonic(chart.input), [chart]);
   return (
     <div className="card viz xs">
       <p className="xs-sub">{t("cal.intro")}</p>

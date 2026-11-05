@@ -361,7 +361,7 @@ ${items.join("\n")}
 - Jyotish:ayanamsa(Lahiri / Chitrapaksha)${jy.ayanamsa.toFixed(2)}°;月亮恆星黃經 ${jy.moonSidereal.toFixed(2)}°,第 ${n.n} 宿 ${n.iast},宿內已行 ${(jy.elapsed * 100).toFixed(1)}%,宿主 ${n.lord}。出處 ${cite(jy.cite)}。
 - Vimshottari 大運(年長 365.25 日):${dashas}。
 - 埃及民用曆:Nabonassar 紀元第 ${eg.year} 年 ${eg.month} ${eg.day} 日;太陽在 ${eg.face.sign} 第 ${eg.face.index + 1} 個 face,主星 ${eg.face.ruler}。出處 ${cite(eg.cite)};face ${cite(eg.faceCite)}。
-- 十九年週期:金數 ${me.golden}、Gregorian epact ${me.epact};出生年復活節 ${me.easter.month} 月 ${me.easter.day} 日;出生年起 19 年現行農曆實有閏月 ${me.leapCount} 個(四分曆章法 7 個)。出處 ${cite(me.cite)};${cite(me.chineseCite)}。
+- 十九年週期:金數 ${me.golden}、Gregorian epact ${me.epact};出生年復活節 ${me.easter.month} 月 ${me.easter.day} 日;農曆 ${me.lunarYear} 年起 19 年現行農曆實有閏月 ${me.leapCount} 個(四分曆章法 7 個)。出處 ${cite(me.cite)};${cite(me.chineseCite)}。
 ${jy.steps.map((x) => `  - ${x}`).join("\n")}`;
   }
   return `# 多體系事實(確定性計算結果,勿改動數字)
