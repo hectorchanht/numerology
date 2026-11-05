@@ -18,7 +18,7 @@ export interface GejuResult {
 const YANG = "甲丙戊庚壬";
 const LAYER = ["本气透", "中气透", "余气透"] as const;
 
-/** 月令取格:月支為日主祿位 → 建祿;陽干月支為羊刃 → 陽刃;陰干本氣為劫財 → 月劫;否則取月支藏干中透出天干者。 */
+/** 月令取格:月支為日主祿位 → 建祿;陽干月支為羊刃 → 陽刃;陰干本氣為劫財(四庫除外)→ 月劫;否則取月支藏干中透出天干者。 */
 export function castGeju(
   dayMaster: Tiangan,
   monthZhi: Dizhi,
@@ -34,7 +34,9 @@ export function castGeju(
   // 《論建祿月劫》:按祿/刃位判,唔係睇本氣十神(戊辰本氣戊雖係比肩,辰非戊祿,唔入建祿)。
   const lu = LUSHEN[dayMaster]?.includes(monthZhi);
   const ren = YANG.includes(dayMaster) && YANGREN[dayMaster]?.includes(monthZhi);
-  if (lu || ren || (!YANG.includes(dayMaster) && mainSs === "劫财")) {
+  // 辰戌丑未為四庫雜氣,《論雜氣如何取用》看透干,唔作月劫(己辰、己戌)。
+  const yueJie = !YANG.includes(dayMaster) && mainSs === "劫财" && !"辰戌丑未".includes(monthZhi);
+  if (lu || ren || yueJie) {
     const main = lu ? "建禄格" : ren ? "阳刃格" : "月劫格";
     return { main, also: [], basis: "禄刃", steps: [`月支 ${monthZhi} 對日主 ${dayMaster}${lu ? "為禄位" : ren ? "為羊刃位" : "本气 " + hide[0] + " 為劫财"} → ${main}`], ...base };
   }

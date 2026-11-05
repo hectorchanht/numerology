@@ -47,8 +47,9 @@ test("建祿陽刃按祿刃位取格(非本氣十神)", () => {
   assert.equal(a.main, "正官格");
   assert.equal(a.basis, "本气未透");
   assert.notEqual(castGeju("戊", "丑", []).main, "阳刃格");
-  // 己戌:戊為劫財(陰干月劫),屬月劫格,非建祿/陽刃
-  assert.equal(castGeju("己", "戌", []).main, "月劫格");
+  // 己辰、己戌:四庫雜氣,唔作月劫,比劫不取格 → 取首個非比劫藏干
+  assert.equal(castGeju("己", "戌", []).main, "食神格"); // 戌藏戊辛丁,戊比劫略過,取辛
+  assert.equal(castGeju("己", "辰", []).main, "七杀格"); // 辰藏戊乙癸,取乙
   assert.equal(castGeju("乙", "寅", []).main, "月劫格");
   const b = castGeju("己", "未", []);
   assert.notEqual(b.main, "建禄格");
