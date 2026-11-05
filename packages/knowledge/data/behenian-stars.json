@@ -1,0 +1,30 @@
+{
+  "meta": {
+    "name": "Behenian 十五恆星:J2000 赤經赤緯、與 Agrippa 卷一第 32 章名稱對照",
+    "schema": "stars:[{n,agrippa,name,bayer,ra,dec,alt?}] ; orb ; longitudes2020",
+    "source": "名稱與次序:Agrippa, Three Books of Occult Philosophy I.32(J.F. 1651 英譯,見 agrippa-correspondences.json)。赤經赤緯(J2000,ICRS):英文維基百科各星條目資訊框,其來源為 van Leeuwen, F. (2007), 'Validation of the new Hipparcos reduction', A&A 474(2): 653–664(Sirius 資訊框引 Tycho-2)。容許度 6° 與 2020 黃經:英文維基百科 'Behenian fixed star'(2020 黃經據 astro-seek 計算器)。",
+    "version": "0.1.0",
+    "reviewed": false,
+    "reviewNote": "赤經赤緯由 web-fetch 逐條讀資訊框,未對 SIMBAD 逐一核對;Alkaid 座標未經 fetch 核對(取自 Hipparcos 新歸算常用值)。test 以 2020 黃經回算(誤差 < 5′)作交叉驗證。第 8 顆:Agrippa 1651 英譯作 'Tail of the Lesser Bear',維基百科 / Hermes 傳統作 Alkaid(Tail of the Great Bear),兩者並列。",
+    "tier": "scholarly"
+  },
+  "orb": { "degrees": 6, "tier": "modern", "text": "When a planet was within six degrees of an associated star, this influence was thought to be particularly strong.", "cite": "Wikipedia, 'Behenian fixed star'" },
+  "stars": [
+    { "n": 1, "agrippa": "Head of Algol", "name": "Algol", "bayer": "β Per", "ra": "03 08 10.13245", "dec": "+40 57 20.3280", "lon2020": "26 Taurus 26" },
+    { "n": 2, "agrippa": "Pleiades", "name": "Alcyone", "bayer": "η Tau", "ra": "03 47 29.077", "dec": "+24 06 18.49", "lon2020": "00 Gemini 16" },
+    { "n": 3, "agrippa": "Aldebaran", "name": "Aldebaran", "bayer": "α Tau", "ra": "04 35 55.23907", "dec": "+16 30 33.4885", "lon2020": "10 Gemini 04" },
+    { "n": 4, "agrippa": "Goat Star", "name": "Capella", "bayer": "α Aur", "ra": "05 16 41.35871", "dec": "+45 59 52.7693", "lon2020": "22 Gemini 08" },
+    { "n": 5, "agrippa": "Great Dog Star", "name": "Sirius", "bayer": "α CMa", "ra": "06 45 08.917", "dec": "-16 42 58.02", "lon2020": "14 Cancer 21" },
+    { "n": 6, "agrippa": "Lesser Dog Star", "name": "Procyon", "bayer": "α CMi", "ra": "07 39 18.11950", "dec": "+05 13 29.9552", "lon2020": "26 Cancer 03" },
+    { "n": 7, "agrippa": "Heart of the Lion", "name": "Regulus", "bayer": "α Leo", "ra": "10 08 22.311", "dec": "+11 58 01.95", "lon2020": "00 Virgo 06" },
+    { "n": 8, "agrippa": "Tail of the Lesser Bear (1651 tr.) / Tail of the Great Bear", "name": "Alkaid", "bayer": "η UMa", "ra": "13 47 32.43776", "dec": "+49 18 47.7602", "lon2020": "27 Virgo 12",
+      "alt": { "name": "Polaris", "bayer": "α UMi", "ra": "02 31 49.09", "dec": "+89 15 50.8", "note": "按 1651 英譯字面(小熊尾)" } },
+    { "n": 9, "agrippa": "Wing of the Crow", "name": "Algorab", "bayer": "δ Crv", "ra": "12 29 51.85517", "dec": "-16 30 55.5525", "lon2020": "13 Libra 43" },
+    { "n": 10, "agrippa": "Spica", "name": "Spica", "bayer": "α Vir", "ra": "13 25 11.579", "dec": "-11 09 40.75", "lon2020": "24 Libra 06" },
+    { "n": 11, "agrippa": "Alchamech", "name": "Arcturus", "bayer": "α Boo", "ra": "14 15 39.7", "dec": "+19 10 56", "lon2020": "24 Libra 30" },
+    { "n": 12, "agrippa": "Elpheia", "name": "Alphecca", "bayer": "α CrB", "ra": "15 34 41.268", "dec": "+26 42 52.89", "lon2020": "12 Scorpio 34" },
+    { "n": 13, "agrippa": "Heart of the Scorpion", "name": "Antares", "bayer": "α Sco", "ra": "16 29 24.45970", "dec": "-26 25 55.2094", "lon2020": "10 Sagittarius 01" },
+    { "n": 14, "agrippa": "Falling Vulture", "name": "Vega", "bayer": "α Lyr", "ra": "18 36 56.33635", "dec": "+38 47 01.2802", "lon2020": "15 Capricorn 34" },
+    { "n": 15, "agrippa": "Tail of Capricorn", "name": "Deneb Algedi", "bayer": "δ Cap", "ra": "21 47 02.44424", "dec": "-16 07 38.2335", "lon2020": "23 Aquarius 48" }
+  ]
+}

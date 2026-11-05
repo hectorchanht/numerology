@@ -122,3 +122,4 @@ export { MAYA_META, TZOLKIN_DAY_NAMES } from "@numerology/knowledge";
 // 學院科學專區的科學筆記亦經此轉出。
 export { SCIENCE_NOTES, type ScienceNote } from "@numerology/knowledge";
 export { castFuyi, type FuyiResult } from "./fuyi.js";
+export { castNumberLore, castBirthLore, classifyNumber, starLongitude, type NumberLoreResult, type NumberLoreItem, type NumberClass, type BirthLoreResult, type StarHit, type LoreSource } from "./lore.js";
