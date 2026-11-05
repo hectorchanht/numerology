@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { castChart, castCrossSystem, castTaixuan, castMaya, castHuangji, castPlanetaryHour } from "@numerology/engine";
+import { castChart, castCrossSystem, castTaixuan, castMaya, castHuangji, castPlanetaryHour, castEphemeris } from "@numerology/engine";
 import { SCIENCE_NOTES } from "@numerology/knowledge";
 import {
   SYSTEM_PERSONA,
@@ -119,9 +119,18 @@ test("crossSystemFacts:附皇極經世會運世同行星時;冇緯度就唔附�
   assert.ok(!noLat.includes("行星時(Heptameron)"));
 });
 
+test("crossSystemFacts:附七曜位置同月宿", () => {
+  const ephemeris = castEphemeris({ ...chart.input, latitude: 22.3, longitude: 114.17 });
+  const f = crossSystemFacts(cross, "zht", { taixuan: castTaixuan(chart.input), maya: castMaya(chart.input.year, chart.input.month, chart.input.day), ephemeris });
+  const sun = ephemeris.planets[0];
+  assert.ok(f.includes(`Sun ${sun.sign} ${sun.degree.toFixed(1)}°`));
+  assert.ok(f.includes(`第 ${ephemeris.moonMansion.n} 宿 ${ephemeris.moonMansion.names[0]}`));
+  assert.ok(f.includes("Tetrabiblos") && f.includes("Agrippa") && /[晝夜]生/.test(f));
+});
+
 test("crosssystem 指令:太玄與瑪雅只作週期定位", () => {
   const p = buildReportSectionPrompt([], seg, "both", "zht", facts);
-  for (const must of ["週期定位", "不推五行", "不作吉凶斷語", "贊辭", "皇極經世", "不推治亂興衰", "行星時", "不寫天使職能", "太玄首名、首辭、贊辭原文未附,不得引述或釋義", "Dreamspell"]) {
+  for (const must of ["週期定位", "不推五行", "不作吉凶斷語", "贊辭", "皇極經世", "不推治亂興衰", "行星時", "不寫天使職能", "七曜位置", "上升點與十二宮位本站未計", "太玄首名、首辭、贊辭原文未附,不得引述或釋義", "Dreamspell"]) {
     assert.ok(p.includes(must), `缺條款: ${must}`);
   }
 });

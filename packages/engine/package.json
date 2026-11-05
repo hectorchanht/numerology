@@ -20,6 +20,7 @@
   ],
   "dependencies": {
     "@numerology/knowledge": "*",
+    "astronomy-engine": "^2.1.19",
     "iztro": "^2.4.0",
     "lunar-javascript": "^1.7.0"
   }

@@ -12,3 +12,5 @@ export * from "./taixuan.js";
 export * from "./maya.js";
 export * from "./huangji-jingshi.js";
 export * from "./heptameron.js";
+export * from "./tetrabiblos.js";
+export * from "./lunar-mansions.js";

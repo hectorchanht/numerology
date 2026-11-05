@@ -9,7 +9,7 @@ import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 
-const DEPS = ["iztro", "lunar-javascript"];
+const DEPS = ["iztro", "lunar-javascript", "astronomy-engine"];
 
 const entries = DEPS.map((name) => {
   let version = "unknown";

@@ -115,6 +115,7 @@ export { castTaixuan, type TaixuanResult } from "./taixuan.js";
 export { castMaya, type MayaResult } from "./maya.js";
 export { castHuangji, type HuangjiResult } from "./huangji.js";
 export { castPlanetaryHour, type PlanetaryHourResult } from "./planetaryhour.js";
+export { castEphemeris, type EphemerisResult, type PlanetPosition, type AspectHit } from "./ephemeris.js";
 // web 不直接依賴 knowledge,瑪雅 tier 與日名表經此轉出。
 export { MAYA_META, TZOLKIN_DAY_NAMES } from "@numerology/knowledge";
 // 學院科學專區的科學筆記亦經此轉出。

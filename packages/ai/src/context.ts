@@ -1,4 +1,4 @@
-import { favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type FortuneAnalysis, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult } from "@numerology/engine";
+import { favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type FortuneAnalysis, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult } from "@numerology/engine";
 import { SCIENCE_NOTES } from "@numerology/knowledge";
 import type { AiLocale } from "./prompts.js";
 
@@ -249,7 +249,7 @@ const VERDICT_ZH: Record<string, string> = { strong: "身強", weak: "身弱", n
 export function crossSystemFacts(
   r: CrossSystemResult,
   locale: AiLocale,
-  cycles?: { taixuan: TaixuanResult; maya: MayaResult; huangji?: HuangjiResult; planetaryHour?: PlanetaryHourResult | null },
+  cycles?: { taixuan: TaixuanResult; maya: MayaResult; huangji?: HuangjiResult; planetaryHour?: PlanetaryHourResult | null; ephemeris?: EphemerisResult },
 ): string {
   const cite = (c: { work: string; author?: string; year?: number | string; locator?: string }) =>
     [c.author, c.work, c.year, c.locator].filter(Boolean).join(",");
@@ -303,6 +303,19 @@ ${step(hj.steps)}`;
       cycleBlock += `
 - 行星時(Heptameron):行星日 ${ph.dayPlanet}(天使 ${ph.dayAngel});${where}。層級 ${TIER_ZH[ph.tier]};出處 ${cite(ph.cite)}。
 ${step(ph.steps)}`;
+    }
+    const ep = cycles.ephemeris;
+    if (ep) {
+      const SECT = { day: "晝生", night: "夜生" } as const;
+      const DIG = { domicile: "入廟", exaltation: "入旺", fall: "落陷" } as const;
+      const pos = ep.planets.map((p) =>
+        `${p.planet} ${p.sign} ${p.degree.toFixed(1)}°${p.retrograde ? "(逆)" : ""} 宮主 ${p.ruler}${p.dignities.map((d) => ` ${DIG[d]}`).join("")} 界主 ${p.termRuler}`).join(";");
+      const asp = ep.aspects.map((a) => `${a.a}–${a.b} ${a.type}`).join("、") || "無";
+      const mm = ep.moonMansion;
+      cycleBlock += `
+- 七曜位置(Tetrabiblos 卷一,回歸黃道):${pos}。${ep.sect ? SECT[ep.sect] : "晝夜生未判"};整宮相位:${asp}。層級 ${TIER_ZH[ep.tier]};出處 ${cite(ep.cite)}。
+- 月宿(Agrippa 二十八宿):第 ${mm.n} 宿 ${mm.names.join(" / ")}${mm.meaning ? `(${mm.meaning})` : ""},起於黃經 ${mm.start.toFixed(2)}°。出處 ${cite(ep.mansionCite)}。
+${step(ep.steps)}`;
     }
   }
   return `# 多體系事實(確定性計算結果,勿改動數字)

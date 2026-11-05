@@ -1,4 +1,4 @@
-import { castCrossSystem, castHuangji, castMaya, castPlanetaryHour, castTaixuan, type ChartResult, type FortuneAnalysis } from "@numerology/engine";
+import { castCrossSystem, castEphemeris, castHuangji, castMaya, castPlanetaryHour, castTaixuan, type ChartResult, type FortuneAnalysis } from "@numerology/engine";
 import { buildContextPack, crossSystemFacts, type FortuneScope } from "./context.js";
 import {
   buildReportUserPrompt,
@@ -199,6 +199,7 @@ export function streamReportSection(chart: ChartResult, sectionKey: string, opts
         maya: castMaya(chart.input.year, chart.input.month, chart.input.day),
         huangji: castHuangji(chart.input),
         planetaryHour: castPlanetaryHour(chart.input),
+        ephemeris: castEphemeris(chart.input),
       })
     : undefined;
   return chatStream({
