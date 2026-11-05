@@ -59,3 +59,15 @@ test("报告用户指令包含全部章节与注意事项", () => {
   assert.ok(promptDefault.includes("性格特質"), "默认应为繁体标题");
   assert.ok(!promptDefault.includes("性格特质"), "默认不应出现简体标题");
 });
+
+test("紫微新增事实:斗君/小限/飞星派;current 无流月;无格局不出格局行", () => {
+  const now = new Date(2026, 10, 5);
+  const full = buildContextPack(chart, undefined, { now }).markdown;
+  for (const must of ["斗君:", "小限:", "飞星派(流派说法", "运限叠宫", "十二宫神煞", "紫微流月", "格局(《紫微斗数全书》)"]) {
+    assert.ok(full.includes(must), `缺少: ${must}`);
+  }
+  assert.ok(!buildContextPack(chart, undefined, { now, fortuneScope: "current" }).markdown.includes("紫微流月"));
+  assert.ok(!buildContextPack(chart, undefined, { now, fortuneScope: "none" }).markdown.includes("斗君:"));
+  assert.equal(buildContextPack(chart, undefined, { now }).markdown, full, "固定 now 确定性");
+  assert.ok(SYSTEM_PERSONA.endsWith("不作主要判断。"), "persona 末句");
+});

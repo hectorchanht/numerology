@@ -1,4 +1,4 @@
-import { favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type GanzhiRelation, type FortuneAnalysis, type HeluoResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult, type NumberLoreResult, type BirthLoreResult, type JyotishResult, type EgyptianResult, type MetonicResult } from "@numerology/engine";
+import { castZiweiFeixing, castZiweiHoroscope, favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type GanzhiRelation, type FortuneAnalysis, type HeluoResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult, type NumberLoreResult, type BirthLoreResult, type JyotishResult, type EgyptianResult, type MetonicResult } from "@numerology/engine";
 import { SCIENCE_NOTES } from "@numerology/knowledge";
 import type { AiLocale } from "./prompts.js";
 
@@ -25,6 +25,8 @@ export type FortuneScope = "full" | "dayun" | "review" | "future" | "current" | 
 
 export interface ContextPackOptions {
   fortuneScope?: FortuneScope;
+  /** 紫微運限(小限/斗君/疊宮/流月)嘅「而家」;默認 new Date()。測試傳固定值確保確定性。 */
+  now?: Date;
 }
 
 /**
@@ -115,11 +117,69 @@ ${shenShaBlock ? "\n神煞:\n" + shenShaBlock : ""}
 - 命主:${z.soul} | 身主:${z.body}
 - 命宫三方四正(判格局的依据):本宫${z.soulSanFang.palaceNames.self} + 对宫${z.soulSanFang.palaceNames.opposite} + 三合${z.soulSanFang.palaceNames.trine.join("/")};四宫合看主星:${z.soulSanFang.majorStars.join("、")}
 - 十二宫主星(含生年四化标注):
-${ORDER.map((n) => "  - " + palaceLine(n)).join("\n")}
+${ORDER.map((n) => "  - " + palaceLine(n)).join("\n")}${ziweiExtra(chart, fortune, opts)}
 ${fortune ? renderFortuneSection(fortune, opts?.fortuneScope ?? "full") : ""}`;
 
   return { markdown, caveats };
 }
+
+const ymd = (d: Date) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+const SIHUA_SHORT = (l: { sihua: { type: string; star: string; intoPalace: string }[] }) =>
+  l.sihua.map((s) => `${s.star}化${s.type}入${s.intoPalace}`).join("、");
+
+/** 紫微附加事實(格局、神煞、飛星派、運限疊宮…);append-only,接喺現有紫微段之後。純計算。 */
+function ziweiExtra(chart: ChartResult, fortune: FortuneAnalysis | undefined, opts?: ContextPackOptions): string {
+  const { input, ziwei: z } = chart;
+  const scope = opts?.fortuneScope ?? "full";
+  const out: string[] = [];
+  if (z.geju.length) out.push(`- 格局(《紫微斗数全书》):${z.geju.map((g) => `${g.name}(${g.verdict})`).join("、")}`);
+  out.push(
+    "- 十二宫神煞(长生/博士/将星/岁建):" +
+      z.palaces.map((p) => `${p.name} ${p.changsheng12}/${p.boshi12}/${p.jiangqian12}/${p.suiqian12}`).join(";"),
+  );
+  if (scope !== "none") {
+    const now = opts?.now ?? new Date();
+    const refYear = fortune?.referenceYear ?? now.getFullYear();
+    const hNow = castZiweiHoroscope(input, ymd(now));
+    const hRef = castZiweiHoroscope(input, `${refYear}-6-1`); // 小限/流耀以參考年年中計
+    const L = (h: typeof hNow, k: string) => h.layers.find((l) => l.key === k)!;
+    const age = L(hRef, "age");
+    out.push(`- 小限:${age.nominalAge}岁行${age.natalPalaceName}`);
+    out.push(`- 斗君:${hNow.douJun.branch}(本命${hNow.douJun.natalPalaceName})`);
+    out.push(
+      `- 运限叠宫(当前):大限命宫=本命${L(hNow, "decadal").natalPalaceName}、流年命宫=本命${L(hNow, "yearly").natalPalaceName}、流月命宫=本命${L(hNow, "monthly").natalPalaceName}`,
+    );
+    if (hNow.overlaps.length)
+      out.push(`- 四化叠化:${hNow.overlaps.map((o) => `${o.star}(本命${o.natalPalaceName}) ${o.tag}(${o.layers.map((l) => l.layer + l.type).join("+")})`).join(";")}`);
+    const ys = L(hRef, "yearly").stars;
+    const yStar = (n: string) => ys.find((s) => s.name === n)?.natalPalaceName;
+    if (yStar("流禄") && yStar("流羊") && yStar("流陀"))
+      out.push(`- 流耀(流年):流禄入${yStar("流禄")}、流羊入${yStar("流羊")}、流陀入${yStar("流陀")}`);
+  }
+  // 飛星派:標流派,只列四宮化忌落宮 + 自化 + 祿忌交馳
+  const fx = castZiweiFeixing(input);
+  const KEY = ["命宫", "财帛", "官禄", "夫妻"];
+  const ji = KEY.map((n) => fx.flies.find((f) => f.from === n && f.type === "忌"))
+    .filter((f) => f !== undefined)
+    .map((f) => `${f.from}(${f.stem})化忌${f.star}入${f.intoPalace}`);
+  out.push(
+    "### 飞星派(流派说法,非《全书》,仅作参考,不作主要判断)",
+    `- 四宫宫干化忌:${ji.join("、") || "—"}`,
+    `- 自化:${fx.selfMutaged.map((s) => `${s.palace}自化${s.type}(${s.star})`).join("、") || "无"}`,
+    `- 禄忌交驰:${fx.luJiJiaoChi.map((x) => `${x.luPalace}化禄入${x.jiPalace}且${x.jiPalace}化忌入${x.luPalace}`).join("、") || "无"}`,
+  );
+  if (scope === "full") {
+    // ponytail: 流月前後用 ±30 日近似「±1 農曆月」,邊界日可能差一格
+    const months = [-30, 0, 30].map((d) => {
+      const m = L2(castZiweiHoroscope(input, ymd(new Date((opts?.now ?? new Date()).getTime() + d * 864e5))));
+      return `  - 流月命宫落本命${m.natalPalaceName}:${SIHUA_SHORT(m) || "—"}`;
+    });
+    out.push("### 紫微流月(当前月±1)", ...months);
+  }
+  return "\n" + out.join("\n");
+}
+const L2 = (h: { layers: { key: string }[] }) => h.layers.find((l) => l.key === "monthly")! as ZiweiLayerM;
+type ZiweiLayerM = ReturnType<typeof castZiweiHoroscope>["layers"][number];
 
 const PILLAR_ZH: Record<string, string> = { year: "年", month: "月", day: "日", hour: "时" };
 /** 動態段只摘 冲/刑/合/会(含半合/三会等)。 */
