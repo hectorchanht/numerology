@@ -1,4 +1,4 @@
-import { favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type FortuneAnalysis, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult } from "@numerology/engine";
+import { favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type FortuneAnalysis, type HeluoResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult } from "@numerology/engine";
 import { SCIENCE_NOTES } from "@numerology/knowledge";
 import type { AiLocale } from "./prompts.js";
 
@@ -249,7 +249,7 @@ const VERDICT_ZH: Record<string, string> = { strong: "身強", weak: "身弱", n
 export function crossSystemFacts(
   r: CrossSystemResult,
   locale: AiLocale,
-  cycles?: { taixuan: TaixuanResult; maya: MayaResult; huangji?: HuangjiResult; planetaryHour?: PlanetaryHourResult | null; ephemeris?: EphemerisResult },
+  cycles?: { taixuan: TaixuanResult; maya: MayaResult; huangji?: HuangjiResult; planetaryHour?: PlanetaryHourResult | null; ephemeris?: EphemerisResult; heluo?: HeluoResult },
 ): string {
   const cite = (c: { work: string; author?: string; year?: number | string; locator?: string }) =>
     [c.author, c.work, c.year, c.locator].filter(Boolean).join(",");
@@ -316,6 +316,13 @@ ${step(ph.steps)}`;
 - 七曜位置(Tetrabiblos 卷一,回歸黃道):${pos}。${ep.angles ? `上升 ${ep.angles.ascSign} ${(ep.angles.ascendant % 30).toFixed(1)}°、天頂 ${ep.angles.mcSign} ${(ep.angles.mc % 30).toFixed(1)}°(整宮制)` : "未填經緯度,無上升與宮位"};${ep.sect ? SECT[ep.sect] : "晝夜生未判"};整宮相位:${asp}。層級 ${TIER_ZH[ep.tier]};出處 ${cite(ep.cite)}。
 - 月宿(Agrippa 二十八宿):第 ${mm.n} 宿 ${mm.names.join(" / ")}${mm.meaning ? `(${mm.meaning})` : ""},起於黃經 ${mm.start.toFixed(2)}°。出處 ${cite(ep.mansionCite)}。
 ${step(ep.steps)}`;
+    }
+    const hl = cycles.heluo;
+    if (hl) {
+      const yun = hl.dayun.map((d) => `${d.phase}第${d.line}爻 ${d.fromAge}–${d.toAge} 歲`).join(";");
+      cycleBlock += `
+- 河洛理數:天數 ${hl.heaven}、地數 ${hl.earth};先天 ${hl.xiantian.name}(元堂第 ${hl.yuantang} 爻),${hl.houtianAge} 歲換後天 ${hl.houtian.name}(元堂第 ${hl.houtianYuantang} 爻);元氣${hl.yuanqi.tian || hl.yuanqi.di ? "有" : "無"}${hl.yuanqi.reversed ? "(逢相反)" : ""},化工${hl.huagong.has ? "有" : "無"}${hl.huagong.reversed ? "(逢反)" : ""}。大運:${yun}。層級 ${TIER_ZH[hl.tier]};出處 ${cite(hl.cite)}。
+${step(hl.steps)}`;
     }
   }
   return `# 多體系事實(確定性計算結果,勿改動數字)

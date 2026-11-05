@@ -90,6 +90,7 @@ Write a short overview in our own words: how the system works, then the tables g
 | Ptolemy, *Tetrabiblos* Book I, tr. Ashmand 1822 (archive.org ptolemystetrabi00procgoog, public domain) | facts | `tetrabiblos.json`, `docs/tetrabiblos.md`: houses, triplicities, exaltations, Egyptian/Ptolemaic/Chaldean terms, aspects. Term tables read from page images; Robbins' 1940 Loeb translation avoided |
 | Plato, *Timaeus*, tr. Jowett 1871 (Project Gutenberg #1572, public domain) | facts | `timaeus.json`, `docs/timaeus.md`: world-soul Lambda + means, 9/8 and leimma, seven circles, Platonic solids, element transformations. Gutenberg plain text cited by Stephanus number + line |
 | Nicomachus, *Introduction to Arithmetic*, tr. D'Ooge 1926 (archive.org nicomachus-introduction-to-arithmetic; US public domain since 2022) | facts | `nicomachus.json`, `docs/nicomachus.md`: number classes, perfect numbers (author's two false claims tested), ratio types, figurate numbers, ten proportions. Used archive.org djvu text; page = 1926 printed page from running heads |
+| 《河洛理數》卷一,文明書局石印本(Commons NLC416 scan, public domain; user's `raw_pdf/河洛理數1.pdf`) | facts + engine | `heluo-lishu.json`, `docs/heluo-lishu.md`, `castHeluo`: 起例 rules, 7 worked examples recomputed. MinerU VLM looped on table pages (24, 25, 36): read those from page images |
 
 ## Chinese classics lessons
 

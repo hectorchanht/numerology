@@ -2,15 +2,15 @@
 
 import { useMemo } from "react";
 import {
-  castEphemeris, castHuangji, castMaya, castPlanetaryHour, castTaixuan, MAYA_META, TZOLKIN_DAY_NAMES,
-  type ChartResult, type EphemerisResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult,
+  castEphemeris, castHeluo, castHuangji, castMaya, castPlanetaryHour, castTaixuan, MAYA_META, TZOLKIN_DAY_NAMES,
+  type ChartResult, type EphemerisResult, type HeluoResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult,
 } from "@numerology/engine";
 import { useLocale, useScript, type TKey } from "@/lib/i18n";
 import { taixuanGrid, tzolkinCell } from "@/lib/cycleView";
 import { CitePop } from "@/components/CrossSystemCard";
 
 /*
- * 時間週期卡:太玄(81 首 9×9 格)、瑪雅曆(Tzolk'in 13×20 格、長紀曆、Haab)、皇極經世、行星時、七曜位置與月宿。
+ * 時間週期卡:太玄(81 首 9×9 格)、瑪雅曆(Tzolk'in 13×20 格、長紀曆、Haab)、皇極經世、行星時、七曜位置與月宿、河洛理數。
  * 全部由引擎確定性計算,零 AI;舊歷史紀錄只存 chart,於此即場重算。
  */
 
@@ -202,6 +202,28 @@ function Sky({ r }: { r: EphemerisResult }) {
   );
 }
 
+function Heluo({ r, solar }: { r: HeluoResult; solar: boolean }) {
+  const { t } = useLocale();
+  const { z } = useScript();
+  const has = (b: boolean) => t(b ? "cycle.has" : "cycle.none");
+  return (
+    <>
+      <h3 className="xs-h">{t("cycle.heluo")}</h3>
+      <p className="cy-val">
+        {t("cycle.heluoVal", { xt: z(r.xiantian.name), yt: r.yuantang, age: r.houtianAge, ht: z(r.houtian.name), hyt: r.houtianYuantang })}
+      </p>
+      <p className="xs-note">{t("cycle.heluoNums", { h: r.heaven, e: r.earth, yq: has(r.yuanqi.tian || r.yuanqi.di), hg: has(r.huagong.has) })}</p>
+      <Meta tier={r.tier} basis={solar ? "cross.basis.solar" : "cycle.basis.clock"} cite={r.cite} />
+      <details className="xs-steps">
+        <summary>{t("cycle.heluoYun")}</summary>
+        <ol>{r.dayun.map((d, i) => <li key={i}>{z(`${d.phase}第${d.line}爻(${d.yang ? "陽" : "陰"})`)} {d.fromAge}–{d.toAge}</li>)}</ol>
+      </details>
+      <p className="xs-note">{t("cycle.heluoNote")}</p>
+      <Steps steps={r.steps} />
+    </>
+  );
+}
+
 export function CycleCard({ chart }: { chart: ChartResult }) {
   const { t } = useLocale();
   const tx = useMemo(() => castTaixuan(chart.input), [chart]);
@@ -209,6 +231,7 @@ export function CycleCard({ chart }: { chart: ChartResult }) {
   const huangji = useMemo(() => castHuangji(chart.input), [chart]);
   const hour = useMemo(() => castPlanetaryHour(chart.input), [chart]);
   const sky = useMemo(() => castEphemeris(chart.input), [chart]);
+  const heluo = useMemo(() => castHeluo(chart.input), [chart]);
   return (
     <div className="card viz xs">
       <p className="xs-sub">{t("cycle.intro")}</p>
@@ -217,6 +240,7 @@ export function CycleCard({ chart }: { chart: ChartResult }) {
       <Huangji r={huangji} solar={chart.meta.trueSolarTimeApplied} />
       <PlanetaryHour r={hour} solar={chart.meta.trueSolarTimeApplied} />
       <Sky r={sky} />
+      <Heluo r={heluo} solar={chart.meta.trueSolarTimeApplied} />
     </div>
   );
 }
