@@ -3,9 +3,10 @@ import DATA from "./ziwei-geju.data.js";
 
 /** 格局條件 DSL(引擎解讀);星名用 iztro 簡體名 */
 export type ZiweiGejuCond =
-  | { op: "samePalace"; stars: string[]; branches?: string[] }
-  | { op: "inSanFang"; stars: string[] }
-  | { op: "inPalace"; stars: string[]; palace: "命宫"; branches?: string[] }
+  | { op: "samePalace"; stars: string[]; branches?: string[]; brightness?: string[] }
+  | { op: "inSanFang"; stars: string[]; brightness?: string[] }
+  /** stars 可為 [] 配 branches,只限制命宫地支;brightness = 每顆星亮度須屬其中 */
+  | { op: "inPalace"; stars: string[]; palace: "命宫"; branches?: string[]; brightness?: string[] }
   | { op: "noMajor"; palace: "命宫" };
 
 export interface ZiweiGejuRule {

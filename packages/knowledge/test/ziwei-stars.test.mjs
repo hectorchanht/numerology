@@ -22,3 +22,10 @@ test("meta 未校對、JSON 同內聯數據一致", () => {
   assert.deepEqual(json.stars, S);
   assert.deepEqual(json.meta, M);
 });
+
+test("七殺化氣標通行、太陽/太陰/天同 cite 引原文", () => {
+  const by = (n) => S.find((s) => s.name === n);
+  assert.match(by("七杀").cite, /通行/);
+  assert.match(by("太阳").cite, /南北斗/);
+  assert.match(by("天同").cite, /南斗/);
+});

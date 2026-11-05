@@ -24,3 +24,12 @@ test("meta 未校對、JSON 同內聯數據一致", () => {
   assert.deepEqual(json.rules, G);
   assert.deepEqual(json.meta, M);
 });
+
+test("DSL 擴充:亮度限定、空 stars 限地支", () => {
+  const g = (id) => G.find((x) => x.id === id);
+  assert.deepEqual(g("riyue-bingming").all[0].brightness, ["庙", "旺"]);
+  assert.deepEqual(g("huotan").all[0].brightness, ["庙", "旺"]);
+  assert.ok(g("jiyue-tongliang").all.some((c) => c.op === "inPalace" && c.stars.length === 0 && c.branches.join() === "寅,申"));
+  assert.equal(g("ming-wu-zhengyao").verdict, "中");
+  assert.deepEqual(g("matou-daijian").all[0].stars, ["天同", "擎羊"]);
+});
