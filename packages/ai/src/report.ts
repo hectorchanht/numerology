@@ -1,4 +1,4 @@
-import { castBirthLore, castCrossSystem, castEphemeris, castNumberLore, castHeluo, castHuangji, castMaya, castPlanetaryHour, castTaixuan, type ChartResult, type FortuneAnalysis } from "@numerology/engine";
+import { castBirthLore, castCrossSystem, castEgyptian, castEphemeris, castJyotish, castMetonic, castNumberLore, castHeluo, castHuangji, castMaya, castPlanetaryHour, castTaixuan, type ChartResult, type FortuneAnalysis } from "@numerology/engine";
 import { buildContextPack, crossSystemFacts, type FortuneScope } from "./context.js";
 import {
   buildReportUserPrompt,
@@ -203,6 +203,7 @@ export function streamReportSection(chart: ChartResult, sectionKey: string, opts
         ephemeris: sky,
         heluo: castHeluo(chart.input),
         lore: { numbers: castNumberLore(chart), birth: castBirthLore(chart, sky) },
+        calendars: { jyotish: castJyotish(sky), egyptian: castEgyptian(chart.input, sky), metonic: castMetonic(chart.input) },
       })
     : undefined;
   return chatStream({

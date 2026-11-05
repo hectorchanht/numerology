@@ -42,15 +42,15 @@
 
 | 體系 | 狀態 | 主要出處 | Deterministic | 與洛書主軸的連結 |
 |---|---|---|---|---|
-| 十九年七閏 / Metonic | todo | Meton(432 BCE)、中國章蔀 | 是 | 19 年週期;19 非九宮數,僅作曆法對照 |
+| 十九年七閏 / Metonic | 已入庫(待校對);已接引擎(`castMetonic`)、曆法卡、AI | Diodorus XII.36.2;金數 / epact(Explanatory Supplement 1961);Meeus 復活節;《後漢書·律曆下》章蔀紀元(`metonic.json`) | 是 | 19 年週期;19 非九宮數,僅作曆法對照;閏月以 lunar-javascript 實數驗證 |
 | Iamblichus | todo | Iamblichus 畢氏傳、*Theologumena Arithmeticae* | 是 | 1–10 數象,補 Nicomachus 之後的數神學 |
 | Kepler | todo | Kepler, *Harmonices Mundi*(1619) | 是(比例) | 行星比例與幻方行星序 |
 | Abjad | todo | 阿拉伯字母數值傳統 | 是 | 字母數化簡後落九宮 |
 | Chaldean 數秘 | todo | 迦勒底數字傳統(現代整理) | 是 | 1–8 數系,9 不用;與畢氏對比 |
 | 塔羅 | todo | Rider-Waite 等(近代) | 否(抽牌) | 大阿爾卡納 22 張,與 Hebrew 字母數對看 |
-| 埃及旬星 / 民用曆 | todo | 埃及 decans、365 日民用曆 | 是 | 365 日 = 12 × 30 + 5 |
-| 藏曆 mewa | todo | 藏曆九宮(mewa) | 是 | 與九星同為洛書九宮,可直接對讀 |
-| Jyotish 27 宿 | todo | Brihat Parashara Hora Shastra 等 | 是(需星曆) | 27 宿與 27 = 729 的立方根 |
+| 埃及民用曆 / face | 已入庫(待校對);已接引擎(`castEgyptian`)、曆法卡、AI | Almagest III.7 Nabonassar 紀元(Era Philip、Censorinus 交叉驗證);face 行星主據 Lilly 1647(經維基百科)(`egyptian-calendar.json`) | 是 | 365 日 = 12 × 30 + 5;旬星星名學界未定,未入庫 |
+| 藏曆 mewa | todo | 藏曆九宮(mewa);tyme4ts 有藏曆(RabByung)日期,可考慮引入 | 是 | 與九星同為洛書九宮,可直接對讀 |
+| Jyotish 27 宿 / Vimshottari | 已入庫(待校對);已接引擎(`castJyotish`)、曆法卡(與八字大運並列)、AI | BPHS 行星大運章 v.12–16(章號 46 / 47 未定);ayanamsa 以 Spica = 180° 即場計(`jyotish.json`) | 是(需星曆) | 27 宿與 27 = 729 的立方根;宮位、分盤、antardasha 未做 |
 | 巴比倫六十進制 | todo | 古巴比倫泥版 | 是 | 60 進位與 360 / 365 週期 |
 | 廣東話版(yue) | todo | 本站新增語言 `yue`(粵語書面語) | 不適用 | 不適用;需先定文風,再補三語以外字串 |
 | 扶抑喜忌引擎(B 方案) | 已入庫 | 滴天髓、子平真詮;本站自建 | 是(規則) | 第三期;本站簡化評分(非古籍原文),tier modern,從格只偵測不推算;補第二條對照軸 |

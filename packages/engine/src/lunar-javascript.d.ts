@@ -3,6 +3,11 @@
  * 完整 API 見 https://6tail.cn/calendar/api.html
  */
 declare module "lunar-javascript" {
+  export class LunarYear {
+    static fromYear(lunarYear: number): LunarYear;
+    /** 閏月月份;無閏月 → 0 */
+    getLeapMonth(): number;
+  }
   export class Solar {
     static fromYmdHms(
       year: number,
