@@ -2,5 +2,5 @@
 export const DEPENDENCY_VERSIONS: Record<string, string> = {
   "iztro": "2.5.8",
   "lunar-javascript": "1.7.7",
-  "astronomy-engine": "unknown",
+  "astronomy-engine": "2.1.19",
 };

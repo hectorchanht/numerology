@@ -4,17 +4,35 @@
  * 依賴的 package.json —— 改為構建時寫入,運行時只做查表,缺失則 "unknown"。
  * 由 packages/engine 的 build 腳本在 tsc 之前調用。
  */
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
+
+const tryRead = (file, name) => {
+  try {
+    const pkg = JSON.parse(readFileSync(file, "utf8"));
+    return pkg.name === name ? pkg : undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 const DEPS = ["iztro", "lunar-javascript", "astronomy-engine"];
 
 const entries = DEPS.map((name) => {
   let version = "unknown";
   try {
-    version = require(`${name}/package.json`).version ?? "unknown";
+    // exports 唔開放 package.json 嘅包(如 astronomy-engine):由入口檔向上讀
+    let pkg;
+    try {
+      pkg = require(`${name}/package.json`);
+    } catch {
+      let dir = dirname(require.resolve(name));
+      while (!(pkg = tryRead(join(dir, "package.json"), name)) && dir !== dirname(dir)) dir = dirname(dir);
+    }
+    version = pkg?.version ?? "unknown";
   } catch {
     /* 未安装或不可读:保持 unknown */
   }
