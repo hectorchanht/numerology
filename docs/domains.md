@@ -20,6 +20,7 @@
 | 皇極經世 | 已入庫(待校對;引擎 `castHuangji`,週期卡 + AI 多體系事實) | 邵雍《皇極經世書》:元會運世紀年、開物 / 閉物、外篇數(`huangji-jingshi.json`) | 是 | 元 = 12 × 30 × 12 × 30 = 129600 年 |
 | 律呂三分損益 | 已入庫(待校對) | 《管子·地員》《呂氏春秋·音律》《淮南子·天文訓》(`lulu.json`) | 是 | 黃鐘 81 = 3⁴ = 九九,與九宮 3 進位相通 |
 | 卡巴拉(Sefer Yetzirah) | 已入庫(待校對) | Sefer Yetzirah,Westcott 1893 英譯(`sefer-yetzirah.json`) | 是(查表) | 22 字母 = 3 + 7 + 12;七雙字母配七行星,與幻方行星序對看 |
+| 西洋占星(Tetrabiblos 卷一) | 已入庫(待校對;未接引擎,需星曆) | Ptolemy,Ashmand 1822 英譯:宮位、三方、廟旺、埃及 / 托勒密 / 迦勒底界、相位(`tetrabiblos.json`) | 是(查表;落點需星曆) | 星期守護行星已經幻方接上 |
 | 康熙筆畫 | 已入庫 | 康熙字典筆畫(`kangxi-strokes.json`) | 是 | 姓名筆畫數化簡後可落九宮 |
 | 科學筆記 | 已入庫(待校對,reviewed: false) | `science-notes.json`(同行評審條目) | 否(文獻) | 無直接連結;供報告「現代科學角度」 |
 | 太玄經 729 贊 | 已入庫(首名對照維基文庫、待校對) | 揚雄《太玄經》(約 4 BCE–AD 2;`taixuan.json`) | 是(首 / 贊由數起) | 三分九天 × 81 首 × 9 贊 = 729,九宮自相乘三次 |
@@ -42,7 +43,6 @@
 | Nicomachus / Iamblichus | todo | Nicomachus, *Introduction to Arithmetic*;Iamblichus 畢氏傳 | 是 | 數論分類(奇偶、完全數)與洛書奇偶分佈對看 |
 | Kepler | todo | Kepler, *Harmonices Mundi*(1619) | 是(比例) | 行星比例與幻方行星序 |
 | Abjad | todo | 阿拉伯字母數值傳統 | 是 | 字母數化簡後落九宮 |
-| 西洋占星 | todo | Ptolemy, *Tetrabiblos*;現代星曆 | 是(需星曆) | 星期守護行星已經幻方接上 |
 | Chaldean 數秘 | todo | 迦勒底數字傳統(現代整理) | 是 | 1–8 數系,9 不用;與畢氏對比 |
 | 塔羅 | todo | Rider-Waite 等(近代) | 否(抽牌) | 大阿爾卡納 22 張,與 Hebrew 字母數對看 |
 | 埃及旬星 / 民用曆 | todo | 埃及 decans、365 日民用曆 | 是 | 365 日 = 12 × 30 + 5 |

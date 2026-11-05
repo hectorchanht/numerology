@@ -1,0 +1,826 @@
+{
+  "meta": {
+    "name": "Ptolemy, Tetrabiblos Book I — planet natures, houses, triplicities, exaltations, terms, aspects",
+    "tier": "classical",
+    "schema": "natures ; houses:{planet:{day,night}} ; triplicities:[{signs,element?,day,night,participating}] ; exaltations:{planet:{sign,fall}} ; terms:{egyptian,ptolemaic:{sign:[{planet,deg}]},chaldean:{rule,stated}} ; aspects",
+    "source": "Ptolemy's Tetrabiblos, tr. J. M. Ashmand (London: Davis and Dickson, 1822), public domain; archive.org ptolemystetrabi00procgoog. `page` = printed page; PDF pp. 86, 90 for the term tables (read from page images).",
+    "version": "0.1.0",
+    "reviewed": false,
+    "reviewNote": "Term tables read from page images, not OCR (MinerU garbled the variant cells). Ashmand prints alternative readings in several Ptolemaic-term cells; `ptolemaic` keeps the reading that matches Ptolemy's own rules in ch. XXIV (e.g. Saturn first in Leo), others in `variants`. Exaltation degrees are not in Ptolemy and are not included."
+  },
+  "natures": {
+    "page": 21,
+    "benefic": [
+      "Jupiter",
+      "Venus",
+      "Moon"
+    ],
+    "malefic": [
+      "Saturn",
+      "Mars"
+    ],
+    "common": [
+      "Sun",
+      "Mercury"
+    ],
+    "feminine": [
+      "Moon",
+      "Venus"
+    ],
+    "masculine": [
+      "Sun",
+      "Saturn",
+      "Jupiter",
+      "Mars"
+    ],
+    "bothSexes": [
+      "Mercury"
+    ],
+    "diurnal": [
+      "Sun",
+      "Jupiter",
+      "Saturn"
+    ],
+    "nocturnal": [
+      "Moon",
+      "Venus",
+      "Mars"
+    ],
+    "bothSects": [
+      "Mercury"
+    ]
+  },
+  "houses": {
+    "page": 42,
+    "luminaries": {
+      "Sun": "Leo",
+      "Moon": "Cancer"
+    },
+    "planets": {
+      "Saturn": {
+        "day": "Aquarius",
+        "night": "Capricorn"
+      },
+      "Jupiter": {
+        "day": "Sagittarius",
+        "night": "Pisces"
+      },
+      "Mars": {
+        "day": "Aries",
+        "night": "Scorpio"
+      },
+      "Venus": {
+        "day": "Taurus",
+        "night": "Libra"
+      },
+      "Mercury": {
+        "day": "Gemini",
+        "night": "Virgo"
+      }
+    },
+    "note": "Day/night houses are from Ashmand's footnote (after Whalley), not Ptolemy's text."
+  },
+  "triplicities": {
+    "page": 44,
+    "items": [
+      {
+        "signs": [
+          "Aries",
+          "Leo",
+          "Sagittarius"
+        ],
+        "day": "Sun",
+        "night": "Jupiter",
+        "wind": "north-west"
+      },
+      {
+        "signs": [
+          "Taurus",
+          "Virgo",
+          "Capricorn"
+        ],
+        "day": "Venus",
+        "night": "Moon",
+        "wind": "south-east"
+      },
+      {
+        "signs": [
+          "Gemini",
+          "Libra",
+          "Aquarius"
+        ],
+        "day": "Saturn",
+        "night": "Mercury",
+        "wind": "north-east"
+      },
+      {
+        "signs": [
+          "Cancer",
+          "Scorpio",
+          "Pisces"
+        ],
+        "day": "Venus",
+        "night": "Moon",
+        "participating": "Mars",
+        "wind": "south-west"
+      }
+    ]
+  },
+  "exaltations": {
+    "page": 45,
+    "items": {
+      "Sun": {
+        "sign": "Aries",
+        "fall": "Libra"
+      },
+      "Saturn": {
+        "sign": "Libra",
+        "fall": "Aries"
+      },
+      "Moon": {
+        "sign": "Taurus",
+        "fall": "Scorpio"
+      },
+      "Jupiter": {
+        "sign": "Cancer",
+        "fall": "Capricorn"
+      },
+      "Mars": {
+        "sign": "Capricorn",
+        "fall": "Cancer"
+      },
+      "Venus": {
+        "sign": "Pisces",
+        "fall": "Virgo"
+      },
+      "Mercury": {
+        "sign": "Virgo",
+        "fall": "Pisces"
+      }
+    }
+  },
+  "terms": {
+    "signs": [
+      "Aries",
+      "Taurus",
+      "Gemini",
+      "Cancer",
+      "Leo",
+      "Virgo",
+      "Libra",
+      "Scorpio",
+      "Sagittarius",
+      "Capricorn",
+      "Aquarius",
+      "Pisces"
+    ],
+    "egyptian": {
+      "page": 49,
+      "bySign": {
+        "Aries": [
+          {
+            "planet": "Jupiter",
+            "deg": 6
+          },
+          {
+            "planet": "Venus",
+            "deg": 6
+          },
+          {
+            "planet": "Mercury",
+            "deg": 8
+          },
+          {
+            "planet": "Mars",
+            "deg": 5
+          },
+          {
+            "planet": "Saturn",
+            "deg": 5
+          }
+        ],
+        "Taurus": [
+          {
+            "planet": "Venus",
+            "deg": 8
+          },
+          {
+            "planet": "Mercury",
+            "deg": 6
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 8
+          },
+          {
+            "planet": "Saturn",
+            "deg": 5
+          },
+          {
+            "planet": "Mars",
+            "deg": 3
+          }
+        ],
+        "Gemini": [
+          {
+            "planet": "Mercury",
+            "deg": 6
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 6
+          },
+          {
+            "planet": "Venus",
+            "deg": 5
+          },
+          {
+            "planet": "Mars",
+            "deg": 7
+          },
+          {
+            "planet": "Saturn",
+            "deg": 6
+          }
+        ],
+        "Cancer": [
+          {
+            "planet": "Mars",
+            "deg": 7
+          },
+          {
+            "planet": "Venus",
+            "deg": 6
+          },
+          {
+            "planet": "Mercury",
+            "deg": 6
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 7
+          },
+          {
+            "planet": "Saturn",
+            "deg": 4
+          }
+        ],
+        "Leo": [
+          {
+            "planet": "Jupiter",
+            "deg": 6
+          },
+          {
+            "planet": "Venus",
+            "deg": 5
+          },
+          {
+            "planet": "Saturn",
+            "deg": 7
+          },
+          {
+            "planet": "Mercury",
+            "deg": 6
+          },
+          {
+            "planet": "Mars",
+            "deg": 6
+          }
+        ],
+        "Virgo": [
+          {
+            "planet": "Mercury",
+            "deg": 7
+          },
+          {
+            "planet": "Venus",
+            "deg": 10
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 4
+          },
+          {
+            "planet": "Mars",
+            "deg": 7
+          },
+          {
+            "planet": "Saturn",
+            "deg": 2
+          }
+        ],
+        "Libra": [
+          {
+            "planet": "Saturn",
+            "deg": 6
+          },
+          {
+            "planet": "Mercury",
+            "deg": 8
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 7
+          },
+          {
+            "planet": "Venus",
+            "deg": 7
+          },
+          {
+            "planet": "Mars",
+            "deg": 2
+          }
+        ],
+        "Scorpio": [
+          {
+            "planet": "Mars",
+            "deg": 7
+          },
+          {
+            "planet": "Venus",
+            "deg": 4
+          },
+          {
+            "planet": "Mercury",
+            "deg": 8
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 5
+          },
+          {
+            "planet": "Saturn",
+            "deg": 6
+          }
+        ],
+        "Sagittarius": [
+          {
+            "planet": "Jupiter",
+            "deg": 12
+          },
+          {
+            "planet": "Venus",
+            "deg": 5
+          },
+          {
+            "planet": "Mercury",
+            "deg": 4
+          },
+          {
+            "planet": "Saturn",
+            "deg": 5
+          },
+          {
+            "planet": "Mars",
+            "deg": 4
+          }
+        ],
+        "Capricorn": [
+          {
+            "planet": "Mercury",
+            "deg": 7
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 7
+          },
+          {
+            "planet": "Venus",
+            "deg": 8
+          },
+          {
+            "planet": "Saturn",
+            "deg": 4
+          },
+          {
+            "planet": "Mars",
+            "deg": 4
+          }
+        ],
+        "Aquarius": [
+          {
+            "planet": "Mercury",
+            "deg": 7
+          },
+          {
+            "planet": "Venus",
+            "deg": 6
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 7
+          },
+          {
+            "planet": "Mars",
+            "deg": 5
+          },
+          {
+            "planet": "Saturn",
+            "deg": 5
+          }
+        ],
+        "Pisces": [
+          {
+            "planet": "Venus",
+            "deg": 12
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 4
+          },
+          {
+            "planet": "Mercury",
+            "deg": 3
+          },
+          {
+            "planet": "Mars",
+            "deg": 9
+          },
+          {
+            "planet": "Saturn",
+            "deg": 2
+          }
+        ]
+      },
+      "statedTotals": {
+        "Saturn": 57,
+        "Jupiter": 79,
+        "Mars": 66,
+        "Venus": 82,
+        "Mercury": 76
+      },
+      "erratum": "Virgo's last cumulative figure is printed 50 for 30."
+    },
+    "ptolemaic": {
+      "page": 53,
+      "bySign": {
+        "Aries": [
+          {
+            "planet": "Jupiter",
+            "deg": 6
+          },
+          {
+            "planet": "Venus",
+            "deg": 8
+          },
+          {
+            "planet": "Mercury",
+            "deg": 7
+          },
+          {
+            "planet": "Mars",
+            "deg": 5
+          },
+          {
+            "planet": "Saturn",
+            "deg": 4
+          }
+        ],
+        "Taurus": [
+          {
+            "planet": "Venus",
+            "deg": 8
+          },
+          {
+            "planet": "Mercury",
+            "deg": 7
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 7
+          },
+          {
+            "planet": "Saturn",
+            "deg": 2
+          },
+          {
+            "planet": "Mars",
+            "deg": 6
+          }
+        ],
+        "Gemini": [
+          {
+            "planet": "Mercury",
+            "deg": 7
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 6
+          },
+          {
+            "planet": "Venus",
+            "deg": 7
+          },
+          {
+            "planet": "Mars",
+            "deg": 6
+          },
+          {
+            "planet": "Saturn",
+            "deg": 4
+          }
+        ],
+        "Cancer": [
+          {
+            "planet": "Mars",
+            "deg": 6
+          },
+          {
+            "planet": "Mercury",
+            "deg": 7
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 7
+          },
+          {
+            "planet": "Venus",
+            "deg": 7
+          },
+          {
+            "planet": "Saturn",
+            "deg": 3
+          }
+        ],
+        "Leo": [
+          {
+            "planet": "Saturn",
+            "deg": 6
+          },
+          {
+            "planet": "Mercury",
+            "deg": 7
+          },
+          {
+            "planet": "Venus",
+            "deg": 6
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 6
+          },
+          {
+            "planet": "Mars",
+            "deg": 5
+          }
+        ],
+        "Virgo": [
+          {
+            "planet": "Mercury",
+            "deg": 7
+          },
+          {
+            "planet": "Venus",
+            "deg": 6
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 5
+          },
+          {
+            "planet": "Saturn",
+            "deg": 6
+          },
+          {
+            "planet": "Mars",
+            "deg": 6
+          }
+        ],
+        "Libra": [
+          {
+            "planet": "Saturn",
+            "deg": 6
+          },
+          {
+            "planet": "Venus",
+            "deg": 5
+          },
+          {
+            "planet": "Mercury",
+            "deg": 8
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 5
+          },
+          {
+            "planet": "Mars",
+            "deg": 6
+          }
+        ],
+        "Scorpio": [
+          {
+            "planet": "Mars",
+            "deg": 6
+          },
+          {
+            "planet": "Venus",
+            "deg": 8
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 7
+          },
+          {
+            "planet": "Mercury",
+            "deg": 6
+          },
+          {
+            "planet": "Saturn",
+            "deg": 3
+          }
+        ],
+        "Sagittarius": [
+          {
+            "planet": "Jupiter",
+            "deg": 8
+          },
+          {
+            "planet": "Venus",
+            "deg": 6
+          },
+          {
+            "planet": "Mercury",
+            "deg": 5
+          },
+          {
+            "planet": "Saturn",
+            "deg": 6
+          },
+          {
+            "planet": "Mars",
+            "deg": 5
+          }
+        ],
+        "Capricorn": [
+          {
+            "planet": "Venus",
+            "deg": 6
+          },
+          {
+            "planet": "Mercury",
+            "deg": 6
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 7
+          },
+          {
+            "planet": "Saturn",
+            "deg": 6
+          },
+          {
+            "planet": "Mars",
+            "deg": 5
+          }
+        ],
+        "Aquarius": [
+          {
+            "planet": "Saturn",
+            "deg": 6
+          },
+          {
+            "planet": "Mercury",
+            "deg": 6
+          },
+          {
+            "planet": "Venus",
+            "deg": 8
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 5
+          },
+          {
+            "planet": "Mars",
+            "deg": 5
+          }
+        ],
+        "Pisces": [
+          {
+            "planet": "Venus",
+            "deg": 8
+          },
+          {
+            "planet": "Jupiter",
+            "deg": 6
+          },
+          {
+            "planet": "Mercury",
+            "deg": 6
+          },
+          {
+            "planet": "Mars",
+            "deg": 6
+          },
+          {
+            "planet": "Saturn",
+            "deg": 4
+          }
+        ]
+      },
+      "rules": {
+        "single": {
+          "Jupiter": 7,
+          "Venus": 7,
+          "Saturn": 5,
+          "Mars": 5,
+          "Mercury": 6
+        },
+        "note": "A planet with a double right gains one degree, taken mostly from Saturn or Jupiter; in Cancer Mars and in Leo Saturn come first."
+      },
+      "variants": [
+        {
+          "sign": "Taurus",
+          "alt": "Saturn 4, Mars 4"
+        },
+        {
+          "sign": "Cancer",
+          "alt": "Jupiter 7 then Mercury 7"
+        },
+        {
+          "sign": "Leo",
+          "alt": "Jupiter printed above Saturn in the first cell; Venus/Saturn alternatives in the third"
+        },
+        {
+          "sign": "Libra",
+          "alt": "Jupiter 5 then Mercury 8"
+        },
+        {
+          "sign": "Scorpio",
+          "alt": "Jupiter 7 then Venus 8"
+        },
+        {
+          "sign": "Capricorn",
+          "alt": "Mars 6 then Saturn 5"
+        },
+        {
+          "sign": "Pisces",
+          "alt": "Mars 5, Saturn 3 (cumulative still printed 30, so the alternative sums to 28: misprint)"
+        }
+      ]
+    },
+    "chaldean": {
+      "page": 50,
+      "rule": "Each triplicity's signs share one sequence starting with its own lord and following the triplicity order (Jupiter, Venus, Saturn/Mercury, Mars); degrees 8, 7, 6, 5, 4. In the third triplicity Saturn leads by day, Mercury by night.",
+      "order": {
+        "Aries": [
+          "Jupiter",
+          "Venus",
+          "Saturn",
+          "Mercury",
+          "Mars"
+        ],
+        "Taurus": [
+          "Venus",
+          "Saturn",
+          "Mercury",
+          "Mars",
+          "Jupiter"
+        ],
+        "Gemini": [
+          "Saturn",
+          "Mercury",
+          "Mars",
+          "Jupiter",
+          "Venus"
+        ],
+        "Cancer": [
+          "Mars",
+          "Jupiter",
+          "Venus",
+          "Saturn",
+          "Mercury"
+        ]
+      },
+      "stated": {
+        "day": {
+          "Saturn": 78,
+          "Jupiter": 72,
+          "Mars": 69,
+          "Venus": 75,
+          "Mercury": 66
+        },
+        "night": {
+          "Saturn": 66,
+          "Mercury": 78
+        }
+      },
+      "unresolved": "Swapping only Saturn and Mercury in the third triplicity at night gives Saturn 75 and Mercury 69, not the printed 66 and 78."
+    }
+  },
+  "aspects": {
+    "page": 38,
+    "degrees": {
+      "opposition": 180,
+      "trine": 120,
+      "quartile": 90,
+      "sextile": 60
+    },
+    "inconjunct": [
+      30,
+      150
+    ],
+    "note": "Aspects divide the circle into aliquot parts; signs one or five apart are inconjunct."
+  }
+}
