@@ -86,6 +86,7 @@ Write a short overview in our own words: how the system works, then the tables g
 | *Fourth Book* compilation, tr. Turner 1655 (Cornell scan of 1978 Askin facsimile; 1655 text public domain, **1978 intro skipped**) | facts | `fourth-book.json`, `docs/fourth-book.md`: 16 geomantic figures (rows read from the p. 41 table image), Heptameron days/planetary hours, Arbatel Olympic spirits |
 | 《管子·地員》《呂氏春秋·音律》《淮南子·天文訓》(zh.wikisource, public domain) | facts | `lulu.json`, `docs/lulu.md`: 五音、十二律、律數、月令 |
 | 邵雍《皇極經世書》(zh.wikisource 四庫本, public domain) | facts | `huangji-jingshi.json`, `docs/huangji-jingshi.md`: 元會運世、紀年錨點、外篇數 |
+| *Sepher Yetzirah*, tr. Westcott 1893 (Wikisource, public domain) | facts | `sefer-yetzirah.json`, `docs/sefer-yetzirah.md`: 3/7/12 letters, 231 gates, six seals; Westcott's ch. IV–V supplements kept as tier modern |
 
 ## Chinese classics lessons
 

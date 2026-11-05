@@ -19,6 +19,7 @@
 | 第四本(Fourth Book) | 已入庫 | 1655 Turner 英譯:地占 16 圖、Heptameron 行星時、Arbatel 七靈(`fourth-book.json`) | 是 | 行星時用迦勒底次序,與幻方行星序相同 |
 | 皇極經世 | 已入庫(待校對) | 邵雍《皇極經世書》:元會運世紀年、開物 / 閉物、外篇數(`huangji-jingshi.json`) | 是 | 元 = 12 × 30 × 12 × 30 = 129600 年 |
 | 律呂三分損益 | 已入庫(待校對) | 《管子·地員》《呂氏春秋·音律》《淮南子·天文訓》(`lulu.json`) | 是 | 黃鐘 81 = 3⁴ = 九九,與九宮 3 進位相通 |
+| 卡巴拉(Sefer Yetzirah) | 已入庫(待校對) | Sefer Yetzirah,Westcott 1893 英譯(`sefer-yetzirah.json`) | 是(查表) | 22 字母 = 3 + 7 + 12;七雙字母配七行星,與幻方行星序對看 |
 | 康熙筆畫 | 已入庫 | 康熙字典筆畫(`kangxi-strokes.json`) | 是 | 姓名筆畫數化簡後可落九宮 |
 | 科學筆記 | 已入庫(待校對,reviewed: false) | `science-notes.json`(同行評審條目) | 否(文獻) | 無直接連結;供報告「現代科學角度」 |
 | 太玄經 729 贊 | 已入庫(首名對照維基文庫、待校對) | 揚雄《太玄經》(約 4 BCE–AD 2;`taixuan.json`) | 是(首 / 贊由數起) | 三分九天 × 81 首 × 9 贊 = 729,九宮自相乘三次 |
@@ -40,7 +41,6 @@
 | Timaeus 世界靈魂數列 | todo | Plato, *Timaeus* 35b–36b | 是 | 1、2、3、4、9、8、27 數列,27 為 729 的立方根 |
 | Nicomachus / Iamblichus | todo | Nicomachus, *Introduction to Arithmetic*;Iamblichus 畢氏傳 | 是 | 數論分類(奇偶、完全數)與洛書奇偶分佈對看 |
 | Kepler | todo | Kepler, *Harmonices Mundi*(1619) | 是(比例) | 行星比例與幻方行星序 |
-| 卡巴拉(生命樹) | todo | Sefer Yetzirah、Agrippa 轉述 | 是 | 十 Sephiroth 與九宮 + 1 的對位 |
 | Abjad | todo | 阿拉伯字母數值傳統 | 是 | 字母數化簡後落九宮 |
 | 西洋占星 | todo | Ptolemy, *Tetrabiblos*;現代星曆 | 是(需星曆) | 星期守護行星已經幻方接上 |
 | Chaldean 數秘 | todo | 迦勒底數字傳統(現代整理) | 是 | 1–8 數系,9 不用;與畢氏對比 |

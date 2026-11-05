@@ -1,0 +1,418 @@
+{
+  "meta": {
+    "name": "Sefer Yetzirah:22 字母分類、三母字母、七雙字母、十二單字母對應",
+    "schema": "structure ; mothers:[{letter,element,world,year,man,male,female}] ; doubles:{letters,pairs,localities,ancientPlanetOrder,supplement:[{letter,quality,planet,day,organ}]} ; simples:{letters,faculties,directions,supplement:[{letter,faculty,sign,month,organ}]} ; numbers",
+    "source": "Sepher Yetzirah, tr. W. Wynn Westcott (London 1893, 2nd ed.), public domain, via Wikisource Page: namespace of 'Sepher Yetzirah.djvu' (`page` = djvu page). Ch. I–VI pp. 20–32; supplements to ch. IV–V pp. 27, 29–30.",
+    "version": "0.1.0",
+    "reviewed": false,
+    "reviewNote": "Chapter pages are Wikisource level 3 (proofread) or 1. Westcott marks the supplements to ch. IV and V as a modern illustration not found in ancient copies, so `supplement` entries are tier modern; other traditions (e.g. Golden Dawn) assign planets to the doubles differently.",
+    "tier": "classical"
+  },
+  "structure": {
+    "page": 20,
+    "paths": 32,
+    "sephiroth": 10,
+    "letters": 22,
+    "mothers": 3,
+    "doubles": 7,
+    "simples": 12,
+    "sepharim": [
+      "numbers",
+      "letters",
+      "sounds"
+    ],
+    "articulation": {
+      "page": 23,
+      "places": [
+        "throat",
+        "mouth",
+        "tongue",
+        "teeth",
+        "lips"
+      ]
+    }
+  },
+  "gates": {
+    "page": 23,
+    "value": 231,
+    "rule": "每兩個字母配成一對,22 個字母共 231 道門"
+  },
+  "sixSeals": {
+    "page": 22,
+    "name": "IHV (יהו)",
+    "seals": [
+      {
+        "direction": "height",
+        "order": "IHV"
+      },
+      {
+        "direction": "depth",
+        "order": "IVH"
+      },
+      {
+        "direction": "east",
+        "order": "HIV"
+      },
+      {
+        "direction": "west",
+        "order": "HVI"
+      },
+      {
+        "direction": "south",
+        "order": "VIH"
+      },
+      {
+        "direction": "north",
+        "order": "VHI"
+      }
+    ]
+  },
+  "permutations": {
+    "page": 26,
+    "stated": [
+      [
+        2,
+        2
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        4,
+        24
+      ],
+      [
+        5,
+        120
+      ],
+      [
+        6,
+        720
+      ],
+      [
+        7,
+        5040
+      ]
+    ],
+    "rule": "n 個字母組成 n! 間「屋」"
+  },
+  "mothers": {
+    "page": 24,
+    "items": [
+      {
+        "letter": "א",
+        "name": "Aleph",
+        "element": "air",
+        "world": "air",
+        "year": "temperate",
+        "man": "chest",
+        "male": "AMS",
+        "female": "SMA"
+      },
+      {
+        "letter": "מ",
+        "name": "Mem",
+        "element": "water",
+        "world": "earth",
+        "year": "cold",
+        "man": "belly",
+        "male": "MAS",
+        "female": "MSA"
+      },
+      {
+        "letter": "ש",
+        "name": "Shin",
+        "element": "fire",
+        "world": "heavens",
+        "year": "heat",
+        "man": "head"
+      }
+    ],
+    "note": "Mem silent, Shin sibilant, Aleph the mediating 'tongue of the balance'. Shin's male/female orders are not printed."
+  },
+  "doubles": {
+    "page": 26,
+    "letters": [
+      "ב",
+      "ג",
+      "ד",
+      "כ",
+      "פ",
+      "ר",
+      "ת"
+    ],
+    "pairs": [
+      [
+        "life",
+        "death"
+      ],
+      [
+        "peace",
+        "war"
+      ],
+      [
+        "wisdom",
+        "folly"
+      ],
+      [
+        "riches",
+        "poverty"
+      ],
+      [
+        "grace",
+        "indignation"
+      ],
+      [
+        "fertility",
+        "desolation"
+      ],
+      [
+        "power",
+        "servitude"
+      ]
+    ],
+    "localities": [
+      "above",
+      "below",
+      "east",
+      "west",
+      "north",
+      "south",
+      "palace of holiness (centre)"
+    ],
+    "ancientPlanetOrder": [
+      "Sun",
+      "Venus",
+      "Mercury",
+      "Moon",
+      "Saturn",
+      "Jupiter",
+      "Mars"
+    ],
+    "gates": [
+      "right eye",
+      "left eye",
+      "right ear",
+      "left ear",
+      "mouth",
+      "right nostril",
+      "left nostril"
+    ],
+    "supplement": {
+      "page": 27,
+      "tier": "modern",
+      "items": [
+        {
+          "letter": "ב",
+          "quality": "wisdom",
+          "planet": "Moon",
+          "day": 1,
+          "organ": "right eye"
+        },
+        {
+          "letter": "ג",
+          "quality": "health",
+          "planet": "Mars",
+          "day": 2,
+          "organ": "right ear"
+        },
+        {
+          "letter": "ד",
+          "quality": "fertility",
+          "planet": "Sun",
+          "day": 3,
+          "organ": "right nostril"
+        },
+        {
+          "letter": "כ",
+          "quality": "life",
+          "planet": "Venus",
+          "day": 4,
+          "organ": "left eye"
+        },
+        {
+          "letter": "פ",
+          "quality": "power",
+          "planet": "Mercury",
+          "day": 5,
+          "organ": "left ear"
+        },
+        {
+          "letter": "ר",
+          "quality": "peace",
+          "planet": "Saturn",
+          "day": 6,
+          "organ": "left nostril"
+        },
+        {
+          "letter": "ת",
+          "quality": "beauty",
+          "planet": "Jupiter",
+          "day": 7,
+          "organ": "mouth"
+        }
+      ]
+    }
+  },
+  "simples": {
+    "page": 28,
+    "letters": [
+      "ה",
+      "ו",
+      "ז",
+      "ח",
+      "ט",
+      "י",
+      "ל",
+      "נ",
+      "ס",
+      "ע",
+      "צ",
+      "ק"
+    ],
+    "faculties": [
+      "sight",
+      "hearing",
+      "smell",
+      "speech",
+      "taste",
+      "sexual love",
+      "work",
+      "movement",
+      "anger",
+      "mirth",
+      "imagination",
+      "sleep"
+    ],
+    "directions": [
+      "north-east",
+      "south-east",
+      "east above",
+      "east below",
+      "north above",
+      "north below",
+      "south-west",
+      "north-west",
+      "west above",
+      "west below",
+      "south above",
+      "south below"
+    ],
+    "months": [
+      "Nisan",
+      "Iyar",
+      "Sivan",
+      "Tammuz",
+      "Ab",
+      "Elul",
+      "Tishri",
+      "Heshvan",
+      "Kislev",
+      "Tebet",
+      "Shebat",
+      "Adar"
+    ],
+    "erratum": "ch. V §2 prints the zodiac letters as 'Teth, Shin, Tau, Samech, Aleph, Beth, Mem, Oin, Qoph, Gimel, Daleth and Daleth', which are not the twelve simples; not used.",
+    "supplement": {
+      "pages": [
+        29,
+        30
+      ],
+      "tier": "modern",
+      "note": "Vau is given 'mind' where ch. V lists 'imagination'; Tzaddi's month (Shebat) is omitted in print. Lamed: Westcott 'private parts', Kalisch 'gall'.",
+      "items": [
+        {
+          "letter": "ה",
+          "faculty": "speech",
+          "sign": "Aries",
+          "month": "Nisan",
+          "organ": "right foot"
+        },
+        {
+          "letter": "ו",
+          "faculty": "imagination",
+          "printed": "mind",
+          "sign": "Taurus",
+          "month": "Iyar",
+          "organ": "right kidney"
+        },
+        {
+          "letter": "ז",
+          "faculty": "movement",
+          "sign": "Gemini",
+          "month": "Sivan",
+          "organ": "left foot"
+        },
+        {
+          "letter": "ח",
+          "faculty": "sight",
+          "sign": "Cancer",
+          "month": "Tammuz",
+          "organ": "right hand"
+        },
+        {
+          "letter": "ט",
+          "faculty": "hearing",
+          "sign": "Leo",
+          "month": "Ab",
+          "organ": "left kidney"
+        },
+        {
+          "letter": "י",
+          "faculty": "work",
+          "sign": "Virgo",
+          "month": "Elul",
+          "organ": "left hand"
+        },
+        {
+          "letter": "ל",
+          "faculty": "sexual love",
+          "sign": "Libra",
+          "month": "Tishri",
+          "organ": "private parts"
+        },
+        {
+          "letter": "נ",
+          "faculty": "smell",
+          "sign": "Scorpio",
+          "month": "Heshvan",
+          "organ": "intestines"
+        },
+        {
+          "letter": "ס",
+          "faculty": "sleep",
+          "sign": "Sagittarius",
+          "month": "Kislev",
+          "organ": "stomach"
+        },
+        {
+          "letter": "ע",
+          "faculty": "anger",
+          "sign": "Capricorn",
+          "month": "Tebet",
+          "organ": "liver"
+        },
+        {
+          "letter": "צ",
+          "faculty": "taste",
+          "sign": "Aquarius",
+          "month": "Shebat",
+          "organ": "gullet"
+        },
+        {
+          "letter": "ק",
+          "faculty": "mirth",
+          "sign": "Pisces",
+          "month": "Adar",
+          "organ": "spleen"
+        }
+      ]
+    }
+  },
+  "hierarchy": {
+    "page": 31,
+    "statement": "One above Three, Three above Seven, Seven above Twelve",
+    "dragon": "T L I (תלי)"
+  }
+}
