@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "tier": "scholarly",
+    "name": "鐵版神數知識條目:源流、四庫提要評語、考刻流程、與本站其他體系關係(不出條文)",
+    "schema": "entries:{id,topic:origin|siku|procedure|relation,zht,quote?,cite,tier?:modern}",
+    "source": "《四庫全書總目提要》卷一百十一(維基文庫 zh.wikisource:四庫全書總目提要/卷111)原文逐句核對;源流與考刻流程取自 zh.wikipedia〈鐵版神數〉(二手,並轉引《清稗類鈔》《春在堂隨筆》《升庵集》,原書未直接對校)。",
+    "version": "1",
+    "reviewed": false,
+    "reviewNote": "只收事實與出處,不收任何鐵版條文,不做算法:考刻依賴六親問答、條文號碼由秘數得出而各派秘而不宣,無公開可重算算法。術家說法逐條標 modern。"
+  },
+  "entries": [
+    {
+      "id": "origin-attributed",
+      "topic": "origin",
+      "zht": "鐵版神數向來託名邵雍(康節)所傳,但無確實證據,學界視為託名;只是借用《皇極經世》一類數理再作推衍。術家多謂興起流行於清代乾隆、嘉慶年間。",
+      "cite": "維基百科〈鐵版神數〉歷史背景(二手) https://zh.wikipedia.org/wiki/鐵版神數"
+    },
+    {
+      "id": "origin-lineage",
+      "topic": "origin",
+      "zht": "坊間流通條文多謂出自清道光刻本《神機妙算鐵版數》,而該書據明代宮廷所用《皇極分經數》修改演變而成;鐵道人(鐵卜子)校訂後稱鐵版神數。此為二手說法,未對校原書。",
+      "cite": "維基百科〈鐵版神數〉歷史背景(二手) https://zh.wikipedia.org/wiki/鐵版神數",
+      "tier": "modern"
+    },
+    {
+      "id": "origin-qingbai",
+      "topic": "origin",
+      "zht": "《清稗類鈔》有光緒間星士推命稱鐵板神數之記載,可見晚清已用此名。轉引自維基百科註腳,未直接對校《清稗類鈔》。",
+      "quote": "遇一星士,推為鐵板神數",
+      "cite": "《清稗類鈔》,轉引自維基百科〈鐵版神數〉註腳(二手) https://zh.wikipedia.org/wiki/鐵版神數"
+    },
+    {
+      "id": "origin-yangshen",
+      "topic": "origin",
+      "zht": "明人楊慎早已指出術人妄造「大定數」「蠢子術」託名邵康節,可見託名邵子之數由來已久。《四庫全書總目提要》引作《丹鉛錄》,維基百科轉引作《升庵集·康節不信命》,篇名各異,此處以提要引文為準。",
+      "quote": "今世遊食術人,妄造大定數、蠢子術託名康節,豈不厚誣前賢",
+      "cite": "《四庫全書總目提要》卷一百十一〈邵子加一倍法〉條引楊慎《丹鉛錄》 https://zh.wikisource.org/wiki/四庫全書總目提要/卷111"
+    },
+    {
+      "id": "siku-huangjishu",
+      "topic": "siku",
+      "zht": "《四庫全書總目提要》評子部術數類《皇極數》三卷(不著撰人):其書稱祖宗後代之數得自康節,提要斥為數學家慣常托辭。",
+      "quote": "牽及邵子,猶數學之慣技",
+      "cite": "《四庫全書總目提要》卷一百十一〈皇極數〉條 https://zh.wikisource.org/wiki/四庫全書總目提要/卷111"
+    },
+    {
+      "id": "siku-heluozhenshu",
+      "topic": "siku",
+      "zht": "提要評《河洛真數》二卷(舊本題宋陳摶撰,前有邵子序):以易卦爻配年月日時八字定休咎,序文鄙倍,斷為術士不學者所為。",
+      "quote": "詞皆鄙倍,殆術士不學者所為",
+      "cite": "《四庫全書總目提要》卷一百十一〈河洛真數〉條 https://zh.wikisource.org/wiki/四庫全書總目提要/卷111"
+    },
+    {
+      "id": "siku-shaozijiayibei",
+      "topic": "siku",
+      "zht": "提要評《邵子加一倍法》一卷:邵子之「加一倍法」本指算數,非占驗祿命;此書以六十甲子積數卜貴賤,仍託名邵子,自相矛盾,並引楊慎之說(見 origin-yangshen)。",
+      "quote": "亦以加一倍法托之邵子,殊相矛盾",
+      "cite": "《四庫全書總目提要》卷一百十一〈邵子加一倍法〉條 https://zh.wikisource.org/wiki/四庫全書總目提要/卷111"
+    },
+    {
+      "id": "siku-no-tieban",
+      "topic": "siku",
+      "zht": "已全文檢索卷一百十一,無「鐵板」「鐵版」「神數」字樣,提要此卷只評上列託名邵子、陳摶之數術書。英文維基謂鐵板神數入四庫,查無實據;全書其他各卷未逐卷檢查。續修四庫目錄有《神機妙算鐵版數》一說,屬維基百科二手說法,未核對。",
+      "cite": "《四庫全書總目提要》卷一百十一全文檢索 https://zh.wikisource.org/wiki/四庫全書總目提要/卷111"
+    },
+    {
+      "id": "procedure-kaoke",
+      "topic": "procedure",
+      "zht": "術家說法、各派不一:鐵版神數以出生干支配卦,核對父母、兄弟姐妹、夫妻兒女等六親情形;客人所報時間只是大概,術者須把時辰細分至「一時辰八刻、一刻十五分」,稱「考時定刻」,另有九十六局之說,各派不一。",
+      "cite": "維基百科〈鐵版神數〉批命操作過程(二手,術家說法) https://zh.wikipedia.org/wiki/鐵版神數",
+      "tier": "modern"
+    },
+    {
+      "id": "procedure-verify",
+      "topic": "procedure",
+      "zht": "術家說法、各派不一:術者先打出若干條文問客人是否屬實,以六親事實逐步核對、定下刻分,之後才打出其餘六親與各歲條文,整理成命書。條文號碼由秘數演算得出,各派秘而不宣,故本站不提供、不示範任何條文,亦無公開可重算算法。",
+      "cite": "維基百科〈鐵版神數〉批命操作過程(二手,術家說法) https://zh.wikipedia.org/wiki/鐵版神數",
+      "tier": "modern"
+    },
+    {
+      "id": "procedure-critique",
+      "topic": "procedure",
+      "zht": "術家說法、各派不一:質疑者認為考時定刻的問答容易令問命者透露資料,故常被評為只有六親準確;《天網搜奇錄》作者亦批評所見講義不考刻分,四柱相同即數重複。",
+      "cite": "維基百科〈鐵版神數〉真偽爭論(二手);本站 tianwang-souqi.json tiebanLecture.note",
+      "tier": "modern"
+    },
+    {
+      "id": "relation-heluo",
+      "topic": "relation",
+      "zht": "河洛理數(heluo-lishu)同樣題邵雍、陳摶之名,以干支取數配卦,本站已有引擎重算;鐵版神數則無公開算法,兩者不可混為一談。《四庫提要》所評《河洛真數》是另一部書。",
+      "cite": "本站 packages/knowledge/data/heluo-lishu.json;《四庫全書總目提要》卷一百十一"
+    },
+    {
+      "id": "relation-huangji",
+      "topic": "relation",
+      "zht": "皇極經世(huangji-jingshi)為邵雍著作的元會運世體系;鐵版神數據稱取其局數數理再變造推衍,但託名性質,不能視為邵雍原說。",
+      "cite": "本站 packages/knowledge/data/huangji-jingshi.json;維基百科〈鐵版神數〉(二手)"
+    },
+    {
+      "id": "relation-tianwang",
+      "topic": "relation",
+      "zht": "tianwang-souqi 已收《天網搜奇錄》轉述的一份鐵板神數講義取數法(tiebanLecture),作者本人認為只有參考價值;本條目不重複該取數,亦不視之為鐵版神數正法。",
+      "cite": "本站 packages/knowledge/data/tianwang-souqi.json tiebanLecture"
+    }
+  ]
+}

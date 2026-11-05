@@ -17,6 +17,7 @@ export * from "./lunar-mansions.js";
 export * from "./heluo-lishu.js";
 export * from "./lore.js";
 export * from "./ganzhi-relations.js";
+export * from "./tieban.js";
 export * from "./calendars.js";
 export * from "./ziwei-geju.js";
 export * from "./ziwei-stars.js";
