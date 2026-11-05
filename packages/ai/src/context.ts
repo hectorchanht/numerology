@@ -145,7 +145,7 @@ function ziweiExtra(chart: ChartResult, fortune: FortuneAnalysis | undefined, op
     const hRef = castZiweiHoroscope(input, `${refYear}-6-1`); // 小限/流耀以參考年年中計
     const L = (h: typeof hNow, k: string) => h.layers.find((l) => l.key === k)!;
     const age = L(hRef, "age");
-    out.push(`- 小限:${age.nominalAge}岁行${age.natalPalaceName}(${refYear}年)`);
+    if (age.active) out.push(`- 小限:${age.nominalAge}岁行${age.natalPalaceName}(${refYear}年)`);
     out.push(`- 斗君:${hNow.douJun.branch}(本命${hNow.douJun.natalPalaceName})`);
     out.push(
       `- 运限叠宫(当前):大限命宫=本命${L(hNow, "decadal").natalPalaceName}、流年命宫=本命${L(hNow, "yearly").natalPalaceName}、流月命宫=本命${L(hNow, "monthly").natalPalaceName}`,

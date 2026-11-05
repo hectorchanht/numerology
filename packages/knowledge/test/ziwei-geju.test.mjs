@@ -15,7 +15,7 @@ test("格局:條數、id 唯一、cite 非空", () => {
 
 test("紫府同宮條件", () => {
   const r = G.find((x) => x.id === "zifu-tonggong");
-  assert.deepEqual(r.all, [{ op: "samePalace", stars: ["紫微", "天府"] }]);
+  assert.deepEqual(r.all, [{ op: "inPalace", stars: ["紫微", "天府"], palace: "命宫" }]);
 });
 
 test("meta 未校對、JSON 同內聯數據一致", () => {

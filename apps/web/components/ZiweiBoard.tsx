@@ -124,7 +124,14 @@ export function ZiweiBoard({ ziwei, input, center }: { ziwei: ZiweiChart; input:
   const [layerSel, setLayerSel] = useState<LayerSel>("natal");
   const [date, setDate] = useState(""); // SSR 唔知用戶時區,mount 後先填今日
   useEffect(() => setDate(todayStr()), []);
-  const horoscope = useMemo(() => (date ? castZiweiHoroscope(input, date) : null), [input, date]);
+  const horoscope = useMemo(() => {
+    if (!date) return null;
+    try {
+      return castZiweiHoroscope(input, date);
+    } catch {
+      return null; // 日期超出可排範圍
+    }
+  }, [input, date]);
   const layer = layerSel === "natal" ? undefined : horoscope?.layers.find((l) => l.key === layerSel);
   const sf = sanFangBranches(selected);
   const highlightOf = (branch: string): Highlight | null => {
@@ -153,6 +160,8 @@ export function ZiweiBoard({ ziwei, input, center }: { ziwei: ZiweiChart; input:
         {t("ziwei.layer.date")}{" "}
         <input
           type="date"
+          min="1900-01-01"
+          max="2100-12-31"
           value={date ? toInputDate(date) : ""}
           onChange={(e) => e.target.value && setDate(e.target.value.split("-").map(Number).join("-"))}
         />

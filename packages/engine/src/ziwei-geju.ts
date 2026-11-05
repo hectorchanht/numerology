@@ -22,7 +22,7 @@ function evalCond(c: ZiweiGejuCond, palaces: ZiweiPalace[], soul: ZiweiPalace): 
   switch (c.op) {
     case "samePalace": {
       const p = palaces.find((x) => (!c.branches || c.branches.includes(x.earthlyBranch)) && found(allStars(x), c.stars, c.brightness));
-      return p ? `${c.stars.join("、")}同在 ${p.earthlyBranch} 宫${tag(c)}` : null;
+      return p ? `${c.stars.join("、")}同在 ${p.name}(${p.earthlyBranch} 宫)${tag(c)}` : null;
     }
     case "inSanFang": {
       const { self, opposite, trine } = soul.sanFang.branches;

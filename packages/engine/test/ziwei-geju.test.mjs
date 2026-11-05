@@ -25,8 +25,15 @@ test("紫府同宫命中,steps 写证据;拆开唔中", () => {
   const hit = detectZiweiGeju(...Object.values(mk("寅", { 寅: { major: ["紫微", "天府"] } })));
   const h = hit.find((x) => x.id === "zifu-tonggong");
   assert.ok(h);
-  assert.deepEqual(h.steps, ["紫微、天府同在 寅 宫"]);
+  assert.deepEqual(h.steps, ["紫微、天府同在命宫(寅)"]);
   assert.ok(!ids(mk("寅", { 寅: { major: ["紫微"] }, 申: { major: ["天府"] } })).includes("zifu-tonggong"));
+});
+
+test("紫府同宫只限命宫:同在疾厄唔中", () => {
+  const m = mk("寅", { 申: { major: ["紫微", "天府"] } });
+  m.palaces.find((p) => p.earthlyBranch === "申").name = "疾厄";
+  assert.ok(!ids(m).includes("zifu-tonggong"));
+  assert.ok(ids(mk("申", { 申: { major: ["紫微", "天府"] } })).includes("zifu-tonggong"));
 });
 
 test("noMajor:命无正曜命中,有主星唔中", () => {
