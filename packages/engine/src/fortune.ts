@@ -280,7 +280,7 @@ interface RawPalace {
 }
 
 /** 建立"星曜名 → 本命宮位名"映射,用於判定四化飛入哪個宮。 */
-function buildStarToPalace(palaces: RawPalace[]): Map<string, string> {
+export function buildStarToPalace(palaces: RawPalace[]): Map<string, string> {
   const map = new Map<string, string>();
   for (const p of palaces) {
     for (const s of [...p.majorStars, ...p.minorStars, ...p.adjectiveStars]) {

@@ -21,6 +21,7 @@ export {
   type ResolvedDateTime,
   type FavorableDirection,
 } from "./solartime.js";
+export { castZiweiHoroscope, computeOverlaps, type ZiweiHoroscope, type ZiweiLayer, type ZiweiLayerKey, type ZiweiOverlap } from "./ziwei-horoscope.js";
 export { analyzeFortune } from "./fortune.js";
 export { castHourCandidates, type HourInferInput, type HourCandidate } from "./hourinfer.js";
 export { solarFromLunar, type LunarDate, type SolarDate } from "./calendar.js";
