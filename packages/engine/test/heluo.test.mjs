@@ -104,6 +104,15 @@ test("小象:同人六二陰爻六年 → 乾 履 中孚 損 臨 師", () => {
   assert.deepEqual(names(heluoYears(BITS.同人, 2, true)), ["乾", "履", "中孚", "損", "臨", "師"]);
 });
 
+// NAJDA-305-0271 卷四 p. 2(明刻本)乾卦流年表:陽爻元堂分「陽不變」「陰必變」兩套
+test("卷四流年表:乾初九、九二陽年/陰年各九年", () => {
+  const y = (line, yang) => names(heluoYears(BITS.乾, line, yang));
+  assert.deepEqual(y(1, true), ["乾", "小畜", "巽", "漸", "觀", "否", "晉", "豫", "震"]);
+  assert.deepEqual(y(1, false), ["姤", "巽", "小畜", "家人", "益", "無妄", "噬嗑", "震", "豫"]);
+  assert.deepEqual(y(2, true), ["乾", "大有", "離", "噬嗑", "頤", "益", "屯", "比", "坎"]);
+  assert.deepEqual(y(2, false), ["同人", "離", "大有", "睽", "損", "中孚", "節", "坎", "比"]);
+});
+
 test("月卦:流年觀上爻 → 正月益…十二月歸妹", () => {
   const r = heluoMonths(BITS.觀, 6);
   assert.deepEqual(names(r), ["益", "無妄", "中孚", "損", "小畜", "需", "乾", "姤", "大有", "離", "大壯", "歸妹"]);
