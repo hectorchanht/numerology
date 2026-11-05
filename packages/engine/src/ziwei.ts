@@ -76,7 +76,9 @@ export function castZiwei(input: BirthInput): ZiweiChart {
     jiangqian12: p.jiangqian12,
     suiqian12: p.suiqian12,
     ages: Array.isArray(p.ages) ? [...p.ages] : [],
+    sanFang: undefined as unknown as SanFangSiZheng, // 下面補(要全盤先有)
   }));
+  for (const p of palaces) p.sanFang = computeSanFangSiZheng(palaces, p.earthlyBranch);
 
   return {
     soulPalaceBranch: a.earthlyBranchOfSoulPalace,

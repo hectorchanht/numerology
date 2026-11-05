@@ -111,6 +111,8 @@ export interface ZiweiPalace {
   suiqian12: string;
   /** 小限對應的虛歲列表 */
   ages: number[];
+  /** 本宮三方四正(任意宮) */
+  sanFang: SanFangSiZheng;
 }
 
 /** 三方四正:本宮 + 對宮 + 兩三合宮 的合看。 */

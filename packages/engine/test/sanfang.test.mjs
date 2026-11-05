@@ -19,3 +19,12 @@ test("computeSanFangSiZheng 通用:对宫=+6、三合=±4", () => {
   assert.equal(sf.branches.opposite, "午");
   assert.deepEqual(sf.branches.trine.slice().sort(), ["申", "辰"].sort());
 });
+
+test("每宮 sanFang 對宮=+6;命宮 sanFang 同 soulSanFang", () => {
+  for (const p of chart.ziwei.palaces) {
+    assert.equal(p.sanFang.branches.self, p.earthlyBranch);
+    assert.equal(p.sanFang.branches.opposite, RING[(RING.indexOf(p.earthlyBranch) + 6) % 12]);
+  }
+  const soul = chart.ziwei.palaces.find((p) => p.isSoulPalace);
+  assert.deepEqual(soul.sanFang, chart.ziwei.soulSanFang);
+});
