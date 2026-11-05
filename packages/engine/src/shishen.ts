@@ -56,4 +56,4 @@ export function dizhiHideGan(zhi: string): Tiangan[] {
   return HIDE_GAN[zhi] ? [...HIDE_GAN[zhi]] : [];
 }
 
-export { WUXING };
+export { WUXING, KE };

@@ -10,6 +10,7 @@ export { castBazi } from "./bazi.js";
 export { castZiwei, computeSanFangSiZheng } from "./ziwei.js";
 export { hourToTimeIndex, validateBirthInput, daysInMonth } from "./time.js";
 export { shiShen, shiShenOf, dizhiHideGan, type ShiShen } from "./shishen.js";
+export { natalRelations, externalRelations, suiYunBingLin, tianKeDiChong, type PillarKey, type RelationKind, type GanzhiRelation } from "./relations.js";
 export { changSheng, changShengOf, CHANGSHENG_STAGES, type ChangSheng } from "./changsheng.js";
 export { shenShaForBranch, type ShenShaContext } from "./shensha.js";
 export {
