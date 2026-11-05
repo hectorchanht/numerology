@@ -52,7 +52,8 @@ export function classifyNumber(n: number): NumberClass {
   const s = aliquot(n);
   const parts: PartsClass | null = n === 1 ? null : s === n ? "perfect" : s > n ? "superabundant" : "deficient";
   const figurate: NumberClass["figurate"] = [];
-  for (let sides = 3; sides <= 7; sides++) {
+  // 1 為數之源(Nicomachus),不列形數與立方
+  for (let sides = 3; n > 1 && sides <= 7; sides++) {
     // k 邊形數第 i 項 = ((k−2)i² − (k−4)i) / 2
     for (let i = 1; ; i++) {
       const v = ((sides - 2) * i * i - (sides - 4) * i) / 2;
@@ -61,7 +62,7 @@ export function classifyNumber(n: number): NumberClass {
     }
   }
   const c = Math.round(Math.cbrt(n));
-  return { parity, parts, aliquotSum: s, figurate, cube: c ** 3 === n ? c : null };
+  return { parity, parts, aliquotSum: s, figurate, cube: n > 1 && c ** 3 === n ? c : null };
 }
 
 /* ───────────── 你的數 ───────────── */
@@ -84,7 +85,8 @@ export interface NumberLoreResult {
   /** gematria 基率:詞表不同數值 D 個、最大值 M;隨機 1–M 整數撞中約 D/M */
   baseRate: { distinct: number; max: number; p: number; eligible: number; expected: number; hits: number };
   steps: string[];
-  tier: KnowledgeTier;
+  /** Nicomachus、Agrippa 屬原典;gematria 詞義屬 Fideler 的作者主張 */
+  tiers: { classes: KnowledgeTier; gematria: KnowledgeTier };
   cites: { scales: Cite; nicomachus: Cite; gematria: Cite; hebrew: Cite; seferYetzirah: Cite };
 }
 
@@ -135,7 +137,7 @@ export function castNumberLore(chart: ChartResult): NumberLoreResult {
     items,
     baseRate: { distinct: values.size, max, p, eligible, expected: eligible * p, hits },
     steps,
-    tier: "classical",
+    tiers: { classes: "classical", gematria: "modern" },
     cites: {
       scales: { work: "Three Books of Occult Philosophy", author: "Agrippa", year: 1651, locator: "II.4–14(J.F. 英譯)" },
       nicomachus: { work: "Introduction to Arithmetic", author: "Nicomachus", year: 1926, locator: "I(D'Ooge 英譯)" },
@@ -154,7 +156,7 @@ export interface BirthLoreResult {
   lulu: { lunarMonth: number; branch: string; pipe: string; value: number; group: "upper" | "lower"; season: string; mode: string | null };
   zodiac: { sign: Sign; ruler: Planet; herb: string; fume: string; letter: { glyph: string; faculty: string; month: string } | null };
   dayPlanet: { planet: Planet; letter: { glyph: string; quality: string } | null };
-  stars: { lons: { n: number; name: string; lon: number; alt: boolean }[]; hits: StarHit[]; orb: number; p: number; points: number; expected: number };
+  stars: { lons: { n: number; name: string; lon: number; alt: boolean }[]; hits: StarHit[]; /** 第 8 顆異讀(Polaris)命中:黃緯近 90°,黃經差幾無意義,不入基率 */ altHits: StarHit[]; orb: number; p: number; points: number; expected: number };
   steps: string[];
   cites: { lulu: Cite; zodiac: Cite; seferYetzirah: Cite; stars: Cite; orb: Cite };
 }
@@ -218,13 +220,13 @@ export function castBirthLore(chart: ChartResult, sky: EphemerisResult): BirthLo
   }
   const points: [StarHit["body"], number][] = sky.planets.map((p) => [p.planet, p.longitude]);
   if (sky.angles) points.push(["Asc", sky.angles.ascendant], ["MC", sky.angles.mc]);
-  const hits: StarHit[] = [];
+  const hits: StarHit[] = [], altHits: StarHit[] = [];
   for (const [body, lon] of points) {
     for (const s of lons) {
       const d = sep(lon, s.lon);
       if (d <= orb) {
         const star = BEHENIAN.stars.find((x) => x.n === s.n)!;
-        hits.push({ star: s.name, bayer: s.alt ? star.alt!.bayer : star.bayer, n: s.n, alt: s.alt, body, starLon: s.lon, orb: Math.round(d * 100) / 100 });
+        (s.alt ? altHits : hits).push({ star: s.name, bayer: s.alt ? star.alt!.bayer : star.bayer, n: s.n, alt: s.alt, body, starLon: s.lon, orb: Math.round(d * 100) / 100 });
       }
     }
   }
@@ -239,13 +241,13 @@ export function castBirthLore(chart: ChartResult, sky: EphemerisResult): BirthLo
     `出生日 ${year}-${month}-${day} 星期${"日一二三四五六"[RULERS.indexOf(planet)]},守護 ${planet}${dbl ? ` → Westcott 補表雙字母 ${dbl.letter}(${dbl.quality});其他傳統(如 Golden Dawn)配法不同` : ""}。`,
     `恆星黃經:J2000 赤經赤緯(Hipparcos)經歲差換算至 ${sky.utc}(真黃道),不計自行。`,
     `容許度 ${orb}°(維基百科所述傳統,近代整理);只比黃經,Vega、Capella、Alkaid 等黃緯高的星,在天球上實際距離遠大於黃經差。`,
-    `第 8 顆:1651 英譯作 "Tail of the Lesser Bear"(Polaris),Hermes 傳統與現代整理作 Alkaid;兩者並列,不合併。`,
+    `第 8 顆:1651 英譯作 "Tail of the Lesser Bear"(Polaris),Hermes 傳統與現代整理作 Alkaid;兩者並列,不合併;Polaris 黃緯近 90°,黃經差幾無意義,其合相另列、不入基率${altHits.length ? `(本盤 ${altHits.map((h) => `${h.body}–Polaris`).join("、")})` : ""}。`,
     `基率:十五顆星 ±${orb}° 合共覆蓋黃道約 ${pct(p)};${points.length} 個點(七曜${sky.angles ? "、上升、天頂" : ""})期望命中約 ${(Math.round(expected * 10) / 10)} 個,實際 ${hits.length} 個。`,
   ].filter(Boolean);
 
   return {
     lulu, zodiac, dayPlanet,
-    stars: { lons, hits, orb, p, points: points.length, expected },
+    stars: { lons, hits, altHits, orb, p, points: points.length, expected },
     steps,
     cites: {
       lulu: { work: "淮南子·天文訓", locator: "律數;並參《呂氏春秋·音律》" },

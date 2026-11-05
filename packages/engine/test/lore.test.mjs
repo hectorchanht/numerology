@@ -9,6 +9,7 @@ const SIGNS = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "
 test("classifyNumber:Nicomachus 分類", () => {
   assert.equal(classifyNumber(1).parity, "unit");
   assert.equal(classifyNumber(1).parts, null);
+  assert.deepEqual([classifyNumber(1).figurate, classifyNumber(1).cube], [[], null]);
   assert.equal(classifyNumber(8).parity, "evenTimesEven");
   assert.equal(classifyNumber(6).parity, "evenTimesOdd");
   assert.equal(classifyNumber(12).parity, "oddTimesEven");
@@ -21,7 +22,7 @@ test("classifyNumber:Nicomachus 分類", () => {
   assert.equal(classifyNumber(28).cube, null);
   // 形數:資料內各數列每一項都要反查得到
   for (const f of NICOMACHUS.figurate.items) {
-    f.seq.forEach((v, i) => assert.ok(classifyNumber(v).figurate.some((x) => x.sides === f.sides && x.index === i + 1), `${f.name} ${v}`));
+    f.seq.forEach((v, i) => v === 1 || assert.ok(classifyNumber(v).figurate.some((x) => x.sides === f.sides && x.index === i + 1), `${f.name} ${v}`));
   }
   assert.deepEqual(classifyNumber(666).figurate, [{ sides: 3, index: 36 }]);
 });
@@ -40,6 +41,7 @@ test("castNumberLore:1990-03-18 星期日 → Sun 方陣 111 / 666", () => {
   assert.ok(r.baseRate.p > 0 && r.baseRate.p < 0.05);
   assert.equal(r.baseRate.hits, r.items.filter((i) => i.gematria.length).length);
   assert.ok(r.steps.some((s) => s.includes("基率")));
+  assert.deepEqual(r.tiers, { classes: "classical", gematria: "modern" });
 });
 
 test("starLongitude:2020 黃經與維基表相差 < 5′", () => {
@@ -66,7 +68,8 @@ test("castBirthLore:律呂、黃道、星期、恆星", () => {
   assert.equal(r.stars.lons.length, 16);
   assert.equal(r.stars.points, 9);
   assert.ok(r.stars.p > 0.2 && r.stars.p < 0.6, String(r.stars.p));
-  for (const h of r.stars.hits) assert.ok(h.orb <= 6);
+  for (const h of r.stars.hits) assert.ok(h.orb <= 6 && !h.alt);
+  for (const h of r.stars.altHits) assert.equal(h.star, "Polaris");
 });
 
 test("律呂:寅月太蔟 72、子月黃鐘 81", () => {

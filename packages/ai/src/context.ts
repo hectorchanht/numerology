@@ -339,7 +339,7 @@ ${step(hl.steps)}`;
       return `  - ${SRC[i.source]} ${i.value}:${cls}${heb}${gem}${sc}`;
     });
     const b = lore.numbers.baseRate, bl = lore.birth, st = bl.stars;
-    const hits = st.hits.map((h) => `${h.body} 合 ${h.star}(${h.bayer})${h.orb}°${h.alt ? "(1651 英譯異讀)" : ""}`).join("、") || "無";
+    const hits = st.hits.map((h) => `${h.body} 合 ${h.star}(${h.bayer})${h.orb}°`).join("、") || "無";
     cycleBlock += `
 
 ## 數之學(確定性計算;象徵對應,不入五行比對)

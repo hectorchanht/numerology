@@ -224,7 +224,7 @@ const LORE_DATA = {
       {
         "n": 4,
         "chapter": 7,
-        "page": null,
+        "page": 213,
         "rows": [
           {
             "world": "intelligible",
@@ -681,7 +681,7 @@ const LORE_DATA = {
       {
         "n": 7,
         "chapter": 10,
-        "page": null,
+        "page": 230,
         "rows": [
           {
             "world": "intelligible",
@@ -1127,7 +1127,7 @@ const LORE_DATA = {
       {
         "n": 12,
         "chapter": 14,
-        "page": null,
+        "page": 243,
         "rows": [
           {
             "world": "intelligible",

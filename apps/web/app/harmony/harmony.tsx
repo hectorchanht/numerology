@@ -57,7 +57,7 @@ function LuluBars() {
   const { z } = useScript();
   const pipes = LULU.huainanzi.pipes;
   const gw = (BW - BL) / pipes.length, ph = BH - BB - 14;
-  const rows = pipes.map((p) => `${z(p.pipe)} ${p.value}`).join(";");
+  const rows = pipes.map((p) => `${z(p.pipe)} ${p.value}(${t("harmony.month", { m: p.month })})`).join(";");
   const label = t("harmony.luluAria", { rows });
   return (
     <svg className="xs-grid sci-chart" viewBox={`0 0 ${BW} ${BH}`} role="img" aria-label={label}>
@@ -130,6 +130,7 @@ export default function HarmonyTool() {
         <h2 className="xs-h">{t("harmony.lulu")}</h2>
         <Meta tier="classical" cites={[{ work: "淮南子·天文訓" }, { work: "呂氏春秋·音律" }, { work: "管子·地員" }]} />
         <LuluBars />
+        <p className="xs-note" style={{ textAlign: "center" }}>{t("harmony.axisMonth")}</p>
         <p className="cy-val">{t("harmony.comma", { c: comma.ratio.toFixed(5), cents: comma.cents.toFixed(2) })}</p>
         <p className="xs-note">{z(t("harmony.luluNote"))}</p>
       </div>
@@ -174,7 +175,7 @@ export default function HarmonyTool() {
 
       <div className="card viz xs">
         <h2 className="xs-h">{t("harmony.gematria")}</h2>
-        <Meta tier="scholarly" cites={[{ work: "Jesus Christ, Sun of God", author: "David Fideler", year: 1993 }]} />
+        <Meta tier="modern" cites={[{ work: "Jesus Christ, Sun of God", author: "David Fideler", year: 1993 }]} />
         <div className="bazi-detail-wrap">
           <table className="bazi-detail">
             <thead><tr>{(["harmony.colRelation", "harmony.colTarget", "harmony.colTol", "harmony.colTerms"] as const).map((k) => <th key={k} className="colhead">{t(k)}</th>)}</tr></thead>

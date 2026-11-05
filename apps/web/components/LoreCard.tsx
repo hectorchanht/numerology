@@ -73,7 +73,7 @@ function Numbers({ r }: { r: NumberLoreResult }) {
   return (
     <>
       <h3 className="xs-h">{t("lore.numbers")}</h3>
-      <Meta tier={r.tier} cites={[r.cites.nicomachus, r.cites.scales, r.cites.hebrew, r.cites.gematria]} />
+      <Meta tier={r.tiers.classes} cites={[r.cites.nicomachus, r.cites.scales, r.cites.hebrew]} />
       <ul className="xs-matrix">
         {r.items.map((it) => (
           <li key={it.source} className="xs-row">
@@ -99,6 +99,7 @@ function Numbers({ r }: { r: NumberLoreResult }) {
       </ul>
       <p className="xs-note">{t("lore.scaleNote")}</p>
       <h3 className="xs-h">{t("lore.baseTitle")}</h3>
+      <Meta tier={r.tiers.gematria} cites={[r.cites.gematria]} />
       <p className="xs-note">{t("lore.baseVal", { e: b.expected.toFixed(2), h: b.hits, d: b.distinct, m: b.max })}</p>
       <BaseBars expected={b.expected} actual={b.hits} />
       <Steps steps={r.steps} />
@@ -107,6 +108,7 @@ function Numbers({ r }: { r: NumberLoreResult }) {
 }
 
 const C = 120, R = 100;
+const GLYPH: Record<string, string> = { Sun: "☉", Moon: "☽", Mercury: "☿", Venus: "♀", Mars: "♂", Jupiter: "♃", Saturn: "♄" };
 
 /** 黃道圓:十五恆星 ±orb 陰影弧、星點,與出生七曜 / 上升 / 天頂。 */
 function StarWheel({ r, sky }: { r: BirthLoreResult; sky: ReturnType<typeof castEphemeris> }) {
@@ -114,8 +116,15 @@ function StarWheel({ r, sky }: { r: BirthLoreResult; sky: ReturnType<typeof cast
   const s = r.stars;
   const hitText = s.hits.map((h) => `${h.body}–${h.star}`).join(", ") || t("lore.none");
   const label = t("lore.wheelAria", { orb: s.orb, k: s.points, hits: hitText });
-  const points: [string, number][] = sky.planets.map((p) => [p.planet.slice(0, 2), p.longitude]);
+  const points: [string, number][] = sky.planets.map((p) => [GLYPH[p.planet], p.longitude]);
   if (sky.angles) points.push(["Asc", sky.angles.ascendant], ["MC", sky.angles.mc]);
+  points.sort((a, b) => a[1] - b[1]);
+  let level = 0;
+  const levels = points.map(([, lon], i) => {
+    const gap = i ? lon - points[i - 1]![1] : 360;
+    level = gap < 12 ? (level + 1) % 3 : 0;
+    return level;
+  });
   return (
     <svg className="xs-grid lore-wheel" viewBox={`0 0 ${C * 2} ${C * 2}`} role="img" aria-label={label}>
       <title>{label}</title>
@@ -132,11 +141,11 @@ function StarWheel({ r, sky }: { r: BirthLoreResult; sky: ReturnType<typeof cast
         return <circle key={`${x.n}${x.alt}`} className={x.alt ? "lore-star alt" : "lore-star"} cx={p.x} cy={p.y} r={3} />;
       })}
       {points.map(([name, lon], i) => {
-        const p = wheelPoint(lon, R - 26 - (i % 2) * 14, C), q = wheelPoint(lon, R - 4, C);
+        const p = wheelPoint(lon, R - 24 - levels[i]! * 16, C), q = wheelPoint(lon, R - 4, C);
         return (
           <g key={name}>
             <line className="lore-ray" x1={p.x} y1={p.y} x2={q.x} y2={q.y} />
-            <text className="cy-axis" x={p.x} y={p.y} fontSize={10}>{name}</text>
+            <text className="cy-axis" x={p.x} y={p.y} fontSize={name.length > 1 ? 9 : 12}>{name}</text>
           </g>
         );
       })}
@@ -164,7 +173,8 @@ function Birth({ r, sky }: { r: BirthLoreResult; sky: ReturnType<typeof castEphe
       <p className="cy-val">{t("lore.zodiacVal", { sign: r.zodiac.sign, ruler: r.zodiac.ruler, herb: r.zodiac.herb, fume: r.zodiac.fume })}</p>
       {r.zodiac.letter ? <p className="xs-note">{t("lore.syLetter", { g: r.zodiac.letter.glyph, f: r.zodiac.letter.faculty, m: r.zodiac.letter.month })}</p> : null}
       {r.dayPlanet.letter ? <p className="xs-note">{t("lore.dayLetter", { planet: r.dayPlanet.planet, g: r.dayPlanet.letter.glyph, q: r.dayPlanet.letter.quality })}</p> : null}
-      <Meta tier="modern" cites={[r.cites.zodiac, r.cites.seferYetzirah]} />
+      <Meta tier="classical" cites={[r.cites.zodiac]} />
+      <Meta tier="modern" cites={[r.cites.seferYetzirah]} />
       <p className="xs-note">{t("lore.syNote")}</p>
 
       <h3 className="xs-h">{t("lore.stars")}</h3>
@@ -174,9 +184,12 @@ function Birth({ r, sky }: { r: BirthLoreResult; sky: ReturnType<typeof castEphe
       {r.stars.hits.length ? (
         <ul className="xs-note">
           {r.stars.hits.map((h, i) => (
-            <li key={i}>{t("lore.hit", { body: h.body, star: h.star, bayer: h.bayer, d: h.orb, alt: h.alt ? t("lore.alt") : "" })}</li>
+            <li key={i}>{t("lore.hit", { body: h.body, star: h.star, bayer: h.bayer, d: h.orb })}</li>
           ))}
         </ul>
+      ) : null}
+      {r.stars.altHits.length ? (
+        <p className="xs-note">{t("lore.altHits", { list: r.stars.altHits.map((h) => `${h.body}–${h.star} ${h.orb}°`).join(", ") })}</p>
       ) : null}
       <p className="xs-note">{t("lore.starsNote")}</p>
       <Steps steps={r.steps} />

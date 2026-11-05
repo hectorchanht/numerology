@@ -724,8 +724,7 @@ const zht = {
   "lore.syNote": "字母配星座、行星出自 Westcott 1893 補表(近代);其他傳統配法不同。",
   "lore.stars": "Behenian 十五恆星",
   "lore.starsVal": "±{orb}° 內合相 {n} 個;基率:十五顆星共覆蓋黃道 {p},{k} 個點期望約 {e} 個",
-  "lore.hit": "{body} 合 {star}({bayer}),相距 {d}°{alt}",
-  "lore.alt": "(1651 英譯異讀)",
+  "lore.hit": "{body} 合 {star}({bayer}),相距 {d}°",
   "lore.wheelAria": "黃道圓圖:十五恆星 ±{orb}° 範圍(陰影)與出生時 {k} 個點的位置;合相:{hits}",
   "lore.starsNote": "只比黃經;Vega、Capella 等黃緯高的星,天球上實際距離遠大於黃經差。第 8 顆 Alkaid 與 Polaris 兩讀並列。",
   "lore.none": "無",
@@ -773,6 +772,8 @@ const zht = {
   "harmony.solid.cube": "立方體",
   "harmony.face.triangle": "正三角形",
   "harmony.face.square": "正方形",
+  "lore.altHits": "異讀 Polaris(黃緯近 90°,黃經差幾無意義,不入基率):{list}",
+  "harmony.axisMonth": "柱下:律名首字;最下一行為夏曆月份",
 } as const;
 
 export type TKey = keyof typeof zht;
@@ -1488,8 +1489,7 @@ const zhs: Record<TKey, string> = {
   "lore.syNote": "字母配星座、行星出自 Westcott 1893 补表(近代);其他传统配法不同。",
   "lore.stars": "Behenian 十五恒星",
   "lore.starsVal": "±{orb}° 内合相 {n} 个;基率:十五颗星共覆盖黄道 {p},{k} 个点期望约 {e} 个",
-  "lore.hit": "{body} 合 {star}({bayer}),相距 {d}°{alt}",
-  "lore.alt": "(1651 英译异读)",
+  "lore.hit": "{body} 合 {star}({bayer}),相距 {d}°",
   "lore.wheelAria": "黄道圆图:十五恒星 ±{orb}° 范围(阴影)与出生时 {k} 个点的位置;合相:{hits}",
   "lore.starsNote": "只比黄经;Vega、Capella 等黄纬高的星,天球上实际距离远大于黄经差。第 8 颗 Alkaid 与 Polaris 两读并列。",
   "lore.none": "无",
@@ -1537,6 +1537,8 @@ const zhs: Record<TKey, string> = {
   "harmony.solid.cube": "立方体",
   "harmony.face.triangle": "正三角形",
   "harmony.face.square": "正方形",
+  "lore.altHits": "异读 Polaris(黄纬近 90°,黄经差几无意义,不入基率):{list}",
+  "harmony.axisMonth": "柱下:律名首字;最下一行为夏历月份",
 };
 
 /** 英文:自然英文翻譯。 */
@@ -2250,8 +2252,7 @@ const en: Record<TKey, string> = {
   "lore.syNote": "The letter–sign and letter–planet pairings come from Westcott’s 1893 supplementary tables (modern); other traditions assign them differently.",
   "lore.stars": "The fifteen Behenian stars",
   "lore.starsVal": "{n} conjunctions within ±{orb}°. Base rate: the fifteen stars cover {p} of the ecliptic, so {k} points should catch about {e}",
-  "lore.hit": "{body} conjunct {star} ({bayer}), {d}° apart{alt}",
-  "lore.alt": " (1651 translation’s reading)",
+  "lore.hit": "{body} conjunct {star} ({bayer}), {d}° apart",
   "lore.wheelAria": "Ecliptic wheel: ±{orb}° zones around the fifteen stars (shaded) and the {k} birth points; conjunctions: {hits}",
   "lore.starsNote": "Longitude only: for high-latitude stars such as Vega or Capella the real distance on the sky is far larger than the longitude gap. Star 8 is shown under both readings, Alkaid and Polaris.",
   "lore.none": "none",
@@ -2299,6 +2300,8 @@ const en: Record<TKey, string> = {
   "harmony.solid.cube": "Cube",
   "harmony.face.triangle": "Equilateral triangle",
   "harmony.face.square": "Square",
+  "lore.altHits": "Alternative reading, Polaris (ecliptic latitude near 90°, so the longitude gap means little; excluded from the base rate): {list}",
+  "harmony.axisMonth": "Under each bar: the pipe’s first character; bottom row: lunar month",
 };
 
 export const STRINGS: Record<Locale, Record<TKey, string>> = { zht, zhs, en };
