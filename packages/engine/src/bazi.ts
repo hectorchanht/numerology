@@ -10,7 +10,8 @@ import {
 import type { BaziChart, BirthInput, DaYunStep, Pillar } from "./types.js";
 import { validateBirthInput } from "./time.js";
 import { changSheng } from "./changsheng.js";
-import { shenShaForBranch, type ShenShaContext } from "./shensha.js";
+import { shenShaForPillar, type ShenShaContext } from "./shensha.js";
+import { natalRelations } from "./relations.js";
 import { resolveBirthDateTime } from "./solartime.js";
 
 /** 排八字四柱,並接入窮通寶鑑調候用神。 */
@@ -31,7 +32,7 @@ export function castBazi(input: BirthInput): BaziChart {
   if (!isDizhi(monthZhi)) throw new Error(`排盘异常:月支非地支 "${monthZhi}"`);
   if (!isDizhi(yearZhi) || !isDizhi(dayZhi)) throw new Error("排盘异常:年/日支非地支");
 
-  const ctx: ShenShaContext = { dayGan, yearZhi, dayZhi };
+  const ctx: ShenShaContext = { dayGan, monthZhi, yearZhi, dayZhi };
   const pillar = (
     gan: string, zhi: string, ganZhi: string, naYin: string,
     shiShenGan: string, hideGan: string[], shiShenZhi: string[], xunKong: string,
@@ -58,8 +59,18 @@ export function castBazi(input: BirthInput): BaziChart {
     startYear: d.getStartYear(),
   }));
 
+  const palace = (ganZhi: string, naYin: string) => ({ ganZhi, naYin });
+  const extraPalaces = {
+    taiYuan: palace(ec.getTaiYuan(), ec.getTaiYuanNaYin()),
+    taiXi: palace(ec.getTaiXi(), ec.getTaiXiNaYin()),
+    mingGong: palace(ec.getMingGong(), ec.getMingGongNaYin()),
+    shenGong: palace(ec.getShenGong(), ec.getShenGongNaYin()),
+  };
+
   return {
     fourPillars,
+    extraPalaces,
+    relations: natalRelations(fourPillars),
     dayMaster: dayGan,
     monthBranch: monthZhi,
     dayWuXing: ec.getDayWuXing(),
@@ -91,6 +102,6 @@ function buildPillar(
     gan, zhi, ganZhi, naYin, shiShenGan, hideGan, shiShenZhi, xunKong,
     xingYun: zhiOk ? changSheng(dayGan, zhi as Dizhi) : "",
     ziZuo: ganOk && zhiOk ? changSheng(gan as Tiangan, zhi as Dizhi) : "",
-    shenSha: zhiOk ? shenShaForBranch(ctx, zhi as Dizhi) : [],
+    shenSha: zhiOk ? shenShaForPillar(ctx, gan, zhi as Dizhi) : [],
   };
 }

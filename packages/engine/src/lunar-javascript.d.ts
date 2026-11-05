@@ -100,6 +100,14 @@ declare module "lunar-javascript" {
     getDayXunKong(): string;
     getTimeXunKong(): string;
     getDayWuXing(): string;
+    getTaiYuan(): string;
+    getTaiYuanNaYin(): string;
+    getTaiXi(): string;
+    getTaiXiNaYin(): string;
+    getMingGong(): string;
+    getMingGongNaYin(): string;
+    getShenGong(): string;
+    getShenGongNaYin(): string;
     /** sex: 1=男, 0=女 */
     getYun(sex: number, sect?: number): Yun;
   }
@@ -118,11 +126,25 @@ declare module "lunar-javascript" {
     getEndAge(): number;
     getStartYear(): number;
     getLiuNian(): LiuNian[];
+    getXiaoYun(): XiaoYun[];
+  }
+
+  export class XiaoYun {
+    getYear(): number;
+    getAge(): number;
+    getGanZhi(): string;
+  }
+
+  export class LiuYue {
+    getIndex(): number;
+    getMonthInChinese(): string;
+    getGanZhi(): string;
   }
 
   export class LiuNian {
     getYear(): number;
     getAge(): number;
     getGanZhi(): string;
+    getLiuYue(): LiuYue[];
   }
 }

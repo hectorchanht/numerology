@@ -47,6 +47,16 @@ const HONGYAN: GanMap = {
   庚: ["戌"], 辛: ["酉"], 壬: ["子"], 癸: ["申"],
 };
 
+/**
+ * 學堂:日干長生位(支)。
+ * 出處核對(zh.wikisource《三命通會》卷三〈論學堂詞館〉):原文以「五行長生為學堂正位」(納音五行長生,如金命見巳),
+ * 與此處「日干長生」取法有出入;此表採通行日干長生法,屬流派差異。
+ */
+const XUETANG: GanMap = {
+  甲: ["亥"], 乙: ["午"], 丙: ["寅"], 丁: ["酉"], 戊: ["寅"], 己: ["酉"],
+  庚: ["巳"], 辛: ["子"], 壬: ["申"], 癸: ["卯"],
+};
+
 const GAN_SHENSHA: { name: string; map: GanMap }[] = [
   { name: "天乙贵人", map: TIANYI },
   { name: "太极贵人", map: TAIJI },
@@ -56,6 +66,7 @@ const GAN_SHENSHA: { name: string; map: GanMap }[] = [
   { name: "羊刃", map: YANGREN },
   { name: "金舆", map: JINYU },
   { name: "红艳煞", map: HONGYAN },
+  { name: "学堂", map: XUETANG },
 ];
 
 /** 三合局:首字(代表) → 局內地支,用於將星/華蓋/驛馬/桃花等。 */
@@ -86,17 +97,42 @@ const GUGUA: Record<string, { 孤辰: Dizhi; 寡宿: Dizhi }> = {
   申: { 孤辰: "亥", 寡宿: "未" }, 酉: { 孤辰: "亥", 寡宿: "未" }, 戌: { 孤辰: "亥", 寡宿: "未" },
 };
 
+/**
+ * 天德貴人:月支 → 干或支。核對〈論天月德〉所載天德合(正月丁合壬、二月坤合巽、三月壬合丁、四月辛合丙…)
+ * 與此表寅丁/卯申/辰壬/巳辛 一致;原文無完整月支表,餘月沿通行表。
+ */
+const TIANDE: Record<Dizhi, string> = {
+  寅: "丁", 卯: "申", 辰: "壬", 巳: "辛", 午: "亥", 未: "甲",
+  申: "癸", 酉: "寅", 戌: "丙", 亥: "乙", 子: "巳", 丑: "庚",
+};
+/**
+ * 月德貴人:月支三合局 → 干。核對〈論天月德〉:申子辰壬、亥卯未甲、寅午戌丙、巳酉丑庚,與原文一致。
+ */
+const YUEDE: Record<string, string> = { 寅午戌: "丙", 申子辰: "壬", 亥卯未: "甲", 巳酉丑: "庚" };
+/**
+ * 紅鸞:年支 → 支(子卯、丑寅…逆數);天喜 = 紅鸞對沖。
+ * 核對:〈論天月德〉等頁查無紅鸞;原文另有「天喜神:春戊夏丑秋辰冬未」(以季論),與通行「紅鸞對沖」法不同。
+ * 無法以原文驗證,沿用通行表,屬流派差異。
+ */
+const HONGLUAN: Record<Dizhi, Dizhi> = {
+  子: "卯", 丑: "寅", 寅: "丑", 卯: "子", 辰: "亥", 巳: "戌",
+  午: "酉", 未: "申", 申: "未", 酉: "午", 戌: "巳", 亥: "辰",
+};
+const DIZHI12: Dizhi[] = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+const chong = (z: Dizhi): Dizhi => DIZHI12[(DIZHI12.indexOf(z) + 6) % 12]!;
+
 export interface ShenShaContext {
   dayGan: Tiangan;
+  monthZhi: Dizhi;
   yearZhi: Dizhi;
   dayZhi: Dizhi;
 }
 
 /**
- * 求某地支(某一柱)上坐落的神煞。以日干 + 年支/日支(三合)+ 年支(孤寡)為依據。
+ * 求某地支(某一柱)上坐落的神煞。以日干 + 月支 + 年支/日支(三合)+ 年支(孤寡)為依據。
  * 返回去重後的神煞名數組。
  */
-export function shenShaForBranch(ctx: ShenShaContext, zhi: Dizhi): string[] {
+export function shenShaForPillar(ctx: ShenShaContext, gan: string, zhi: Dizhi): string[] {
   const out = new Set<string>();
 
   // 日干派
@@ -119,6 +155,17 @@ export function shenShaForBranch(ctx: ShenShaContext, zhi: Dizhi): string[] {
     if (gg.孤辰 === zhi) out.add("孤辰");
     if (gg.寡宿 === zhi) out.add("寡宿");
   }
+
+  // 月支派:天德(干或支)、月德(干)
+  const td = TIANDE[ctx.monthZhi];
+  if (td === gan || td === zhi) out.add("天德贵人");
+  const g = groupOf(ctx.monthZhi);
+  if (g && YUEDE[g] === gan) out.add("月德贵人");
+
+  // 年支派:紅鸞、天喜
+  const hl = HONGLUAN[ctx.yearZhi];
+  if (hl === zhi) out.add("红鸾");
+  if (chong(hl) === zhi) out.add("天喜");
 
   return [...out];
 }
