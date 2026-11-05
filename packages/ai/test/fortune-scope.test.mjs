@@ -89,3 +89,24 @@ test("无 fortune 时 scope 不影响(无动态段,不报错)", () => {
 const { markdown} = buildContextPack(chart, undefined, { fortuneScope: "dayun"});
 assert.ok(!markdown.includes("## 动态运势"));
 });
+
+test("八字格局/关系/胎元入命盘事实;流月仅当前月出", () => {
+  const { markdown } = buildContextPack(chart, fortune);
+  for (const must of ["格局(本站按《子平真诠》", "原局干支关系:", "胎元 ", "命宫 "]) assert.ok(markdown.includes(must), must);
+  assert.ok(dynOf("full").includes("八字流月(当前月±1)") === fortune.bazi.liuYue.some((m) => m.isCurrent));
+  const old = analyzeFortune(birth, { referenceYear: 2017, yearsBack: 1, yearsAhead: 1 });
+  assert.ok(!buildContextPack(chart, old, { fortuneScope: "current" }).markdown.includes("八字流月"));
+});
+
+test("岁运并临/关系摘要进流年行", () => {
+  const fake = structuredClone(fortune);
+  fake.bazi.liuNian[0].suiYunBingLin = true;
+  fake.bazi.liuNian[0].relations = [{ kind: "相冲", between: ["liunian", "year"], chars: ["子", "午"] }];
+  const md = buildContextPack(chart, fake, { fortuneScope: "full" }).markdown;
+  assert.ok(md.includes("〔相冲年柱子午;岁运并临〕"));
+});
+
+test("三会入原局干支关系", () => {
+  const b = { year: 1950, month: 3, day: 10, hour: 0, minute: 0, gender: "男" };
+  assert.ok(buildContextPack(castChart(b)).markdown.includes("三会 寅卯辰(木)"));
+});

@@ -1,4 +1,4 @@
-import { favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type FortuneAnalysis, type HeluoResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult, type NumberLoreResult, type BirthLoreResult } from "@numerology/engine";
+import { favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type GanzhiRelation, type FortuneAnalysis, type HeluoResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult, type NumberLoreResult, type BirthLoreResult } from "@numerology/engine";
 import { SCIENCE_NOTES } from "@numerology/knowledge";
 import type { AiLocale } from "./prompts.js";
 
@@ -108,7 +108,7 @@ ${shenShaBlock ? "\n神煞:\n" + shenShaBlock : ""}
 - 调候用神(穷通宝鉴):${b.tiaohou.useGods.join("、")}${b.tiaohou.reviewed ? "" : "(待校对)"}
 - 喜用神方位(开运参考,由用神五行推):${favLine || "—"}
 - 起运:${b.startLuck.description}(${b.startLuck.solarDate})
-- 大运:${daYun}
+- 大运:${daYun}${baziExtra(b)}
 
 ## 紫微斗数
 - 命宫:${z.soulPalaceBranch} | 身宫:${z.bodyPalaceBranch} | ${z.fiveElementsClass}
@@ -119,6 +119,22 @@ ${ORDER.map((n) => "  - " + palaceLine(n)).join("\n")}
 ${fortune ? renderFortuneSection(fortune, opts?.fortuneScope ?? "full") : ""}`;
 
   return { markdown, caveats };
+}
+
+const PILLAR_ZH: Record<string, string> = { year: "年", month: "月", day: "日", hour: "时" };
+/** 動態段只摘 冲/刑/合/会(含半合/三会等)。 */
+const REL_KEEP = /冲|刑|合|会/;
+
+/** 八字附加事實(格局、原局干支關係、胎元命宮);append-only,原有行不動。 */
+function baziExtra(b: ChartResult["bazi"]): string {
+  const g = b.geju;
+  const rel = b.relations
+    .map((r) => `${r.kind} ${r.chars.join("")}(${r.kind === "三会" ? r.hua : r.between.map((w) => PILLAR_ZH[w]).join("-")})`)
+    .join(";");
+  const x = b.extraPalaces;
+  return `
+- 格局(本站按《子平真诠》月令取格简化,不含成败救应):${g.main}(${g.basis})${g.also.length ? `;兼:${g.also.join("、")}` : ""}${g.possibleCong ? ";可能从格,格局仅供参考" : ""}${rel ? `\n- 原局干支关系:${rel}` : ""}
+- 胎元 ${x.taiYuan.ganZhi}(${x.taiYuan.naYin}) | 胎息 ${x.taiXi.ganZhi} | 命宫 ${x.mingGong.ganZhi} | 身宫 ${x.shenGong.ganZhi}(古法,《三命通会》提要谓多有不验)`;
 }
 
 /** 按 scope 決定動態段的取捨;none → 空字符串(調用方直接不拼動態段)。 */
@@ -135,19 +151,37 @@ function renderFortune(f: FortuneAnalysis, scope: FortuneScope = "full"): string
   const sihua = (s: { type: string; star: string; intoPalace: string }[]) =>
     s.map((x) => `${x.type}→${x.star}(入${x.intoPalace})`).join(" ");
 
+  /** 關係摘要〔冲年柱子午;岁运并临〕,無則空。 */
+  const relTail = (rels: GanzhiRelation[], keChong: string[], bing = false) => {
+    const parts = rels
+      .filter((r) => REL_KEEP.test(r.kind))
+      .map((r) => `${r.kind}${r.between.map((w) => PILLAR_ZH[w] ?? "").join("")}柱${r.chars.join("")}`);
+    if (bing) parts.push("岁运并临");
+    if (keChong.length) parts.push(`天克地冲${keChong.map((w) => PILLAR_ZH[w]).join("")}柱`);
+    return parts.length ? `〔${parts.join(";")}〕` : "";
+  };
+
   const daYun = f.bazi.daYun
     .map((d) => {
       const dec = d.ziweiDecadal;
       return (
         `  - ${d.ganZhi}(${d.startAge}-${d.endAge}岁/${d.startYear}-${d.endYear}) ` +
-        `天干${d.ganShiShen}、支藏${d.hideShiShen.map((h) => h.gan + h.shiShen).join("")} ${u(d.suppliesUseGod)}${cur(d.isCurrent)}` +
+        `天干${d.ganShiShen}、支藏${d.hideShiShen.map((h) => h.gan + h.shiShen).join("")} ${u(d.suppliesUseGod)}${cur(d.isCurrent)}${relTail(d.relations, d.tianKeDiChong)}` +
         `【同期大限${dec.heavenlyStem}${dec.earthlyBranch}(行${dec.palaceName}):${sihua(dec.sihua)}】`
       );
     })
     .join("\n");
 
   const liuNianLine = (y: (typeof f.bazi.liuNian)[number]) =>
-    `${y.year}(${y.age}岁)${y.ganZhi}·${y.ganShiShen}${y.suppliesUseGod ? "✓" : ""}${y.isReference ? "【参考年/今年】" : y.isPast ? "(已过)" : ""}`;
+    `${y.year}(${y.age}岁)${y.ganZhi}·${y.ganShiShen}${y.suppliesUseGod ? "✓" : ""}${y.isReference ? "【参考年/今年】" : y.isPast ? "(已过)" : ""}${relTail(y.relations, y.tianKeDiChong, y.suiYunBingLin)}`;
+
+  /** 流月(当前月±1);無 isCurrent 則不出。 */
+  const liuYue = () => {
+    const i = f.bazi.liuYue.findIndex((m) => m.isCurrent);
+    if (i < 0) return "";
+    const lines = f.bazi.liuYue.slice(Math.max(0, i - 1), i + 2).map((m) => `  - ${m.monthName}月 ${m.ganZhi}·${m.ganShiShen}${m.isCurrent ? " 【当前月】" : ""}${relTail(m.relations, [])}`);
+    return `\n### 八字流月(当前月±1)\n${lines.join("\n")}`;
+  };
 
   const yearlyLine = (y: (typeof f.ziwei.yearly)[number]) =>
     `  - ${y.year} ${y.heavenlyStem}${y.earthlyBranch}(行${y.palaceName}):${sihua(y.sihua)}`;
@@ -186,7 +220,7 @@ function renderFortune(f: FortuneAnalysis, scope: FortuneScope = "full"): string
     return `## 动态运势(当前运总览)
 ${useGodHeader}
 ${curLine}
-  - 当前紫微大限:${f.ziwei.decadal.heavenlyStem}${f.ziwei.decadal.earthlyBranch}(行${f.ziwei.decadal.palaceName}):${sihua(f.ziwei.decadal.sihua)}
+  - 当前紫微大限:${f.ziwei.decadal.heavenlyStem}${f.ziwei.decadal.earthlyBranch}(行${f.ziwei.decadal.palaceName}):${sihua(f.ziwei.decadal.sihua)}${liuYue()}
 `;
   }
 
@@ -232,7 +266,7 @@ ${daYun}
   - 大限 ${f.ziwei.decadal.heavenlyStem}${f.ziwei.decadal.earthlyBranch}(行${f.ziwei.decadal.palaceName}):${sihua(f.ziwei.decadal.sihua)}
 
 ### 紫微流年四化(飞入本命宫,化忌冲宫尤需留意)
-${yearly}
+${yearly}${liuYue()}
 `;
 }
 
