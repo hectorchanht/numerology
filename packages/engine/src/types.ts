@@ -1,6 +1,7 @@
 import type { Dizhi, Tiangan, TiaohouResult } from "@numerology/knowledge";
 import type { GanzhiRelation } from "./relations.js";
 import type { GejuResult } from "./geju.js";
+import type { ZiweiGejuHit } from "./ziwei-geju.js";
 
 export type Gender = "男" | "女";
 
@@ -142,6 +143,8 @@ export interface ZiweiChart {
   palaces: ZiweiPalace[];
   /** 命宮三方四正(判斷格局的依據) */
   soulSanFang: SanFangSiZheng;
+  /** 《紫微斗數全書》格局識別結果 */
+  geju: ZiweiGejuHit[];
 }
 
 export interface ChartMeta {

@@ -21,6 +21,7 @@ export {
   type ResolvedDateTime,
   type FavorableDirection,
 } from "./solartime.js";
+export { detectZiweiGeju, type ZiweiGejuHit } from "./ziwei-geju.js";
 export { castZiweiFeixing, findLuJiJiaoChi, type ZiweiFeixing } from "./ziwei-feixing.js";
 export { castZiweiHoroscope, computeOverlaps, type ZiweiHoroscope, type ZiweiLayer, type ZiweiLayerKey, type ZiweiOverlap } from "./ziwei-horoscope.js";
 export { analyzeFortune } from "./fortune.js";

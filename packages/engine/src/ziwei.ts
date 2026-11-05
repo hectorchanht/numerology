@@ -3,6 +3,7 @@ import { DIZHI } from "@numerology/knowledge";
 import type { BirthInput, SanFangSiZheng, ZiweiChart, ZiweiPalace, ZiweiStar } from "./types.js";
 import { hourToTimeIndex, validateBirthInput } from "./time.js";
 import { resolveBirthDateTime } from "./solartime.js";
+import { detectZiweiGeju } from "./ziwei-geju.js";
 
 /**
  * 計算某宮(以地支定位)的三方四正:本宮 + 對宮(環上 +6)+ 兩三合宮(±4)。
@@ -92,6 +93,7 @@ export function castZiwei(input: BirthInput): ZiweiChart {
     chineseDate: a.chineseDate,
     palaces,
     soulSanFang: computeSanFangSiZheng(palaces, a.earthlyBranchOfSoulPalace),
+    geju: detectZiweiGeju(palaces, a.earthlyBranchOfSoulPalace),
   };
 }
 
