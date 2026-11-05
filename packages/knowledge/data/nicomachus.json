@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "name": "Nicomachus《算術入門》:數嘅分類、完全數、比嘅五種、形數、立方、十種比例",
+    "schema": "classes ; perfect:{method,known,claims} ; ratios:[{name,greek,example,rule}] ; figurate:[{sides,seq,gnomonStep}] ; cubes ; proportions:[{n,name,example,rule}] ; mostPerfect",
+    "source": "Nicomachus of Gerasa, Introduction to Arithmetic, tr. Martin Luther D'Ooge (Macmillan 1926;美國 1926 年出版,2022 年起公有領域;archive.org nicomachus-introduction-to-arithmetic)。page = 1926 印刷頁碼。只用 Nicomachus 正文;Robbins 同 Karpinski 嘅研究部分同譯者註只用作核對。",
+    "version": "0.1.0",
+    "reviewed": false,
+    "reviewNote": "OCR 用 archive.org djvu 文字,數列逐個由公式重算(test)。Nicomachus 對完全數嘅兩個說法(每個位數級各一個、尾數 6 同 8 交替)係作者論點,test 證明第五、第六個完全數已經唔成立。"
+  },
+  "classes": {
+    "page": 192,
+    "even": {
+      "evenTimesEven": "2ⁿ:可以一路對半直到 1",
+      "evenTimesOdd": "2 × 奇數:只可以對半一次",
+      "oddTimesEven": "2ᵏ × 奇數(k ≥ 2,奇數 > 1):介乎兩者之間"
+    },
+    "odd": {
+      "prime": "質數,只有 1 做因數",
+      "composite": "合數,有其他奇數因數",
+      "relativelyPrime": "本身係合數,但同另一個數互質(例:9 同 25)"
+    },
+    "parts": {
+      "superabundant": "真因數和 > 本數",
+      "deficient": "真因數和 < 本數",
+      "perfect": "真因數和 = 本數"
+    }
+  },
+  "perfect": {
+    "page": 209,
+    "method": "由 1 起累加 1, 2, 4, 8, …;和係質數就乘以最後加入嗰項,得完全數",
+    "known": [6, 28, 496, 8128],
+    "claims": [
+      { "id": "onePerOrder", "text": "個位、十位、百位、千位各得一個完全數", "tier": "author-thesis", "holdsFor": 4 },
+      { "id": "alternate68", "text": "完全數必為偶數,尾數 6、8 交替", "tier": "author-thesis", "holdsFor": 4 }
+    ],
+    "unity": "1 係「潛在」完全數,唔係實際"
+  },
+  "ratios": {
+    "page": 214,
+    "greater": [
+      { "name": "multiple", "zh": "倍", "example": [2, 1], "rule": "a = kb, k ≥ 2" },
+      { "name": "superparticular", "zh": "超一分", "example": [3, 2], "rule": "a = b + b/k" },
+      { "name": "superpartient", "zh": "超多分", "example": [5, 3], "rule": "a = b + m·b/k,1 < m < k" },
+      { "name": "multiple superparticular", "zh": "倍超一分", "example": [5, 2], "rule": "a = nb + b/k" },
+      { "name": "multiple superpartient", "zh": "倍超多分", "example": [8, 3], "rule": "a = nb + m·b/k" }
+    ],
+    "less": "反過嚟就係 submultiple、subsuperparticular 等五種"
+  },
+  "figurate": {
+    "page": 243,
+    "rule": "k 邊形數 = 由 1 起、公差 k−2 嘅等差數列逐項累加(gnomon)",
+    "items": [
+      { "sides": 3, "name": "triangular", "page": 247, "seq": [1, 3, 6, 10, 15, 21, 28, 36, 45, 55] },
+      { "sides": 4, "name": "square", "page": 247, "seq": [1, 4, 9, 16, 25, 36, 49, 64, 81, 100] },
+      { "sides": 5, "name": "pentagonal", "page": 243, "seq": [1, 5, 12, 22, 35, 51, 70] },
+      { "sides": 6, "name": "hexagonal", "page": 245, "seq": [1, 6, 15, 28, 45, 66] },
+      { "sides": 7, "name": "heptagonal", "page": 245, "seq": [1, 7, 18, 34, 55, 81, 112, 148] }
+    ],
+    "relations": [
+      { "page": 247, "text": "相鄰兩個三角數之和係平方數" },
+      { "page": 247, "text": "三角數加平方數得五角數" }
+    ]
+  },
+  "cubes": {
+    "page": 263,
+    "seq": [1, 8, 27, 64, 125, 216],
+    "rule": "連續奇數分組:第 n 組有 n 個奇數,組和係 n³(1;3+5;7+9+11;…)"
+  },
+  "proportions": {
+    "page": 281,
+    "note": "a > b > c;頭三種係古典三種,第四至第六係「相反」形,第七至第十係後人補充",
+    "items": [
+      { "n": 1, "name": "arithmetic", "example": [3, 2, 1], "rule": "a − b = b − c" },
+      { "n": 2, "name": "geometric", "example": [4, 2, 1], "rule": "a : b = b : c" },
+      { "n": 3, "name": "harmonic", "example": [6, 4, 3], "rule": "(a − b) : (b − c) = a : c" },
+      { "n": 4, "name": "subcontrary", "example": [6, 5, 3], "rule": "(a − b) : (b − c) = c : a" },
+      { "n": 5, "name": "fifth", "example": [5, 4, 2], "rule": "(a − b) : (b − c) = c : b" },
+      { "n": 6, "name": "sixth", "example": [6, 4, 1], "rule": "(a − b) : (b − c) = b : a" },
+      { "n": 7, "name": "seventh", "example": [9, 8, 6], "rule": "(a − c) : (b − c) = a : c" },
+      { "n": 8, "name": "eighth", "example": [9, 7, 6], "rule": "(a − c) : (a − b) = a : c" },
+      { "n": 9, "name": "ninth", "example": [7, 6, 4], "rule": "(a − c) : (b − c) = b : c" },
+      { "n": 10, "name": "tenth", "example": [8, 5, 3], "rule": "(a − c) : (a − b) = b : c" }
+    ]
+  },
+  "mostPerfect": {
+    "page": 284,
+    "example": [6, 8, 9, 12],
+    "rule": "兩端之間一個係算術中項、一個係調和中項,而且 端:算術中項 = 調和中項:端(幾何)",
+    "music": "6:12 八度、6:9 同 8:12 五度、6:8 同 9:12 四度、8:9 全音"
+  }
+}
