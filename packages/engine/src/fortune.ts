@@ -6,6 +6,7 @@ import { castBazi } from "./bazi.js";
 import { hourToTimeIndex, validateBirthInput } from "./time.js";
 import { dizhiHideGan, shiShen, type ShiShen } from "./shishen.js";
 import { resolveBirthDateTime } from "./solartime.js";
+import { externalRelations, suiYunBingLin, tianKeDiChong, type GanzhiRelation, type PillarKey } from "./relations.js";
 
 export interface DaYunAnalysis {
   ganZhi: string;
@@ -29,6 +30,9 @@ export interface DaYunAnalysis {
    * "當前大限"套用到每一步大運上。
    */
   ziweiDecadal: ZiweiScopeFortune;
+  /** 大運對原局的干支關係 */
+  relations: GanzhiRelation[];
+  tianKeDiChong: PillarKey[];
 }
 
 export interface LiuNianAnalysis {
@@ -40,6 +44,20 @@ export interface LiuNianAnalysis {
   isReference: boolean;
   /** 該流年是否已過(早於參考年)→ 供"回看驗證" */
   isPast: boolean;
+  /** 流年對原局的干支關係 */
+  relations: GanzhiRelation[];
+  tianKeDiChong: PillarKey[];
+  /** 歲運並臨:流年干支 === 所屬大運干支 */
+  suiYunBingLin: boolean;
+}
+
+export interface LiuYueAnalysis {
+  index: number;
+  monthName: string;
+  ganZhi: string;
+  ganShiShen: ShiShen;
+  relations: GanzhiRelation[];
+  isCurrent: boolean;
 }
 
 export type SihuaType = "禄" | "权" | "科" | "忌";
@@ -69,6 +87,10 @@ export interface FortuneAnalysis {
     useGodsReviewed: boolean;
     daYun: DaYunAnalysis[];
     liuNian: LiuNianAnalysis[];
+    /** 起運前虛運段嘅小運;起運後唔出 */
+    xiaoYun: { year: number; age: number; ganZhi: string }[];
+    /** referenceYear 流年嘅 12 個月;搵唔到 → [] */
+    liuYue: LiuYueAnalysis[];
   };
   ziwei: {
     decadal: ZiweiScopeFortune;
@@ -143,10 +165,15 @@ export function analyzeFortune(
 
   const daYun: DaYunAnalysis[] = [];
   const liuNian: LiuNianAnalysis[] = [];
+  const natal = bazi.fourPillars;
+  const xiaoYun: { year: number; age: number; ganZhi: string }[] = [];
 
   for (const d of rawDaYun) {
     const ganZhi = d.getGanZhi();
-    if (ganZhi.trim().length !== 2) continue; // 跳過起運前虛運
+    if (ganZhi.trim().length !== 2) {
+      xiaoYun.push(...d.getXiaoYun().map((x) => ({ year: x.getYear(), age: x.getAge(), ganZhi: x.getGanZhi() })));
+      continue;
+    } // 跳過起運前虛運
     const gan = ganZhi[0]!;
     const zhi = ganZhi[1]!;
     const hide = dizhiHideGan(zhi);
@@ -172,6 +199,8 @@ export function analyzeFortune(
         "大限",
         a.horoscope(`${Math.round((startYear + endYear) / 2)}-6-1`).decadal,
       ),
+      relations: externalRelations({ ganZhi, role: "dayun" }, natal),
+      tianKeDiChong: tianKeDiChong(ganZhi, natal),
     });
 
     // 該運內、落在窗口的流年
@@ -190,9 +219,29 @@ export function analyzeFortune(
         suppliesUseGod: suppliesUseGod(yGan, yHide),
         isReference: year === referenceYear,
         isPast: year < referenceYear,
+        relations: externalRelations({ ganZhi: yGanZhi, role: "liunian" }, natal),
+        tianKeDiChong: tianKeDiChong(yGanZhi, natal),
+        suiYunBingLin: suiYunBingLin(ganZhi, yGanZhi),
       });
     }
   }
+
+  // —— 流月:referenceYear 嗰年(搵遍所有原始大運,包括虛運) ——
+  const refLiuNian = rawDaYun.flatMap((d) => d.getLiuNian()).find((y) => y.getYear() === referenceYear);
+  const nowZhi = referenceYear === new Date().getFullYear()
+    ? Solar.fromYmd(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate()).getLunar().getEightChar().getMonthZhi()
+    : undefined;
+  const liuYue: LiuYueAnalysis[] = (refLiuNian?.getLiuYue() ?? []).map((m) => {
+    const ganZhi = m.getGanZhi();
+    return {
+      index: m.getIndex(),
+      monthName: m.getMonthInChinese(),
+      ganZhi,
+      ganShiShen: shiShen(dayMaster, ganZhi[0] as Tiangan),
+      relations: externalRelations({ ganZhi, role: "liuyue" }, natal),
+      isCurrent: nowZhi === ganZhi[1],
+    };
+  });
 
   // —— 紫微大限(當前) / 流年四化 ——
   // a / starToPalace / palaceNameByIndex / toScope 已在上方定義,此處複用。
@@ -213,6 +262,8 @@ export function analyzeFortune(
       useGodsReviewed: bazi.tiaohou.reviewed,
       daYun,
       liuNian,
+      xiaoYun,
+      liuYue,
     },
     ziwei: { decadal, yearly },
   };

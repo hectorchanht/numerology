@@ -34,3 +34,25 @@ test("紫微流年四化:2026 有禄权科忌四化,且各落入本命某宫", (
 test("大限四化结构完整(禄权科忌各一)", () => {
   assert.deepEqual(f.ziwei.decadal.sihua.map((s) => s.type).slice().sort(), ["权", "科", "忌", "禄"].sort());
 });
+
+test("小運、流月、歲運關係", () => {
+  const S = { year: 1990, month: 5, day: 15, hour: 14, minute: 30, gender: "男" };
+  const a = analyzeFortune(S, { referenceYear: 2017 });
+  assert.equal(a.bazi.liuYue.length, 12);
+  assert.equal(
+    a.bazi.liuYue.map((m) => m.ganZhi).join(" "),
+    "壬寅 癸卯 甲辰 乙巳 丙午 丁未 戊申 己酉 庚戌 辛亥 壬子 癸丑",
+  );
+  const g = analyzeFortune(S, { referenceYear: 1991, yearsBack: 1 });
+  assert.deepEqual(g.bazi.xiaoYun.slice(0, 3), [
+    { year: 1990, age: 1, ganZhi: "甲申" }, { year: 1991, age: 2, ganZhi: "乙酉" }, { year: 1992, age: 3, ganZhi: "丙戌" },
+  ]);
+  assert.deepEqual(analyzeFortune(S, { referenceYear: 1980 }).bazi.liuYue, []);
+  for (const d of a.bazi.daYun) {
+    assert.ok(Array.isArray(d.relations) && Array.isArray(d.tianKeDiChong));
+  }
+  for (const y of a.bazi.liuNian) {
+    assert.ok(Array.isArray(y.relations) && Array.isArray(y.tianKeDiChong));
+    assert.equal(typeof y.suiYunBingLin, "boolean");
+  }
+});
