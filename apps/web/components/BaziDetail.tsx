@@ -65,6 +65,44 @@ export function BaziDetail({ bazi }: { bazi: BaziChart }) {
         </div>
       </div>
       <p className="note">{t("bazi.footnote")}</p>
+      <div className="card">
+        <h3>{t("bazi.geju.title")}</h3>
+        <p>
+          <span className="tag accent">{z(bazi.geju.main)}</span>{" "}
+          {bazi.geju.also.map((a) => <span className="tag" key={a}>{z(a)}</span>)}{" "}
+          <span className="muted">{t("bazi.geju.basis")}:{z(bazi.geju.basis)}</span>
+        </p>
+        <details>
+          <summary>{t("bazi.geju.steps")}</summary>
+          <ol>{bazi.geju.steps.map((s) => <li key={s}>{z(s)}</li>)}</ol>
+        </details>
+        <p className="note">{t("bazi.geju.note")}({z(bazi.geju.cite)})</p>
+      </div>
+      <div className="card">
+        <h3>{t("bazi.rel.title")}</h3>
+        <div className="pill-grp">
+          {bazi.relations.length
+            ? bazi.relations.map((r, i) => (
+                <span className="tag" key={i}>{z(`${r.kind} ${r.chars.join("")}${r.hua ? `→${r.hua}` : ""}`)}</span>
+              ))
+            : <span className="muted">{t("bazi.rel.none")}</span>}
+        </div>
+      </div>
+      <div className="card">
+        <h3>{t("bazi.extra.title")}</h3>
+        <table className="bazi-detail">
+          <tbody>
+            {(["taiYuan", "taiXi", "mingGong", "shenGong"] as const).map((k) => (
+              <tr key={k}>
+                <th className="rowlabel">{t(`bazi.extra.${k}`)}</th>
+                <td>{z(bazi.extraPalaces[k].ganZhi)}</td>
+                <td className="muted">{z(bazi.extraPalaces[k].naYin)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="note">{t("bazi.extra.note")}</p>
+      </div>
     </>
   );
 }

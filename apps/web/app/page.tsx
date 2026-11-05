@@ -20,7 +20,7 @@ import { SettingsPanel } from "@/components/SettingsPanel";
 import { HistoryPanel } from "@/components/HistoryPanel";
 import { YijingHistoryPanel } from "@/components/YijingHistoryPanel";
 import { FortuneTimeline } from "@/components/FortuneTimeline";
-import { FortuneDayun, FortuneYears, FortuneRhythm } from "@/components/FortuneSections";
+import { FortuneDayun, FortuneMonths, FortuneYears, FortuneRhythm } from "@/components/FortuneSections";
 import { ChartSummary, WuxingChart } from "@/components/Charts";
 import { SectionBasis } from "@/components/SectionBasis";
 import { CrossSystemCard } from "@/components/CrossSystemCard";
@@ -542,7 +542,12 @@ export default function Home() {
                     ? (segKey, md, lens) => {
                         switch (segKey) {
                           case "dayun":
-                            return <FortuneDayun md={md} fortune={fortuneJson} lens={lens} />;
+                            return (
+                              <>
+                                <FortuneDayun md={md} fortune={fortuneJson} lens={lens} />
+                                {lens !== "ziwei" ? <FortuneMonths fortune={fortuneJson} /> : null}
+                              </>
+                            );
                           case "review":
                             return <FortuneYears md={md} fortune={fortuneJson} lens={lens} past />;
                           case "future":
