@@ -14,7 +14,7 @@ const GMT = 584283;
 const mod = (a: number, n: number) => ((a % n) + n) % n;
 
 /** 格里曆 → 儒略日數(標準整數公式,含公元前的天文紀年)。 */
-function gregorianToJdn(y: number, m: number, d: number): number {
+export function gregorianToJdn(y: number, m: number, d: number): number {
   const a = Math.floor((14 - m) / 12);
   const yy = y + 4800 - a;
   const mm = m + 12 * a - 3;

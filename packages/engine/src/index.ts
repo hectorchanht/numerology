@@ -123,3 +123,4 @@ export { MAYA_META, TZOLKIN_DAY_NAMES } from "@numerology/knowledge";
 export { SCIENCE_NOTES, type ScienceNote } from "@numerology/knowledge";
 export { castFuyi, type FuyiResult } from "./fuyi.js";
 export { castNumberLore, castBirthLore, classifyNumber, starLongitude, type NumberLoreResult, type NumberLoreItem, type NumberClass, type BirthLoreResult, type StarHit, type LoreSource } from "./lore.js";
+export { castJyotish, castEgyptian, castMetonic, type JyotishResult, type Dasha, type EgyptianResult, type MetonicResult } from "./calendars.js";

@@ -1,0 +1,143 @@
+{
+  "meta": {
+    "name": "埃及民用曆(Nabonassar 紀元)與三十六 face(旬)行星主",
+    "schema": "civil:{months,monthDays,epagomenal,epoch} ; faces:[{sign,rulers[3]}]",
+    "source": "民用曆:365 日 = 12 × 30 + 5,不置閏(Ptolemy《天文學大成》各表通用);月名拼法依 Utrecht 大學 Almagest 曆表頁(webspace.science.uu.nl/~gent0113/astro/almagestephemeris_main.htm);紀元 Nabonassar 元年 Thoth 1 = 公元前 747 年 2 月 26 日正午(儒略曆),Almagest III.7,經英文維基百科 Nabonassar 與上述 Utrecht 頁轉引。Face 行星主:迦勒底序由白羊 0° 火星起,據英文維基百科 Decan (astrology)『Faces of the Planets』表,其出處為 William Lilly, Christian Astrology(1647)頁 104–105。",
+    "version": "0.1.0",
+    "reviewed": false,
+    "reviewNote": "JDN 1448638 由 test 以儒略曆公式重算。月名各譯本拼法不同(Choiak / Choiach 等)。埃及旬星星名與現代星座的對應學界未定(Symons),不入庫;10° face 為希臘化時期改造。",
+    "tier": "classical"
+  },
+  "civil": {
+    "months": [
+      "Thoth",
+      "Phaophi",
+      "Hathyr",
+      "Choiach",
+      "Tybi",
+      "Mecheir",
+      "Phamenoth",
+      "Pharmouthi",
+      "Pachon",
+      "Payni",
+      "Epeiph",
+      "Mesore"
+    ],
+    "epagomenal": "Epagomenae",
+    "monthDays": 30,
+    "epagomenalDays": 5,
+    "epoch": {
+      "era": "Nabonassar",
+      "julianDate": "-746-02-26",
+      "jdn": 1448638,
+      "note": "公元前 747 年 = 天文紀年 −746;正午(亞歷山大港)"
+    }
+  },
+  "faces": [
+    {
+      "sign": "Aries",
+      "rulers": [
+        "Mars",
+        "Sun",
+        "Venus"
+      ]
+    },
+    {
+      "sign": "Taurus",
+      "rulers": [
+        "Mercury",
+        "Moon",
+        "Saturn"
+      ]
+    },
+    {
+      "sign": "Gemini",
+      "rulers": [
+        "Jupiter",
+        "Mars",
+        "Sun"
+      ]
+    },
+    {
+      "sign": "Cancer",
+      "rulers": [
+        "Venus",
+        "Mercury",
+        "Moon"
+      ]
+    },
+    {
+      "sign": "Leo",
+      "rulers": [
+        "Saturn",
+        "Jupiter",
+        "Mars"
+      ]
+    },
+    {
+      "sign": "Virgo",
+      "rulers": [
+        "Sun",
+        "Venus",
+        "Mercury"
+      ]
+    },
+    {
+      "sign": "Libra",
+      "rulers": [
+        "Moon",
+        "Saturn",
+        "Jupiter"
+      ]
+    },
+    {
+      "sign": "Scorpio",
+      "rulers": [
+        "Mars",
+        "Sun",
+        "Venus"
+      ]
+    },
+    {
+      "sign": "Sagittarius",
+      "rulers": [
+        "Mercury",
+        "Moon",
+        "Saturn"
+      ]
+    },
+    {
+      "sign": "Capricorn",
+      "rulers": [
+        "Jupiter",
+        "Mars",
+        "Sun"
+      ]
+    },
+    {
+      "sign": "Aquarius",
+      "rulers": [
+        "Venus",
+        "Mercury",
+        "Moon"
+      ]
+    },
+    {
+      "sign": "Pisces",
+      "rulers": [
+        "Saturn",
+        "Jupiter",
+        "Mars"
+      ]
+    }
+  ],
+  "facesOrder": [
+    "Mars",
+    "Sun",
+    "Venus",
+    "Mercury",
+    "Moon",
+    "Saturn",
+    "Jupiter"
+  ]
+}
