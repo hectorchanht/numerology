@@ -24,6 +24,7 @@
 | 河洛理數 | 已入庫(待校對);已接引擎(`castHeluo`)、週期卡同 AI 多體系一節 | 陳摶、邵雍題《河洛理數》卷一起例(`heluo-lishu.json`):干支取數、天地數、先後天卦、元堂、元氣、化工、大運 | 是 | 天干洛書數同八卦、地支河圖數;卦名接易經知識庫 |
 | 天網搜奇錄 | 已入庫(待校對);周姓命例接引擎測試 | 紫微楼《天網搜奇錄》(現代、有版權,只錄事實):鐵板神數講義取數(太玄數、遇十不用)、河洛配卦實例、庚干化忌派別、擲錢規則(`tianwang-souqi.json`) | 否 | 周姓命例同 `castHeluo` 吻合;馬翰如命例天地數有誤(庚當 4) |
 | 鐵版神數 | 已入庫(知識條目,待校對) | 《四庫全書總目提要》卷一百十一(維基文庫)評語原文;源流、考刻流程取自維基百科(二手)(`tieban.json`) | 否(考刻依賴六親問答,條文不公開) | 同河洛理數、皇極經世(題邵雍之名)、天網搜奇錄講義取數有關;見 `docs/tieban.md` |
+| 河圖洛書 | 已入庫(待校對) | 《古今圖書集成·經籍典·河圖洛書部》卷 51–58(公有領域,Wikisource):河圖方位同五行、洛書九宮、天地之數 55、大衍 50、劉牧圖書互易之爭、范望太玄天干數(`hetu-luoshu.json`) | 否 | 太玄天干數同《天網搜奇錄》一致;八卷無「河洛理數」一詞 |
 | 卡巴拉(Sefer Yetzirah) | 已入庫(待校對);已接引擎(字母分類、Westcott 補表配星座 / 星期) | Sefer Yetzirah,Westcott 1893 英譯(`sefer-yetzirah.json`) | 是(查表) | 22 字母 = 3 + 7 + 12;七雙字母配七行星,與幻方行星序對看 |
 | Behenian 十五恆星 | 已入庫(待校對);已接引擎(`castBirthLore` 合相 + 基率) | Agrippa I.32 名稱;J2000 座標 Hipparcos(van Leeuwen 2007,經維基百科);容許度 6°(維基百科,近代)(`behenian-stars.json`) | 是(歲差換算黃經) | 第 8 顆 Alkaid / Polaris 兩讀並列 |
 | 數之學(Agrippa 數階、希伯來字母值、gematria 同值) | 已接引擎(`castNumberLore`)、首頁「數之學」卡同 AI 多體系一節 | `agrippa-scales.json`、`agrippa-correspondences.json`、`greek-gematria.json` | 是(查表) | 盤中各數(生命靈數、幻方行和 / 總和、瑪雅 Kin、河洛天地數)逐個查,附 gematria 基率 |
