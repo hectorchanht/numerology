@@ -1,8 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import type { ZiweiChart, ZiweiPalace, ZiweiStar } from "@numerology/engine";
+import { useEffect, useMemo, useState } from "react";
+import { castZiweiHoroscope, type BirthInput, type ZiweiChart, type ZiweiLayer, type ZiweiPalace, type ZiweiStar } from "@numerology/engine";
 import { useLocale, useScript, type TKey } from "@/lib/i18n";
+import { Seg } from "@/components/ui";
+import { ZiweiExtras } from "@/components/ZiweiExtras";
+
+type LayerSel = "natal" | ZiweiLayer["key"];
+const LAYER_KEYS: Record<LayerSel, TKey> = {
+  natal: "ziwei.layer.natal", decadal: "ziwei.layer.decadal", age: "ziwei.layer.age",
+  yearly: "ziwei.layer.yearly", monthly: "ziwei.layer.monthly", daily: "ziwei.layer.daily",
+};
+
+/** 瀏覽器時區今日 YYYY-M-D(引擎格式);只可喺 client 呼叫。 */
+function todayStr(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+const toInputDate = (s: string) => s.split("-").map((x) => x.padStart(2, "0")).join("-");
 
 /** 地支 → 傳統紫微盤 4×4 網格座標 [row, col]。 */
 const GRID: Record<string, [number, number]> = {
@@ -45,11 +60,14 @@ function StarSpan({ star, kind }: { star: ZiweiStar; kind: "major" | "minor" }) 
 }
 
 function Palace({
-  p, highlight, onSelect,
+  p, highlight, onSelect, layer, douJun,
 }: {
   p: ZiweiPalace;
   highlight: Highlight | null;
   onSelect: (branch: string) => void;
+  /** 揀咗運限層先有 */
+  layer?: ZiweiLayer;
+  douJun?: boolean;
 }) {
   const { t } = useLocale();
   const { z } = useScript();
@@ -59,6 +77,7 @@ function Palace({
     p.isSoulPalace ? "soul" : "",
     p.isBodyPalace ? "body" : "",
     highlight ? `hl-${highlight}` : "",
+    layer && !layer.active ? "dim" : "",
   ].filter(Boolean).join(" ");
   return (
     <button
@@ -74,21 +93,39 @@ function Palace({
           : <span className="empty">{t("zw.noMajor")}</span>}
         {p.minorStars.map((s) => <StarSpan key={s.name} star={s} kind="minor" />)}
       </span>
+      {layer ? (
+        <span className="stars" style={{ color: "var(--accent-text)", fontSize: 10 }}>
+          <span>
+            {z(layer.palaceNames[p.index])}
+            {layer.palaceIndex === p.index ? ` ★${t("ziwei.layer.ming", { l: t(LAYER_KEYS[layer.key]) })}` : ""}
+          </span>
+          {layer.sihua.filter((h) => h.intoPalace === p.name).map((h) => (
+            <span key={h.type}>{t(LAYER_KEYS[layer.key])}{z(h.type)}{z(h.star)}</span>
+          ))}
+          {layer.stars.filter((s) => s.natalPalaceName === p.name).map((s) => <span key={s.name}>{z(s.name)}</span>)}
+        </span>
+      ) : null}
       <span className="pn">
         <b>{z(p.name)}</b>
         <span className="dr">{p.decadal.range[0]}–{p.decadal.range[1]}</span>
       </span>
       {p.isBodyPalace ? <span className="tag">{t("zw.body")}</span> : null}
+      {douJun ? <span className="tag" style={{ top: 34 }}>{t("ziwei.doujun")}</span> : null}
       {highlight ? <span className="sfsz-badge">{t(BADGE_KEYS[highlight])}</span> : null}
     </button>
   );
 }
 
 /** 紫微 4×4 宮盤:撳宮位高亮三方四正,下方列出該宮全部星曜與十二神。 */
-export function ZiweiBoard({ ziwei, center }: { ziwei: ZiweiChart; center?: React.ReactNode }) {
+export function ZiweiBoard({ ziwei, input, center }: { ziwei: ZiweiChart; input: BirthInput; center?: React.ReactNode }) {
   const { t } = useLocale();
   const { z } = useScript();
   const [selected, setSelected] = useState<string>(ziwei.soulPalaceBranch);
+  const [layerSel, setLayerSel] = useState<LayerSel>("natal");
+  const [date, setDate] = useState(""); // SSR 唔知用戶時區,mount 後先填今日
+  useEffect(() => setDate(todayStr()), []);
+  const horoscope = useMemo(() => (date ? castZiweiHoroscope(input, date) : null), [input, date]);
+  const layer = layerSel === "natal" ? undefined : horoscope?.layers.find((l) => l.key === layerSel);
   const sf = sanFangBranches(selected);
   const highlightOf = (branch: string): Highlight | null => {
     if (branch === sf.self) return "self";
@@ -105,9 +142,25 @@ export function ZiweiBoard({ ziwei, center }: { ziwei: ZiweiChart; center?: Reac
 
   return (
     <>
+      <Seg
+        compact
+        label={t("ziwei.layer.label")}
+        value={layerSel}
+        onChange={setLayerSel}
+        options={(Object.keys(LAYER_KEYS) as LayerSel[]).map((k) => ({ value: k, label: t(LAYER_KEYS[k]) }))}
+      />
+      <label className="note" style={{ display: "block" }}>
+        {t("ziwei.layer.date")}{" "}
+        <input
+          type="date"
+          value={date ? toInputDate(date) : ""}
+          onChange={(e) => e.target.value && setDate(e.target.value.split("-").map(Number).join("-"))}
+        />
+      </label>
+      {layer && !layer.active ? <p className="note">{t("ziwei.layer.inactive")}</p> : null}
       <div className="ziwei-board">
         {ziwei.palaces.map((p) => (
-          <Palace key={p.index} p={p} highlight={highlightOf(p.earthlyBranch)} onSelect={setSelected} />
+          <Palace key={p.index} p={p} highlight={highlightOf(p.earthlyBranch)} onSelect={setSelected} layer={layer} douJun={!!layer && horoscope?.douJun.branch === p.earthlyBranch} />
         ))}
         <div className="board-center">
           {center ?? (
@@ -160,11 +213,16 @@ export function ZiweiBoard({ ziwei, center }: { ziwei: ZiweiChart; center?: Reac
             </span>
           </div>
           <div className="row plain">
+            <span className="lbl">{t("ziwei.sanfangMajor")}</span>
+            <span className="val wrap">{sel.sanFang.majorStars.map((s) => z(s)).join("、") || t("zw.noMajor")}</span>
+          </div>
+          <div className="row plain">
             <span className="lbl">{t("zw.gods")}</span>
             <span className="val wrap">{z(`${sel.changsheng12} · ${sel.boshi12} · ${sel.jiangqian12} · ${sel.suiqian12}`)}</span>
           </div>
         </div>
       ) : null}
+      <ZiweiExtras ziwei={ziwei} input={input} horoscope={horoscope} />
     </>
   );
 }

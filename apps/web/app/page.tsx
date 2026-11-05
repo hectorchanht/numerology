@@ -454,7 +454,7 @@ export default function Home() {
               </div>
               <div hidden={sys !== "ziwei"}>
                 <h2 className="group-title">{t("chart.palacesTitle")}</h2>
-                <ZiweiBoard key={JSON.stringify(ready.input)} ziwei={ready.chart.ziwei} />
+                <ZiweiBoard key={JSON.stringify(ready.input)} ziwei={ready.chart.ziwei} input={ready.input} />
                 <p className="note">{t("chart.palaceNote")}</p>
               </div>
             </div>
