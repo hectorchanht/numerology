@@ -1,0 +1,133 @@
+// AUTO-GENERATED from data/huangji-jingshi.json — 內聯為 TS 模組,免運行時 fs 讀取。
+// 若需更新數據,改 data/huangji-jingshi.json 後重新生成本文件。
+const HUANGJI_DATA = {
+  "meta": {
+    "name": "皇極經世:元會運世紀年",
+    "schema": "units ; naming ; anchors:[{label,hui,yun,shi,yearInShi,ganzhi,ad}] ; squares",
+    "source": "邵雍《皇極經世書》(北宋;四庫全書本),全文據維基文庫 zh.wikisource:皇極經世/卷三上(以會經運,開物、唐堯)、卷四下(麟德、閉物)、卷十三(觀物外篇上)。公有領域,此處只錄數值同規則。",
+    "version": "0.1.0",
+    "reviewed": false,
+    "reviewNote": "表格頁未排版(Wikisource {{未排版}})。紀年由 test 逐項重算:會/運/世序號、干支同公元互相核對。公元換算用唐堯元年甲辰 = 前 2357 年(傳統紀年,唔係考古年代)。",
+    "tier": "classical"
+  },
+  "units": {
+    "yuan": {
+      "hui": 12
+    },
+    "hui": {
+      "yun": 30
+    },
+    "yun": {
+      "shi": 12
+    },
+    "shi": {
+      "years": 30
+    },
+    "names": {
+      "日": "元",
+      "月": "會",
+      "星": "運",
+      "辰": "世"
+    },
+    "yearsPerYuan": 129600
+  },
+  "naming": {
+    "hui": "會用十二地支:子一、丑二……亥十二",
+    "yun": "運用十天干循環:甲一、乙二……癸十,甲十一……",
+    "shi": "世用十二地支循環:子一……亥十二,子十三……",
+    "yearOne": "元第一年為甲子;單數世由甲子起,雙數世由甲午起"
+  },
+  "anchors": [
+    {
+      "label": "開物",
+      "hui": 3,
+      "huiName": "寅",
+      "yun": 76,
+      "yunName": "己",
+      "note": "開物始月寅之中,經星之己七十六",
+      "volume": "卷三上"
+    },
+    {
+      "label": "唐堯元年",
+      "hui": 6,
+      "huiName": "巳",
+      "yun": 180,
+      "yunName": "癸",
+      "shi": 2156,
+      "shiName": "未",
+      "yearInShi": 11,
+      "ganzhi": "甲辰",
+      "ad": -2356,
+      "volume": "卷三上",
+      "note": "經辰之未二千一百五十六,甲辰唐堯;ad 用天文紀年(-2356 = 前 2357 年)"
+    },
+    {
+      "label": "午會第一運",
+      "hui": 7,
+      "huiName": "午",
+      "yun": 181,
+      "yunName": "甲",
+      "shi": 2161,
+      "shiName": "子",
+      "volume": "卷三上"
+    },
+    {
+      "label": "麟德元年",
+      "hui": 7,
+      "huiName": "午",
+      "yun": 189,
+      "yunName": "壬",
+      "shi": 2257,
+      "shiName": "子",
+      "yearInShi": 1,
+      "ganzhi": "甲子",
+      "ad": 664,
+      "volume": "卷四下"
+    },
+    {
+      "label": "書止:後周顯德六年",
+      "ganzhi": "己未",
+      "ad": 959,
+      "note": "四庫提要:起於帝堯甲辰,至后周顯德六年己未"
+    },
+    {
+      "label": "閉物",
+      "hui": 11,
+      "huiName": "戌",
+      "yun": 315,
+      "yunName": "戊",
+      "note": "經星之戊三百十五,閉物經月戌之終",
+      "volume": "卷四下"
+    }
+  ],
+  "squares": {
+    "volume": "卷十三",
+    "statement": "三百六十變為十二萬九千六百,十二萬九千六百變為一百六十七億九千六百一十六萬",
+    "values": [
+      360,
+      129600,
+      16796160000
+    ],
+    "note": "每一級係上一級嘅平方;再下一級(原文「二萬八千二百一十一兆……」)用大數單位,未入庫。"
+  },
+  "hexagramScale": {
+    "volume": "卷十三",
+    "items": [
+      {
+        "gua": "夬",
+        "value": 12
+      },
+      {
+        "gua": "大壯",
+        "value": 4320
+      },
+      {
+        "gua": "泰",
+        "value": 559872000
+      }
+    ],
+    "note": "每級乘上一節嘅 360、129600;原文續到臨、復,數字有傳抄錯,未入庫。"
+  }
+} as const;
+
+export default HUANGJI_DATA;

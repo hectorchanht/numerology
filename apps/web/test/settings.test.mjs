@@ -232,3 +232,10 @@ test("readingId:同一输入稳定", async () => {
   const input = { year: 1990, month: 6, day: 15, hour: 14, gender: "男" };
   assert.equal(await readingId(input), await readingId({ ...input }));
 });
+
+test("stableInputHash:冇緯度時哈希同舊版一致;有緯度就唔同", async () => {
+  const base = { year: 1990, month: 6, day: 15, hour: 14, minute: 0, gender: "男" };
+  const old = await stableInputHash(base);
+  assert.equal(await stableInputHash({ ...base, latitude: undefined }), old);
+  assert.notEqual(await stableInputHash({ ...base, latitude: 22.3 }), old);
+});

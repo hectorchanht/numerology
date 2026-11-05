@@ -97,6 +97,14 @@ test("birth:拒绝非整数 / 经度越界,小数经度通过", () => {
   assert.throws(() => parseHourInferInput({ ...base, longitude: 999 }), /经度/);
 });
 
+test("birth:緯度選填,越界拒絕", () => {
+  const base = { year: 1990, month: 5, day: 30, hour: 11, minute: 0, gender: "男" };
+  assert.equal(parseBirthInput(base).latitude, undefined);
+  assert.equal(parseBirthInput({ ...base, latitude: "22.3" }).latitude, 22.3);
+  assert.throws(() => parseBirthInput({ ...base, latitude: 91 }), /纬度.*超出范围/);
+  assert.throws(() => parseBirthInput({ ...base, latitude: "abc" }), /latitude 非数字/);
+});
+
 // —— Bug 6: 農曆換算後超出範圍 ——
 test("birth:农历换算后超出 1900-2100 → 明确报错", () => {
   // 農曆 2100 年臘月廿九 → 公曆 2101-1-28:應報換算越界,而非下游「年 2101」。

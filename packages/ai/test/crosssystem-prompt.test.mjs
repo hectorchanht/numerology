@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { castChart, castCrossSystem, castTaixuan, castMaya } from "@numerology/engine";
+import { castChart, castCrossSystem, castTaixuan, castMaya, castHuangji, castPlanetaryHour } from "@numerology/engine";
 import { SCIENCE_NOTES } from "@numerology/knowledge";
 import {
   SYSTEM_PERSONA,
@@ -105,9 +105,23 @@ test("crossSystemFacts:附太玄與瑪雅週期定位,標明不入五行比對",
   assert.ok(!facts.includes("Tzolk'in"), "未傳入週期時不附");
 });
 
+test("crossSystemFacts:附皇極經世會運世同行星時;冇緯度就唔附行星時", () => {
+  const taixuan = castTaixuan(chart.input);
+  const maya = castMaya(chart.input.year, chart.input.month, chart.input.day);
+  const huangji = castHuangji(chart.input);
+  const planetaryHour = castPlanetaryHour({ ...chart.input, latitude: 22.3, longitude: 114.17 });
+  const f = crossSystemFacts(cross, "zht", { taixuan, maya, huangji, planetaryHour });
+  assert.ok(f.includes(`${huangji.huiName}會第 ${huangji.yun} 運`) && f.includes(`第 ${huangji.shi} 世`));
+  assert.ok(f.includes("邵雍") && f.includes("唐堯"), "出處與錨點步驟");
+  assert.ok(f.includes(`行星日 ${planetaryHour.dayPlanet}`) && f.includes(`時主 ${planetaryHour.hourPlanet}`));
+  assert.ok(f.includes("Heptameron") && f.includes("日出"));
+  const noLat = crossSystemFacts(cross, "zht", { taixuan, maya, huangji, planetaryHour: castPlanetaryHour(chart.input) });
+  assert.ok(!noLat.includes("行星時(Heptameron)"));
+});
+
 test("crosssystem 指令:太玄與瑪雅只作週期定位", () => {
   const p = buildReportSectionPrompt([], seg, "both", "zht", facts);
-  for (const must of ["週期定位", "不推五行", "不作吉凶斷語", "贊辭", "太玄首名、首辭、贊辭原文未附,不得引述或釋義", "Dreamspell"]) {
+  for (const must of ["週期定位", "不推五行", "不作吉凶斷語", "贊辭", "皇極經世", "不推治亂興衰", "行星時", "不寫天使職能", "太玄首名、首辭、贊辭原文未附,不得引述或釋義", "Dreamspell"]) {
     assert.ok(p.includes(must), `缺條款: ${must}`);
   }
 });

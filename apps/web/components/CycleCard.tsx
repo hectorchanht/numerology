@@ -1,13 +1,16 @@
 "use client";
 
 import { useMemo } from "react";
-import { castMaya, castTaixuan, MAYA_META, TZOLKIN_DAY_NAMES, type ChartResult, type MayaResult, type TaixuanResult } from "@numerology/engine";
+import {
+  castHuangji, castMaya, castPlanetaryHour, castTaixuan, MAYA_META, TZOLKIN_DAY_NAMES,
+  type ChartResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult,
+} from "@numerology/engine";
 import { useLocale, useScript, type TKey } from "@/lib/i18n";
 import { taixuanGrid, tzolkinCell } from "@/lib/cycleView";
 import { CitePop } from "@/components/CrossSystemCard";
 
 /*
- * 時間週期卡:太玄(81 首 9×9 格)與瑪雅曆(Tzolk'in 13×20 格、長紀曆、Haab)。
+ * 時間週期卡:太玄(81 首 9×9 格)、瑪雅曆(Tzolk'in 13×20 格、長紀曆、Haab)、皇極經世、行星時。
  * 全部由引擎確定性計算,零 AI;舊歷史紀錄只存 chart,於此即場重算。
  */
 
@@ -111,15 +114,61 @@ function Maya({ r }: { r: MayaResult }) {
   );
 }
 
+function Huangji({ r, solar }: { r: HuangjiResult; solar: boolean }) {
+  const { t } = useLocale();
+  return (
+    <>
+      <h3 className="xs-h">{t("cycle.huangji")}</h3>
+      <p className="cy-val">
+        {t("cycle.huangjiVal", { hui: r.huiName, yun: r.yun, yunName: r.yunName, shi: r.shi, shiName: r.shiName, y: r.yearInShi })}
+      </p>
+      <Meta tier={r.tier} basis={solar ? "cross.basis.solar" : "cycle.basis.clock"} cite={r.cite} />
+      <p className="xs-note">{t("cycle.huangjiNote")}</p>
+      <Steps steps={r.steps} />
+    </>
+  );
+}
+
+function PlanetaryHour({ r, solar }: { r: PlanetaryHourResult | null; solar: boolean }) {
+  const { t } = useLocale();
+  if (!r) {
+    return (
+      <>
+        <h3 className="xs-h">{t("cycle.hour")}</h3>
+        <p className="xs-note">{t("cycle.hourNeedLat")}</p>
+      </>
+    );
+  }
+  return (
+    <>
+      <h3 className="xs-h">{t("cycle.hour")}</h3>
+      <p className="cy-val">
+        {r.hour
+          ? t("cycle.hourVal", {
+              day: r.dayPlanet, half: t(r.half === "day" ? "cycle.hourDay" : "cycle.hourNight"), n: r.hour,
+              name: r.hourName ?? "", planet: r.hourPlanet ?? "", angel: r.hourAngel ?? "",
+            })
+          : t("cycle.hourPolar", { day: r.dayPlanet, angel: r.dayAngel })}
+      </p>
+      <Meta tier={r.tier} basis={solar ? "cross.basis.solar" : "cycle.basis.clock"} cite={r.cite} />
+      <Steps steps={r.steps} />
+    </>
+  );
+}
+
 export function CycleCard({ chart }: { chart: ChartResult }) {
   const { t } = useLocale();
   const tx = useMemo(() => castTaixuan(chart.input), [chart]);
   const maya = useMemo(() => castMaya(chart.input.year, chart.input.month, chart.input.day), [chart]);
+  const huangji = useMemo(() => castHuangji(chart.input), [chart]);
+  const hour = useMemo(() => castPlanetaryHour(chart.input), [chart]);
   return (
     <div className="card viz xs">
       <p className="xs-sub">{t("cycle.intro")}</p>
       <Taixuan r={tx} solar={chart.meta.trueSolarTimeApplied} />
       <Maya r={maya} />
+      <Huangji r={huangji} solar={chart.meta.trueSolarTimeApplied} />
+      <PlanetaryHour r={hour} solar={chart.meta.trueSolarTimeApplied} />
     </div>
   );
 }

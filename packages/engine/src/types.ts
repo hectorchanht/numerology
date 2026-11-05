@@ -20,6 +20,8 @@ export interface BirthInput {
    * 預留給真太陽時校正;當前版本【尚未應用】,見 ChartMeta.trueSolarTimeApplied。
    */
   longitude?: number;
+  /** 出生地緯度(北緯為正),只用於行星時嘅日出日落;唔影響八字紫微。 */
+  latitude?: number;
 }
 
 /** 單柱(年/月/日/時)。 */

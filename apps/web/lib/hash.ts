@@ -21,6 +21,8 @@ export async function stableInputHash(input: Record<string, unknown>): Promise<s
     minute: input.minute ?? 0,
     gender: input.gender,
     longitude: input.longitude ?? null,
+    // 後加欄位:只喺有值時入鍵,舊紀錄嘅哈希不變。
+    ...(input.latitude !== undefined && input.latitude !== null ? { latitude: input.latitude } : {}),
   };
   return sha256hex(JSON.stringify(norm));
 }

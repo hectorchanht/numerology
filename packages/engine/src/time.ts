@@ -36,4 +36,6 @@ export function validateBirthInput(input: BirthInput): void {
   if (!Number.isInteger(hour) || hour < 0 || hour > 23) fail(`时 ${hour}`);
   if (!Number.isInteger(minute) || minute < 0 || minute > 59) fail(`分 ${minute}`);
   if (gender !== "男" && gender !== "女") fail(`性别 ${gender}(应为 男/女)`);
+  const { latitude } = input;
+  if (latitude !== undefined && (!Number.isFinite(latitude) || latitude < -90 || latitude > 90)) fail(`纬度 ${latitude}(-90~90)`);
 }

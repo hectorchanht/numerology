@@ -45,6 +45,7 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
   const [longitude, setLongitude] = useState<string>(
     defaults?.longitude !== undefined ? String(defaults.longitude) : "",
   );
+  const [latitude, setLatitude] = useState<string>(str(defaults?.latitude));
   // 真太陽時:開 = 有揀城市就帶經度校正;關 = 按時鐘時間(保留已揀城市)。
   const [trueSolar, setTrueSolar] = useState(true);
   const [error, setError] = useState<string>("");
@@ -98,6 +99,14 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
       ...(name.trim() ? { name: name.trim() } : {}),
     };
     if (trueSolar && longitude !== "") out.longitude = Number(longitude);
+    if (latitude !== "") {
+      const lat = Number(latitude);
+      if (!Number.isFinite(lat) || lat < -90 || lat > 90) {
+        fail("latitude", t("form.invalidField", { label: t("form.latitude") }));
+        return;
+      }
+      out.latitude = lat;
+    }
     onSubmit(out);
   };
 
@@ -206,6 +215,20 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
             </div>
             <LocationPicker value={longitude} onChange={setLongitude} />
             <ToggleRow icon="sun" label={t("form.trueSolar")} sub={solarSub} checked={trueSolar} onChange={setTrueSolar} />
+            <label className="row" htmlFor={idOf("latitude")}>
+              <Icon name="pin" className="ic dim" />
+              <span className="lbl">
+                {t("form.latitude")}
+                <span className="sub">{t("form.latitudeSub")}</span>
+                {errSub("latitude")}
+              </span>
+              <input
+                id={idOf("latitude")} type="number" inputMode="decimal" min={-90} max={90} step={0.01}
+                value={latitude}
+                onChange={(e) => { setLatitude(e.target.value); clearErr("latitude"); }}
+                {...invalid("latitude")}
+              />
+            </label>
           </div>
         </div>
       </div>

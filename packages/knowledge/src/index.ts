@@ -10,3 +10,5 @@ export * from "./pythagorean-numbers.js";
 export * from "./science-notes.js";
 export * from "./taixuan.js";
 export * from "./maya.js";
+export * from "./huangji-jingshi.js";
+export * from "./heptameron.js";

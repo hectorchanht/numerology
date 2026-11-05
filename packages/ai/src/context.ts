@@ -1,4 +1,4 @@
-import { favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type FortuneAnalysis, type MayaResult, type TaixuanResult } from "@numerology/engine";
+import { favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type FortuneAnalysis, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult } from "@numerology/engine";
 import { SCIENCE_NOTES } from "@numerology/knowledge";
 import type { AiLocale } from "./prompts.js";
 
@@ -249,7 +249,7 @@ const VERDICT_ZH: Record<string, string> = { strong: "身強", weak: "身弱", n
 export function crossSystemFacts(
   r: CrossSystemResult,
   locale: AiLocale,
-  cycles?: { taixuan: TaixuanResult; maya: MayaResult },
+  cycles?: { taixuan: TaixuanResult; maya: MayaResult; huangji?: HuangjiResult; planetaryHour?: PlanetaryHourResult | null },
 ): string {
   const cite = (c: { work: string; author?: string; year?: number | string; locator?: string }) =>
     [c.author, c.work, c.year, c.locator].filter(Boolean).join(",");
@@ -289,6 +289,21 @@ export function crossSystemFacts(
 ${step(tx.steps)}
 - 瑪雅:長紀曆 ${m.longCount.join(".")};Tzolk'in ${m.tzolkin.number} ${m.tzolkin.dayName};Haab ${m.haab.day} ${m.haab.monthName};GMT 對應常數 ${m.correlation}。層級 ${MAYA_META.tier ? TIER_ZH[MAYA_META.tier] : "未分級"};出處 ${cite(m.cite)}。
 ${step(m.steps)}`;
+    const hj = cycles.huangji;
+    if (hj) {
+      cycleBlock += `
+- 皇極經世:${hj.huiName}會第 ${hj.yun} 運(${hj.yunName})第 ${hj.shi} 世(${hj.shiName}),世內第 ${hj.yearInShi} 年;年柱 ${hj.ganzhi}。層級 ${TIER_ZH[hj.tier]};出處 ${cite(hj.cite)}。
+${step(hj.steps)}`;
+    }
+    const ph = cycles.planetaryHour;
+    if (ph) {
+      const where = ph.hour
+        ? `${ph.half === "day" ? "日間" : "夜間"}第 ${ph.hour} 時「${ph.hourName}」,時主 ${ph.hourPlanet}(天使 ${ph.hourAngel})`
+        : "當日極晝或極夜,無行星時";
+      cycleBlock += `
+- 行星時(Heptameron):行星日 ${ph.dayPlanet}(天使 ${ph.dayAngel});${where}。層級 ${TIER_ZH[ph.tier]};出處 ${cite(ph.cite)}。
+${step(ph.steps)}`;
+    }
   }
   return `# 多體系事實(確定性計算結果,勿改動數字)
 
