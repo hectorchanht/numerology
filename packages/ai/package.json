@@ -22,6 +22,7 @@
     "@anthropic-ai/sdk": "^0.39.0",
     "@numerology/engine": "*",
     "@numerology/knowledge": "*",
+    "lunar-javascript": "^1.7.0",
     "openai": "^4.77.0"
   }
 }

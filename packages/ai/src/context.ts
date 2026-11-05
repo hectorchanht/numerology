@@ -1,4 +1,5 @@
 import { castZiweiFeixing, castZiweiHoroscope, favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type GanzhiRelation, type FortuneAnalysis, type HeluoResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult, type NumberLoreResult, type BirthLoreResult, type JyotishResult, type EgyptianResult, type MetonicResult } from "@numerology/engine";
+import { Solar } from "lunar-javascript";
 import { SCIENCE_NOTES } from "@numerology/knowledge";
 import type { AiLocale } from "./prompts.js";
 
@@ -144,7 +145,7 @@ function ziweiExtra(chart: ChartResult, fortune: FortuneAnalysis | undefined, op
     const hRef = castZiweiHoroscope(input, `${refYear}-6-1`); // 小限/流耀以參考年年中計
     const L = (h: typeof hNow, k: string) => h.layers.find((l) => l.key === k)!;
     const age = L(hRef, "age");
-    out.push(`- 小限:${age.nominalAge}岁行${age.natalPalaceName}`);
+    out.push(`- 小限:${age.nominalAge}岁行${age.natalPalaceName}(${refYear}年)`);
     out.push(`- 斗君:${hNow.douJun.branch}(本命${hNow.douJun.natalPalaceName})`);
     out.push(
       `- 运限叠宫(当前):大限命宫=本命${L(hNow, "decadal").natalPalaceName}、流年命宫=本命${L(hNow, "yearly").natalPalaceName}、流月命宫=本命${L(hNow, "monthly").natalPalaceName}`,
@@ -154,7 +155,7 @@ function ziweiExtra(chart: ChartResult, fortune: FortuneAnalysis | undefined, op
     const ys = L(hRef, "yearly").stars;
     const yStar = (n: string) => ys.find((s) => s.name === n)?.natalPalaceName;
     if (yStar("流禄") && yStar("流羊") && yStar("流陀"))
-      out.push(`- 流耀(流年):流禄入${yStar("流禄")}、流羊入${yStar("流羊")}、流陀入${yStar("流陀")}`);
+      out.push(`- 流耀(流年):流禄入${yStar("流禄")}、流羊入${yStar("流羊")}、流陀入${yStar("流陀")}(${refYear}年)`);
   }
   // 飛星派:標流派,只列四宮化忌落宮 + 自化 + 祿忌交馳
   const fx = castZiweiFeixing(input);
@@ -169,17 +170,22 @@ function ziweiExtra(chart: ChartResult, fortune: FortuneAnalysis | undefined, op
     `- 禄忌交驰:${fx.luJiJiaoChi.map((x) => `${x.luPalace}化禄入${x.jiPalace}且${x.jiPalace}化忌入${x.luPalace}`).join("、") || "无"}`,
   );
   if (scope === "full") {
-    // ponytail: 流月前後用 ±30 日近似「±1 農曆月」,邊界日可能差一格
-    const months = [-30, 0, 30].map((d) => {
-      const m = L2(castZiweiHoroscope(input, ymd(new Date((opts?.now ?? new Date()).getTime() + d * 864e5))));
-      return `  - 流月命宫落本命${m.natalPalaceName}:${SIHUA_SHORT(m) || "—"}`;
+    // 精確取鄰月:以今日回推當月初一,上月 = 初一前一日,下月 = 初一後 29 日(若仍同月再 +1,即大月 30 日)。
+    const now = opts?.now ?? new Date();
+    const lunarOf = (d: Date) => Solar.fromYmd(d.getFullYear(), d.getMonth() + 1, d.getDate()).getLunar();
+    const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+    const cur = lunarOf(now);
+    const first = addDays(now, -(cur.getDay() - 1));
+    let next = addDays(first, 29);
+    if (lunarOf(next).getMonth() === cur.getMonth()) next = addDays(next, 1);
+    const months = [addDays(first, -1), now, next].map((d) => {
+      const m = castZiweiHoroscope(input, ymd(d)).layers.find((l) => l.key === "monthly")!;
+      return `  - 农历${lunarOf(d).getMonthInChinese()}月(${m.heavenlyStem}${m.earthlyBranch}):流月命宫落本命${m.natalPalaceName}:${SIHUA_SHORT(m) || "—"}`;
     });
     out.push("### 紫微流月(当前月±1)", ...months);
   }
   return "\n" + out.join("\n");
 }
-const L2 = (h: { layers: { key: string }[] }) => h.layers.find((l) => l.key === "monthly")! as ZiweiLayerM;
-type ZiweiLayerM = ReturnType<typeof castZiweiHoroscope>["layers"][number];
 
 const PILLAR_ZH: Record<string, string> = { year: "年", month: "月", day: "日", hour: "时" };
 /** 動態段只摘 冲/刑/合/会(含半合/三会等)。 */

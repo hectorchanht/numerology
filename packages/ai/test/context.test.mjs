@@ -71,3 +71,33 @@ test("紫微新增事实:斗君/小限/飞星派;current 无流月;无格局不�
   assert.equal(buildContextPack(chart, undefined, { now }).markdown, full, "固定 now 确定性");
   assert.ok(SYSTEM_PERSONA.endsWith("不作主要判断。"), "persona 末句");
 });
+
+test("无格局命中 → 不出格局行", () => {
+  const c = { ...chart, ziwei: { ...chart.ziwei, geju: [] } };
+  assert.ok(!buildContextPack(c, undefined, { now: new Date(2026, 10, 5) }).markdown.includes("格局(《紫微斗数全书》)"));
+});
+
+test("流月±1:农历初一/三十都得三個連續不同月", async () => {
+  const { Lunar } = await import("lunar-javascript");
+  for (const [y, m, d] of [[2026, 11, 1], [2026, 11, 30], [2025, 8, 25], [2025, 10, 22]]) {
+    const md = buildContextPack(chart, undefined, { now: new Date(y, m - 1, d) }).markdown;
+    const lines = md.slice(md.indexOf("### 紫微流月")).split("\n").filter((l) => l.includes("农历"));
+    const ms = lines.map((l) => l.match(/农历(闰?.)月/)[1]);
+    assert.equal(lines.length, 3);
+    assert.equal(new Set(ms).size, 3, `${y}-${m}-${d} 月份重複: ${ms}`);
+  }
+  // 2026-11-9 = 十月三十前後;專測大月三十日
+  let found = false;
+  for (let i = 0; i < 400 && !found; i++) {
+    const dt = new Date(2025, 0, 1 + i);
+    const l = Lunar.fromDate(dt);
+    if (l.getDay() === 30) {
+      found = true;
+      const md = buildContextPack(chart, undefined, { now: dt }).markdown;
+      const ms = md.slice(md.indexOf("### 紫微流月")).split("\n").filter((x) => x.includes("农历")).map((x) => x.match(/农历(闰?.)月/)[1]);
+      assert.equal(new Set(ms).size, 3, `三十日: ${ms}`);
+      assert.equal(ms[1], l.getMonthInChinese());
+    }
+  }
+  assert.ok(found);
+});
