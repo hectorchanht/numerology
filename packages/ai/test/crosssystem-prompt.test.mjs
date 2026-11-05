@@ -186,3 +186,22 @@ test("crosssystem 指令:第二軸說明、按盤基率、從格警示、不自�
     assert.ok(p.includes(must), `缺條款: ${must}`);
   }
 });
+
+test("數之學:事實區塊附你的數、基率、律呂、恆星;指令要求同句講基率", async () => {
+  const { castNumberLore, castBirthLore } = await import("@numerology/engine");
+  const sky = castEphemeris(chart.input);
+  const f = crossSystemFacts(cross, "zht", {
+    taixuan: castTaixuan(chart.input),
+    maya: castMaya(1990, 3, 18),
+    lore: { numbers: castNumberLore(chart), birth: castBirthLore(chart, sky) },
+  });
+  assert.ok(f.includes("## 數之學"));
+  assert.ok(f.includes("幻方總和 666"));
+  assert.ok(f.includes("ΣΥΗΝΗ"));
+  assert.ok(f.includes("gematria 基率"));
+  assert.ok(f.includes("夾鐘,律數 68"));
+  assert.ok(f.includes("Behenian 恆星合相"));
+  const p = buildReportSectionPrompt([], seg, "both", "zht", f);
+  assert.ok(p.includes("同句講事實區塊所列的基率與期望數"));
+  assert.ok(!facts.includes("## 數之學"), "未傳 lore 時不出數之學段");
+});

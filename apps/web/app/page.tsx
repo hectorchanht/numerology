@@ -25,6 +25,7 @@ import { ChartSummary, WuxingChart } from "@/components/Charts";
 import { SectionBasis } from "@/components/SectionBasis";
 import { CrossSystemCard } from "@/components/CrossSystemCard";
 import { CycleCard } from "@/components/CycleCard";
+import { LoreCard } from "@/components/LoreCard";
 import { Icon } from "@/components/Icon";
 import { EmptyChart, ScreenNav, Seg } from "@/components/ui";
 import { loadAi } from "@/lib/aiSettings";
@@ -432,6 +433,8 @@ export default function Home() {
               <CrossSystemCard chart={ready.chart} />
               <h2 className="group-title">{t("cycle.title")}</h2>
               <CycleCard chart={ready.chart} />
+              <h2 className="group-title">{t("lore.title")}</h2>
+              <LoreCard chart={ready.chart} />
 
               <Seg
                 label={t("chart.sysLabel")}

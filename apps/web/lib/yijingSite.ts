@@ -14,6 +14,7 @@ export const SITE_ROUTES: SiteRoute[] = [
   { path: "/yijing/meihua", priority: 0.8 },
   { path: "/yijing/cases", priority: 0.8 },
   { path: "/yijing/academy", priority: 0.8 },
+  { path: "/harmony", priority: 0.6 },
   { path: "/science", priority: 0.7 },
   { path: "/yijing/academy/basics", priority: 0.7 },
   { path: "/yijing/academy/reading-gua", priority: 0.7 },

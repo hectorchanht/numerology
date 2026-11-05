@@ -31,7 +31,7 @@ export const NICOMACHUS = DATA.nicomachus as unknown as {
 
 export interface GematriaTerm { greek: string; gloss: string; value: number; page: number; note?: string }
 export const GEMATRIA_TERMS = DATA.gematria.terms as unknown as GematriaTerm[];
-export const GEMATRIA_RELATIONS = DATA.gematria.relations as unknown as { id: string; latex: string; expr: string; target: number; tol: number; terms: string[]; page: number }[];
+export const GEMATRIA_RELATIONS = DATA.gematria.relations as unknown as { id: string; latex: string; expr: string; target: number; tol: number; terms?: string[]; page?: number; note?: string }[];
 
 /** 希伯來 22 字母數值(Agrippa 卷一表)。 */
 export const HEBREW_LETTERS = DATA.correspondences.hebrew.letters as unknown as { glyph: string; name: string; value: number }[];

@@ -18,11 +18,13 @@
 | Agrippa correspondences / cabala / scales | 已入庫 | Agrippa 卷 I 對應表、卷 II–III 行星神名 / 28 月宿 / 十 Sephiroth、卷 II 數字刻度表 1–12、卷 III 七十二天使(`agrippa-correspondences.json`、`agrippa-cabala.json`、`agrippa-scales.json`) | 是(查表) | 行星神名值與幻方行和 / 總和相扣;七十二天使由出埃及記 14:19–21 推算 |
 | 第四本(Fourth Book) | 已入庫(行星時:引擎 `castPlanetaryHour`,需出生地緯度;週期卡 + AI 多體系事實) | 1655 Turner 英譯:地占 16 圖、Heptameron 行星時、Arbatel 七靈(`fourth-book.json`) | 是 | 行星時用迦勒底次序,與幻方行星序相同 |
 | 皇極經世 | 已入庫(待校對;引擎 `castHuangji`,週期卡 + AI 多體系事實) | 邵雍《皇極經世書》:元會運世紀年、開物 / 閉物、外篇數(`huangji-jingshi.json`) | 是 | 元 = 12 × 30 × 12 × 30 = 129600 年 |
-| 律呂三分損益 | 已入庫(待校對) | 《管子·地員》《呂氏春秋·音律》《淮南子·天文訓》(`lulu.json`) | 是 | 黃鐘 81 = 3⁴ = 九九,與九宮 3 進位相通 |
-| 蒂邁歐篇數理 | 已入庫(待校對) | Plato,Jowett 1871 英譯:世界靈魂音階、七重天、五正多面體、元素轉換(`timaeus.json`) | 是 | 9/8、256/243 同律呂三分損益同源 |
-| Nicomachus 算術 | 已入庫(待校對) | D'Ooge 1926 英譯:數嘅分類、完全數、五種比、形數、十種比例、最完美比例(`nicomachus.json`) | 是 | 6:8:9:12 同律呂、蒂邁歐篇音程一致 |
+| 律呂三分損益 | 已入庫(待校對);已接引擎(`castBirthLore` 出生月律)同學院 `/harmony` | 《管子·地員》《呂氏春秋·音律》《淮南子·天文訓》(`lulu.json`) | 是 | 黃鐘 81 = 3⁴ = 九九,與九宮 3 進位相通 |
+| 蒂邁歐篇數理 | 已入庫(待校對);已接學院 `/harmony` | Plato,Jowett 1871 英譯:世界靈魂音階、七重天、五正多面體、元素轉換(`timaeus.json`) | 是 | 9/8、256/243 同律呂三分損益同源 |
+| Nicomachus 算術 | 已入庫(待校對);已接學院 `/harmony`、`castNumberLore` 數的分類 | D'Ooge 1926 英譯:數嘅分類、完全數、五種比、形數、十種比例、最完美比例(`nicomachus.json`) | 是 | 6:8:9:12 同律呂、蒂邁歐篇音程一致 |
 | 河洛理數 | 已入庫(待校對);已接引擎(`castHeluo`)、週期卡同 AI 多體系一節 | 陳摶、邵雍題《河洛理數》卷一起例(`heluo-lishu.json`):干支取數、天地數、先後天卦、元堂、元氣、化工、大運 | 是 | 天干洛書數同八卦、地支河圖數;卦名接易經知識庫 |
-| 卡巴拉(Sefer Yetzirah) | 已入庫(待校對) | Sefer Yetzirah,Westcott 1893 英譯(`sefer-yetzirah.json`) | 是(查表) | 22 字母 = 3 + 7 + 12;七雙字母配七行星,與幻方行星序對看 |
+| 卡巴拉(Sefer Yetzirah) | 已入庫(待校對);已接引擎(字母分類、Westcott 補表配星座 / 星期) | Sefer Yetzirah,Westcott 1893 英譯(`sefer-yetzirah.json`) | 是(查表) | 22 字母 = 3 + 7 + 12;七雙字母配七行星,與幻方行星序對看 |
+| Behenian 十五恆星 | 已入庫(待校對);已接引擎(`castBirthLore` 合相 + 基率) | Agrippa I.32 名稱;J2000 座標 Hipparcos(van Leeuwen 2007,經維基百科);容許度 6°(維基百科,近代)(`behenian-stars.json`) | 是(歲差換算黃經) | 第 8 顆 Alkaid / Polaris 兩讀並列 |
+| 數之學(Agrippa 數階、希伯來字母值、gematria 同值) | 已接引擎(`castNumberLore`)、首頁「數之學」卡同 AI 多體系一節 | `agrippa-scales.json`、`agrippa-correspondences.json`、`greek-gematria.json` | 是(查表) | 盤中各數(生命靈數、幻方行和 / 總和、瑪雅 Kin、河洛天地數)逐個查,附 gematria 基率 |
 | 西洋占星(Tetrabiblos 卷一) | 已入庫(待校對);已接引擎(`castEphemeris`)同 AI 多體系一節 | Ptolemy,Ashmand 1822 英譯:宮位、三方、廟旺、埃及 / 托勒密 / 迦勒底界、相位(`tetrabiblos.json`);七曜位置用 astronomy-engine(對 JPL Horizons 誤差 < 0.01°) | 是(七曜宮度、尊貴、界主、整宮相位、晝夜生;有經緯度時加上升、天頂、整宮宮位) | 星期守護行星已經幻方接上;月亮位置另配 Agrippa 二十八月宿 |
 | 康熙筆畫 | 已入庫 | 康熙字典筆畫(`kangxi-strokes.json`) | 是 | 姓名筆畫數化簡後可落九宮 |
 | 科學筆記 | 已入庫(待校對,reviewed: false) | `science-notes.json`(同行評審條目) | 否(文獻) | 無直接連結;供報告「現代科學角度」 |
@@ -42,8 +44,7 @@
 |---|---|---|---|---|
 | 河洛理數 | todo | 陳摶傳、後人編(明清) | 是 | 以河圖洛書數起卦,直接用九宮 |
 | 十九年七閏 / Metonic | todo | Meton(432 BCE)、中國章蔀 | 是 | 19 年週期;19 非九宮數,僅作曆法對照 |
-| Timaeus 世界靈魂數列 | todo | Plato, *Timaeus* 35b–36b | 是 | 1、2、3、4、9、8、27 數列,27 為 729 的立方根 |
-| Nicomachus / Iamblichus | todo | Nicomachus, *Introduction to Arithmetic*;Iamblichus 畢氏傳 | 是 | 數論分類(奇偶、完全數)與洛書奇偶分佈對看 |
+| Iamblichus | todo | Iamblichus 畢氏傳、*Theologumena Arithmeticae* | 是 | 1–10 數象,補 Nicomachus 之後的數神學 |
 | Kepler | todo | Kepler, *Harmonices Mundi*(1619) | 是(比例) | 行星比例與幻方行星序 |
 | Abjad | todo | 阿拉伯字母數值傳統 | 是 | 字母數化簡後落九宮 |
 | Chaldean 數秘 | todo | 迦勒底數字傳統(現代整理) | 是 | 1–8 數系,9 不用;與畢氏對比 |

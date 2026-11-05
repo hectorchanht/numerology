@@ -1,4 +1,4 @@
-import { favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type FortuneAnalysis, type HeluoResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult } from "@numerology/engine";
+import { favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type FortuneAnalysis, type HeluoResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult, type NumberLoreResult, type BirthLoreResult } from "@numerology/engine";
 import { SCIENCE_NOTES } from "@numerology/knowledge";
 import type { AiLocale } from "./prompts.js";
 
@@ -249,7 +249,7 @@ const VERDICT_ZH: Record<string, string> = { strong: "身強", weak: "身弱", n
 export function crossSystemFacts(
   r: CrossSystemResult,
   locale: AiLocale,
-  cycles?: { taixuan: TaixuanResult; maya: MayaResult; huangji?: HuangjiResult; planetaryHour?: PlanetaryHourResult | null; ephemeris?: EphemerisResult; heluo?: HeluoResult },
+  cycles?: { taixuan: TaixuanResult; maya: MayaResult; huangji?: HuangjiResult; planetaryHour?: PlanetaryHourResult | null; ephemeris?: EphemerisResult; heluo?: HeluoResult; lore?: { numbers: NumberLoreResult; birth: BirthLoreResult } },
 ): string {
   const cite = (c: { work: string; author?: string; year?: number | string; locator?: string }) =>
     [c.author, c.work, c.year, c.locator].filter(Boolean).join(",");
@@ -324,6 +324,31 @@ ${step(ep.steps)}`;
 - 河洛理數:天數 ${hl.heaven}、地數 ${hl.earth};先天 ${hl.xiantian.name}(元堂第 ${hl.yuantang} 爻),${hl.houtianAge} 歲換後天 ${hl.houtian.name}(元堂第 ${hl.houtianYuantang} 爻);元氣${hl.yuanqi.tian || hl.yuanqi.di ? "有" : "無"}${hl.yuanqi.reversed ? "(逢相反)" : ""},化工${hl.huagong.has ? "有" : "無"}${hl.huagong.reversed ? "(逢反)" : ""}。大運:${yun}。層級 ${TIER_ZH[hl.tier]};出處 ${cite(hl.cite)}。
 ${step(hl.steps)}`;
     }
+  }
+  const lore = cycles?.lore;
+  if (lore) {
+    const PAR: Record<string, string> = { unit: "一", prime: "質數", composite: "合數", evenTimesEven: "偶偶數", evenTimesOdd: "偶奇數", oddTimesEven: "奇偶數" };
+    const PARTS: Record<string, string> = { perfect: "完全數", superabundant: "盈數", deficient: "虧數" };
+    const SRC: Record<string, string> = { lifepath: "生命靈數", kameaLine: "幻方行和", kameaTotal: "幻方總和", mayaKin: "瑪雅 Kin", heluoHeaven: "河洛天數", heluoEarth: "河洛地數" };
+    const GRP: Record<string, string> = { mother: "母字母", double: "雙字母", simple: "單字母" };
+    const items = lore.numbers.items.map((i) => {
+      const cls = [PAR[i.cls.parity], i.cls.parts && PARTS[i.cls.parts], ...i.cls.figurate.map((f) => `${f.sides} 邊形數第 ${f.index} 項`), i.cls.cube && `${i.cls.cube}³`].filter(Boolean).join("、");
+      const heb = i.hebrew ? `;希伯來字母 ${i.hebrew.name}(${GRP[i.hebrew.group]})` : "";
+      const gem = i.gematria.length ? `;同值希臘詞 ${i.gematria.map((g) => `${g.greek}(${g.gloss})`).join("、")}` : "";
+      const sc = i.scale ? `;Agrippa 數階 ${i.scale.n}(卷二第 ${i.scale.chapter} 章,象徵對應)` : "";
+      return `  - ${SRC[i.source]} ${i.value}:${cls}${heb}${gem}${sc}`;
+    });
+    const b = lore.numbers.baseRate, bl = lore.birth, st = bl.stars;
+    const hits = st.hits.map((h) => `${h.body} 合 ${h.star}(${h.bayer})${h.orb}°${h.alt ? "(1651 英譯異讀)" : ""}`).join("、") || "無";
+    cycleBlock += `
+
+## 數之學(確定性計算;象徵對應,不入五行比對)
+- 你的數(Nicomachus 分類;出處 ${cite(lore.numbers.cites.nicomachus)}、${cite(lore.numbers.cites.scales)}、${cite(lore.numbers.cites.gematria)}):
+${items.join("\n")}
+- gematria 基率:詞表 ${b.distinct} 個不同數值分佈於 1–${b.max},隨機撞中約 ${b.distinct}/${b.max};${b.eligible} 個數期望撞中約 ${b.expected.toFixed(2)} 個,實際 ${b.hits} 個。詞表由 Fideler 挑選,偏向特定數。
+- 律呂:夏曆 ${bl.lulu.lunarMonth} 月(${bl.lulu.branch}月)→ ${bl.lulu.pipe},律數 ${bl.lulu.value};《呂氏春秋》${bl.lulu.group === "upper" ? "上" : "下"}組,主${bl.lulu.season}。出處 ${cite(bl.cites.lulu)}。
+- 黃道對應:太陽 ${bl.zodiac.sign},Agrippa 守護 ${bl.zodiac.ruler}、草 ${bl.zodiac.herb}、薰香 ${bl.zodiac.fume}${bl.zodiac.letter ? `;Sefer Yetzirah 單字母 ${bl.zodiac.letter.glyph}(${bl.zodiac.letter.faculty})` : ""}${bl.dayPlanet.letter ? `;出生星期 ${bl.dayPlanet.planet} 配雙字母 ${bl.dayPlanet.letter.glyph}(${bl.dayPlanet.letter.quality})` : ""}。字母配法出自 Westcott 1893 補表(近代),其他傳統不同。
+- Behenian 恆星合相(±${st.orb}°,只比黃經):${hits}。基率:十五顆星覆蓋黃道約 ${(st.p * 100).toFixed(1)}%,${st.points} 個點期望命中約 ${st.expected.toFixed(1)} 個。出處 ${cite(bl.cites.stars)};容許度 ${cite(bl.cites.orb)}(近代)。`;
   }
   return `# 多體系事實(確定性計算結果,勿改動數字)
 

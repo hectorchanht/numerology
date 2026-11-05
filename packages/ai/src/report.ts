@@ -1,4 +1,4 @@
-import { castCrossSystem, castEphemeris, castHeluo, castHuangji, castMaya, castPlanetaryHour, castTaixuan, type ChartResult, type FortuneAnalysis } from "@numerology/engine";
+import { castBirthLore, castCrossSystem, castEphemeris, castNumberLore, castHeluo, castHuangji, castMaya, castPlanetaryHour, castTaixuan, type ChartResult, type FortuneAnalysis } from "@numerology/engine";
 import { buildContextPack, crossSystemFacts, type FortuneScope } from "./context.js";
 import {
   buildReportUserPrompt,
@@ -193,14 +193,16 @@ export function streamReportSection(chart: ChartResult, sectionKey: string, opts
   const { caveats } = buildContextPack(chart, opts.fortune, { fortuneScope: scope });
   const locale = opts.locale ?? "zht";
   // 多體系事實只進本節 user prompt,system 不變(prompt cache 照常命中)。
-  const facts = seg.key === "crosssystem"
+  const sky = seg.key === "crosssystem" ? castEphemeris(chart.input) : undefined;
+  const facts = sky
     ? crossSystemFacts(castCrossSystem(chart), locale, {
         taixuan: castTaixuan(chart.input),
         maya: castMaya(chart.input.year, chart.input.month, chart.input.day),
         huangji: castHuangji(chart.input),
         planetaryHour: castPlanetaryHour(chart.input),
-        ephemeris: castEphemeris(chart.input),
+        ephemeris: sky,
         heluo: castHeluo(chart.input),
+        lore: { numbers: castNumberLore(chart), birth: castBirthLore(chart, sky) },
       })
     : undefined;
   return chatStream({

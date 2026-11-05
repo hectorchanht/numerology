@@ -41,6 +41,7 @@ export const SUB_GROUPS: SubGroup[] = [
       { href: "/yijing/academy", id: "nav.academy", icon: "bulb" },
       { href: "/yijing/gua", id: "nav.gua", icon: "book" },
       { href: "/yijing/cases", id: "nav.cases", icon: "history" },
+      { href: "/harmony", id: "nav.harmony", icon: "waves" },
       { href: "/science", id: "nav.science", icon: "gauge" },
     ],
   },

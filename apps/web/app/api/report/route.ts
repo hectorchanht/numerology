@@ -25,8 +25,9 @@ export const dynamic = "force-dynamic";
  * v7 = 2026-11-02 harmony 正規化:provider 補上 gpt-oss harmony channel 拆分
  * (mlx-lm 原始標記);v6 緩存裡 MLX gpt-oss 的未正規化原文必須失效。
  * v8 = 2026-11-04 人設擴為多體系、新增 crosssystem 節。
+ * v9 = 2026-11-05 crosssystem 節事實加「數之學」(你的數、律呂、黃道、Behenian 恆星)與基率指令。
  */
-const PROMPT_VERSION = "report/v8";
+const PROMPT_VERSION = "report/v9";
 
 /** 流式生成命盤解讀報告(動靜結合)。首 token 前失敗 → JSON 錯誤(502),而非截斷流。 */
 export async function POST(req: Request): Promise<Response> {
