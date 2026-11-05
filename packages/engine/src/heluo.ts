@@ -24,6 +24,16 @@ export interface HeluoYun {
   toAge: number;
 }
 
+export interface HeluoYear {
+  /** 虛歲 */
+  age: number;
+  /** 干支年(立春分界)的公曆年 */
+  year: number;
+  hex: HeluoHex;
+  /** 當年所坐之爻 */
+  line: number;
+}
+
 export interface HeluoResult {
   pillars: [string, string, string, string];
   heaven: number;
@@ -42,6 +52,8 @@ export interface HeluoResult {
   yuanqi: { stem: TrigramName; branch: TrigramName; tian: boolean; di: boolean; reversed: boolean };
   huagong: { trigrams: TrigramName[]; has: boolean; reversed: boolean };
   dayun: HeluoYun[];
+  /** 小象流年:每個大運爻內逐年游變之卦 */
+  liunian: HeluoYear[];
   steps: string[];
   tier: "classical";
   cite: Cite;
@@ -64,6 +76,58 @@ const mod = (n: number, m: number) => ((n % m) + m) % m;
 export function heluoReduce(sum: number, base: number): number {
   const n = sum > base ? sum - base : sum;
   return n % 10 === 0 ? n / 10 : n % 10;
+}
+
+const flip = (bits: number[], line: number) => bits.map((b, i) => (i + 1 === line ? 1 - b : b));
+/** 由第 line 爻往上數 k 位(循環) */
+const up = (line: number, k: number) => ((line - 1 + k) % 6) + 1;
+
+/**
+ * 小象流年(卷一 pp. 37–38):陰爻六年,由本爻起逐年變一爻向上;
+ * 陽爻九年,本爻一年(陽年不變、陰年即變)、應爻一年、本爻一年,再由上一爻起逐年變六爻。
+ */
+export function heluoYears(bits: number[], line: number, yangYear: boolean): { bits: number[]; line: number }[] {
+  const out: { bits: number[]; line: number }[] = [];
+  let b = bits;
+  const step = (l: number) => out.push({ bits: (b = flip(b, l)), line: l });
+  if (bits[line - 1] === 0) {
+    for (let k = 0; k < 6; k++) step(up(line, k));
+    return out;
+  }
+  if (yangYear) out.push({ bits: b, line });
+  else step(line);
+  step(up(line, 3));
+  step(line);
+  for (let k = 1; k <= 6; k++) step(up(line, k));
+  return out;
+}
+
+/**
+ * 月卦(卷一 p. 39):流年卦元堂上進一位變爻為正月,單月逐月再上進一位;
+ * 雙月取前一單月卦之應爻變之。回傳正月至十二月(節月)。
+ */
+export function heluoMonths(bits: number[], line: number): { bits: number[]; line: number }[] {
+  const out: { bits: number[]; line: number }[] = [];
+  let b = bits;
+  for (let k = 1; k <= 6; k++) {
+    const l = up(line, k);
+    b = flip(b, l);
+    out.push({ bits: b, line: l }, { bits: flip(b, up(l, 3)), line: up(l, 3) });
+  }
+  return out;
+}
+
+/**
+ * 日卦(卷一 p. 40):月卦本爻不變,其餘五爻由上一位起各變一卦,
+ * 每卦由初爻至上爻一爻管一日,五卦共三十日,由交節時刻起算。
+ */
+export function heluoDays(bits: number[], line: number): { bits: number[]; line: number }[] {
+  const out: { bits: number[]; line: number }[] = [];
+  for (let k = 1; k <= 5; k++) {
+    const b = flip(bits, up(line, k));
+    for (let d = 1; d <= 6; d++) out.push({ bits: b, line: d });
+  }
+  return out;
 }
 
 /** 元堂:按時辰陰陽數同性爻(由下而上),一二重而寄、三重不寄、四五不重而寄。 */
@@ -154,6 +218,12 @@ export function castHeluo(input: BirthInput): HeluoResult {
   }
   const houtianAge = dayun[6]!.fromAge;
 
+  const liunian: HeluoYear[] = dayun.flatMap((y) => {
+    const year = gzYear + y.fromAge - 1;
+    return heluoYears(y.phase === "先天" ? bits : houBits, y.line, mod(year - 4, 2) === 0)
+      .map((x, i) => ({ age: y.fromAge + i, year: year + i, hex: hexOf(x.bits), line: x.line }));
+  });
+
   // 元氣:生年干支
   const [ys, yb] = [pillars[0][0]!, pillars[0][1]!];
   const both = [bits.slice(0, 3), bits.slice(3), houBits.slice(0, 3), houBits.slice(3)].map(triOf);
@@ -183,13 +253,14 @@ export function castHeluo(input: BirthInput): HeluoResult {
       ? `${xiantian.name}為三至尊卦,元堂在${yuantang === 5 ? "九五、生於陰令" : "上六、生於陽月"},只變爻不換內外,後天 ${houtian.name},元堂仍在第 ${houtianYuantang} 爻。`
       : `元堂爻變、內外互換,後天 ${houtian.name},元堂移至第 ${houtianYuantang} 爻。`,
     `大運由元堂起陽爻九年、陰爻六年:先天行至 ${houtianAge - 1} 歲,${houtianAge} 歲換後天。`,
+    "流年用小象:陰爻六年逐年由本爻向上各變一爻;陽爻九年,本爻(陽年不變、陰年即變)、應爻、本爻各一年,再向上逐爻變六年。",
     `元氣:年干 ${ys} 屬 ${stem}、年支 ${yb} 屬 ${branch};先後天卦${yuanqi.tian || yuanqi.di ? `有${[yuanqi.tian && "天元氣", yuanqi.di && "地元氣"].filter(Boolean).join("、")}` : "無元氣"}${yuanqi.reversed ? ",且逢元氣相反之卦" : ""}。`,
     `化工:生於${earthDays ? `${next4.name}前十八日土旺` : `${period.from}後${period.to}前`},化工屬 ${hg.join("、")};先後天卦${huagong.has ? "有化工" : "無化工"}${huagong.reversed ? ",且逢化工反" : ""}。`,
   ];
 
   return {
     pillars, heaven, earth, heavenNumber, earthNumber, heavenTrigram, earthTrigram, yuan,
-    xiantian, yuantang, houtian, houtianYuantang, houtianAge, yuanqi, huagong, dayun, steps,
+    xiantian, yuantang, houtian, houtianYuantang, houtianAge, yuanqi, huagong, dayun, liunian, steps,
     tier: "classical",
     cite: { work: "河洛理數", author: "題陳摶、邵雍", year: 1632, locator: "卷一起例(陳仁錫刻本,文明書局石印)" },
   };

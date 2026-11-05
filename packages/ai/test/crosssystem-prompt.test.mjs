@@ -135,6 +135,8 @@ test("crossSystemFacts:附河洛理數先後天卦同大運", () => {
   assert.ok(f.includes(`先天 ${heluo.xiantian.name}(元堂第 ${heluo.yuantang} 爻)`));
   assert.ok(f.includes(`${heluo.houtianAge} 歲換後天 ${heluo.houtian.name}`));
   assert.ok(f.includes("陳摶") && f.includes("遇十不用"));
+  const ln = heluo.liunian.find((y) => y.year === new Date().getFullYear());
+  if (ln) assert.ok(f.includes(`流年卦 ${ln.hex.name} 第 ${ln.line} 爻`));
 });
 
 test("crosssystem 指令:太玄與瑪雅只作週期定位", () => {

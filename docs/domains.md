@@ -52,6 +52,8 @@
 | 埃及民用曆 / face | 已入庫(待校對);已接引擎(`castEgyptian`)、曆法卡、AI | Almagest III.7 Nabonassar 紀元(Era Philip、Censorinus 交叉驗證);face 行星主據 Lilly 1647(經維基百科)(`egyptian-calendar.json`) | 是 | 365 日 = 12 × 30 + 5;旬星星名學界未定,未入庫 |
 | 藏曆 mewa | todo | 藏曆九宮(mewa);tyme4ts 有藏曆(RabByung)日期,可考慮引入 | 是 | 與九星同為洛書九宮,可直接對讀 |
 | Jyotish 27 宿 / Vimshottari | 已入庫(待校對);已接引擎(`castJyotish`)、曆法卡(與八字大運並列)、AI | BPHS 行星大運章 v.12–16(章號 46 / 47 未定);ayanamsa 以 Spica = 180° 即場計(`jyotish.json`) | 是(需星曆) | 27 宿與 27 = 729 的立方根;宮位、分盤、antardasha 未做 |
+| 河洛真數(北大館藏,十冊) | todo | archive.org `creator:"題(宋)陳摶邵雍撰"`(https://archive.org/search?query=creator%3A%22%E9%A1%8C%28%E5%AE%8B%29%E9%99%B3%E6%91%B6%E9%82%B5%E9%9B%8D%E6%92%B0%22),識別碼 02094383.cn–02094392.cn,約 1250 頁;已下載至 `raw_pdf/河洛真數/` | 是(起例) | 同《河洛理數》起例對校,補卷一以外的流年、月卦、詩訣 |
+| archive.org 術數類古籍 | todo | archive.org `subject:"術數類"`(https://archive.org/search?query=subject%3A%22%E8%A1%93%E6%95%B8%E9%A1%9E%22),約 789 項,多為北大館藏公有領域:乾象通鑑、玉髓真經、夢林玄解、觀象玩占、卜筮全書、易林(焦氏)、三命通會、星學大成、協紀辨方書、皇極經世書(解)、集注太玄、太乙統宗寶鑑、範衍、乙巳占、太清神鑑等 | 視書而定 | 按體系逐本揀選;先揀已有引擎的(三命通會、協紀辨方書、皇極經世、太玄),再補新體系 |
 | 巴比倫六十進制 | todo | 古巴比倫泥版 | 是 | 60 進位與 360 / 365 週期 |
 | 廣東話版(yue) | todo | 本站新增語言 `yue`(粵語書面語) | 不適用 | 不適用;需先定文風,再補三語以外字串 |
 | 扶抑喜忌引擎(B 方案) | 已入庫 | 滴天髓、子平真詮;本站自建 | 是(規則) | 第三期;本站簡化評分(非古籍原文),tier modern,從格只偵測不推算;補第二條對照軸 |

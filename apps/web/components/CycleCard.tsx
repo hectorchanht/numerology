@@ -206,6 +206,7 @@ function Heluo({ r, solar }: { r: HeluoResult; solar: boolean }) {
   const { t } = useLocale();
   const { z } = useScript();
   const has = (b: boolean) => t(b ? "cycle.has" : "cycle.none");
+  const ln = r.liunian.find((y) => y.year === new Date().getFullYear());
   return (
     <>
       <h3 className="xs-h">{t("cycle.heluo")}</h3>
@@ -213,6 +214,7 @@ function Heluo({ r, solar }: { r: HeluoResult; solar: boolean }) {
         {t("cycle.heluoVal", { xt: z(r.xiantian.name), yt: r.yuantang, age: r.houtianAge, ht: z(r.houtian.name), hyt: r.houtianYuantang })}
       </p>
       <p className="xs-note">{t("cycle.heluoNums", { h: r.heaven, e: r.earth, yq: has(r.yuanqi.tian || r.yuanqi.di), hg: has(r.huagong.has) })}</p>
+      {ln && <p className="xs-note">{t("cycle.heluoYear", { y: ln.year, age: ln.age, hex: z(ln.hex.name), line: ln.line })}</p>}
       <Meta tier={r.tier} basis={solar ? "cross.basis.solar" : "cycle.basis.clock"} cite={r.cite} />
       <details className="xs-steps">
         <summary>{t("cycle.heluoYun")}</summary>

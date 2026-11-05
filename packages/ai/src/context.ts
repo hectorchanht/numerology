@@ -354,8 +354,9 @@ ${step(ep.steps)}`;
     const hl = cycles.heluo;
     if (hl) {
       const yun = hl.dayun.map((d) => `${d.phase}第${d.line}爻 ${d.fromAge}–${d.toAge} 歲`).join(";");
+      const ln = hl.liunian.find((y) => y.year === new Date().getFullYear());
       cycleBlock += `
-- 河洛理數:天數 ${hl.heaven}、地數 ${hl.earth};先天 ${hl.xiantian.name}(元堂第 ${hl.yuantang} 爻),${hl.houtianAge} 歲換後天 ${hl.houtian.name}(元堂第 ${hl.houtianYuantang} 爻);元氣${hl.yuanqi.tian || hl.yuanqi.di ? "有" : "無"}${hl.yuanqi.reversed ? "(逢相反)" : ""},化工${hl.huagong.has ? "有" : "無"}${hl.huagong.reversed ? "(逢反)" : ""}。大運:${yun}。層級 ${TIER_ZH[hl.tier]};出處 ${cite(hl.cite)}。
+- 河洛理數:天數 ${hl.heaven}、地數 ${hl.earth};先天 ${hl.xiantian.name}(元堂第 ${hl.yuantang} 爻),${hl.houtianAge} 歲換後天 ${hl.houtian.name}(元堂第 ${hl.houtianYuantang} 爻);元氣${hl.yuanqi.tian || hl.yuanqi.di ? "有" : "無"}${hl.yuanqi.reversed ? "(逢相反)" : ""},化工${hl.huagong.has ? "有" : "無"}${hl.huagong.reversed ? "(逢反)" : ""}。大運:${yun}。${ln ? `${ln.year} 年(${ln.age} 歲)流年卦 ${ln.hex.name} 第 ${ln.line} 爻(小象)。` : ""}層級 ${TIER_ZH[hl.tier]};出處 ${cite(hl.cite)}。
 ${step(hl.steps)}`;
     }
   }

@@ -110,3 +110,16 @@ test("寄宮詩:三元男女取卦齊全;三元一周 180 年", () => {
   assert.equal((1684 - H.yuan.anchorUpper) % 180, 0); // 康熙甲子上元
   assert.equal((1744 - H.yuan.anchorUpper) % 180, 60); // 乾隆甲子中元
 });
+
+test("卦氣歌:十二月各五卦,六十卦不重複、不含坎震離兌", () => {
+  const all = Object.values(H.guaqi.months).flat();
+  assert.equal(all.length, 60);
+  assert.equal(new Set(all).size, 60);
+  for (const n of ["坎", "震", "離", "兌"]) assert.ok(!all.includes(n));
+  for (const n of all) assert.ok(hexByName(n), n);
+});
+
+test("小象、月卦、日卦算例:卦名都是六十四卦", () => {
+  for (const e of H.xiaoxiang.examples) for (const n of [e.hex, ...e.years]) assert.ok(hexByName(n), n);
+  for (const n of H.monthHex.example.months) assert.ok(hexByName(n), n);
+});
