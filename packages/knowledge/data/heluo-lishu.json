@@ -2,26 +2,94 @@
   "meta": {
     "name": "河洛理數起例:天地數、先天卦、元堂、後天卦、元氣、化工、大運",
     "schema": "stemNumbers ; branchNumbers ; base ; reduce ; luoshuTrigram ; fiveRule ; yuan ; dang ; yuantang:{generic,pure} ; houtian ; zhizun ; yuanqi ; huagong ; dayun ; examples",
-    "source": "題(宋)陳摶、邵雍《河洛理數》卷一,上海文明書局石印本(據明崇禎壬申 1632 陳仁錫刻本;Wikimedia Commons NLC416 掃描,公有領域)。page = PDF 頁(raw_pdf/河洛理數1.pdf,MinerU doc:fd203eb)。只錄起例規則同書中算例,唔錄斷語、詩訣。",
+    "source": "題(宋)陳摶、邵雍《河洛理數》卷一,上海文明書局石印本(據明崇禎壬申 1632 陳仁錫刻本;Wikimedia Commons NLC416 掃描,公有領域)。page = PDF 頁(raw_pdf/河洛理數1.pdf,MinerU doc:fd203eb)。只錄起例規則同書中算例,唔錄斷語、詩訣。 校本:日本國立公文書館藏刻本 NAJDA-305-0271 巻1(Wikimedia Commons,公有領域)。",
     "version": "0.1.0",
     "reviewed": false,
-    "reviewNote": "地支數、寄宮詩、元堂各式、元氣同化工表都對過頁面圖片(pp. 21, 25, 27, 30–32, 35)。書中七個算例由 test 按規則重算。原書印錯兩處,見 errata。",
+    "reviewNote": "地支數、寄宮詩、元堂各式、元氣同化工表都對過頁面圖片(pp. 21, 25, 27, 30–32, 35)。書中七個算例由 test 按規則重算。原書印錯兩處,見 errata。 地支數、元氣、化工表另與 NAJDA 刻本巻1 核對。",
     "tier": "classical"
   },
   "stemNumbers": {
     "page": 21,
     "rule": "天干取洛書(後天卦)數:戊一乙癸二庚三辛四,壬甲從六,丁七丙八,己九;五數寄於中",
-    "values": { "甲": 6, "乙": 2, "丙": 8, "丁": 7, "戊": 1, "己": 9, "庚": 3, "辛": 4, "壬": 6, "癸": 2 },
-    "trigram": { "甲": "乾", "壬": "乾", "乙": "坤", "癸": "坤", "庚": "震", "辛": "巽", "丙": "艮", "己": "離", "戊": "坎", "丁": "兌" }
+    "values": {
+      "甲": 6,
+      "乙": 2,
+      "丙": 8,
+      "丁": 7,
+      "戊": 1,
+      "己": 9,
+      "庚": 3,
+      "辛": 4,
+      "壬": 6,
+      "癸": 2
+    },
+    "trigram": {
+      "甲": "乾",
+      "壬": "乾",
+      "乙": "坤",
+      "癸": "坤",
+      "庚": "震",
+      "辛": "巽",
+      "丙": "艮",
+      "己": "離",
+      "戊": "坎",
+      "丁": "兌"
+    }
   },
   "branchNumbers": {
     "page": 21,
     "rule": "地支取河圖生成數:亥子一六水、寅卯三八木、巳午二七火、申酉四九金、辰戌丑未五十土",
     "values": {
-      "子": [1, 6], "亥": [1, 6], "寅": [3, 8], "卯": [3, 8], "巳": [2, 7], "午": [2, 7],
-      "申": [4, 9], "酉": [4, 9], "辰": [5, 10], "戌": [5, 10], "丑": [5, 10], "未": [5, 10]
+      "子": [
+        1,
+        6
+      ],
+      "亥": [
+        1,
+        6
+      ],
+      "寅": [
+        3,
+        8
+      ],
+      "卯": [
+        3,
+        8
+      ],
+      "巳": [
+        2,
+        7
+      ],
+      "午": [
+        2,
+        7
+      ],
+      "申": [
+        4,
+        9
+      ],
+      "酉": [
+        4,
+        9
+      ],
+      "辰": [
+        5,
+        10
+      ],
+      "戌": [
+        5,
+        10
+      ],
+      "丑": [
+        5,
+        10
+      ],
+      "未": [
+        5,
+        10
+      ]
     },
-    "erratum": "原書印「寅卯二八、巳午三七」;同頁後四個算例(p. 22–23)要用寅卯 3、8、巳午 2、7 先計得出書中天地數,即標準河圖數。"
+    "erratum": "文明書局石印本印「寅卯二八、巳午三七」;同頁算例(p. 22–23)要用寅卯 3、8、巳午 2、7 先計得出書中天地數。日本國立公文書館藏刻本(NAJDA-305-0271 巻1,Commons,PDF p. 21)正作「寅卯三八、巳午二七」,即石印本翻刻之誤。"
   },
   "base": {
     "page": 22,
@@ -37,14 +105,34 @@
   "luoshuTrigram": {
     "page": 23,
     "rule": "一坎二坤三震四巽,五寄中宮,六乾七兌八艮九離",
-    "values": { "1": "坎", "2": "坤", "3": "震", "4": "巽", "6": "乾", "7": "兌", "8": "艮", "9": "離" }
+    "values": {
+      "1": "坎",
+      "2": "坤",
+      "3": "震",
+      "4": "巽",
+      "6": "乾",
+      "7": "兌",
+      "8": "艮",
+      "9": "離"
+    }
   },
   "fiveRule": {
     "page": 25,
     "rule": "天地二數所餘得五,寄中宮,按三元同陰陽男女取卦",
-    "upper": { "male": "艮", "female": "坤" },
-    "middle": { "yangMale": "艮", "yinFemale": "艮", "yinMale": "坤", "yangFemale": "坤" },
-    "lower": { "male": "離", "female": "兌" },
+    "upper": {
+      "male": "艮",
+      "female": "坤"
+    },
+    "middle": {
+      "yangMale": "艮",
+      "yinFemale": "艮",
+      "yinMale": "坤",
+      "yangFemale": "坤"
+    },
+    "lower": {
+      "male": "離",
+      "female": "兌"
+    },
     "yinYang": "甲丙戊庚壬年生為陽,乙丁己辛癸年生為陰"
   },
   "yuan": {
@@ -61,25 +149,226 @@
     "rule": "子丑寅卯辰巳為陽時,數本卦陽爻,由子時起;午未申酉戌亥為陰時,數本卦陰爻,由午時起;皆由下而上",
     "poem": "陰陽一二重而寄,三位雖重沒寄宮,四五無重應有寄,純爻男女不相同",
     "generic": [
-      { "count": 1, "rule": "同性爻一位重數兩時,其餘四時寄異性爻(由下而上)", "example": { "hex": "師", "hour": "陽", "order": [2, 2, 1, 3, 4, 5] }, "page": 27 },
-      { "count": 1, "example": { "hex": "小畜", "hour": "陰", "order": [4, 4, 1, 2, 3, 5] }, "page": 27 },
-      { "count": 2, "rule": "同性爻兩次往復,其餘兩時寄異性爻", "example": { "hex": "萃", "hour": "陽", "order": [4, 5, 4, 5, 1, 2] }, "page": 27 },
-      { "count": 2, "example": { "hex": "无妄", "hour": "陰", "order": [2, 3, 2, 3, 1, 4] }, "page": 28 },
-      { "count": 3, "rule": "同性爻往來兩次,不寄", "example": { "hex": "旅", "hour": "陽", "order": [3, 4, 6, 3, 4, 6] }, "page": 28 },
-      { "count": 3, "example": { "hex": "節", "hour": "陰", "order": [3, 4, 6, 3, 4, 6] }, "page": 29 },
-      { "count": 4, "rule": "同性爻行完一次,其餘兩時寄異性爻", "example": { "hex": "巽", "hour": "陽", "order": [2, 3, 5, 6, 1, 4] }, "page": 29 },
-      { "count": 4, "example": { "hex": "震", "hour": "陰", "order": [2, 3, 5, 6, 1, 4] }, "page": 29 },
-      { "count": 5, "rule": "同性爻行完一次,末一時寄異性爻", "example": { "hex": "同人", "hour": "陽", "order": [1, 3, 4, 5, 6, 2] }, "page": 29 },
-      { "count": 5, "example": { "hex": "豫", "hour": "陰", "order": [1, 2, 3, 5, 6, 4] }, "page": 30 }
+      {
+        "count": 1,
+        "rule": "同性爻一位重數兩時,其餘四時寄異性爻(由下而上)",
+        "example": {
+          "hex": "師",
+          "hour": "陽",
+          "order": [
+            2,
+            2,
+            1,
+            3,
+            4,
+            5
+          ]
+        },
+        "page": 27
+      },
+      {
+        "count": 1,
+        "example": {
+          "hex": "小畜",
+          "hour": "陰",
+          "order": [
+            4,
+            4,
+            1,
+            2,
+            3,
+            5
+          ]
+        },
+        "page": 27
+      },
+      {
+        "count": 2,
+        "rule": "同性爻兩次往復,其餘兩時寄異性爻",
+        "example": {
+          "hex": "萃",
+          "hour": "陽",
+          "order": [
+            4,
+            5,
+            4,
+            5,
+            1,
+            2
+          ]
+        },
+        "page": 27
+      },
+      {
+        "count": 2,
+        "example": {
+          "hex": "无妄",
+          "hour": "陰",
+          "order": [
+            2,
+            3,
+            2,
+            3,
+            1,
+            4
+          ]
+        },
+        "page": 28
+      },
+      {
+        "count": 3,
+        "rule": "同性爻往來兩次,不寄",
+        "example": {
+          "hex": "旅",
+          "hour": "陽",
+          "order": [
+            3,
+            4,
+            6,
+            3,
+            4,
+            6
+          ]
+        },
+        "page": 28
+      },
+      {
+        "count": 3,
+        "example": {
+          "hex": "節",
+          "hour": "陰",
+          "order": [
+            3,
+            4,
+            6,
+            3,
+            4,
+            6
+          ]
+        },
+        "page": 29
+      },
+      {
+        "count": 4,
+        "rule": "同性爻行完一次,其餘兩時寄異性爻",
+        "example": {
+          "hex": "巽",
+          "hour": "陽",
+          "order": [
+            2,
+            3,
+            5,
+            6,
+            1,
+            4
+          ]
+        },
+        "page": 29
+      },
+      {
+        "count": 4,
+        "example": {
+          "hex": "震",
+          "hour": "陰",
+          "order": [
+            2,
+            3,
+            5,
+            6,
+            1,
+            4
+          ]
+        },
+        "page": 29
+      },
+      {
+        "count": 5,
+        "rule": "同性爻行完一次,末一時寄異性爻",
+        "example": {
+          "hex": "同人",
+          "hour": "陽",
+          "order": [
+            1,
+            3,
+            4,
+            5,
+            6,
+            2
+          ]
+        },
+        "page": 29
+      },
+      {
+        "count": 5,
+        "example": {
+          "hex": "豫",
+          "hour": "陰",
+          "order": [
+            1,
+            2,
+            3,
+            5,
+            6,
+            4
+          ]
+        },
+        "page": 30
+      }
     ],
     "pure": {
       "page": 30,
       "rule": "乾、坤六爻同性,只數一個三爻卦兩次。順:陽時數下卦、陰時數上卦,由下而上;逆:陽時數上卦、陰時數下卦,由上而下",
-      "乾": { "male": "順", "female": { "winterToSummer": "逆", "summerToWinter": "順" } },
-      "坤": { "female": "順", "male": { "summerToWinter": "逆", "winterToSummer": "順" } },
+      "乾": {
+        "male": "順",
+        "female": {
+          "winterToSummer": "逆",
+          "summerToWinter": "順"
+        }
+      },
+      "坤": {
+        "female": "順",
+        "male": {
+          "summerToWinter": "逆",
+          "winterToSummer": "順"
+        }
+      },
       "orders": {
-        "順": { "陽": [1, 2, 3, 1, 2, 3], "陰": [4, 5, 6, 4, 5, 6] },
-        "逆": { "陽": [6, 5, 4, 6, 5, 4], "陰": [3, 2, 1, 3, 2, 1] }
+        "順": {
+          "陽": [
+            1,
+            2,
+            3,
+            1,
+            2,
+            3
+          ],
+          "陰": [
+            4,
+            5,
+            6,
+            4,
+            5,
+            6
+          ]
+        },
+        "逆": {
+          "陽": [
+            6,
+            5,
+            4,
+            6,
+            5,
+            4
+          ],
+          "陰": [
+            3,
+            2,
+            1,
+            3,
+            2,
+            1
+          ]
+        }
       },
       "season": "冬至後夏至前 = winterToSummer;夏至後冬至前 = summerToWinter"
     }
@@ -90,29 +379,90 @@
   },
   "zhizun": {
     "page": 32,
-    "hexagrams": ["坎", "屯", "蹇"],
+    "hexagrams": [
+      "坎",
+      "屯",
+      "蹇"
+    ],
     "rule": "三至尊卦:九五元堂生於陰令則變爻而不換內外,陽月則照常換;上六元堂生於陽月則變而不換,陰令則照常換",
     "note": "陽月/陰令按書中陰陽分法解作冬至後夏至前 / 夏至後冬至前(原文未明定界),屬本站詮釋"
   },
   "yuanqi": {
     "page": 32,
     "rule": "元氣只看生年干支:天干逢者為天元氣,地支逢者為地元氣;先天或後天卦中有其卦即為有元氣",
-    "stems": { "甲": "乾", "壬": "乾", "乙": "坤", "癸": "坤", "丙": "艮", "丁": "兌", "戊": "坎", "己": "離", "庚": "震", "辛": "巽" },
-    "branches": { "戌": "乾", "亥": "乾", "未": "坤", "申": "坤", "丑": "艮", "寅": "艮", "酉": "兌", "子": "坎", "午": "離", "卯": "震", "辰": "巽", "巳": "巽" },
-    "opposite": { "page": 33, "rule": "元氣相反:乾逢坤、坤逢乾、艮逢兌、兌逢艮、坎逢離、離逢坎、震逢巽、巽逢震(先天對宮)" }
+    "stems": {
+      "甲": "乾",
+      "壬": "乾",
+      "乙": "坤",
+      "癸": "坤",
+      "丙": "艮",
+      "丁": "兌",
+      "戊": "坎",
+      "己": "離",
+      "庚": "震",
+      "辛": "巽"
+    },
+    "branches": {
+      "戌": "乾",
+      "亥": "乾",
+      "未": "坤",
+      "申": "坤",
+      "丑": "艮",
+      "寅": "艮",
+      "酉": "兌",
+      "子": "坎",
+      "午": "離",
+      "卯": "震",
+      "辰": "巽",
+      "巳": "巽"
+    },
+    "opposite": {
+      "page": 33,
+      "rule": "元氣相反:乾逢坤、坤逢乾、艮逢兌、兌逢艮、坎逢離、離逢坎、震逢巽、巽逢震(先天對宮)"
+    }
   },
   "huagong": {
     "page": 34,
     "rule": "化工只看生月節氣:冬至後春分前坎,春分後夏至前震,夏至後秋分前離,秋分後冬至前兌;每季月坤、艮各旺十八日",
     "periods": [
-      { "from": "冬至", "to": "春分", "trigram": "坎", "reverse": "離" },
-      { "from": "春分", "to": "夏至", "trigram": "震", "reverse": "巽" },
-      { "from": "夏至", "to": "秋分", "trigram": "離", "reverse": "坎" },
-      { "from": "秋分", "to": "冬至", "trigram": "兌", "reverse": "艮" }
+      {
+        "from": "冬至",
+        "to": "春分",
+        "trigram": "坎",
+        "reverse": "離"
+      },
+      {
+        "from": "春分",
+        "to": "夏至",
+        "trigram": "震",
+        "reverse": "巽"
+      },
+      {
+        "from": "夏至",
+        "to": "秋分",
+        "trigram": "離",
+        "reverse": "坎"
+      },
+      {
+        "from": "秋分",
+        "to": "冬至",
+        "trigram": "兌",
+        "reverse": "艮"
+      }
     ],
-    "earth": { "rule": "季月(四立前)十八日:化工坤、艮;反乾、兌", "trigrams": ["坤", "艮"], "reverse": ["乾", "兌"] },
+    "earth": {
+      "rule": "季月(四立前)十八日:化工坤、艮;反乾、兌",
+      "trigrams": [
+        "坤",
+        "艮"
+      ],
+      "reverse": [
+        "乾",
+        "兌"
+      ]
+    },
     "reversePage": 35,
-    "erratum": "化工反表原印「冬至以後夏至前逢離」,同「春分以後夏至前逢巽」重疊;按其餘各條皆為化工卦之先天對宮,應作冬至後春分前。"
+    "erratum": "化工反表「冬至以後夏至前逢離」同「春分以後夏至前逢巽」重疊;NAJDA 刻本(PDF p. 33)亦同,屬原文問題。按其餘各條為化工卦之先天對宮,應作冬至後春分前。"
   },
   "dayun": {
     "page": 37,
@@ -121,12 +471,108 @@
     "yin": 6
   },
   "examples": [
-    { "page": 22, "pillars": ["甲子", "丁卯", "庚申", "庚辰"], "heaven": 31, "earth": 34, "heavenTrigram": "乾", "earthTrigram": "巽" },
-    { "page": 23, "pillars": ["丁巳", "丙午", "壬寅", "辛丑"], "heaven": 29, "earth": 40, "heavenTrigram": "巽", "earthTrigram": "坎" },
-    { "page": 23, "pillars": ["庚午", "戊戌", "己酉", "乙亥"], "heaven": 35, "earth": 24, "heavenTrigram": "坎", "earthTrigram": "巽" },
-    { "page": 23, "pillars": ["癸卯", "壬戌", "甲申", "辛未"], "heaven": 22, "earth": 50, "heavenTrigram": "坤", "earthTrigram": "坤" },
-    { "page": 31, "pillars": ["甲子", "丁卯", "庚申", "庚辰"], "gender": "male", "hour": "辰", "xiantian": "姤", "yuantang": 6, "houtian": "中孚", "houtianYuantang": 3 },
-    { "page": 82, "pillars": ["庚午", "甲申", "丙申", "丁酉"], "gender": "male", "hour": "酉", "heaven": 44, "earth": 28, "xiantian": "旅", "yuantang": 1, "houtian": "離", "houtianYuantang": 4, "houtianAge": 46 },
-    { "page": 83, "pillars": ["乙亥", "乙酉", "戊寅", "庚申"], "gender": "male", "hour": "申", "heaven": 26, "earth": 26, "xiantian": "訟", "yuantang": 1, "houtian": "夬", "houtianYuantang": 4, "houtianAge": 49 }
+    {
+      "page": 22,
+      "pillars": [
+        "甲子",
+        "丁卯",
+        "庚申",
+        "庚辰"
+      ],
+      "heaven": 31,
+      "earth": 34,
+      "heavenTrigram": "乾",
+      "earthTrigram": "巽"
+    },
+    {
+      "page": 23,
+      "pillars": [
+        "丁巳",
+        "丙午",
+        "壬寅",
+        "辛丑"
+      ],
+      "heaven": 29,
+      "earth": 40,
+      "heavenTrigram": "巽",
+      "earthTrigram": "坎"
+    },
+    {
+      "page": 23,
+      "pillars": [
+        "庚午",
+        "戊戌",
+        "己酉",
+        "乙亥"
+      ],
+      "heaven": 35,
+      "earth": 24,
+      "heavenTrigram": "坎",
+      "earthTrigram": "巽"
+    },
+    {
+      "page": 23,
+      "pillars": [
+        "癸卯",
+        "壬戌",
+        "甲申",
+        "辛未"
+      ],
+      "heaven": 22,
+      "earth": 50,
+      "heavenTrigram": "坤",
+      "earthTrigram": "坤"
+    },
+    {
+      "page": 31,
+      "pillars": [
+        "甲子",
+        "丁卯",
+        "庚申",
+        "庚辰"
+      ],
+      "gender": "male",
+      "hour": "辰",
+      "xiantian": "姤",
+      "yuantang": 6,
+      "houtian": "中孚",
+      "houtianYuantang": 3
+    },
+    {
+      "page": 82,
+      "pillars": [
+        "庚午",
+        "甲申",
+        "丙申",
+        "丁酉"
+      ],
+      "gender": "male",
+      "hour": "酉",
+      "heaven": 44,
+      "earth": 28,
+      "xiantian": "旅",
+      "yuantang": 1,
+      "houtian": "離",
+      "houtianYuantang": 4,
+      "houtianAge": 46
+    },
+    {
+      "page": 83,
+      "pillars": [
+        "乙亥",
+        "乙酉",
+        "戊寅",
+        "庚申"
+      ],
+      "gender": "male",
+      "hour": "申",
+      "heaven": 26,
+      "earth": 26,
+      "xiantian": "訟",
+      "yuantang": 1,
+      "houtian": "夬",
+      "houtianYuantang": 4,
+      "houtianAge": 49
+    }
   ]
 }

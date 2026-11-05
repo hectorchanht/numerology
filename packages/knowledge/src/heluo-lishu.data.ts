@@ -4,10 +4,10 @@ const HELUO_DATA = {
   "meta": {
     "name": "河洛理數起例:天地數、先天卦、元堂、後天卦、元氣、化工、大運",
     "schema": "stemNumbers ; branchNumbers ; base ; reduce ; luoshuTrigram ; fiveRule ; yuan ; dang ; yuantang:{generic,pure} ; houtian ; zhizun ; yuanqi ; huagong ; dayun ; examples",
-    "source": "題(宋)陳摶、邵雍《河洛理數》卷一,上海文明書局石印本(據明崇禎壬申 1632 陳仁錫刻本;Wikimedia Commons NLC416 掃描,公有領域)。page = PDF 頁(raw_pdf/河洛理數1.pdf,MinerU doc:fd203eb)。只錄起例規則同書中算例,唔錄斷語、詩訣。",
+    "source": "題(宋)陳摶、邵雍《河洛理數》卷一,上海文明書局石印本(據明崇禎壬申 1632 陳仁錫刻本;Wikimedia Commons NLC416 掃描,公有領域)。page = PDF 頁(raw_pdf/河洛理數1.pdf,MinerU doc:fd203eb)。只錄起例規則同書中算例,唔錄斷語、詩訣。 校本:日本國立公文書館藏刻本 NAJDA-305-0271 巻1(Wikimedia Commons,公有領域)。",
     "version": "0.1.0",
     "reviewed": false,
-    "reviewNote": "地支數、寄宮詩、元堂各式、元氣同化工表都對過頁面圖片(pp. 21, 25, 27, 30–32, 35)。書中七個算例由 test 按規則重算。原書印錯兩處,見 errata。",
+    "reviewNote": "地支數、寄宮詩、元堂各式、元氣同化工表都對過頁面圖片(pp. 21, 25, 27, 30–32, 35)。書中七個算例由 test 按規則重算。原書印錯兩處,見 errata。 地支數、元氣、化工表另與 NAJDA 刻本巻1 核對。",
     "tier": "classical"
   },
   "stemNumbers": {
@@ -91,7 +91,7 @@ const HELUO_DATA = {
         10
       ]
     },
-    "erratum": "原書印「寅卯二八、巳午三七」;同頁後四個算例(p. 22–23)要用寅卯 3、8、巳午 2、7 先計得出書中天地數,即標準河圖數。"
+    "erratum": "文明書局石印本印「寅卯二八、巳午三七」;同頁算例(p. 22–23)要用寅卯 3、8、巳午 2、7 先計得出書中天地數。日本國立公文書館藏刻本(NAJDA-305-0271 巻1,Commons,PDF p. 21)正作「寅卯三八、巳午二七」,即石印本翻刻之誤。"
   },
   "base": {
     "page": 22,
@@ -441,7 +441,7 @@ const HELUO_DATA = {
       ]
     },
     "reversePage": 35,
-    "erratum": "化工反表原印「冬至以後夏至前逢離」,同「春分以後夏至前逢巽」重疊;按其餘各條皆為化工卦之先天對宮,應作冬至後春分前。"
+    "erratum": "化工反表「冬至以後夏至前逢離」同「春分以後夏至前逢巽」重疊;NAJDA 刻本(PDF p. 33)亦同,屬原文問題。按其餘各條為化工卦之先天對宮,應作冬至後春分前。"
   },
   "dayun": {
     "page": 37,
