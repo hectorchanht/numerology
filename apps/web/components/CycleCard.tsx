@@ -2,15 +2,15 @@
 
 import { useMemo } from "react";
 import {
-  castHuangji, castMaya, castPlanetaryHour, castTaixuan, MAYA_META, TZOLKIN_DAY_NAMES,
-  type ChartResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult,
+  castEphemeris, castHuangji, castMaya, castPlanetaryHour, castTaixuan, MAYA_META, TZOLKIN_DAY_NAMES,
+  type ChartResult, type EphemerisResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult,
 } from "@numerology/engine";
 import { useLocale, useScript, type TKey } from "@/lib/i18n";
 import { taixuanGrid, tzolkinCell } from "@/lib/cycleView";
 import { CitePop } from "@/components/CrossSystemCard";
 
 /*
- * 時間週期卡:太玄(81 首 9×9 格)、瑪雅曆(Tzolk'in 13×20 格、長紀曆、Haab)、皇極經世、行星時。
+ * 時間週期卡:太玄(81 首 9×9 格)、瑪雅曆(Tzolk'in 13×20 格、長紀曆、Haab)、皇極經世、行星時、七曜位置與月宿。
  * 全部由引擎確定性計算,零 AI;舊歷史紀錄只存 chart,於此即場重算。
  */
 
@@ -156,12 +156,59 @@ function PlanetaryHour({ r, solar }: { r: PlanetaryHourResult | null; solar: boo
   );
 }
 
+const deg = (lon: number) => `${Math.floor(lon % 30)}°${String(Math.floor(((lon % 30) % 1) * 60)).padStart(2, "0")}′`;
+
+/** 七曜位置(星曆 + Tetrabiblos 尊貴)同 Agrippa 月宿;時間按鐘面東八區,不受真太陽時影響。 */
+function Sky({ r }: { r: EphemerisResult }) {
+  const { t } = useLocale();
+  const m = r.moonMansion;
+  const aspects = r.aspects.map((a) => `${a.a}–${a.b} ${a.type}`).join(", ");
+  return (
+    <>
+      <h3 className="xs-h">{t("cycle.sky")}</h3>
+      <p className="cy-val">
+        {r.angles
+          ? `${t("cycle.skyAngles", { asc: `${r.angles.ascSign} ${deg(r.angles.ascendant)}`, mc: `${r.angles.mcSign} ${deg(r.angles.mc)}` })} · ${t(r.sect === "day" ? "cycle.sectDay" : "cycle.sectNight")}`
+          : t("cycle.skyNeedLat")}
+      </p>
+      <Meta tier={r.tier} basis="cycle.basis.clock" cite={r.cite} />
+      <div className="bazi-detail-wrap">
+        <table className="bazi-detail cy-sky">
+          <thead>
+            <tr>
+              {(["cycle.colPlanet", "cycle.colPos", "cycle.colHouse", "cycle.colDig", "cycle.colTerm"] as const).map((k) => <th key={k} className="colhead">{t(k)}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {r.planets.map((p) => (
+              <tr key={p.planet}>
+                <th className="rowlabel">{p.planet}</th>
+                <td>{p.sign} {deg(p.longitude)}{p.retrograde ? ` ${t("cycle.retro")}` : ""}</td>
+                <td>{p.house ?? "—"}</td>
+                <td>{p.dignities.map((d) => t(`cycle.dig.${d}` as TKey)).join("、") || "—"}</td>
+                <td>{p.termRuler}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="xs-note">{aspects ? t("cycle.aspects", { list: aspects }) : t("cycle.aspectsNone")}</p>
+      <h3 className="xs-h">{t("cycle.mansion")}</h3>
+      <p className="cy-val">{t("cycle.mansionVal", { n: m.n, name: m.names.join(" / "), meaning: m.meaning ? ` (${m.meaning})` : "", start: m.start.toFixed(2) })}</p>
+      <Meta tier={r.tier} basis="cycle.basis.clock" cite={r.mansionCite} />
+      <p className="xs-note">{t("cycle.skyNote")}</p>
+      <Steps steps={r.steps} />
+    </>
+  );
+}
+
 export function CycleCard({ chart }: { chart: ChartResult }) {
   const { t } = useLocale();
   const tx = useMemo(() => castTaixuan(chart.input), [chart]);
   const maya = useMemo(() => castMaya(chart.input.year, chart.input.month, chart.input.day), [chart]);
   const huangji = useMemo(() => castHuangji(chart.input), [chart]);
   const hour = useMemo(() => castPlanetaryHour(chart.input), [chart]);
+  const sky = useMemo(() => castEphemeris(chart.input), [chart]);
   return (
     <div className="card viz xs">
       <p className="xs-sub">{t("cycle.intro")}</p>
@@ -169,6 +216,7 @@ export function CycleCard({ chart }: { chart: ChartResult }) {
       <Maya r={maya} />
       <Huangji r={huangji} solar={chart.meta.trueSolarTimeApplied} />
       <PlanetaryHour r={hour} solar={chart.meta.trueSolarTimeApplied} />
+      <Sky r={sky} />
     </div>
   );
 }

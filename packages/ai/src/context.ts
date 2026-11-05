@@ -309,11 +309,11 @@ ${step(ph.steps)}`;
       const SECT = { day: "晝生", night: "夜生" } as const;
       const DIG = { domicile: "入廟", exaltation: "入旺", fall: "落陷" } as const;
       const pos = ep.planets.map((p) =>
-        `${p.planet} ${p.sign} ${p.degree.toFixed(1)}°${p.retrograde ? "(逆)" : ""} 宮主 ${p.ruler}${p.dignities.map((d) => ` ${DIG[d]}`).join("")} 界主 ${p.termRuler}`).join(";");
+        `${p.planet} ${p.sign} ${p.degree.toFixed(1)}°${p.retrograde ? "(逆)" : ""}${p.house ? ` 第${p.house}宮` : ""} 宮主 ${p.ruler}${p.dignities.map((d) => ` ${DIG[d]}`).join("")} 界主 ${p.termRuler}`).join(";");
       const asp = ep.aspects.map((a) => `${a.a}–${a.b} ${a.type}`).join("、") || "無";
       const mm = ep.moonMansion;
       cycleBlock += `
-- 七曜位置(Tetrabiblos 卷一,回歸黃道):${pos}。${ep.sect ? SECT[ep.sect] : "晝夜生未判"};整宮相位:${asp}。層級 ${TIER_ZH[ep.tier]};出處 ${cite(ep.cite)}。
+- 七曜位置(Tetrabiblos 卷一,回歸黃道):${pos}。${ep.angles ? `上升 ${ep.angles.ascSign} ${(ep.angles.ascendant % 30).toFixed(1)}°、天頂 ${ep.angles.mcSign} ${(ep.angles.mc % 30).toFixed(1)}°(整宮制)` : "未填經緯度,無上升與宮位"};${ep.sect ? SECT[ep.sect] : "晝夜生未判"};整宮相位:${asp}。層級 ${TIER_ZH[ep.tier]};出處 ${cite(ep.cite)}。
 - 月宿(Agrippa 二十八宿):第 ${mm.n} 宿 ${mm.names.join(" / ")}${mm.meaning ? `(${mm.meaning})` : ""},起於黃經 ${mm.start.toFixed(2)}°。出處 ${cite(ep.mansionCite)}。
 ${step(ep.steps)}`;
     }

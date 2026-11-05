@@ -21,6 +21,8 @@ export interface PlanetPosition {
   triplicityRulers: Planet[];
   /** 埃及界主 */
   termRuler: Planet;
+  /** 整宮制宮位(上升所在宮 = 第 1 宮);缺經緯度 → null */
+  house: number | null;
 }
 
 export interface AspectHit {
@@ -39,6 +41,8 @@ export interface EphemerisResult {
   aspects: AspectHit[];
   /** 晝生 / 夜生(太陽喺地平上下);缺經緯度 → null */
   sect: "day" | "night" | null;
+  /** 上升點同天頂(回歸黃經);缺經緯度 → null */
+  angles: { ascendant: number; ascSign: Sign; mc: number; mcSign: Sign } | null;
   moonMansion: { n: number; names: string[]; meaning: string | null; start: number };
   steps: string[];
   tier: "classical";
@@ -54,6 +58,8 @@ const MANSION = 360 / 28;
 const SIGN_GAP: Record<number, keyof typeof ASPECTS> = { 2: "sextile", 3: "quartile", 4: "trine", 6: "opposition" };
 
 const lonOf = (body: Planet, t: Astro.AstroTime) => Astro.Ecliptic(Astro.GeoVector(body as Astro.Body, t, true)).elon;
+const rad = Math.PI / 180;
+const norm = (d: number) => ((d % 360) + 360) % 360;
 const dms = (d: number) => `${Math.floor(d)}°${String(Math.floor((d % 1) * 60)).padStart(2, "0")}′`;
 
 /**
@@ -68,11 +74,19 @@ export function castEphemeris(input: BirthInput): EphemerisResult {
   const prev = Astro.MakeTime(new Date(ms - 86400000));
 
   let sect: EphemerisResult["sect"] = null;
+  let angles: EphemerisResult["angles"] = null;
   if (input.latitude != null && input.longitude != null) {
     const obs = new Astro.Observer(input.latitude, input.longitude, 0);
     const eq = Astro.Equator(Astro.Body.Sun, t, obs, true, true);
     sect = Astro.Horizon(t, obs, eq.ra, eq.dec).altitude > 0 ? "day" : "night";
+    // 地方恆星時 θ(= 天頂赤經)+ 真黃赤交角 ε → 天頂、上升(球面三角標準式)
+    const th = norm(Astro.SiderealTime(t) * 15 + input.longitude) * rad;
+    const e = Astro.e_tilt(t).tobl * rad;
+    const mc = norm(Math.atan2(Math.sin(th), Math.cos(th) * Math.cos(e)) / rad);
+    const ascendant = norm(Math.atan2(Math.cos(th), -(Math.sin(th) * Math.cos(e) + Math.tan(input.latitude * rad) * Math.sin(e))) / rad);
+    angles = { ascendant, ascSign: SIGNS[Math.floor(ascendant / 30)]!, mc, mcSign: SIGNS[Math.floor(mc / 30)]! };
   }
+  const ascIdx = angles ? SIGNS.indexOf(angles.ascSign) : -1;
 
   const planets = BODIES.map((planet): PlanetPosition => {
     const longitude = lonOf(planet, t);
@@ -95,6 +109,7 @@ export function castEphemeris(input: BirthInput): EphemerisResult {
       ],
       triplicityRulers: sect ? [tri[sect]] : [tri.day, tri.night],
       termRuler: term.planet,
+      house: angles ? ((SIGNS.indexOf(sign) - ascIdx + 12) % 12) + 1 : null,
     };
   });
 
@@ -114,12 +129,15 @@ export function castEphemeris(input: BirthInput): EphemerisResult {
     `鐘面時間 ${input.year}-${input.month}-${input.day} ${input.hour}:${String(input.minute ?? 0).padStart(2, "0")} 按東八區換算 UTC ${new Date(ms).toISOString().slice(0, 16)}Z(未計夏令時)。`,
     "七曜取地心視黃經(含光行差),回歸黃道,當日真春分為 0°。",
     sect ? `太陽${sect === "day" ? "在地平以上,晝生" : "在地平以下,夜生"};三方主星取${sect === "day" ? "晝" : "夜"}主。` : "未填經緯度,不判晝夜生;三方主星晝夜並列。",
-    ...planets.map((p) => `${p.planet} ${p.sign} ${dms(p.degree)}${p.retrograde ? "(逆行)" : ""}:宮主 ${p.ruler}${p.dignities.length ? `,${p.dignities.join("、")}` : ""};界主 ${p.termRuler}。`),
+    ...planets.map((p) => `${p.planet} ${p.sign} ${dms(p.degree)}${p.retrograde ? "(逆行)" : ""}${p.house ? `,第 ${p.house} 宮` : ""}:宮主 ${p.ruler}${p.dignities.length ? `,${p.dignities.join("、")}` : ""};界主 ${p.termRuler}。`),
+    angles
+      ? `地方恆星時與黃赤交角求得上升 ${angles.ascSign} ${dms(angles.ascendant % 30)}、天頂 ${angles.mcSign} ${dms(angles.mc % 30)};宮位用整宮制,上升所在宮為第 1 宮。`
+      : "未填經緯度,不計上升點與宮位。",
     `月亮黃經 ${dms(moon.longitude)} ÷ ${MANSION.toFixed(4)}° → 第 ${mi + 1} 宿 ${m.names[0]}。`,
   ];
 
   return {
-    utc: new Date(ms).toISOString(), planets, aspects, sect,
+    utc: new Date(ms).toISOString(), planets, aspects, sect, angles,
     moonMansion: { n: m.n, names: m.names, meaning: m.meaning, start: mi * MANSION },
     steps, tier: "classical",
     cite: { work: "Tetrabiblos", author: "Ptolemy", year: 1822, locator: "Book I, tr. J. M. Ashmand" },

@@ -22,7 +22,7 @@
 | 蒂邁歐篇數理 | 已入庫(待校對) | Plato,Jowett 1871 英譯:世界靈魂音階、七重天、五正多面體、元素轉換(`timaeus.json`) | 是 | 9/8、256/243 同律呂三分損益同源 |
 | Nicomachus 算術 | 已入庫(待校對) | D'Ooge 1926 英譯:數嘅分類、完全數、五種比、形數、十種比例、最完美比例(`nicomachus.json`) | 是 | 6:8:9:12 同律呂、蒂邁歐篇音程一致 |
 | 卡巴拉(Sefer Yetzirah) | 已入庫(待校對) | Sefer Yetzirah,Westcott 1893 英譯(`sefer-yetzirah.json`) | 是(查表) | 22 字母 = 3 + 7 + 12;七雙字母配七行星,與幻方行星序對看 |
-| 西洋占星(Tetrabiblos 卷一) | 已入庫(待校對);已接引擎(`castEphemeris`)同 AI 多體系一節 | Ptolemy,Ashmand 1822 英譯:宮位、三方、廟旺、埃及 / 托勒密 / 迦勒底界、相位(`tetrabiblos.json`);七曜位置用 astronomy-engine(對 JPL Horizons 誤差 < 0.01°) | 是(七曜宮度、尊貴、界主、整宮相位、晝夜生;未計上升點同宮位) | 星期守護行星已經幻方接上;月亮位置另配 Agrippa 二十八月宿 |
+| 西洋占星(Tetrabiblos 卷一) | 已入庫(待校對);已接引擎(`castEphemeris`)同 AI 多體系一節 | Ptolemy,Ashmand 1822 英譯:宮位、三方、廟旺、埃及 / 托勒密 / 迦勒底界、相位(`tetrabiblos.json`);七曜位置用 astronomy-engine(對 JPL Horizons 誤差 < 0.01°) | 是(七曜宮度、尊貴、界主、整宮相位、晝夜生;有經緯度時加上升、天頂、整宮宮位) | 星期守護行星已經幻方接上;月亮位置另配 Agrippa 二十八月宿 |
 | 康熙筆畫 | 已入庫 | 康熙字典筆畫(`kangxi-strokes.json`) | 是 | 姓名筆畫數化簡後可落九宮 |
 | 科學筆記 | 已入庫(待校對,reviewed: false) | `science-notes.json`(同行評審條目) | 否(文獻) | 無直接連結;供報告「現代科學角度」 |
 | 太玄經 729 贊 | 已入庫(首名對照維基文庫、待校對) | 揚雄《太玄經》(約 4 BCE–AD 2;`taixuan.json`) | 是(首 / 贊由數起) | 三分九天 × 81 首 × 9 贊 = 729,九宮自相乘三次 |

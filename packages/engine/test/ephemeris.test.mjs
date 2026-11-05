@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import * as Astro from "astronomy-engine";
 import { castEphemeris } from "../dist/index.js";
 
 // J2000.0 = 2000-01-01 12:00 UTC = 東八區 20:00。參考值:JPL Horizons 地心黃經(QUANTITIES=31,2026-11-05 查詢)。
@@ -46,4 +47,33 @@ test("月宿:月亮 223.3° ÷ 12.857° → 第 18 宿;冇經緯度唔判晝夜"
   const r = castEphemeris({ year: 2000, month: 1, day: 1, hour: 20, gender: "男" });
   assert.equal(r.sect, null);
   assert.equal(at(r, "Sun").triplicityRulers.length, 2);
+});
+
+
+// 上升點獨立驗證:將黃經點轉赤道座標,用 astronomy-engine 嘅 Horizon 計地平高度,應 ≈ 0° 而且喺東方。
+const altAz = (r, lon, lat, lng) => {
+  const t = Astro.MakeTime(new Date(r.utc));
+  const e = Astro.e_tilt(t).tobl * Math.PI / 180, l = lon * Math.PI / 180;
+  const dec = Math.asin(Math.sin(e) * Math.sin(l)) * 180 / Math.PI;
+  const ra = ((Math.atan2(Math.cos(e) * Math.sin(l), Math.cos(l)) * 180 / Math.PI + 360) % 360) / 15;
+  return Astro.Horizon(t, new Astro.Observer(lat, lng, 0), ra, dec);
+};
+
+test("上升點喺東方地平線、天頂喺子午線(多個地點時刻)", () => {
+  for (const [y, mo, d, h, lat, lng] of [[2000, 1, 1, 20, 39.9, 116.4], [1988, 7, 15, 6, 22.3, 114.17], [2024, 12, 1, 15, -33.9, 151.2], [1975, 3, 3, 3, 60.2, 24.9]]) {
+    const r = castEphemeris({ year: y, month: mo, day: d, hour: h, gender: "男", latitude: lat, longitude: lng });
+    const asc = altAz(r, r.angles.ascendant, lat, lng);
+    assert.ok(Math.abs(asc.altitude) < 0.05 && asc.azimuth < 180, `${y} asc alt ${asc.altitude} az ${asc.azimuth}`);
+    const mc = altAz(r, r.angles.mc, lat, lng);
+    const off = mc.azimuth % 180;
+    assert.ok(Math.min(off, 180 - off) < 0.05, `${y} mc az ${mc.azimuth}`); // 子午線:正南或正北
+  }
+});
+
+test("整宮制:上升所在宮為第 1 宮;冇經緯度就冇宮位", () => {
+  const signIdx = (lon) => Math.floor(lon / 30);
+  for (const p of j2000.planets) assert.equal(p.house, ((signIdx(p.longitude) - signIdx(j2000.angles.ascendant) + 12) % 12) + 1, p.planet);
+  const r = castEphemeris({ year: 2000, month: 1, day: 1, hour: 20, gender: "男" });
+  assert.equal(r.angles, null);
+  assert.ok(r.planets.every((p) => p.house === null));
 });
