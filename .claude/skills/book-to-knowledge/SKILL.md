@@ -84,6 +84,13 @@ Write a short overview in our own words: how the system works, then the tables g
 
 | Agrippa *De occulta philosophia*, Cologne 1533 (LOC scan, archive.org DeOccultaPhilosophiaLoc1533; public domain, Latin) | verification only | Kameas checked against the first edition (Book II ch. 22, PDF pp. 165-169). The Moon table prints 45 for 54 (row 1, col 8) in both its Arabic and Hebrew forms; recorded as `erratum` |
 | *Fourth Book* compilation, tr. Turner 1655 (Cornell scan of 1978 Askin facsimile; 1655 text public domain, **1978 intro skipped**) | facts | `fourth-book.json`, `docs/fourth-book.md`: 16 geomantic figures (rows read from the p. 41 table image), Heptameron days/planetary hours, Arbatel Olympic spirits |
+| 《管子·地員》《呂氏春秋·音律》《淮南子·天文訓》(zh.wikisource, public domain) | facts | `lulu.json`, `docs/lulu.md`: 五音、十二律、律數、月令 |
+| 邵雍《皇極經世書》(zh.wikisource 四庫本, public domain) | facts | `huangji-jingshi.json`, `docs/huangji-jingshi.md`: 元會運世、紀年錨點、外篇數 |
+
+## Chinese classics lessons
+
+- zh.wikisource titles are often not the obvious ones (e.g. `管子/第58篇地員`, `呂氏春秋/卷六`). Find them with `list=search` first, then fetch with `action=parse&prop=wikitext`.
+- Number tables (e.g. 皇極經世 以會經運) give the structure in the headers. Store the rule plus a few anchor years, and let the test recompute their index, 干支 and year number from each other. Don't transcribe the whole table.
 
 ## Archive.org lessons
 
