@@ -628,6 +628,14 @@ button.sec-h { min-height: 44px; margin: -8px 0; }
 .hm-dot { fill: var(--accent-text); }
 .hm-node { fill: var(--card); stroke: var(--accent); stroke-width: 1.5; }
 .hm-edge { stroke: var(--sep); stroke-width: 1.5; }
+.cal-timeline, .cal-year, .cal-grid { max-width: 343px; }
+.cal-seg-0 { fill: var(--accent-soft); }
+.cal-seg-1 { fill: var(--fill); stroke: var(--sep); stroke-width: 1; }
+.cal-epa { fill: var(--warn-soft); }
+.cal-seg-txt { fill: var(--label); text-anchor: middle; dominant-baseline: central; }
+.cal-now { stroke: var(--accent-text); stroke-width: 2; }
+.cal-now-txt { fill: var(--accent-text); text-anchor: middle; dominant-baseline: hanging; }
+.viz-legend .sw.cal-sw-leap { background: var(--accent-soft); border-radius: 2px; }
 .sci-range { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
 .sci-range input { width: 100%; accent-color: var(--accent); }
 .sci-claim { margin: 0; font-size: 14px; line-height: 1.6; }

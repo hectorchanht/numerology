@@ -26,6 +26,7 @@ import { SectionBasis } from "@/components/SectionBasis";
 import { CrossSystemCard } from "@/components/CrossSystemCard";
 import { CycleCard } from "@/components/CycleCard";
 import { LoreCard } from "@/components/LoreCard";
+import { CalendarCard } from "@/components/CalendarCard";
 import { Icon } from "@/components/Icon";
 import { EmptyChart, ScreenNav, Seg } from "@/components/ui";
 import { loadAi } from "@/lib/aiSettings";
@@ -435,6 +436,8 @@ export default function Home() {
               <CycleCard chart={ready.chart} />
               <h2 className="group-title">{t("lore.title")}</h2>
               <LoreCard chart={ready.chart} />
+              <h2 className="group-title">{t("cal.title")}</h2>
+              <CalendarCard chart={ready.chart} />
 
               <Seg
                 label={t("chart.sysLabel")}

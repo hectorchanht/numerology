@@ -1,4 +1,4 @@
-import { favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type FortuneAnalysis, type HeluoResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult, type NumberLoreResult, type BirthLoreResult } from "@numerology/engine";
+import { favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type FortuneAnalysis, type HeluoResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult, type NumberLoreResult, type BirthLoreResult, type JyotishResult, type EgyptianResult, type MetonicResult } from "@numerology/engine";
 import { SCIENCE_NOTES } from "@numerology/knowledge";
 import type { AiLocale } from "./prompts.js";
 
@@ -249,7 +249,7 @@ const VERDICT_ZH: Record<string, string> = { strong: "身強", weak: "身弱", n
 export function crossSystemFacts(
   r: CrossSystemResult,
   locale: AiLocale,
-  cycles?: { taixuan: TaixuanResult; maya: MayaResult; huangji?: HuangjiResult; planetaryHour?: PlanetaryHourResult | null; ephemeris?: EphemerisResult; heluo?: HeluoResult; lore?: { numbers: NumberLoreResult; birth: BirthLoreResult } },
+  cycles?: { taixuan: TaixuanResult; maya: MayaResult; huangji?: HuangjiResult; planetaryHour?: PlanetaryHourResult | null; ephemeris?: EphemerisResult; heluo?: HeluoResult; lore?: { numbers: NumberLoreResult; birth: BirthLoreResult }; calendars?: { jyotish: JyotishResult; egyptian: EgyptianResult; metonic: MetonicResult } },
 ): string {
   const cite = (c: { work: string; author?: string; year?: number | string; locator?: string }) =>
     [c.author, c.work, c.year, c.locator].filter(Boolean).join(",");
@@ -349,6 +349,20 @@ ${items.join("\n")}
 - 律呂:夏曆 ${bl.lulu.lunarMonth} 月(${bl.lulu.branch}月)→ ${bl.lulu.pipe},律數 ${bl.lulu.value};《呂氏春秋》${bl.lulu.group === "upper" ? "上" : "下"}組,主${bl.lulu.season}。出處 ${cite(bl.cites.lulu)}。
 - 黃道對應:太陽 ${bl.zodiac.sign},Agrippa 守護 ${bl.zodiac.ruler}、草 ${bl.zodiac.herb}、薰香 ${bl.zodiac.fume}${bl.zodiac.letter ? `;Sefer Yetzirah 單字母 ${bl.zodiac.letter.glyph}(${bl.zodiac.letter.faculty})` : ""}${bl.dayPlanet.letter ? `;出生星期 ${bl.dayPlanet.planet} 配雙字母 ${bl.dayPlanet.letter.glyph}(${bl.dayPlanet.letter.quality})` : ""}。字母配法出自 Westcott 1893 補表(近代),其他傳統不同。
 - Behenian 恆星合相(±${st.orb}°,只比黃經):${hits}。基率:十五顆星覆蓋黃道約 ${(st.p * 100).toFixed(1)}%,${st.points} 個點期望命中約 ${st.expected.toFixed(1)} 個。出處 ${cite(bl.cites.stars)};容許度 ${cite(bl.cites.orb)}(近代)。`;
+  }
+  const cal = cycles?.calendars;
+  if (cal) {
+    const { jyotish: jy, egyptian: eg, metonic: me } = cal;
+    const n = jy.nakshatra;
+    const dashas = jy.dashas.map((d) => `${d.lord} ${d.start.slice(0, 4)}–${d.end.slice(0, 4)}(${d.startAge.toFixed(1)}–${d.endAge.toFixed(1)} 歲${d.partial ? ",首運折算" : ""})`).join(";");
+    cycleBlock += `
+
+## 曆法三系(確定性計算;週期定位,不入五行比對)
+- Jyotish:ayanamsa(Lahiri / Chitrapaksha)${jy.ayanamsa.toFixed(2)}°;月亮恆星黃經 ${jy.moonSidereal.toFixed(2)}°,第 ${n.n} 宿 ${n.iast},宿內已行 ${(jy.elapsed * 100).toFixed(1)}%,宿主 ${n.lord}。出處 ${cite(jy.cite)}。
+- Vimshottari 大運(年長 365.25 日):${dashas}。
+- 埃及民用曆:Nabonassar 紀元第 ${eg.year} 年 ${eg.month} ${eg.day} 日;太陽在 ${eg.face.sign} 第 ${eg.face.index + 1} 個 face,主星 ${eg.face.ruler}。出處 ${cite(eg.cite)};face ${cite(eg.faceCite)}。
+- 十九年週期:金數 ${me.golden}、Gregorian epact ${me.epact};出生年復活節 ${me.easter.month} 月 ${me.easter.day} 日;出生年起 19 年現行農曆實有閏月 ${me.leapCount} 個(四分曆章法 7 個)。出處 ${cite(me.cite)};${cite(me.chineseCite)}。
+${jy.steps.map((x) => `  - ${x}`).join("\n")}`;
   }
   return `# 多體系事實(確定性計算結果,勿改動數字)
 
