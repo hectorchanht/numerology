@@ -213,7 +213,7 @@ export function BirthForm({ loading, onSubmit, defaults }: Props) {
                 ]}
               />
             </div>
-            <LocationPicker value={longitude} onChange={setLongitude} />
+            <LocationPicker value={longitude} onChange={(lon, lat) => { setLongitude(lon); if (lat !== undefined) { setLatitude(lat); clearErr("latitude"); } }} />
             <ToggleRow icon="sun" label={t("form.trueSolar")} sub={solarSub} checked={trueSolar} onChange={setTrueSolar} />
             <label className="row" htmlFor={idOf("latitude")}>
               <Icon name="pin" className="ic dim" />

@@ -8,6 +8,7 @@ test("locations:中國省數據完整", () => {
     assert.ok(p.cities.length > 0, `${p.province} 無城市`);
     for (const c of p.cities) {
       assert.ok(c.longitude >= 70 && c.longitude <= 140, `${c.name} 經度異常:${c.longitude}`);
+      assert.ok(c.latitude >= 15 && c.latitude <= 54, `${c.name} 緯度異常:${c.latitude}`);
     }
   }
 });
@@ -25,6 +26,7 @@ test("locations:世界國家數據完整", () => {
         city.longitude >= -180 && city.longitude <= 180,
         `${c.country}/${city.name} 經度異常:${city.longitude}`,
       );
+      assert.ok(city.latitude >= -90 && city.latitude <= 90, `${c.country}/${city.name} 緯度異常:${city.latitude}`);
     }
   }
 });
@@ -45,4 +47,10 @@ test("locations:REGIONS 統一結構無重名", () => {
   assert.equal(locName("zhs", calgary.name, calgary.nameHant), "卡尔加里");
   assert.equal(locName("zht", calgary.name, calgary.nameHant), "卡爾加里");
   assert.equal(locName("en", calgary.name, calgary.nameHant), "卡爾加里");
+});
+
+test("locations:2026-11 修正嘅經度同已知坐標吻合", () => {
+  const find = (n) => PROVINCES.flatMap((p) => p.cities).find((c) => c.name === n);
+  assert.deepEqual([find("大同市").longitude, find("中山市").longitude, find("资阳市").longitude], [113.29, 113.38, 104.65]);
+  assert.equal(find("北京").latitude, 39.91);
 });

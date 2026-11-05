@@ -8,7 +8,8 @@ import { Icon } from "@/components/Icon";
 interface Props {
   /** 當前選中的經度(字符串;"" 表示不指定) */
   value: string;
-  onChange: (longitude: string) => void;
+  /** 揀城市時連緯度一齊帶出(行星時用);手動輸入經度時 latitude 為 undefined。 */
+  onChange: (longitude: string, latitude?: string) => void;
 }
 
 /** 手動輸入經度:唔喺城市表入面嘅出生地用呢個兜底,全球通用。 */
@@ -20,6 +21,8 @@ export function LocationPicker({ value, onChange }: Props) {
   /** 地名跟 UI locale:預轉好嘅數據直接揀,唔經 runtime 轉換 */
   const L = (name: string, nameHant: string) => locName(locale, name, nameHant);
   const [regionIdx, setRegionIdx] = useState("");
+  // 按城市名揀:同區有經度相同嘅城市(如邯鄲、邢台),用經度做 value 會揀錯。
+  const [cityName, setCityName] = useState("");
   const region =
     regionIdx !== "" && regionIdx !== MANUAL ? (REGIONS[Number(regionIdx)] ?? null) : null;
   const groups: string[] = [];
@@ -33,7 +36,7 @@ export function LocationPicker({ value, onChange }: Props) {
         <select
           aria-label={t("loc.regionAria")}
           value={regionIdx}
-          onChange={(e) => { setRegionIdx(e.target.value); onChange(""); }}
+          onChange={(e) => { setRegionIdx(e.target.value); setCityName(""); onChange(""); }}
         >
           <option value="">{t("loc.noRegion")}</option>
           <option value={MANUAL}>{t("loc.manualEntry")}</option>
@@ -71,13 +74,18 @@ export function LocationPicker({ value, onChange }: Props) {
           <span className="lbl">{t("loc.cityAria")}</span>
           <select
             aria-label={t("loc.cityAria")}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
+            value={value === "" ? "" : cityName}
+            onChange={(e) => {
+              const c = region?.cities.find((x) => x.name === e.target.value);
+              setCityName(c?.name ?? "");
+              if (c) onChange(String(c.longitude), String(c.latitude));
+              else onChange("");
+            }}
             disabled={!region}
           >
             <option value="">{region ? t("loc.pickCity") : "—"}</option>
             {(region?.cities ?? []).map((c) => (
-              <option key={c.name} value={c.longitude}>{L(c.name, c.nameHant)}</option>
+              <option key={c.name} value={c.name}>{L(c.name, c.nameHant)}</option>
             ))}
           </select>
         </label>
