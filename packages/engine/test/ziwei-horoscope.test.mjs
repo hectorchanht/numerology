@@ -21,11 +21,18 @@ test("運限盤五層", () => {
   assert.equal(dec.active, true);
   // 斗君值(iztro 實測):按《全書》「流年太歲宮起正月逆至本生月,又從本生月起子順數至本生時」手算核對(2026 午宮起正月逆至四月=卯,再由卯起子順數至未時=戌)
   assert.equal(h.douJun.branch, "戌");
+  assert.equal(h.douJun.natalPalaceName, "命宫");
 });
 
 test("出生前日期不拋錯", () => {
   const h = castZiweiHoroscope(S, "1985-1-1");
-  assert.equal(h.layers[0].active, false);
+  assert.ok(h.layers.every((l) => !l.active));
+});
+
+test("大限未起:僅大限 inactive 且不入疊化", () => {
+  const h = castZiweiHoroscope(S, "1992-1-1");
+  assert.deepEqual(h.layers.map((l) => l.active), [false, true, true, true, true]);
+  assert.ok(h.overlaps.every((o) => o.layers.every((l) => l.layer !== "大限")));
 });
 
 test("閏月斗君同流年不變", () => {

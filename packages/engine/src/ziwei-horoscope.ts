@@ -8,6 +8,11 @@ import { buildStarToPalace } from "./fortune.js";
 export type ZiweiLayerKey = "decadal" | "age" | "yearly" | "monthly" | "daily";
 type Hua = "禄" | "权" | "科" | "忌";
 
+/**
+ * 注意 heavenlyStem / earthlyBranch 語義因層而異:
+ * decadal / age 係該層【命宮所在宮】嘅干支;yearly / monthly / daily 係【該時段本身】嘅干支(流年太歲、月柱、日柱)。
+ * palaceIndex / natalPalaceName 則一律係該層命宮落本命盤嘅宮位。douJun.branch 係宮支。
+ */
 export interface ZiweiLayer {
   key: ZiweiLayerKey;
   label: "大限" | "小限" | "流年" | "流月" | "流日";
@@ -63,10 +68,9 @@ export function computeOverlaps(
     .filter((o) => o.layers.length >= 2)
     .map((o) => {
       const types = o.layers.map((l) => l.type);
-      const tag = types.includes("禄") && types.includes("忌")
-        ? "禄忌同星"
-        : types.join("叠");
-      return { ...o, tag: new Set(types).size === 1 ? `${types[0]}叠${types[0]}` : tag };
+      const uniq = [...new Set(types)];
+      const tag = uniq.includes("禄") && uniq.includes("忌") ? "禄忌同星" : uniq.length === 1 ? `${uniq[0]}叠${uniq[0]}` : uniq.join("叠");
+      return { ...o, tag };
     });
 }
 
@@ -80,7 +84,7 @@ export function castZiweiHoroscope(input: BirthInput, date: string): ZiweiHorosc
 
   const [by, bm, bd] = [t.year, t.month, t.day];
   const [dy, dm, dd] = date.split("-").map(Number) as [number, number, number];
-  const bornAfter = new Date(dy, dm - 1, dd) < new Date(by, bm - 1, bd);
+  const beforeBirth = new Date(dy, dm - 1, dd) < new Date(by, bm - 1, bd);
   const firstStart = Math.min(...a.palaces.map((p) => p.decadal.range[0] ?? 0));
 
   const layers: ZiweiLayer[] = LAYERS.map(([key, label]) => {
@@ -88,7 +92,7 @@ export function castZiweiHoroscope(input: BirthInput, date: string): ZiweiHorosc
     return {
       key,
       label,
-      active: key !== "decadal" || (!bornAfter && (h.age.nominalAge ?? 0) >= firstStart),
+      active: !beforeBirth && (key !== "decadal" || (h.age.nominalAge ?? 0) >= firstStart),
       heavenlyStem: l.heavenlyStem,
       earthlyBranch: l.earthlyBranch,
       palaceIndex: l.index,
@@ -118,13 +122,14 @@ export function castZiweiHoroscope(input: BirthInput, date: string): ZiweiHorosc
       if (i >= 0) natal.push({ type: HUA[i]!, star: s.name, intoPalace: p.name });
     }
   }
-  const overlaps = computeOverlaps([
+  const overlaps = computeOverlaps(([
     { layer: "生年", sihua: natal },
+    // 未起嘅大限(active:false)唔入疊化
     ...(["decadal:大限", "yearly:流年", "monthly:流月"] as const).map((k) => {
       const [key, layer] = k.split(":") as [ZiweiLayerKey, "大限" | "流年" | "流月"];
       return { layer, sihua: layers.find((l) => l.key === key)!.sihua };
     }),
-  ]);
+  ] as Parameters<typeof computeOverlaps>[0]).filter((x) => x.layer === "生年" || layers.find((l) => l.label === x.layer)!.active));
 
   return { date, layers, douJun, overlaps };
 }
