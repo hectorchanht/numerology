@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "name": "柏拉圖《蒂邁歐篇》:世界靈魂音階、七重天、五正多面體同元素轉換",
+    "schema": "worldSoul:{seven,double,triple,means,tone,leimma,leimmaChain} ; circles ; planetOrder ; solids:[{element,solid,faces,faceShape,elementTriangle,trianglesPerFace}] ; transformations",
+    "source": "Plato, Timaeus, tr. Benjamin Jowett (1871; Project Gutenberg eBook #1572, public domain)。位置用 Stephanus 頁碼;line = Gutenberg 純文字版行號。只錄數值同對應,唔錄譯文。",
+    "version": "0.1.0",
+    "reviewed": false,
+    "reviewNote": "七數、兩種中項、9:8 同 256:243 全部由 test 重算。Gutenberg 版 leimma 連比最後一項印 242/32,應為 243/32(其餘各項都係 243·2ᵏ 或 81·2ᵏ 形式),已記 erratum。"
+  },
+  "worldSoul": {
+    "stephanus": "35b–36b",
+    "line": 4656,
+    "seven": [1, 2, 3, 4, 9, 8, 27],
+    "double": [1, 2, 4, 8],
+    "triple": [1, 3, 9, 27],
+    "means": {
+      "harmonic": "超出前項同被後項超出嘅,係兩端嘅同一分數(例:1, 4/3, 2;4/3 比 1 多 1 嘅 1/3,比 2 少 2 嘅 1/3)",
+      "arithmetic": "超出同被超出嘅係同一個數(例:1, 3/2, 2)"
+    },
+    "filledDouble": ["1", "4/3", "3/2", "2", "8/3", "3", "4", "16/3", "6", "8"],
+    "filledTriple": ["1", "3/2", "2", "3", "9/2", "6", "9", "27/2", "18", "27"],
+    "intervals": { "fifth": "3/2", "fourth": "4/3", "tone": "9/8" },
+    "leimma": "256/243",
+    "rule": "每個 4/3 用 9/8 填,剩低嘅零頭係 256/243(4/3 = (9/8)² × 256/243)",
+    "leimmaChain": {
+      "line": 4683,
+      "pairs": [["243", "256"], ["81/64", "4/3"], ["243/128", "2"], ["81/32", "8/3"], ["243/64", "4"], ["81/16", "16/3"], ["243/32", "8"]],
+      "erratum": "Gutenberg 文本最後一對印 242/32:8;按比例 256:243 應為 243/32:8"
+    }
+  },
+  "circles": {
+    "stephanus": "36b–d",
+    "line": 4688,
+    "same": "外圈,同之運,向右,唯一不分",
+    "other": "內圈,異之運,斜向左;分六處成七個不等圓,間距按二倍同三倍之比,各三個",
+    "equalSpeed": ["Sun", "Venus", "Mercury"],
+    "unequalSpeed": ["Moon", "Saturn", "Mars", "Jupiter"]
+  },
+  "planetOrder": {
+    "stephanus": "38c–d",
+    "line": 4781,
+    "fromEarth": ["Moon", "Sun", "Venus", "Mercury"],
+    "note": "原文只排到第四;其餘(Mars, Jupiter, Saturn)話留待日後再講"
+  },
+  "solids": {
+    "stephanus": "53c–56b",
+    "line": 5452,
+    "triangles": {
+      "scalene": "直角三角形,斜邊為短邊兩倍(30-60-90)",
+      "isosceles": "等腰直角三角形(45-45-90)"
+    },
+    "items": [
+      { "element": "fire", "solid": "tetrahedron", "faces": 4, "faceShape": "equilateral triangle", "elementTriangle": "scalene", "trianglesPerFace": 6, "solidAngle": "每個由 3 個平面角組成" },
+      { "element": "air", "solid": "octahedron", "faces": 8, "faceShape": "equilateral triangle", "elementTriangle": "scalene", "trianglesPerFace": 6, "solidAngle": "每個由 4 個平面角組成,共 6 個" },
+      { "element": "water", "solid": "icosahedron", "faces": 20, "faceShape": "equilateral triangle", "elementTriangle": "scalene", "trianglesPerFace": 6, "solidAngle": "每個由 5 個平面角組成,共 12 個", "statedTriangles": 120 },
+      { "element": "earth", "solid": "cube", "faces": 6, "faceShape": "square", "elementTriangle": "isosceles", "trianglesPerFace": 4, "solidAngle": "每個由 3 個直角組成,共 8 個" }
+    ],
+    "fifth": "第五種組合神用嚟描繪宇宙整體(傳統解作十二面體;原文冇點名)",
+    "mobility": "面數愈少愈輕、愈尖、愈易動:fire > air > water;earth 最穩"
+  },
+  "transformations": {
+    "stephanus": "56d–e",
+    "line": 5533,
+    "rules": [
+      { "from": [["water", 1]], "to": [["fire", 1], ["air", 2]] },
+      { "from": [["air", 1]], "to": [["fire", 2]] },
+      { "from": [["fire", 2]], "to": [["air", 1]] },
+      { "from": [["air", 2.5]], "to": [["water", 1]] }
+    ],
+    "earth": "土被分解後只會重新變返土,唔轉做其他元素(正方形面同其餘三種嘅三角形唔同)"
+  }
+}

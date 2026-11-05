@@ -88,6 +88,7 @@ Write a short overview in our own words: how the system works, then the tables g
 | 邵雍《皇極經世書》(zh.wikisource 四庫本, public domain) | facts | `huangji-jingshi.json`, `docs/huangji-jingshi.md`: 元會運世、紀年錨點、外篇數 |
 | *Sepher Yetzirah*, tr. Westcott 1893 (Wikisource, public domain) | facts | `sefer-yetzirah.json`, `docs/sefer-yetzirah.md`: 3/7/12 letters, 231 gates, six seals; Westcott's ch. IV–V supplements kept as tier modern |
 | Ptolemy, *Tetrabiblos* Book I, tr. Ashmand 1822 (archive.org ptolemystetrabi00procgoog, public domain) | facts | `tetrabiblos.json`, `docs/tetrabiblos.md`: houses, triplicities, exaltations, Egyptian/Ptolemaic/Chaldean terms, aspects. Term tables read from page images; Robbins' 1940 Loeb translation avoided |
+| Plato, *Timaeus*, tr. Jowett 1871 (Project Gutenberg #1572, public domain) | facts | `timaeus.json`, `docs/timaeus.md`: world-soul Lambda + means, 9/8 and leimma, seven circles, Platonic solids, element transformations. Gutenberg plain text cited by Stephanus number + line |
 
 ## Chinese classics lessons
 
