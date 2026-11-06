@@ -88,3 +88,15 @@ test("steps 非空,cite 指《六壬大全》", () => {
   assert.ok(r.cite.work.includes("六壬大全"));
   assert.equal(r.tier, "classical");
 });
+
+test("年底冬至、年初大寒換將(含 1900、2100 邊界)", () => {
+  const b = { year: 1990, month: 5, day: 15, hour: 12, gender: "男" };
+  const r = castLiuren(b, { year: 2024, month: 12, day: 25, hour: 12 });
+  assert.equal(r.zhongQi, "冬至");
+  assert.equal(r.yueJiang.zhi, "丑");
+  assert.equal(castLiuren(b, { year: 1900, month: 12, day: 31, hour: 12 }).yueJiang.zhi, "丑");
+  assert.equal(castLiuren(b, { year: 2100, month: 12, day: 31, hour: 12 }).yueJiang.zhi, "丑");
+  const d = castLiuren(b, { year: 2025, month: 1, day: 25, hour: 12 });
+  assert.equal(d.zhongQi, "大寒");
+  assert.equal(d.yueJiang.zhi, "子");
+});

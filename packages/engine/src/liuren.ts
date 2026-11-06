@@ -36,6 +36,8 @@ const wxOf = (c: string) => (Z.includes(c) ? ZHI_WX[zi(c)]! : "木木火火土�
 const ke = (a: string, b: string) => (WX.indexOf(wxOf(b)) - WX.indexOf(wxOf(a)) + 5) % 5 === 2;
 const yangZhi = (z: string) => zi(z) % 2 === 0;
 const MENG = "寅申巳亥", ZHONG = "子午卯酉";
+/** 井欄射神所在地盤支(卷05「丑日取巳上神、未日取亥上神」);返吟無剋只得丑未日(全表窮舉驗證) */
+const JINGLAN_SHE: Record<string, string> = { 丑: "巳", 未: "亥" };
 
 type Cand = { shen: string; on: string };
 type Kind = "下賊上" | "上剋下";
@@ -115,7 +117,7 @@ export function castLiurenKe(p: { dayGan: string; dayZhi: string; hourZhi: strin
       steps.push(`月將沖占時,返吟有剋。${r.note}`);
     } else {
       // 井欄:丑日取地盤巳上神、未日取地盤亥上神;窮舉 60 日只丁己辛丑未日會返吟無剋,與書合
-      const chu = up(Z[[8, 5, 2, 11][zi(dayZhi) % 4]!]!);
+      const chu = up(JINGLAN_SHE[dayZhi]!);
       sc = { chu, zhong: chenShang, mo: riShang, method: "fanyin", sub: "井欄" };
       steps.push(`月將沖占時,返吟無剋,井欄:${dayZhi}日取射神 ${chu},中傳辰上神、末傳日上神`);
     }
@@ -178,13 +180,14 @@ export function castLiuren(input: BirthInput, at?: { year: number; month: number
   const t = at ? { ...at, minute: at.minute ?? 0 } : resolveBirthDateTime(input);
   const ec = Solar.fromYmdHms(t.year, t.month, t.day, t.hour, t.minute, 0).getLunar().getEightChar();
   const ms = Date.UTC(t.year, t.month - 1, t.day, t.hour, t.minute);
+  // 每年表只以中文鍵記上年冬至起之節氣,當年十二月冬至用拼音鍵 DONG_ZHI;故掃前後三年,只取中文鍵
   let zhongQi = "";
   let best = -Infinity;
-  for (const y of [t.year - 1, t.year]) {
+  for (const y of [t.year - 1, t.year, t.year + 1]) {
     for (const [name, s] of Object.entries(Solar.fromYmd(y, 6, 1).getLunar().getJieQiTable())) {
       const trad = ZQ_TRAD[name] ?? name;
       if (!(trad in LIUREN_YUEJIANG)) continue;
-      const m = Date.UTC(s.getYear(), s.getMonth() - 1, s.getDay(), s.getHour(), s.getMinute());
+      const m = Date.UTC(s.getYear(), s.getMonth() - 1, s.getDay(), s.getHour(), s.getMinute(), s.getSecond());
       if (m <= ms && m > best) { best = m; zhongQi = trad; }
     }
   }
