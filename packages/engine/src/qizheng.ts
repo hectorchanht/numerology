@@ -1,4 +1,4 @@
-import { QIZHENG_MANSIONS, QIZHENG_SEVEN, QIZHENG_YU, QIZHENG_ZIQI } from "@numerology/knowledge";
+import { QIZHENG_GONG, QIZHENG_MANSIONS, QIZHENG_SEVEN, QIZHENG_YU, QIZHENG_ZIQI } from "@numerology/knowledge";
 import { castEphemeris } from "./ephemeris.js";
 import type { BirthInput } from "./types.js";
 
@@ -12,6 +12,8 @@ export interface QizhengBody {
   mansion: { name: string; degree: number };
   /** 古宿度(古度單位,周天 365);參宿範圍包觜,唔會出「觜」 */
   ancient: { name: string; degree: number };
+  /** 所落宮(地支 + 十二次名),按《星學大成》過宮度於古宿度上定 */
+  gong: { zhi: string; ci: string };
   retrograde?: boolean;
 }
 
@@ -32,6 +34,12 @@ const DAY = 86400000;
 /** 一般歲差 50.29″/年(黃經)。ponytail: 當全部距星同速,忽略黃緯與黃道移動項(1900–2100 誤差約 0.01° 級);要更準就改用 astronomy-engine Rotation_EQJ_ECT 轉距星赤道座標。 */
 const PRECESSION_DEG_PER_YEAR = 50.29 / 3600;
 
+const ANC_START: Record<string, number> = {};
+{ let acc = 0; for (const m of QIZHENG_MANSIONS) { ANC_START[m.name] = acc; acc += m.ancientDeg; } }
+/** 過宮界按周天古度位置排序;位置 < 最小界即屬最末界之宮(辰,跨角宿) */
+const GONG_AT = QIZHENG_GONG.boundaries.map((b) => ({ zhi: b.zhi, ci: b.ci, pos: ANC_START[b.xiu]! + b.deg })).sort((a, b) => a.pos - b.pos);
+const gongOf = (x: number) => { let g = GONG_AT[GONG_AT.length - 1]!; for (const b of GONG_AT) if (x >= b.pos) g = b; return { zhi: g.zhi, ci: g.ci }; };
+
 /** 某黃經(回歸)於時刻 ms(UTC 毫秒)所落現代宿同古宿;距星歲差後為宿起點 */
 export function qizhengMansionAt(longitude: number, ms: number) {
   const prec = (PRECESSION_DEG_PER_YEAR * (ms - J2000_MS)) / (DAY * 365.25);
@@ -46,7 +54,7 @@ export function qizhengMansionAt(longitude: number, ms: number) {
     if (x < acc + m.ancientDeg) { anc = { name: m.name, degree: x - acc }; break; }
     acc += m.ancientDeg;
   }
-  return { modern: { name: best.name, degree: bd }, ancient: anc };
+  return { modern: { name: best.name, degree: bd }, ancient: anc, gong: gongOf(x) };
 }
 
 export function castQizheng(input: BirthInput): QizhengResult {
@@ -54,10 +62,6 @@ export function castQizheng(input: BirthInput): QizhengResult {
   const ms = Date.parse(eph.utc);
   const T = (ms - J2000_MS) / (DAY * 36525);
   const jd = ms / DAY + 2440587.5;
-
-  const at = (lon: number) => qizhengMansionAt(lon, ms);
-  const modern = (lon: number) => at(lon).modern;
-  const ancient = (lon: number) => at(lon).ancient;
 
   const raw: { id: string; name: string; kind: "政" | "餘"; lon: number; retro?: boolean }[] = [
     ...QIZHENG_SEVEN.map((s) => {
@@ -75,9 +79,10 @@ export function castQizheng(input: BirthInput): QizhengResult {
   };
   for (const y of QIZHENG_YU) raw.push({ id: y.id, name: y.name, kind: "餘", lon: yuLon[y.id]![0], retro: yuLon[y.id]![1] });
 
-  const bodies = raw.map((r): QizhengBody => ({
+  const placed = raw.map((r) => ({ r, at: qizhengMansionAt(r.lon, ms) }));
+  const bodies = placed.map(({ r, at }): QizhengBody => ({
     id: r.id, name: r.name, kind: r.kind, longitude: r.lon,
-    mansion: modern(r.lon), ancient: ancient(r.lon), retrograde: r.retro,
+    mansion: at.modern, ancient: at.ancient, gong: at.gong, retrograde: r.retro,
   }));
 
   const steps = [
@@ -86,7 +91,8 @@ export function castQizheng(input: BirthInput): QizhengResult {
     `月孛 = 平均遠地點 = 平均近地點 + 180°;紫氣按《推步捷例》平行 ${QIZHENG_ZIQI.degPerDay}°/日由元起算(流派公式,無實象)。`,
     `距星黃經由 J2000 加歲差 ${((PRECESSION_DEG_PER_YEAR * (ms - J2000_MS)) / (DAY * 365.25)).toFixed(4)}°(50.29″/年)推到出生日;某點宿 = 黃經 ≥ 該宿距星而 < 下一宿距星。`,
     "古宿度以角宿距星為起點,現代度 × 365 / 360 化古度,按《六壬大全》卷十一宿度表累計;觜附參,參宿範圍包觜。",
-    ...bodies.map((b) => `${b.name} ${dms(b.longitude)}:現代 ${b.mansion.name}宿 ${dms(b.mansion.degree)},古度 ${b.ancient.name}宿 ${dms(b.ancient.degree)}${b.retrograde ? "(逆行)" : ""}。`),
+    "十二宮按《星學大成》卷一〈約二十八宿過宫度數歌〉過宮度(氐一過卯…軫九辰)於古宿度上分界;次名取《晉書·天文志》。",
+    ...bodies.map((b) => `${b.name} ${dms(b.longitude)}:現代 ${b.mansion.name}宿 ${dms(b.mansion.degree)},古度 ${b.ancient.name}宿 ${dms(b.ancient.degree)},${b.gong.zhi}宮${b.gong.ci}${b.retrograde ? "(逆行)" : ""}。`),
   ];
 
   return {
@@ -94,8 +100,9 @@ export function castQizheng(input: BirthInput): QizhengResult {
     variants: [
       "羅計分歧:《張果星宗》《清史稿》以升交為羅睺、降交為計都;《推步捷例》以正交為計都,與此對調。",
       "古宿度表(《六壬大全》卷十一)各曆初度取 1 度為概數;《星學大成》度歌讀法見知識表 variants。",
+      "過宮度:《張果星宗》卷一〈度数所在〉斗、女、張、軫四界比《星學大成》各晚 1 度。",
     ],
     steps, tier: "classical",
-    cite: { work: "六壬大全(四庫全書本)/星學大成/張果星宗/推步捷例/清史稿", locator: "六壬大全卷十一;清史稿卷四十五〈時憲志一〉" },
+    cite: { work: "六壬大全(四庫全書本)/星學大成/張果星宗/推步捷例/清史稿", locator: "六壬大全卷十一;星學大成卷一;清史稿卷四十五〈時憲志一〉" },
   };
 }

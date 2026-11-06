@@ -60,3 +60,29 @@ test("28 宿古度逐宿對《六壬大全》卷十一(正度 + 初度 1)", () =
   const exp = { 角: 13, 亢: 9, 氐: 16, 房: 6, 心: 7, 尾: 18, 箕: 10, 斗: 23, 牛: 7, 女: 11, 虛: 9, 危: 16, 室: 18, 壁: 10, 奎: 18, 婁: 12, 胃: 16, 昴: 11, 畢: 16, 觜: 0, 參: 10, 井: 31, 鬼: 3, 柳: 13, 星: 6, 張: 18, 翼: 20, 軫: 18 };
   for (const m of QIZHENG_MANSIONS) assert.equal(m.ancientDeg, exp[m.name], m.name);
 });
+
+test("十二宮過宮界:12 支各一、界宿非觜、界度 < 宿闊、宮闊 28–33 合 365", async () => {
+  const { QIZHENG_GONG } = await import("../dist/index.js");
+  const b = QIZHENG_GONG.boundaries;
+  assert.equal(b.length, 12);
+  assert.equal(new Set(b.map((x) => x.zhi)).size, 12);
+  assert.equal(new Set(b.map((x) => x.ci)).size, 12);
+  const start = {};
+  let acc = 0;
+  for (const m of QIZHENG_MANSIONS) { start[m.name] = acc; acc += m.ancientDeg; }
+  for (const x of b) {
+    const m = QIZHENG_MANSIONS.find((y) => y.name === x.xiu);
+    assert.ok(m && m.ancientDeg > 0, x.xiu);
+    assert.ok(x.deg >= 0 && x.deg < m.ancientDeg, x.xiu);
+  }
+  // 《星學大成》卷一〈約二十八宿過宫度數歌〉逐界
+  assert.deepEqual(b.map((x) => `${x.zhi}${x.xiu}${x.deg}`), ["卯氐1", "寅尾3", "丑斗3", "子女1", "亥危12", "戌奎1", "酉胃3", "申畢6", "未井8", "午柳3", "巳張14", "辰軫9"]);
+  const p = b.map((x) => start[x.xiu] + x.deg);
+  const w = p.map((v, i) => (((p[(i + 1) % 12] - v) % 365) + 365) % 365);
+  for (const x of w) assert.ok(x >= 28 && x <= 33, String(w));
+  assert.equal(w.reduce((s, x) => s + x, 0), 365);
+  assert.equal(b.find((x) => x.zhi === "亥").ci, "娵訾");
+  assert.ok(QIZHENG_GONG.cite.includes("危十二度亥中陳"));
+  assert.ok(QIZHENG_GONG.variants.some((v) => v.includes("張果星宗")));
+});
+

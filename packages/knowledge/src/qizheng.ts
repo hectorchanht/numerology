@@ -36,3 +36,14 @@ export const QIZHENG_SEVEN = DATA.seven as unknown as readonly { body: QizhengBo
 export const QIZHENG_YU = DATA.yu as unknown as readonly QizhengYu[];
 /** 紫氣根數(已換算為回歸黃經 + JD(UT)):lon = lonAtEpoch + degPerDay·(jd − epochJd) */
 export const QIZHENG_ZIQI = DATA.ziqi as { epochJd: number; lonAtEpoch: number; degPerDay: number; source: string; note: string };
+
+/** 十二宮(十二次)過宮界:由「某宿 N 古度」起入該支宮 */
+export interface QizhengGong {
+  /** 依歌訣次序(卯起);xiu 為古宿名、deg 為宿內古度 */
+  boundaries: readonly { zhi: string; ci: string; xiu: string; deg: number }[];
+  cite: string;
+  variants: string[];
+  ciCite: string;
+  note: string;
+}
+export const QIZHENG_GONG = DATA.gong as unknown as QizhengGong;

@@ -96,3 +96,27 @@ test("1900-01-01 / 2100-12-31:全部 body 宿名非空、宿度喺該宿闊內",
     }
   }
 });
+
+import { QIZHENG_GONG } from "@numerology/knowledge";
+
+const ms0 = Date.UTC(2000, 0, 1, 12);
+const anc0 = QIZHENG_MANSIONS[0].lonJ2000;
+/** 古宿某宿 deg 古度之回歸黃經(J2000) */
+const lonOfAnc = (xiu, deg) => {
+  let acc = 0;
+  for (const m of QIZHENG_MANSIONS) { if (m.name === xiu) break; acc += m.ancientDeg; }
+  return (((anc0 + ((acc + deg) * 360) / 365) % 360) + 360) % 360;
+};
+
+test("十二宮:過宮界(星學大成)兩側分屬兩宮;軫九→角→氐一屬辰", () => {
+  for (const b of QIZHENG_GONG.boundaries) {
+    const at = qizhengMansionAt(lonOfAnc(b.xiu, b.deg + 0.01), ms0).gong;
+    assert.equal(at.zhi, b.zhi, `${b.xiu}${b.deg}`);
+    assert.equal(at.ci, b.ci);
+    assert.notEqual(qizhengMansionAt(lonOfAnc(b.xiu, b.deg - 0.01), ms0).gong.zhi, b.zhi);
+  }
+  for (const [x, d] of [["軫", 9.5], ["角", 0], ["角", 12], ["亢", 3], ["氐", 0.9]]) assert.equal(qizhengMansionAt(lonOfAnc(x, d), ms0).gong.zhi, "辰", `${x}${d}`);
+  assert.equal(qizhengMansionAt(lonOfAnc("危", 12.5), ms0).gong.ci, "娵訾");
+  for (const b of r.bodies) assert.ok(b.gong.zhi && b.gong.ci, b.id);
+});
+
