@@ -1,6 +1,6 @@
 import { Solar } from "lunar-javascript";
 import {
-  DIZHI, LIUREN_CITE, LIUREN_DAY_NIGHT, LIUREN_DIRECTION, LIUREN_GUIREN, LIUREN_JIANG, LIUREN_JIGONG,
+  DIZHI, LIUREN_CITE, LIUREN_DAY_NIGHT, LIUREN_DIRECTION, LIUREN_GUIREN, LIUREN_JIANG, LIUREN_JIGONG, LIUREN_LIUQIN,
   LIUREN_SHEN_NAME, LIUREN_XING, LIUREN_YUEJIANG, TIANGAN,
 } from "@numerology/knowledge";
 import type { BirthInput } from "./types.js";
@@ -22,8 +22,8 @@ export interface LiurenResult {
   jiang: Record<string, string>;
   /** 日干支所在旬:旬首、旬空兩支 */
   xun: { shou: string; kong: [string, string] };
-  /** 三傳(初中末)逐支:遁干(旬空為 null)、是否旬空 */
-  chuan: { zhi: string; dun: string | null; kong: boolean }[];
+  /** 三傳(初中末)逐支:遁干(旬空為 null)、是否旬空、對日干六親 */
+  chuan: { zhi: string; dun: string | null; kong: boolean; qin: string }[];
   /** 四課上神是否旬空(一課至四課) */
   keKong: boolean[];
   steps: string[];
@@ -51,6 +51,12 @@ export function liurenXun(dayGan: string, dayZhi: string): { shou: string; kong:
   const dun: Record<string, string | null> = {};
   for (let k = 0; k < 12; k++) dun[at12(start + k)] = k < 10 ? G[k]! : null;
   return { shou: "甲" + at12(start), kong: [at12(start + 10), at12(start + 11)], dun };
+}
+
+/** 六親(卷07「甲乙日水神發用是父母應也」):日干對支五行 */
+export function liurenLiuqin(gan: string, zhi: string): string {
+  const d = (WX.indexOf(wxOf(zhi)) - WX.indexOf(wxOf(gan)) + 5) % 5;
+  return LIUREN_LIUQIN[(["同類", "日生", "日剋", "剋日", "生日"] as const)[d]!];
 }
 
 type Cand = { shen: string; on: string };
@@ -169,9 +175,9 @@ export function castLiurenKe(p: { dayGan: string; dayZhi: string; hourZhi: strin
   }
   steps.push(`三傳:${sc.chu} → ${sc.zhong} → ${sc.mo}`);
   const xun = liurenXun(dayGan, dayZhi);
-  const chuan = [sc.chu, sc.zhong, sc.mo].map((z) => ({ zhi: z, dun: xun.dun[z]!, kong: xun.dun[z] === null }));
+  const chuan = [sc.chu, sc.zhong, sc.mo].map((z) => ({ zhi: z, dun: xun.dun[z] ?? null, kong: xun.dun[z] === null, qin: liurenLiuqin(dayGan, z) }));
   const keKong = kes.map((k) => xun.dun[k.up] === null);
-  steps.push(`旬遁:${dayGan}${dayZhi}在${xun.shou}旬,旬空 ${xun.kong.join("")};三傳遁干 ${chuan.map((c) => `${c.zhi}${c.dun ?? "(空亡)"}`).join("、")}`);
+  steps.push(`旬遁:${dayGan}${dayZhi}在${xun.shou}旬,旬空 ${xun.kong.join("")};三傳遁干 ${chuan.map((c) => `${c.zhi}${c.dun ?? "(空亡)"}`).join("、")};六親 ${chuan.map((c) => `${c.zhi}${c.qin}`).join("、")}`);
 
   const daytime = LIUREN_DAY_NIGHT.day.includes(hourZhi);
   const gz = LIUREN_GUIREN[dayGan]![daytime ? "day" : "night"];

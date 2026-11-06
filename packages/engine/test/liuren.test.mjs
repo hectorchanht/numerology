@@ -141,3 +141,12 @@ test("三傳遁干同旬空;四課上神標旬空", () => {
   }
   assert.ok(seen > 0);
 });
+
+test("六親:書例(liuqin.evidence)逐條推得;三傳逐支標六親", async () => {
+  const { liurenLiuqin } = await import("../dist/index.js");
+  assert.ok(json.liuqin.evidence.length >= 5);
+  for (const e of json.liuqin.evidence) assert.equal(liurenLiuqin(e.gan, e.zhi), e.qin, `${e.gan}${e.zhi}`);
+  const r = ke("甲子", "卯", "子"); // 三傳午卯子
+  assert.deepEqual(r.chuan.map((c) => c.qin), ["子孫", "兄弟", "父母"]);
+  assert.equal(liurenLiuqin("戊", "戌"), "兄弟"); // 辰戌丑未屬土
+});

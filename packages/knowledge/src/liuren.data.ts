@@ -4,7 +4,7 @@ const LIUREN_DATA = {
   "meta": {
     "tier": "classical",
     "name": "大六壬起課規則:月將、天地盤、寄宮、四課、九宗門三傳、天乙貴人、十二天將",
-    "schema": "cite ; yuejiang:{rule,cite,values,book} ; shenName:{cite,values} ; tianDiPan ; jigong:{cite,values} ; sike:{rule,tier,cite} ; guiren:{values:{干:{day,night}},evidence,note} ; dayNight:{day,night,tier} ; direction:{forward,backward,cite} ; jiang:{values,cite} ; methods:[{id,name,sub,cite,rule,modern?:[{tier,item,note}]}] ; xing ; xun:{rule,cite,cites,evidence} ; shehai:{rule,steps,modern,workedCounts,cite} ; errata ; examples:[{id,juan,day,hour,jiang,bookName,quote,expected:{method,sub,chu,zhong,mo},bookSanChuan?,bookSource?,note?}]",
+    "schema": "cite ; yuejiang:{rule,cite,values,book} ; shenName:{cite,values} ; tianDiPan ; jigong:{cite,values} ; sike:{rule,tier,cite} ; guiren:{values:{干:{day,night}},evidence,note} ; dayNight:{day,night,tier} ; direction:{forward,backward,cite} ; jiang:{values,cite} ; methods:[{id,name,sub,cite,rule,modern?:[{tier,item,note}]}] ; xing ; xun:{rule,cite,cites,evidence} ; liuqin:{rule,values,cite,cites,evidence} ; shehai:{rule,steps,modern,workedCounts,cite} ; errata ; examples:[{id,juan,day,hour,jiang,bookName,quote,expected:{method,sub,chu,zhong,mo},bookSanChuan?,bookSource?,note?}]",
     "source": "《六壬大全》十二卷,不著撰人,懷慶府推官郭載騋校,明刊;四庫全書本,維基文庫 https://zh.wikisource.org/wiki/六壬大全_(四庫全書本) 卷01–12 原文逐字核對。只錄起課規則同書中課例日辰、占時、月將,唔錄課體吉凶斷語。",
     "version": "0.1.0",
     "reviewed": false,
@@ -584,6 +584,63 @@ const LIUREN_DATA = {
       }
     ],
     "note": "書無逐步算式,只有旬中遁干、旬空之名及上列書例;本表以六十甲子次序推,書例逐條驗合。"
+  },
+  "liuqin": {
+    "rule": "以日干五行對三傳各支五行:生日干者父母,日干所生者子孫,剋日干者官鬼,日干所剋者妻財,同五行者兄弟。支五行依卷02 十二神(亥子水、寅卯木、巳午火、申酉金、辰戌丑未土)。",
+    "values": {
+      "生日": "父母",
+      "日生": "子孫",
+      "剋日": "官鬼",
+      "日剋": "妻財",
+      "同類": "兄弟"
+    },
+    "cite": "卷07「甲乙日水神發用是父母應也」",
+    "cites": [
+      "卷07「甲乙日用起火神發動也是子孫」",
+      "卷07「土神發用是妻財」",
+      "卷07「用是比和兄弟」",
+      "卷05「更克日為官鬼也」",
+      "卷08「六親之類各倣此推」"
+    ],
+    "evidence": [
+      {
+        "gan": "甲",
+        "zhi": "子",
+        "qin": "父母",
+        "cite": "卷07「甲乙日水神發用是父母應也」"
+      },
+      {
+        "gan": "乙",
+        "zhi": "午",
+        "qin": "子孫",
+        "cite": "卷07「甲乙日用起火神發動也是子孫」"
+      },
+      {
+        "gan": "甲",
+        "zhi": "辰",
+        "qin": "妻財",
+        "cite": "卷07「土神發用是妻財」(甲乙日)"
+      },
+      {
+        "gan": "乙",
+        "zhi": "寅",
+        "qin": "兄弟",
+        "cite": "卷07「用是比和兄弟」(甲乙日木神)"
+      },
+      {
+        "gan": "甲",
+        "zhi": "申",
+        "qin": "官鬼",
+        "cite": "卷05「更克日為官鬼也」(春甲乙日申酉發用)"
+      },
+      {
+        "gan": "戊",
+        "zhi": "丑",
+        "qin": "兄弟",
+        "cite": "卷10「生起干上之丑為兄弟爻」(戊午日)"
+      }
+    ],
+    "note": "只按單支五行論。卷10 另有三傳合局整體論六親(如戊寅日「三傳戌午寅火局皆作父母爻」),未收;合局時單支所標(戌為兄弟)與書異。卷10 亦稱子孫為「子息爻」、妻財為「財爻」。"
   },
   "errata": [
     {

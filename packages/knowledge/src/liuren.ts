@@ -35,3 +35,5 @@ export const LIUREN_DAY_NIGHT: { day: readonly string[]; night: readonly string[
 export const LIUREN_DIRECTION: { forward: readonly string[]; backward: readonly string[] } = DATA.direction;
 /** 伏吟傳刑:支 → 所刑之支 */
 export const LIUREN_XING: Record<string, string> = DATA.xing.values;
+/** 六親:日干對支五行關係(生日/日生/剋日/日剋/同類)→ 父母/子孫/官鬼/妻財/兄弟 */
+export const LIUREN_LIUQIN: Record<"生日" | "日生" | "剋日" | "日剋" | "同類", string> = DATA.liuqin.values;
