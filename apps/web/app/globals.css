@@ -1211,3 +1211,10 @@ h1.large + .seg { margin-bottom: 12px; }
 @media (prefers-reduced-motion: reduce) {
   .ai-picker-spinner, .more-sheet, .progress .bar i { animation: none !important; transition: none !important; }
 }
+.lr-at { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; }
+.lr-at label { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.lr-ke { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; max-width: 320px; }
+.lr-cell { display: flex; flex-direction: column; align-items: center; border: 1px solid var(--sep); border-radius: 8px; padding: 6px 0; font-size: 20px; font-weight: 600; background: var(--card); }
+.lr-cell .lr-down { color: var(--label-2); border-top: 1px solid var(--sep); width: 60%; text-align: center; margin-top: 2px; padding-top: 2px; }
+.lr-cell small { font-size: 11px; font-weight: 400; color: var(--label-2); }
+.lr-san { margin: 0; padding-left: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 14px; }

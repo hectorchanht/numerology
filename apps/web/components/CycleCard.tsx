@@ -1,16 +1,16 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
-  castEphemeris, castHeluo, castHuangji, castMaya, castPlanetaryHour, castTaixuan, MAYA_META, TZOLKIN_DAY_NAMES,
-  type ChartResult, type EphemerisResult, type HeluoResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult,
+  castEphemeris, castHeluo, castHuangji, castLiuren, castMaya, castPlanetaryHour, castTaixuan, MAYA_META, TZOLKIN_DAY_NAMES,
+  type ChartResult, type EphemerisResult, type HeluoResult, type HuangjiResult, type LiurenResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult,
 } from "@numerology/engine";
 import { useLocale, useScript, type TKey } from "@/lib/i18n";
 import { taixuanGrid, tzolkinCell } from "@/lib/cycleView";
 import { CitePop } from "@/components/CrossSystemCard";
 
 /*
- * 時間週期卡:太玄(81 首 9×9 格)、瑪雅曆(Tzolk'in 13×20 格、長紀曆、Haab)、皇極經世、行星時、七曜位置與月宿、河洛理數。
+ * 時間週期卡:太玄(81 首 9×9 格)、瑪雅曆(Tzolk'in 13×20 格、長紀曆、Haab)、皇極經世、行星時、七曜位置與月宿、河洛理數、大六壬。
  * 全部由引擎確定性計算,零 AI;舊歷史紀錄只存 chart,於此即場重算。
  */
 
@@ -226,6 +226,62 @@ function Heluo({ r, solar }: { r: HeluoResult; solar: boolean }) {
   );
 }
 
+const LR_METHOD: Record<string, string> = { fuyin: "伏吟", fanyin: "返吟", bazhuan: "八專", zeike: "賊剋", biyong: "比用", shehai: "涉害", yaoke: "遙剋", maoxing: "昴星", biezhe: "別責" };
+const pad = (n: number) => String(n).padStart(2, "0");
+const toLocalInput = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+/** 出生時刻課;可選另一時刻起課(只在本頁顯示,不入 AI)。空白、非法或出錯一律退回出生課。 */
+function Liuren({ chart, solar }: { chart: ChartResult; solar: boolean }) {
+  const { t } = useLocale();
+  const { z } = useScript();
+  const [val, setVal] = useState("");
+  const r: LiurenResult = useMemo(() => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(val);
+    if (m) {
+      try {
+        return castLiuren(chart.input, { year: +m[1]!, month: +m[2]!, day: +m[3]!, hour: +m[4]!, minute: +m[5]! });
+      } catch { /* 超出範圍或非法:退回出生課 */ }
+    }
+    return castLiuren(chart.input);
+  }, [chart, val]);
+  const sc = r.sanChuan;
+  const g = r.guiren;
+  return (
+    <>
+      <h3 className="xs-h">{t("cycle.liuren")}</h3>
+      <div className="lr-at">
+        <label>
+          {t("cycle.liurenAt")}
+          <input type="datetime-local" min="1900-01-01T00:00" max="2100-12-31T23:59" value={val} onChange={(e) => setVal(e.target.value)} />
+        </label>
+        <button type="button" className="btn secondary small" onClick={() => setVal(toLocalInput(new Date()))}>{t("cycle.liurenNow")}</button>
+        {val && <button type="button" className="btn secondary small" onClick={() => setVal("")}>{t("cycle.liurenBirth")}</button>}
+      </div>
+      <p className="xs-note">{t("cycle.liurenAtNote", { at: `${r.at.year}-${pad(r.at.month)}-${pad(r.at.day)} ${pad(r.at.hour)}:${pad(r.at.minute)}`, day: z(r.dayGanZhi), hour: z(r.hourZhi) })}</p>
+      <p className="cy-val">{t("cycle.liurenJiang", { zq: z(r.zhongQi), zhi: z(r.yueJiang.zhi), name: z(r.yueJiang.name) })}</p>
+      <div className="lr-ke" role="group" aria-label={t("cycle.liurenKe")}>
+        {[...r.ke].reverse().map((k, i) => (
+          <div key={i} className="lr-cell">
+            <span>{z(k.up)}</span>
+            <span className="lr-down">{z(k.down)}</span>
+            <small>{t("cycle.liurenKeN", { n: 4 - i })}</small>
+          </div>
+        ))}
+      </div>
+      <p className="cy-val">{t("cycle.liurenSan", { method: z(LR_METHOD[sc.method] ?? sc.method), sub: z(sc.sub) })}</p>
+      <ol className="lr-san">
+        {([["cycle.liurenChu", sc.chu], ["cycle.liurenZhong", sc.zhong], ["cycle.liurenMo", sc.mo]] as [TKey, string][]).map(([k, zhi]) => (
+          <li key={k}>{t(k)} {z(zhi)} · {z(r.jiang[zhi] ?? "")}</li>
+        ))}
+      </ol>
+      <p className="xs-note">{t("cycle.liurenGui", { zhi: z(g.zhi), dn: t(g.daytime ? "cycle.liurenDay" : "cycle.liurenNight"), dir: t(g.forward ? "cycle.liurenFwd" : "cycle.liurenBack") })}</p>
+      <Meta tier={r.tier} basis={solar ? "cross.basis.solar" : "cycle.basis.clock"} cite={r.cite} />
+      <p className="xs-note">{t("cycle.liurenNote")}</p>
+      <Steps steps={r.steps} />
+    </>
+  );
+}
+
 export function CycleCard({ chart }: { chart: ChartResult }) {
   const { t } = useLocale();
   const tx = useMemo(() => castTaixuan(chart.input), [chart]);
@@ -243,6 +299,7 @@ export function CycleCard({ chart }: { chart: ChartResult }) {
       <PlanetaryHour r={hour} solar={chart.meta.trueSolarTimeApplied} />
       <Sky r={sky} />
       <Heluo r={heluo} solar={chart.meta.trueSolarTimeApplied} />
+      <Liuren chart={chart} solar={chart.meta.trueSolarTimeApplied} />
     </div>
   );
 }
