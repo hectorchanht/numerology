@@ -1,4 +1,4 @@
-import { castZiweiFeixing, castZiweiHoroscope, favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type GanzhiRelation, type FortuneAnalysis, type HeluoResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult, type NumberLoreResult, type BirthLoreResult, type JyotishResult, type EgyptianResult, type MetonicResult } from "@numerology/engine";
+import { castZiweiFeixing, castZiweiHoroscope, favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type GanzhiRelation, type FortuneAnalysis, type HeluoResult, type QizhengResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult, type NumberLoreResult, type BirthLoreResult, type JyotishResult, type EgyptianResult, type MetonicResult } from "@numerology/engine";
 import { Solar } from "lunar-javascript";
 import { SCIENCE_NOTES } from "@numerology/knowledge";
 import type { AiLocale } from "./prompts.js";
@@ -349,7 +349,7 @@ const VERDICT_ZH: Record<string, string> = { strong: "身強", weak: "身弱", n
 export function crossSystemFacts(
   r: CrossSystemResult,
   locale: AiLocale,
-  cycles?: { taixuan: TaixuanResult; maya: MayaResult; huangji?: HuangjiResult; planetaryHour?: PlanetaryHourResult | null; ephemeris?: EphemerisResult; heluo?: HeluoResult; lore?: { numbers: NumberLoreResult; birth: BirthLoreResult }; calendars?: { jyotish: JyotishResult; egyptian: EgyptianResult; metonic: MetonicResult } },
+  cycles?: { taixuan: TaixuanResult; maya: MayaResult; huangji?: HuangjiResult; planetaryHour?: PlanetaryHourResult | null; ephemeris?: EphemerisResult; heluo?: HeluoResult; qizheng?: QizhengResult; lore?: { numbers: NumberLoreResult; birth: BirthLoreResult }; calendars?: { jyotish: JyotishResult; egyptian: EgyptianResult; metonic: MetonicResult } },
 ): string {
   const cite = (c: { work: string; author?: string; year?: number | string; locator?: string }) =>
     [c.author, c.work, c.year, c.locator].filter(Boolean).join(",");
@@ -424,6 +424,13 @@ ${step(ep.steps)}`;
       cycleBlock += `
 - 河洛理數:天數 ${hl.heaven}、地數 ${hl.earth};先天 ${hl.xiantian.name}(元堂第 ${hl.yuantang} 爻),${hl.houtianAge} 歲換後天 ${hl.houtian.name}(元堂第 ${hl.houtianYuantang} 爻);元氣${hl.yuanqi.tian || hl.yuanqi.di ? "有" : "無"}${hl.yuanqi.reversed ? "(逢相反)" : ""},化工${hl.huagong.has ? "有" : "無"}${hl.huagong.reversed ? "(逢反)" : ""}。大運:${yun}。${ln ? `${ln.year} 年(${ln.age} 歲)流年卦 ${ln.hex.name} 第 ${ln.line} 爻(小象)。` : ""}層級 ${TIER_ZH[hl.tier]};出處 ${cite(hl.cite)}。
 ${step(hl.steps)}`;
+    }
+    const qz = cycles.qizheng;
+    if (qz) {
+      const rows = qz.bodies.map((b) => `${b.name}(${b.kind === "政" ? "七政" : "四餘推算點"}${b.id === "ziqi" ? ",流派公式、無實象" : ""}) 黃經 ${b.longitude.toFixed(2)}° 古宿度 ${b.ancient.name}宿 ${b.ancient.degree.toFixed(1)} 度、現代宿度 ${b.mansion.name}宿 ${b.mansion.degree.toFixed(1)}°${b.retrograde && b.kind === "政" ? "(逆)" : ""}`).join(";");
+      cycleBlock += `
+- 七政四餘(回歸黃經;古宿度按《六壬大全》卷十一周天 365 度,現代宿度按距星歲差推算):${rows}。羅睺、計都、月孛、紫氣均為推算點、非實體天體;${qz.variants.join(";")}。層級 ${TIER_ZH[qz.tier]};出處 ${cite(qz.cite)}。
+${step(qz.steps)}`;
     }
   }
   const lore = cycles?.lore;
