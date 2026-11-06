@@ -158,12 +158,12 @@ test("crossSystemFacts:附七政四餘宿度同羅計分歧", () => {
   const sun = qizheng.bodies.find((b) => b.id === "Sun");
   assert.ok(f.includes(`古宿度 ${sun.ancient.name}宿`));
   assert.ok(f.includes(`${sun.gong.zhi}宮${sun.gong.ci}`));
-  assert.ok(f.includes(`命宮在${qizheng.minggong.zhi}`) && f.includes("曆象考成") && f.includes("恆逆"));
+  assert.ok(f.includes(`命宮在${qizheng.minggong.zhi}`) && f.includes("曆象考成") && f.includes("恆逆") && f.includes("本站讀法"));
 });
 
 test("crosssystem 指令:太玄與瑪雅只作週期定位", () => {
   const p = buildReportSectionPrompt([], seg, "both", "zht", facts);
-  for (const must of ["週期定位", "不推五行", "不作吉凶斷語", "贊辭", "皇極經世", "不推治亂興衰", "行星時", "不寫天使職能", "七曜位置", "不推宮位主事吉凶", "河洛理數", "不作富貴壽夭斷語", "七政四餘", "紫氣為流派公式", "大六壬", "不作占斷", "未附上升時不講宮位", "太玄首名、首辭、贊辭原文未附,不得引述或釋義", "Dreamspell"]) {
+  for (const must of ["週期定位", "不推五行", "不作吉凶斷語", "贊辭", "皇極經世", "不推治亂興衰", "行星時", "不寫天使職能", "七曜位置", "不推宮位主事吉凶", "河洛理數", "不作富貴壽夭斷語", "七政四餘", "紫氣為流派公式", "命宮與十二宮名的落點", "大六壬", "不作占斷", "未附上升時不講宮位", "太玄首名、首辭、贊辭原文未附,不得引述或釋義", "Dreamspell"]) {
     assert.ok(p.includes(must), `缺條款: ${must}`);
   }
 });

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { castQizheng, castEphemeris, qizhengMansionAt } from "../dist/index.js";
-import { QIZHENG_MANSIONS } from "@numerology/knowledge";
+import { QIZHENG_GONG, QIZHENG_MANSIONS } from "@numerology/knowledge";
 
 const j2000 = { year: 2000, month: 1, day: 1, hour: 20, gender: "男" };
 const r = castQizheng(j2000);
@@ -13,6 +13,7 @@ test("J2000 四餘:羅睺 125.04、計都對衝、月孛 263.35;11 個 body", ()
   assert.ok(Math.abs(by("jidu").longitude - 305.04) < 0.01);
   assert.ok(Math.abs(by("yuebei").longitude - 263.35) < 0.01);
   assert.ok(r.variants.some((v) => v.includes("推步捷例") && v.includes("曆象考成")));
+  assert.ok(r.variants.some((v) => v.includes("本站取法")));
 });
 
 test("七政黃經同 castEphemeris;無經緯度照算;黃經全在 [0,360)", () => {
@@ -97,7 +98,6 @@ test("1900-01-01 / 2100-12-31:全部 body 宿名非空、宿度喺該宿闊內",
   }
 });
 
-import { QIZHENG_GONG } from "@numerology/knowledge";
 
 const ms0 = Date.UTC(2000, 0, 1, 12);
 const anc0 = QIZHENG_MANSIONS[0].lonJ2000;
