@@ -55,3 +55,8 @@ test("meta 未校對;JSON 同內聯 data.ts 一致", async () => {
   const { default: inline } = await import("../dist/qizheng.data.js");
   assert.deepEqual(inline, json);
 });
+
+test("28 宿古度逐宿對《六壬大全》卷十一(正度 + 初度 1)", () => {
+  const exp = { 角: 13, 亢: 9, 氐: 16, 房: 6, 心: 7, 尾: 18, 箕: 10, 斗: 23, 牛: 7, 女: 11, 虛: 9, 危: 16, 室: 18, 壁: 10, 奎: 18, 婁: 12, 胃: 16, 昴: 11, 畢: 16, 觜: 0, 參: 10, 井: 31, 鬼: 3, 柳: 13, 星: 6, 張: 18, 翼: 20, 軫: 18 };
+  for (const m of QIZHENG_MANSIONS) assert.equal(m.ancientDeg, exp[m.name], m.name);
+});
