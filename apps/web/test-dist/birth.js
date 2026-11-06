@@ -38,6 +38,18 @@ function longitudeNum(b) {
         throw new Error(`经度 ${v} 超出范围(-180~180)`);
     return v;
 }
+/** 緯度域:允許小數,但必須在 -90~90 範圍內。 */
+function latitudeNum(b) {
+    const raw = b.latitude;
+    if (raw === undefined || raw === "" || raw === null)
+        return undefined;
+    const v = Number(raw);
+    if (!Number.isFinite(v))
+        throw new Error("字段 latitude 非数字");
+    if (v < -90 || v > 90)
+        throw new Error(`纬度 ${v} 超出范围(-90~90)`);
+    return v;
+}
 /** 把任意外部輸入(API body)安全解析為 BirthInput,在邊界快速失敗。 */
 export function parseBirthInput(body) {
     if (typeof body !== "object" || body === null) {
@@ -59,6 +71,9 @@ export function parseBirthInput(body) {
     };
     if (longitude !== undefined)
         input.longitude = longitude;
+    const latitude = latitudeNum(b);
+    if (latitude !== undefined)
+        input.latitude = latitude;
     return input;
 }
 /** 時辰推斷輸入(無時辰):年月日 + 性別(+可選經度)。 */
