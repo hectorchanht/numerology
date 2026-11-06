@@ -111,10 +111,11 @@ const SIHUA_ORDER: SihuaType[] = ["禄", "权", "科", "忌"];
  */
 export function analyzeFortune(
   input: BirthInput,
-  opts: { referenceYear?: number; yearsAhead?: number; yearsBack?: number } = {},
+  opts: { referenceYear?: number; yearsAhead?: number; yearsBack?: number; now?: Date } = {},
 ): FortuneAnalysis {
   validateBirthInput(input);
-  const referenceYear = opts.referenceYear ?? new Date().getFullYear();
+  const now = opts.now ?? new Date();
+  const referenceYear = opts.referenceYear ?? now.getFullYear();
   const yearsAhead = opts.yearsAhead ?? 8;
   const yearsBack = opts.yearsBack ?? 0;
   const windowEnd = referenceYear + yearsAhead;
@@ -228,20 +229,23 @@ export function analyzeFortune(
 
   // —— 流月:referenceYear 嗰年(搵遍所有原始大運,包括虛運) ——
   const refLiuNian = rawDaYun.flatMap((d) => d.getLiuNian()).find((y) => y.getYear() === referenceYear);
-  const now = new Date();
-  // ponytail: 立春前(子/丑月)而 referenceYear=曆年時,高亮格會錯位;升級:比對實際節起始日
-  const nowZhi = referenceYear === now.getFullYear()
-    ? Solar.fromYmd(now.getFullYear(), now.getMonth() + 1, now.getDate()).getLunar().getEightChar().getMonthZhi()
-    : undefined;
+  // 流年 referenceYear 嘅流月由立春起、至翌年立春止(子/丑月落喺翌年公曆 1 月)。
+  // 以節氣表實際交節時刻判定「而家」落喺邊個月,唔可以用公曆年 + 月支對(立春前會錯位)。
+  const jq = Solar.fromYmd(referenceYear, 6, 1).getLunar().getJieQiTable();
+  const monthStarts = [
+    "立春", "惊蛰", "清明", "立夏", "芒种", "小暑", "立秋", "白露", "寒露", "立冬", "大雪", "XIAO_HAN", "LI_CHUN",
+  ].map((k) => jq[k]!.toYmdHms());
+  const nowYmdHms = Solar.fromDate(now).toYmdHms();
   const liuYue: LiuYueAnalysis[] = (refLiuNian?.getLiuYue() ?? []).map((m) => {
     const ganZhi = m.getGanZhi();
+    const i = m.getIndex();
     return {
-      index: m.getIndex(),
+      index: i,
       monthName: m.getMonthInChinese(),
       ganZhi,
       ganShiShen: shiShen(dayMaster, ganZhi[0] as Tiangan),
       relations: externalRelations({ ganZhi, role: "liuyue" }, natal),
-      isCurrent: nowZhi === ganZhi[1],
+      isCurrent: monthStarts[i]! <= nowYmdHms && nowYmdHms < monthStarts[i + 1]!,
     };
   });
 

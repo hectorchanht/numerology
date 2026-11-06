@@ -24,6 +24,8 @@ declare module "lunar-javascript" {
     toYmd(): string;
     toYmdHms(): string;
     static fromYmd(year: number, month: number, day: number): Solar;
+    /** 以本地時區讀取 Date */
+    static fromDate(date: Date): Solar;
     getHour(): number;
     getMinute(): number;
     getSecond(): number;
