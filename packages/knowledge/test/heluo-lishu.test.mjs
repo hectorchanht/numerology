@@ -123,3 +123,14 @@ test("小象、月卦、日卦算例:卦名都是六十四卦", () => {
   for (const e of H.xiaoxiang.examples) for (const n of [e.hex, ...e.years]) assert.ok(hexByName(n), n);
   for (const n of H.monthHex.example.months) assert.ok(hexByName(n), n);
 });
+
+test("天地數分類:安和自寧唯一,各型區間合法", () => {
+  const P = H.numberClasses.patterns.items;
+  // 兩項為閉區間(null = 無界),其餘為枚舉值
+  const inR = (v, r) => (r.length === 2 ? (r[0] === null || v >= r[0]) && (r[1] === null || v <= r[1]) : r.includes(v));
+  const hit = (h, e) => P.filter((p) => inR(h, p.heaven) && inR(e, p.earth)).map((p) => p.name);
+  assert.deepEqual(hit(25, 30), ["安和自寧"]);
+  assert.ok(hit(18, 42).includes("以弱敵強")); // 卷一 p. 84 例
+  assert.ok(hit(11, 30).includes("陽偏")); // 卷一 p. 85 例
+  assert.ok(hit(40, 30).includes("孤陽自耦"));
+});
