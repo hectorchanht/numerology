@@ -226,7 +226,7 @@ function Heluo({ r, solar }: { r: HeluoResult; solar: boolean }) {
   );
 }
 
-function Qizheng({ r, solar }: { r: QizhengResult; solar: boolean }) {
+function Qizheng({ r }: { r: QizhengResult }) {
   const { t } = useLocale();
   const { z } = useScript();
   const dms = (d: number) => `${Math.floor(d)}°${String(Math.floor((d % 1) * 60)).padStart(2, "0")}′`;
@@ -234,7 +234,7 @@ function Qizheng({ r, solar }: { r: QizhengResult; solar: boolean }) {
     <>
       <h3 className="xs-h">{t("cycle.qizheng")}</h3>
       <p className="xs-note">{t("cycle.qizhengIntro")}</p>
-      <Meta tier={r.tier} basis={solar ? "cross.basis.solar" : "cycle.basis.clock"} cite={r.cite} />
+      <Meta tier={r.tier} basis="cycle.basis.clock" cite={r.cite} />
       <div className="bazi-detail-wrap">
         <table className="bazi-detail cy-sky">
           <thead>
@@ -278,7 +278,7 @@ export function CycleCard({ chart }: { chart: ChartResult }) {
       <PlanetaryHour r={hour} solar={chart.meta.trueSolarTimeApplied} />
       <Sky r={sky} />
       <Heluo r={heluo} solar={chart.meta.trueSolarTimeApplied} />
-      <Qizheng r={qizheng} solar={chart.meta.trueSolarTimeApplied} />
+      <Qizheng r={qizheng} />
     </div>
   );
 }

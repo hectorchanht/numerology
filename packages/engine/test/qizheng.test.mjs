@@ -49,13 +49,11 @@ test("qizhengMansionAt:距星正點 → 該宿 0 度;跨 0° 兩側;古宿無觜
     assert.equal(a.modern.name, m.name);
     assert.ok(a.modern.degree < 1e-9);
   }
-  // 跨 0°:奎/婁一帶(距星 ~ 0° 附近)兩側都有宿、且度數連續
+  // 跨 0°:兩側必同落一宿(J2000 為室宿),度數差 = 0.02°
   const lo = qizhengMansionAt(359.99, ms), hi = qizhengMansionAt(0.01, ms);
-  assert.ok(lo.modern.name && hi.modern.name);
-  const gap = norm(0.01 - 359.99);
-  const d = lo.modern.name === hi.modern.name ? hi.modern.degree - lo.modern.degree : null;
-  if (d !== null) assert.ok(Math.abs(norm(d) - gap) < 1e-6);
-  else assert.ok(hi.modern.degree < gap + 1e-6);
+  assert.equal(lo.modern.name, "室");
+  assert.equal(hi.modern.name, "室");
+  assert.ok(Math.abs(hi.modern.degree - lo.modern.degree - 0.02) < 1e-6);
   // 古宿:掃全周天無觜;觜距星現代點落參
   for (let l = 0; l < 360; l += 0.25) assert.notEqual(qizhengMansionAt(l, ms).ancient.name, "觜");
   // 參古度範圍(10 古度 = 觜附參):起點 = 角距星 + 前面累計古度 × 360/365
@@ -65,4 +63,36 @@ test("qizhengMansionAt:距星正點 → 該宿 0 度;跨 0° 兩側;古宿無觜
   for (const g of [acc + 0.01, acc + 5, acc + 9.99]) assert.equal(qizhengMansionAt(lon(g), ms).ancient.name, "參");
   assert.equal(qizhengMansionAt(lon(acc - 0.01), ms).ancient.name, "畢");
   assert.equal(qizhengMansionAt(lon(acc + 10.01), ms).ancient.name, "井");
+});
+
+test("古宿表 軫→角 環繞同 365 古度邊界", () => {
+  const ms = Date.UTC(2000, 0, 1, 12);
+  const anchor = QIZHENG_MANSIONS[0].lonJ2000;
+  const zhen = QIZHENG_MANSIONS.find((m) => m.name === "軫");
+  const before = qizhengMansionAt(anchor - 0.01, ms).ancient;
+  assert.equal(before.name, "軫");
+  assert.ok(before.degree < zhen.ancientDeg && zhen.ancientDeg - before.degree < 0.02);
+  const at = qizhengMansionAt(anchor, ms).ancient;
+  assert.equal(at.name, "角");
+  assert.ok(at.degree < 1e-9);
+  // 周天末(365 古度邊緣,浮點差一絲)(差 1e-6°;< 1e-9° 當 0 屬設計)仍落軫而唔溢出
+  const edge = qizhengMansionAt(anchor - 1e-6, ms).ancient;
+  assert.equal(edge.name, "軫");
+  assert.ok(edge.degree < zhen.ancientDeg);
+});
+
+test("1900-01-01 / 2100-12-31:全部 body 宿名非空、宿度喺該宿闊內", () => {
+  const width = (name) => {
+    const i = QIZHENG_MANSIONS.findIndex((m) => m.name === name);
+    const nx = QIZHENG_MANSIONS[(i + 1) % 28].lonJ2000;
+    return (((nx - QIZHENG_MANSIONS[i].lonJ2000) % 360) + 360) % 360;
+  };
+  for (const [year, month, day] of [[1900, 1, 1], [2100, 12, 31]]) {
+    for (const b of castQizheng({ year, month, day, hour: 12, gender: "女" }).bodies) {
+      assert.ok(b.mansion.name && b.ancient.name);
+      assert.ok(b.mansion.degree >= 0 && b.mansion.degree < width(b.mansion.name) + 0.05, `${b.id} 現代`);
+      const am = QIZHENG_MANSIONS.find((m) => m.name === b.ancient.name);
+      assert.ok(b.ancient.degree >= 0 && b.ancient.degree < am.ancientDeg + 1e-9, `${b.id} 古`);
+    }
+  }
 });

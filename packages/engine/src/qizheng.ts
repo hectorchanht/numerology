@@ -96,6 +96,6 @@ export function castQizheng(input: BirthInput): QizhengResult {
       "古宿度表(《六壬大全》卷十一)各曆初度取 1 度為概數;《星學大成》度歌讀法見知識表 variants。",
     ],
     steps, tier: "classical",
-    cite: { work: "六壬大全(四庫全書本)/星學大成/清史稿", locator: "六壬大全卷十一;清史稿卷四十五〈時憲志一〉" },
+    cite: { work: "六壬大全(四庫全書本)/星學大成/張果星宗/推步捷例/清史稿", locator: "六壬大全卷十一;清史稿卷四十五〈時憲志一〉" },
   };
 }
