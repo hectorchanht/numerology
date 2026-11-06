@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 import {
-  castEphemeris, castHeluo, castHuangji, castLiuren, castMaya, castPlanetaryHour, castQizheng, castTaixuan, LIUREN_METHODS, MAYA_META, TZOLKIN_DAY_NAMES,
-  type ChartResult, type EphemerisResult, type HeluoResult, type HuangjiResult, type LiurenResult, type MayaResult, type PlanetaryHourResult, type QizhengResult, type TaixuanResult,
+  castEphemeris, castHeluo, heluoClasses, castHuangji, castLiuren, castMaya, castPlanetaryHour, castQizheng, castTaixuan, LIUREN_METHODS, MAYA_META, TZOLKIN_DAY_NAMES,
+  type ChartResult, type EphemerisResult, type HeluoResult, type HeluoClasses, type HuangjiResult, type LiurenResult, type MayaResult, type PlanetaryHourResult, type QizhengResult, type TaixuanResult,
 } from "@numerology/engine";
 import { useLocale, useScript, type TKey } from "@/lib/i18n";
 import { parseLiurenAt, taixuanGrid, tzolkinCell } from "@/lib/cycleView";
@@ -202,7 +202,7 @@ function Sky({ r }: { r: EphemerisResult }) {
   );
 }
 
-function Heluo({ r, solar }: { r: HeluoResult; solar: boolean }) {
+function Heluo({ r, c, solar }: { r: HeluoResult; c: HeluoClasses; solar: boolean }) {
   const { t } = useLocale();
   const { z } = useScript();
   const has = (b: boolean) => t(b ? "cycle.has" : "cycle.none");
@@ -214,6 +214,14 @@ function Heluo({ r, solar }: { r: HeluoResult; solar: boolean }) {
         {t("cycle.heluoVal", { xt: z(r.xiantian.name), yt: r.yuantang, age: r.houtianAge, ht: z(r.houtian.name), hyt: r.houtianYuantang })}
       </p>
       <p className="xs-note">{t("cycle.heluoNums", { h: r.heaven, e: r.earth, yq: has(r.yuanqi.tian || r.yuanqi.di), hg: has(r.huagong.has) })}</p>
+      <p className="xs-note">
+        {t("cycle.heluoClass", {
+          s: z([c.heaven && `天${c.heaven}`, c.earth && `地${c.earth}`, ...c.excess].filter(Boolean).join("、") || "—"),
+          p: z(c.patterns.join("、") || "—"),
+          rank: c.lineRank,
+          yuan: has(c.youyuan),
+        })}
+      </p>
       {ln && <p className="xs-note">{t("cycle.heluoYear", { y: ln.year, age: ln.age, hex: z(ln.hex.name), line: ln.line })}</p>}
       <Meta tier={r.tier} basis={solar ? "cross.basis.solar" : "cycle.basis.clock"} cite={r.cite} />
       <details className="xs-steps">
@@ -379,6 +387,7 @@ export function CycleCard({ chart }: { chart: ChartResult }) {
   const hour = useMemo(() => castPlanetaryHour(chart.input), [chart]);
   const sky = useMemo(() => castEphemeris(chart.input), [chart]);
   const heluo = useMemo(() => castHeluo(chart.input), [chart]);
+  const heluoCls = useMemo(() => heluoClasses(heluo, chart.input), [heluo, chart]);
   const qizheng = useMemo(() => castQizheng(chart.input), [chart]);
   return (
     <div className="card viz xs">
@@ -388,7 +397,7 @@ export function CycleCard({ chart }: { chart: ChartResult }) {
       <Huangji r={huangji} solar={chart.meta.trueSolarTimeApplied} />
       <PlanetaryHour r={hour} solar={chart.meta.trueSolarTimeApplied} />
       <Sky r={sky} />
-      <Heluo r={heluo} solar={chart.meta.trueSolarTimeApplied} />
+      <Heluo r={heluo} c={heluoCls} solar={chart.meta.trueSolarTimeApplied} />
       <Liuren chart={chart} solar={chart.meta.trueSolarTimeApplied} />
       <Qizheng r={qizheng} />
     </div>

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { allHexagrams, GUANGXIANG } from "@numerology/knowledge";
-import { castHeluo, heluoReduce, heluoYears, heluoMonths, heluoDays, heluoJinsuo, heluoGuangxiang } from "../dist/index.js";
+import { castHeluo, heluoReduce, heluoYears, heluoMonths, heluoDays, heluoJinsuo, heluoGuangxiang, heluoClasses } from "../dist/index.js";
 
 // 書中算例(河洛理數卷一 pp. 22–23、31、82–83),揀四柱相同嘅現代日期重算。
 const cast = (year, month, day, hour, gender = "男") => castHeluo({ year, month, day, hour, gender });
@@ -196,4 +196,29 @@ test("castHeluo 帶金鎖銀匙同廣象徹微,年柱納音取自八字", () => 
   assert.equal(r.jinsuo.nayin, "金");
   assert.deepEqual(r.jinsuo, heluoJinsuo(r.pillars, "金"));
   assert.equal(r.guangxiang.branch.product, heluoGuangxiang(r.pillars).branch.product);
+});
+
+test("天地數分類:p. 84 剝例以弱敵強、毛例陰陽戰勝;元堂等第同有援", () => {
+  const input = { year: 1926, month: 12, day: 13, hour: 22, gender: "男" };
+  const a = heluoClasses(castHeluo(input), input);
+  assert.deepEqual([a.heaven, a.earth, a.patterns, a.lineRank, a.youyuan], ["不足", null, ["以弱敵強"], 4, true]);
+  const inputB = { year: 1893, month: 12, day: 26, hour: 8, gender: "男" };
+  const b = heluoClasses(castHeluo(inputB), inputB);
+  assert.deepEqual([b.patterns, b.excess, b.youyuan], [["陰陽戰勝"], [], false]);
+});
+
+test("天地數分類:陽太過生於辰、巳月不忌", () => {
+  let hit = 0;
+  for (let d = 0; d < 400 && hit < 2; d++) {
+    const dt = new Date(Date.UTC(2000, 0, 1 + d * 3));
+    const input = { year: dt.getUTCFullYear(), month: dt.getUTCMonth() + 1, day: dt.getUTCDate(), hour: (d * 5) % 24, gender: "男" };
+    const r = castHeluo(input);
+    if (r.heaven < 40) continue;
+    const c = heluoClasses(r, input);
+    const ex = "辰巳".includes(r.pillars[1][1]);
+    assert.equal(c.exempt.includes("陽太過"), ex, r.pillars.join(""));
+    assert.equal(c.excess.includes("陽太過"), !ex);
+    hit++;
+  }
+  assert.ok(hit > 0);
 });

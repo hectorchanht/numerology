@@ -28,7 +28,7 @@ export const dynamic = "force-dynamic";
  * v9 = 2026-11-05 crosssystem 節事實加「數之學」(你的數、律呂、黃道、Behenian 恆星)與基率指令。
  * v10 = 2026-11-05 crosssystem 節事實加「曆法三系」(Vimshottari、埃及民用曆、十九年週期)。
  */
-const PROMPT_VERSION = "report/v11";
+const PROMPT_VERSION = "report/v12";
 
 /** 流式生成命盤解讀報告(動靜結合)。首 token 前失敗 → JSON 錯誤(502),而非截斷流。 */
 export async function POST(req: Request): Promise<Response> {

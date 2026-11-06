@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { castChart, castCrossSystem, castTaixuan, castMaya, castHuangji, castPlanetaryHour, castEphemeris, castHeluo, castQizheng, castLiuren } from "@numerology/engine";
+import { castChart, castCrossSystem, castTaixuan, castMaya, castHuangji, castPlanetaryHour, castEphemeris, castHeluo, heluoClasses, castQizheng, castLiuren } from "@numerology/engine";
 import { LIUREN_METHODS, SCIENCE_NOTES } from "@numerology/knowledge";
 import {
   SYSTEM_PERSONA,
@@ -156,6 +156,9 @@ test("crossSystemFacts:附河洛理數先後天卦同大運", () => {
   assert.ok(f.includes(`積 ${heluo.guangxiang.branch.product},256 卦中 ${heluo.guangxiang.dist[heluo.guangxiang.branch.product]} 卦同積`));
   const ln = heluo.liunian.find((y) => y.year === new Date().getFullYear());
   if (ln) assert.ok(f.includes(`流年卦 ${ln.hex.name} 第 ${ln.line} 爻`));
+  assert.ok(!f.includes("河洛天地數分類"));
+  const g = crossSystemFacts(cross, "zht", { taixuan: castTaixuan(chart.input), maya: castMaya(chart.input.year, chart.input.month, chart.input.day), heluo, heluoClasses: heluoClasses(heluo, chart.input) });
+  assert.ok(g.includes("河洛天地數分類") && g.includes(`元堂第 ${heluo.yuantang} 爻,爻位等第`));
 });
 
 test("crossSystemFacts:附七政四餘宿度同羅計分歧", () => {

@@ -1,4 +1,4 @@
-import { castZiweiFeixing, castZiweiHoroscope, favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type GanzhiRelation, type FortuneAnalysis, type HeluoResult, type QizhengResult, type HuangjiResult, type LiurenResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult, type NumberLoreResult, type BirthLoreResult, type JyotishResult, type EgyptianResult, type MetonicResult } from "@numerology/engine";
+import { castZiweiFeixing, castZiweiHoroscope, favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type GanzhiRelation, type FortuneAnalysis, type HeluoResult, type HeluoClasses, type QizhengResult, type HuangjiResult, type LiurenResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult, type NumberLoreResult, type BirthLoreResult, type JyotishResult, type EgyptianResult, type MetonicResult } from "@numerology/engine";
 import { Solar } from "lunar-javascript";
 import { LIUREN_METHODS, SCIENCE_NOTES } from "@numerology/knowledge";
 import type { AiLocale } from "./prompts.js";
@@ -353,7 +353,7 @@ const VERDICT_ZH: Record<string, string> = { strong: "身強", weak: "身弱", n
 export function crossSystemFacts(
   r: CrossSystemResult,
   locale: AiLocale,
-  cycles?: { taixuan: TaixuanResult; maya: MayaResult; huangji?: HuangjiResult; planetaryHour?: PlanetaryHourResult | null; ephemeris?: EphemerisResult; heluo?: HeluoResult; qizheng?: QizhengResult; lore?: { numbers: NumberLoreResult; birth: BirthLoreResult }; calendars?: { jyotish: JyotishResult; egyptian: EgyptianResult; metonic: MetonicResult }; liuren?: LiurenResult },
+  cycles?: { taixuan: TaixuanResult; maya: MayaResult; huangji?: HuangjiResult; planetaryHour?: PlanetaryHourResult | null; ephemeris?: EphemerisResult; heluo?: HeluoResult; heluoClasses?: HeluoClasses; qizheng?: QizhengResult; lore?: { numbers: NumberLoreResult; birth: BirthLoreResult }; calendars?: { jyotish: JyotishResult; egyptian: EgyptianResult; metonic: MetonicResult }; liuren?: LiurenResult },
 ): string {
   const cite = (c: { work: string; author?: string; year?: number | string; locator?: string }) =>
     [c.author, c.work, c.year, c.locator].filter(Boolean).join(",");
@@ -431,6 +431,13 @@ ${step(ep.steps)}`;
 - 河洛理數:天數 ${hl.heaven}、地數 ${hl.earth};先天 ${hl.xiantian.name}(元堂第 ${hl.yuantang} 爻),${hl.houtianAge} 歲換後天 ${hl.houtian.name}(元堂第 ${hl.houtianYuantang} 爻);元氣${hl.yuanqi.tian || hl.yuanqi.di ? "有" : "無"}${hl.yuanqi.reversed ? "(逢相反)" : ""},化工${hl.huagong.has ? "有" : "無"}${hl.huagong.reversed ? "(逢反)" : ""}。大運:${yun}。${ln ? `${ln.year} 年(${ln.age} 歲)流年卦 ${ln.hex.name} 第 ${ln.line} 爻(小象)。` : ""}層級 ${TIER_ZH[hl.tier]};出處 ${cite(hl.cite)}。
 - 河洛理數續(金鎖銀匙、廣象徹微):金鎖銀匙年柱納音屬${hl.jinsuo.nayin},順數 ${hl.jinsuo.forward}、逆數 ${hl.jinsuo.reverse}(查詩表編號,詩表未入庫)。廣象徹微:四柱支 ${hl.guangxiang.branch.xiang.join("")} 積 ${gb},256 卦中 ${hl.guangxiang.dist[gb]} 卦同積(${share(gb)});干 ${hl.guangxiang.stem.xiang.join("")} 積 ${gs},${hl.guangxiang.dist[gs]} 卦同積(${share(gs)})。層級 ${TIER_ZH[hl.tier]};出處 ${cite(hl.ggzCite)}。
 ${step(hl.steps)}`;
+      const hc = cycles.heluoClasses;
+      if (hc) {
+        const RANK = ["", "五爻最佳", "二爻次之", "三、四爻居中", "初、上爻最次"];
+        const str = [hc.heaven && `天數${hc.heaven}`, hc.earth && `地數${hc.earth}`].filter(Boolean).join("、");
+        cycleBlock += `
+- 河洛天地數分類(卷一論篇,用未化簡的天 ${hl.heaven}、地 ${hl.earth}):${str || "強弱未入表"};${hc.excess.length ? hc.excess.join("、") : "無太過"}${hc.exempt.length ? `(${hc.exempt.join("、")}但生於不忌之時)` : ""};格局 ${hc.patterns.join("、") || "未入書中各格"}。元堂第 ${hl.yuantang} 爻,爻位等第${RANK[hc.lineRank]};元堂${hc.youyuan ? "有應(有援)" : "無應(無援)"}。出處 ${cite(hl.cite)} pp. 45–96。`;
+      }
     }
     const qz = cycles.qizheng;
     if (qz) {

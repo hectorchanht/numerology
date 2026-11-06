@@ -38,3 +38,13 @@ export const HELUO_DAYUN = DATA.dayun as unknown as { yang: number; yin: number 
 
 /** 三至尊卦。 */
 export const HELUO_ZHIZUN = DATA.zhizun.hexagrams as unknown as string[];
+
+type Range = (number | null)[];
+/** 天地數分類(卷一論篇 pp. 45–96):按未化簡的天數、地數分強弱、太過、格局。 */
+export const HELUO_CLASSES = DATA.numberClasses as unknown as {
+  strength: { page: [number, number]; heaven: Record<string, [number, number]>; earth: Record<string, [number, number]> };
+  excess: { page: number; heaven: Record<string, Range | string>; earth: Record<string, Range | string> };
+  /** range 兩項為閉區間(null 無界),其餘為列舉 */
+  patterns: { page: [number, number]; items: { name: string; heaven: Range; earth: Range }[] };
+  lineRank: { page: number };
+};
