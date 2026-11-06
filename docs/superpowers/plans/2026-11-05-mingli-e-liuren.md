@@ -143,7 +143,7 @@
 ### Task 4: 週期卡 UI、i18n、docs
 
 **Files:**
-- Modify: `apps/web/components/CycleCard.tsx`(新 `Liuren` 組件,放 `Heluo` 之後)、`apps/web/lib/i18n.ts`(三語)、`apps/web/lib/glossary*`(如現有術語表結構要求;加 月將、四課、三傳、九宗門、天將)、`docs/domains.md`(加大六壬一行)
+- Modify: `apps/web/components/CycleCard.tsx`(新 `Liuren` 組件,放 `Heluo` 之後)、`apps/web/lib/i18n.ts`(三語)、`packages/knowledge/src/mingli-glossary.ts`(加 月將、四課、三傳、九宗門、天將,三語,格式跟「考刻」條)、`docs/domains.md`(加大六壬一行)
 - Create: `docs/liuren.md`(用自己文字概述起課步驟同已定規則、errata、「本站取法」各項)
 
 - [ ] **Step 1: 實作 `Liuren`**:預設顯示出生時刻課;`<input type="datetime-local" min="1900-01-01T00:00" max="2100-12-31T23:59">` 加「而家」掣(用瀏覽器本地時間);輸入改變時 `castLiuren(chart.input, at)`,包 `try/catch`,失敗或清空就退返出生課。顯示:月將、四課(四格 上/下)、三傳 + 課門 + 天將、貴人晝夜順逆;`Meta` tier/cite;`Steps`;註「只列起課結果,不作占斷」。風格跟 `Heluo`。
