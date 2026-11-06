@@ -4,11 +4,11 @@ const LIUREN_DATA = {
   "meta": {
     "tier": "classical",
     "name": "大六壬起課規則:月將、天地盤、寄宮、四課、九宗門三傳、天乙貴人、十二天將",
-    "schema": "cite ; yuejiang:{rule,cite,values,book} ; shenName:{cite,values} ; tianDiPan ; jigong:{cite,values} ; sike:{rule,tier,cite} ; guiren:{values:{干:{day,night,unconfirmed?}},evidence,note} ; dayNight:{day,night,tier} ; direction:{forward,backward,cite} ; jiang:{values,cite} ; methods:[{id,name,sub,cite,rule,tier?}] ; xing ; shehai:{rule,steps,workedCounts,cite} ; errata ; examples:[{id,juan,day,hour,jiang,bookName,quote,expected:{method,sub,chu,zhong,mo},bookSanChuan?,bookSource?,note?}]",
+    "schema": "cite ; yuejiang:{rule,cite,values,book} ; shenName:{cite,values} ; tianDiPan ; jigong:{cite,values} ; sike:{rule,tier,cite} ; guiren:{values:{干:{day,night}},evidence,note} ; dayNight:{day,night,tier} ; direction:{forward,backward,cite} ; jiang:{values,cite} ; methods:[{id,name,sub,cite,rule,tier?}] ; xing ; shehai:{rule,steps,workedCounts,cite} ; errata ; examples:[{id,juan,day,hour,jiang,bookName,quote,expected:{method,sub,chu,zhong,mo},bookSanChuan?,bookSource?,note?}]",
     "source": "《六壬大全》十二卷,不著撰人,懷慶府推官郭載騋校,明刊;四庫全書本,維基文庫 https://zh.wikisource.org/wiki/六壬大全_(四庫全書本) 卷01–12 原文逐字核對。只錄起課規則同書中課例日辰、占時、月將,唔錄課體吉凶斷語。",
     "version": "0.1.0",
     "reviewed": false,
-    "reviewNote": "引文逐條對維基文庫原文。書中課圖錄文錯亂,課例三傳一律由本表規則重新推導;書文或課圖三傳行明載者記 bookSanChuan 對照。四課起法、晝夜界、壬日貴人旦夜書無明文或未分,標 modern / unconfirmed。"
+    "reviewNote": "引文逐條對維基文庫原文。書中課圖錄文錯亂,課例三傳一律由本表規則重新推導;書文或課圖三傳行明載者記 bookSanChuan 對照。四課起法、晝夜界書無明文,標 modern。"
   },
   "cite": {
     "work": "《六壬大全》(四庫全書本)",
@@ -127,9 +127,8 @@ const LIUREN_DATA = {
         "night": "卯"
       },
       "壬": {
-        "day": "卯",
-        "night": "巳",
-        "unconfirmed": true
+        "day": "巳",
+        "night": "卯"
       }
     },
     "evidence": [
@@ -172,9 +171,13 @@ const LIUREN_DATA = {
       {
         "stems": "壬",
         "cite": "卷09「如六壬日六癸日以卯為夜貴」"
+      },
+      {
+        "stems": "壬",
+        "cite": "卷09「餘五壬日〔干上夘〕夜貴」"
       }
     ],
-    "note": "書只載先天貴人圖(未錄文),各干旦夜貴由卷09、卷10 課例反推。丙日只見夜貴酉,旦貴亥據「六丙丁日〔亥加未酉加巳〕」同對。壬日只見巳、卯一對,旦夜未分;本表暫取旦卯夜巳(unconfirmed),惟卷09 有「六壬日六癸日以卯為夜貴」一句,與此相反,見 errata。四庫提要謂「是書所取天乙尚沿俗例」。"
+    "note": "書只載先天貴人圖(未錄文),各干旦夜貴由卷09、卷10 課例反推。丙日只見夜貴酉,旦貴亥據「六丙丁日〔亥加未酉加巳〕」同對。壬日「六壬癸日〔己加亥卯加酉〕」只見巳、卯一對,旦夜由卷09「六壬日六癸日以卯為夜貴」「餘五壬日〔干上夘〕夜貴」分出:夜卯、旦巳,同癸。四庫提要謂「是書所取天乙尚沿俗例」。"
   },
   "dayNight": {
     "day": [
@@ -505,12 +508,7 @@ const LIUREN_DATA = {
     {
       "juan": "卷05",
       "item": "涉害 甲午日例",
-      "note": "書以辰加寅、申加午俱一重為「復等」取日上辰(綴瑕);按孟仲次序,辰所加地盤寅為孟,應先以見機取辰。初傳同為辰,三傳辰午申不變,只子格名異。"
-    },
-    {
-      "juan": "卷09",
-      "item": "壬日貴人",
-      "note": "本表壬取旦卯夜巳(unconfirmed),但卷09 貴人脫格有「如六壬日六癸日以卯為夜貴」,依此則壬應旦巳夜卯(同癸)。待人工校定。"
+      "note": "書以辰加寅、申加午俱一重為「復等」取日上辰(綴瑕);按孟仲次序,辰所加地盤寅為孟,應先以見機取辰。初傳同為辰,三傳辰午申不變,只子格名異。若改以上神本身論孟仲,則申(孟)見機取申,與書初傳辰不合;兩種讀法都得不出綴瑕,故仍依加臨地盤論。"
     }
   ],
   "examples": [

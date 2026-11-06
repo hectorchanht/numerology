@@ -20,8 +20,8 @@ export const LIUREN_YUEJIANG: Record<string, string> = DATA.yuejiang.values;
 export const LIUREN_SHEN_NAME: Record<string, string> = DATA.shenName.values;
 /** 日干 → 寄宮支 */
 export const LIUREN_JIGONG: Record<string, string> = DATA.jigong.values;
-/** 日干 → { day: 支, night: 支 };unconfirmed = 書未明分旦夜 */
-export const LIUREN_GUIREN: Record<string, { day: string; night: string; unconfirmed?: boolean }> =
+/** 日干 → { day: 支, night: 支 } */
+export const LIUREN_GUIREN: Record<string, { day: string; night: string }> =
   DATA.guiren.values;
 /** 十二天將,貴人起 */
 export const LIUREN_JIANG: readonly string[] = DATA.jiang.values;

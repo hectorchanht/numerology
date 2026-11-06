@@ -30,13 +30,13 @@ test("寄宮:10 干齊,值只得 8 個支", () => {
   assert.equal(new Set(Object.values(LIUREN_JIGONG)).size, 8);
 });
 
-test("貴人:10 干齊,每干晝夜唔同;壬標未確認", () => {
+test("貴人:10 干齊,每干晝夜唔同;壬同癸(卷09)", () => {
   assert.deepEqual(Object.keys(LIUREN_GUIREN).sort(), [...TIANGAN].sort());
   for (const [g, v] of Object.entries(LIUREN_GUIREN)) {
     assert.ok(DIZHI.includes(v.day) && DIZHI.includes(v.night), g);
     assert.notEqual(v.day, v.night, g);
   }
-  assert.equal(LIUREN_GUIREN["壬"].unconfirmed, true);
+  assert.deepEqual(LIUREN_GUIREN["壬"], { day: "巳", night: "卯" });
 });
 
 test("十二天將唔重複,首個係貴人", () => {
