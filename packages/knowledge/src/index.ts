@@ -21,3 +21,4 @@ export * from "./tieban.js";
 export * from "./calendars.js";
 export * from "./ziwei-geju.js";
 export * from "./ziwei-stars.js";
+export * from "./liuren.js";
