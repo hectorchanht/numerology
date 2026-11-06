@@ -93,6 +93,7 @@ Write a short overview in our own words: how the system works, then the tables g
 | 《河洛理數》卷一,文明書局石印本(Commons NLC416 scan, public domain; user's `raw_pdf/河洛理數1.pdf`) | facts + engine | `heluo-lishu.json`, `docs/heluo-lishu.md`, `castHeluo`: 起例 rules, 7 worked examples recomputed. MinerU VLM looped on table pages (24, 25, 36): read those from page images |
 | 紫微楼《天網搜奇錄》(modern HK column collection, in copyright; user's `raw_pdf/天網搜奇錄.pdf`) | facts only | `tianwang-souqi.json`, `docs/tianwang-souqi.md`: 鐵板 lecture number rules, two 河洛 cases (one matches `castHeluo`, one author arithmetic slip), 庚 化忌 variants. Mostly anecdotes. Full 116-page parse timed out server-side: parse in ~25-page chunks |
 | 《古今圖書集成·河圖洛書部》卷 51–58 (1726, public domain, Wikisource) | facts | `hetu-luoshu.json`, `docs/hetu-luoshu.md`. Wikisource pages transclude `Page:` text, so `action=raw` is empty: use `api.php?action=parse&prop=text` and strip HTML |
+| 《河洛理數 範衍 廣象徹微初集》GGZBCK405 (故宮珍本叢刊 photo-reprint of Ming edition, public domain) | facts | `heluo-ggz.json`, `docs/heluo-ggz.md`; pp.1–216 used as third witness for `heluo-lishu.json`. Woodblock small-print tables OCR badly: read page images, crop with `sips -c`, upscale |
 
 ## Chinese classics lessons
 

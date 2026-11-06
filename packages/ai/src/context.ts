@@ -157,18 +157,22 @@ function ziweiExtra(chart: ChartResult, fortune: FortuneAnalysis | undefined, op
     if (yStar("流禄") && yStar("流羊") && yStar("流陀"))
       out.push(`- 流耀(流年):流禄入${yStar("流禄")}、流羊入${yStar("流羊")}、流陀入${yStar("流陀")}(${refYear}年)`);
   }
-  // 飛星派:標流派,只列四宮化忌落宮 + 自化 + 祿忌交馳
-  const fx = castZiweiFeixing(input);
-  const KEY = ["命宫", "财帛", "官禄", "夫妻"];
-  const ji = KEY.map((n) => fx.flies.find((f) => f.from === n && f.type === "忌"))
-    .filter((f) => f !== undefined)
-    .map((f) => `${f.from}(${f.stem})化忌${f.star}入${f.intoPalace}`);
-  out.push(
-    "### 飞星派(流派说法,非《全书》,仅作参考,不作主要判断)",
-    `- 四宫宫干化忌:${ji.join("、") || "—"}`,
-    `- 自化:${fx.selfMutaged.map((s) => `${s.palace}自化${s.type}(${s.star})`).join("、") || "无"}`,
-    `- 禄忌交驰:${fx.luJiJiaoChi.map((x) => `${x.luPalace}化禄入${x.jiPalace}且${x.jiPalace}化忌入${x.luPalace}`).join("、") || "无"}`,
-  );
+  // 飛星派:標流派,只列四宮化忌落宮 + 自化 + 祿忌交馳。
+  // 屬本命靜態結構,只喺 full(整篇/對話)同 current(靜態報告各節)先送;
+  // dayun/review/future 專講運限、none 唔要附加段,慳 ~數百 token。位置不變(保 prompt cache 前綴次序)。
+  if (scope === "full" || scope === "current") {
+    const fx = castZiweiFeixing(input);
+    const KEY = ["命宫", "财帛", "官禄", "夫妻"];
+    const ji = KEY.map((n) => fx.flies.find((f) => f.from === n && f.type === "忌"))
+      .filter((f) => f !== undefined)
+      .map((f) => `${f.from}(${f.stem})化忌${f.star}入${f.intoPalace}`);
+    out.push(
+      "### 飞星派(流派说法,非《全书》,仅作参考,不作主要判断)",
+      `- 四宫宫干化忌:${ji.join("、") || "—"}`,
+      `- 自化:${fx.selfMutaged.map((s) => `${s.palace}自化${s.type}(${s.star})`).join("、") || "无"}`,
+      `- 禄忌交驰:${fx.luJiJiaoChi.map((x) => `${x.luPalace}化禄入${x.jiPalace}且${x.jiPalace}化忌入${x.luPalace}`).join("、") || "无"}`,
+    );
+  }
   if (scope === "full") {
     // 精確取鄰月:以今日回推當月初一,上月 = 初一前一日,下月 = 初一後 29 日(若仍同月再 +1,即大月 30 日)。
     const now = opts?.now ?? new Date();
@@ -480,7 +484,7 @@ ${jy.steps.map((x) => `  - ${x}`).join("\n")}`;
     cycleBlock += `
 
 ## 大六壬(確定性計算;只列起課結果,不入五行比對)
-- 大六壬(出生時刻起課;日 ${lr.dayGanZhi}、占時 ${lr.hourZhi}):當令中氣 ${lr.zhongQi},月將 ${lr.yueJiang.zhi}(${lr.yueJiang.name});天地盤(地盤子→亥之天盤支)${lr.tianPan.join("")};四課(上/下)${ke};三傳 ${sc.chu}→${sc.zhong}→${sc.mo},課門 ${men}${sc.sub && sc.sub !== men ? `(${sc.sub})` : ""};天乙貴人 ${lr.guiren.zhi}(${lr.guiren.daytime ? "晝貴" : "夜貴"}、${lr.guiren.forward ? "順布" : "逆布"});天將落三傳:${[sc.chu, sc.zhong, sc.mo].map((z) => `${z}${lr.jiang[z]}`).join("、")}。層級 ${TIER_ZH[lr.tier]};出處 ${cite(lr.cite)}。四課起法、晝夜界、遙剋多神涉害剋向、涉害同深多孟、伏吟自刑用日判屬本站取法,非書明文。
+- 大六壬(出生時刻起課;日 ${lr.dayGanZhi}、占時 ${lr.hourZhi}):當令中氣 ${lr.zhongQi},月將 ${lr.yueJiang.zhi}(${lr.yueJiang.name});天地盤(地盤子→亥之天盤支)${lr.tianPan.join("")};四課(上/下)${ke};三傳 ${sc.chu}→${sc.zhong}→${sc.mo},課門 ${men}${sc.sub && sc.sub !== men ? `(${sc.sub})` : ""};天乙貴人 ${lr.guiren.zhi}(${lr.guiren.daytime ? "晝貴" : "夜貴"}、${lr.guiren.forward ? "順布" : "逆布"});天將落三傳:${[sc.chu, sc.zhong, sc.mo].map((z) => `${z}${lr.jiang[z]}`).join("、")};旬首 ${lr.xun.shou}、旬空 ${lr.xun.kong.join("")};三傳遁干、六親:${lr.chuan.map((c) => `${c.zhi}(${c.dun ? `遁${c.dun}` : "空亡"}、${c.qin})`).join("、")};神煞落三傳四課:${lr.shenSha.filter((s) => s.at.length).map((s) => `${s.name}${s.zhi}(${s.at.join("、")})`).join("、") || "無"}。層級 ${TIER_ZH[lr.tier]};出處 ${cite(lr.cite)}。四課起法、晝夜界、遙剋多神涉害剋向、涉害同深多孟、伏吟自刑用日判、遁干算式屬本站取法,非書明文。
 ${lr.steps.map((x) => `  - ${x}`).join("\n")}`;
   }
   return `# 多體系事實(確定性計算結果,勿改動數字)

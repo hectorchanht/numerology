@@ -56,3 +56,39 @@ test("小運、流月、歲運關係", () => {
     assert.equal(typeof y.suiYunBingLin, "boolean");
   }
 });
+
+test("流月 isCurrent:以實際交節時刻判定,立春前唔會錯標翌年子/丑月", () => {
+  const S = { year: 1990, month: 5, day: 15, hour: 14, minute: 30, gender: "男" };
+  const cur = (now) =>
+    analyzeFortune(S, { referenceYear: 2026, now: new Date(now) }).bazi.liuYue
+      .filter((m) => m.isCurrent).map((m) => m.ganZhi);
+  // 2026-01-10 仲屬乙巳年丑月(上一個流年),2026 流年無當前月
+  assert.deepEqual(cur("2026-01-10T12:00:00+08:00"), []);
+  // 2026 立春 = 02-04 04:02:08(北京時間)
+  assert.deepEqual(cur("2026-02-04T04:02:07+08:00"), []);
+  assert.deepEqual(cur("2026-02-04T04:02:09+08:00"), ["庚寅"]);
+  // 翌年小寒後屬 2026 流年丑月
+  assert.deepEqual(cur("2027-01-10T12:00:00+08:00"), ["辛丑"]);
+  assert.deepEqual(cur("2027-02-10T12:00:00+08:00"), []);
+});
+
+test("歲運並臨:流年干支同大運干支時為 true", () => {
+  const S = { year: 1990, month: 5, day: 15, hour: 14, minute: 30, gender: "男" };
+  const f = analyzeFortune(S, { referenceYear: 2000, yearsBack: 3, yearsAhead: 5 });
+  assert.deepEqual(f.bazi.liuNian.filter((y) => y.suiYunBingLin).map((y) => `${y.year}${y.ganZhi}`), ["2002壬午"]);
+});
+
+test("預設參考年 = now 所屬干支年(立春分界),流月當前月一致", () => {
+  const S = { year: 1990, month: 5, day: 15, hour: 14, minute: 30, gender: "男" };
+  const at = (now) => analyzeFortune(S, { now: new Date(now) });
+  const jan = at("2026-01-20T12:00:00+08:00");
+  assert.equal(jan.referenceYear, 2025);
+  assert.deepEqual(jan.bazi.liuYue.filter((m) => m.isCurrent).map((m) => m.monthName + m.ganZhi), ["腊己丑"]);
+  assert.equal(jan.bazi.liuNian.find((y) => y.isReference).ganZhi, "乙巳");
+  const feb = at("2026-02-05T12:00:00+08:00");
+  assert.equal(feb.referenceYear, 2026);
+  assert.deepEqual(feb.bazi.liuYue.filter((m) => m.isCurrent).map((m) => m.monthName + m.ganZhi), ["正庚寅"]);
+  // 北京時間比對:UTC 2026-02-03T20:02:09Z = 北京 02-04 04:02:09,已過立春
+  assert.equal(at("2026-02-03T20:02:09Z").referenceYear, 2026);
+  assert.equal(at("2026-02-03T20:02:07Z").referenceYear, 2025);
+});

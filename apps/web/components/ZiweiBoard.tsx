@@ -94,7 +94,7 @@ function Palace({
         {p.minorStars.map((s) => <StarSpan key={s.name} star={s} kind="minor" />)}
       </span>
       {layer ? (
-        <span className="stars" style={{ color: "var(--accent-text)", fontSize: 10 }}>
+        <span className="stars layer-stars">
           <span>
             {z(layer.palaceNames[p.index])}
             {layer.palaceIndex === p.index ? ` ★${t("ziwei.layer.ming", { l: t(LAYER_KEYS[layer.key]) })}` : ""}
@@ -110,7 +110,7 @@ function Palace({
         <span className="dr">{p.decadal.range[0]}–{p.decadal.range[1]}</span>
       </span>
       {p.isBodyPalace ? <span className="tag">{t("zw.body")}</span> : null}
-      {douJun ? <span className="tag" style={{ top: 34 }}>{t("ziwei.doujun")}</span> : null}
+      {douJun ? <span className="tag doujun">{t("ziwei.doujun")}</span> : null}
       {highlight ? <span className="sfsz-badge">{t(BADGE_KEYS[highlight])}</span> : null}
     </button>
   );
@@ -156,7 +156,7 @@ export function ZiweiBoard({ ziwei, input, center }: { ziwei: ZiweiChart; input:
         onChange={setLayerSel}
         options={(Object.keys(LAYER_KEYS) as LayerSel[]).map((k) => ({ value: k, label: t(LAYER_KEYS[k]) }))}
       />
-      <label className="note" style={{ display: "block" }}>
+      <label className="note layer-date">
         {t("ziwei.layer.date")}{" "}
         <input
           type="date"

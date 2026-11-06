@@ -18,7 +18,14 @@ export function ZiweiExtras({
   const { t } = useLocale();
   const { z, zT } = useScript();
   const [star, setStar] = useState<string | null>(null);
-  const fx = useMemo(() => castZiweiFeixing(input), [input]);
+  const fx = useMemo(() => {
+    try {
+      return castZiweiFeixing(input);
+    } catch (e) {
+      console.warn("castZiweiFeixing 失敗,飛星派段落唔顯示", e);
+      return null; // 輸入超出可排範圍:唔好令成頁崩
+    }
+  }, [input]);
   const entry = ZIWEI_STARS.find((s) => s.name === star);
 
   return (
@@ -27,7 +34,7 @@ export function ZiweiExtras({
       {ziwei.geju.length ? (
         <div className="list">
           {ziwei.geju.map((g) => (
-            <div key={g.id} className="row plain" style={{ display: "block" }}>
+            <div key={g.id} className="row plain ziwei-geju-row">
               <b>{z(g.name)}</b>{" "}
               <span className={`tag${g.verdict === "吉" ? " accent" : g.verdict === "凶" ? " warn" : ""}`}>
                 {t(VERDICT[g.verdict] ?? "ziwei.geju.vZhong")}
@@ -56,7 +63,7 @@ export function ZiweiExtras({
         </div>
       ) : <p className="note">{t("ziwei.overlap.none")}</p>}
 
-      <details style={{ marginTop: 16 }}>
+      {fx ? <details className="ziwei-feixing">
         <summary className="group-title">{t("ziwei.feixing.summary")}</summary>
         <h3 className="note"><b>{t("ziwei.feixing.jiaochi")}</b></h3>
         <p className="note">
@@ -78,10 +85,10 @@ export function ZiweiExtras({
             </li>
           ))}
         </ul>
-      </details>
+      </details> : null}
 
       <h2 className="group-title">{t("ziwei.star.title")}</h2>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+      <div className="ziwei-star-tags">
         {ZIWEI_STARS.map((s) => (
           <button
             key={s.name}

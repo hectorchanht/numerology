@@ -136,4 +136,4 @@ export { castFuyi, type FuyiResult } from "./fuyi.js";
 export { castGeju, type GejuResult } from "./geju.js";
 export { castNumberLore, castBirthLore, classifyNumber, starLongitude, type NumberLoreResult, type NumberLoreItem, type NumberClass, type BirthLoreResult, type StarHit, type LoreSource } from "./lore.js";
 export { castJyotish, castEgyptian, castMetonic, type JyotishResult, type Dasha, type EgyptianResult, type MetonicResult } from "./calendars.js";
-export { castLiuren, castLiurenKe, type LiurenResult, type LiurenKe } from "./liuren.js";
+export { castLiuren, castLiurenKe, liurenXun, liurenLiuqin, type LiurenResult, type LiurenKe } from "./liuren.js";
