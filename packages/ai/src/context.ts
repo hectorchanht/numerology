@@ -480,7 +480,7 @@ ${jy.steps.map((x) => `  - ${x}`).join("\n")}`;
     cycleBlock += `
 
 ## 大六壬(確定性計算;只列起課結果,不入五行比對)
-- 大六壬(出生時刻起課;日 ${lr.dayGanZhi}、占時 ${lr.hourZhi}):當令中氣 ${lr.zhongQi},月將 ${lr.yueJiang.zhi}(${lr.yueJiang.name});天地盤(地盤子→亥之天盤支)${lr.tianPan.join("")};四課(上/下)${ke};三傳 ${sc.chu}→${sc.zhong}→${sc.mo},課門 ${men}${sc.sub && sc.sub !== men ? `(${sc.sub})` : ""};天乙貴人 ${lr.guiren.zhi}(${lr.guiren.daytime ? "晝貴" : "夜貴"}、${lr.guiren.forward ? "順布" : "逆布"});天將落三傳:${[sc.chu, sc.zhong, sc.mo].map((z) => `${z}${lr.jiang[z]}`).join("、")}。層級 ${TIER_ZH[lr.tier]};出處 ${cite(lr.cite)}。四課起法、晝夜界、遙剋多神涉害剋向、涉害同深多孟、伏吟自刑用日判屬本站取法,非書明文。
+- 大六壬(出生時刻起課;日 ${lr.dayGanZhi}、占時 ${lr.hourZhi}):當令中氣 ${lr.zhongQi},月將 ${lr.yueJiang.zhi}(${lr.yueJiang.name});天地盤(地盤子→亥之天盤支)${lr.tianPan.join("")};四課(上/下)${ke};三傳 ${sc.chu}→${sc.zhong}→${sc.mo},課門 ${men}${sc.sub && sc.sub !== men ? `(${sc.sub})` : ""};天乙貴人 ${lr.guiren.zhi}(${lr.guiren.daytime ? "晝貴" : "夜貴"}、${lr.guiren.forward ? "順布" : "逆布"});天將落三傳:${[sc.chu, sc.zhong, sc.mo].map((z) => `${z}${lr.jiang[z]}`).join("、")};旬首 ${lr.xun.shou}、旬空 ${lr.xun.kong.join("")};三傳遁干、六親:${lr.chuan.map((c) => `${c.zhi}(${c.dun ? `遁${c.dun}` : "空亡"}、${c.qin})`).join("、")};神煞落三傳四課:${lr.shenSha.filter((s) => s.at.length).map((s) => `${s.name}${s.zhi}(${s.at.join("、")})`).join("、") || "無"}。層級 ${TIER_ZH[lr.tier]};出處 ${cite(lr.cite)}。四課起法、晝夜界、遙剋多神涉害剋向、涉害同深多孟、伏吟自刑用日判屬本站取法,非書明文。
 ${lr.steps.map((x) => `  - ${x}`).join("\n")}`;
   }
   return `# 多體系事實(確定性計算結果,勿改動數字)
