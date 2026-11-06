@@ -4,7 +4,7 @@ const LIUREN_DATA = {
   "meta": {
     "tier": "classical",
     "name": "大六壬起課規則:月將、天地盤、寄宮、四課、九宗門三傳、天乙貴人、十二天將",
-    "schema": "cite ; yuejiang:{rule,cite,values,book} ; shenName:{cite,values} ; tianDiPan ; jigong:{cite,values} ; sike:{rule,tier,cite} ; guiren:{values:{干:{day,night}},evidence,note} ; dayNight:{day,night,tier} ; direction:{forward,backward,cite} ; jiang:{values,cite} ; methods:[{id,name,sub,cite,rule,tier?}] ; xing ; shehai:{rule,steps,workedCounts,cite} ; errata ; examples:[{id,juan,day,hour,jiang,bookName,quote,expected:{method,sub,chu,zhong,mo},bookSanChuan?,bookSource?,note?}]",
+    "schema": "cite ; yuejiang:{rule,cite,values,book} ; shenName:{cite,values} ; tianDiPan ; jigong:{cite,values} ; sike:{rule,tier,cite} ; guiren:{values:{干:{day,night}},evidence,note} ; dayNight:{day,night,tier} ; direction:{forward,backward,cite} ; jiang:{values,cite} ; methods:[{id,name,sub,cite,rule,modern?:[{tier,item,note}]}] ; xing ; shehai:{rule,steps,modern,workedCounts,cite} ; errata ; examples:[{id,juan,day,hour,jiang,bookName,quote,expected:{method,sub,chu,zhong,mo},bookSanChuan?,bookSource?,note?}]",
     "source": "《六壬大全》十二卷,不著撰人,懷慶府推官郭載騋校,明刊;四庫全書本,維基文庫 https://zh.wikisource.org/wiki/六壬大全_(四庫全書本) 卷01–12 原文逐字核對。只錄起課規則同書中課例日辰、占時、月將,唔錄課體吉凶斷語。",
     "version": "0.1.0",
     "reviewed": false,
@@ -253,6 +253,13 @@ const LIUREN_DATA = {
         "卷05「凢伏吟用起自刑之神傳行杜塞為杜傳格」",
         "卷05「次傳復自刑以冲為末傳」",
         "卷05「子卯兩刑不復再傳以子冲午為末傳也」"
+      ],
+      "modern": [
+        {
+          "tier": "modern",
+          "item": "伏吟有剋子格",
+          "note": "本站取法:書無明文,有剋者子格依日剛柔記自任/自信。"
+        }
       ]
     },
     {
@@ -268,6 +275,13 @@ const LIUREN_DATA = {
         "卷05「凢返吟課無相克以支辰傍射敵上神為用」",
         "卷05「必中投辰上神而末投日上神為傳」",
         "卷05「返吟亦名無依」"
+      ],
+      "modern": [
+        {
+          "tier": "modern",
+          "item": "返吟有剋子格",
+          "note": "本站取法:有剋者子格一律記無依(書謂返吟亦名無依,未分有剋無剋)。"
+        }
       ]
     },
     {
@@ -398,6 +412,13 @@ const LIUREN_DATA = {
       "5. 同深:其中加臨地盤四孟(寅申巳亥)者唯一 → 初傳,子格 見機。",
       "6. 仍不決:加臨地盤四仲(子午卯酉)者唯一 → 初傳,子格 察微。",
       "7. 仍不決(復等):剛日取日上神(一課上神),柔日取辰上神(三課上神)為初傳,子格 綴瑕。"
+    ],
+    "modern": [
+      {
+        "tier": "modern",
+        "item": "steps[0] 候選取法",
+        "note": "本站取法:書例只有兩候選;三候選以上、部份比者(只取比者)無書例可驗。"
+      }
     ],
     "workedCounts": [
       {

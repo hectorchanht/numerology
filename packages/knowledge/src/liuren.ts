@@ -10,6 +10,8 @@ export interface LiurenMethod {
   rule: string;
   cites?: string[];
   note?: string;
+  /** 本站取法(書無明文)部份 */
+  modern?: { tier: string; item: string; note: string }[];
 }
 
 export const LIUREN_META = DATA.meta as unknown as KnowledgeMeta;
