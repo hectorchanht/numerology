@@ -2,15 +2,15 @@
 
 import { useMemo, useState } from "react";
 import {
-  castEphemeris, castHeluo, castHuangji, castLiuren, castMaya, castPlanetaryHour, castTaixuan, LIUREN_METHODS, MAYA_META, TZOLKIN_DAY_NAMES,
-  type ChartResult, type EphemerisResult, type HeluoResult, type HuangjiResult, type LiurenResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult,
+  castEphemeris, castHeluo, castHuangji, castLiuren, castMaya, castPlanetaryHour, castQizheng, castTaixuan, LIUREN_METHODS, MAYA_META, TZOLKIN_DAY_NAMES,
+  type ChartResult, type EphemerisResult, type HeluoResult, type HuangjiResult, type LiurenResult, type MayaResult, type PlanetaryHourResult, type QizhengResult, type TaixuanResult,
 } from "@numerology/engine";
 import { useLocale, useScript, type TKey } from "@/lib/i18n";
 import { taixuanGrid, tzolkinCell } from "@/lib/cycleView";
 import { CitePop } from "@/components/CrossSystemCard";
 
 /*
- * 時間週期卡:太玄(81 首 9×9 格)、瑪雅曆(Tzolk'in 13×20 格、長紀曆、Haab)、皇極經世、行星時、七曜位置與月宿、河洛理數、大六壬。
+ * 時間週期卡:太玄(81 首 9×9 格)、瑪雅曆(Tzolk'in 13×20 格、長紀曆、Haab)、皇極經世、行星時、七曜位置與月宿、河洛理數、大六壬、七政四餘。
  * 全部由引擎確定性計算,零 AI;舊歷史紀錄只存 chart,於此即場重算。
  */
 
@@ -283,6 +283,40 @@ function Liuren({ chart, solar }: { chart: ChartResult; solar: boolean }) {
   );
 }
 
+function Qizheng({ r }: { r: QizhengResult }) {
+  const { t } = useLocale();
+  const { z } = useScript();
+  const dms = (d: number) => `${Math.floor(d)}°${String(Math.floor((d % 1) * 60)).padStart(2, "0")}′`;
+  return (
+    <>
+      <h3 className="xs-h">{t("cycle.qizheng")}</h3>
+      <p className="xs-note">{t("cycle.qizhengIntro")}</p>
+      <Meta tier={r.tier} basis="cycle.basis.clock" cite={r.cite} />
+      <div className="bazi-detail-wrap">
+        <table className="bazi-detail cy-sky">
+          <thead>
+            <tr>
+              {(["cycle.qzColName", "cycle.qzColLon", "cycle.qzColAnc", "cycle.qzColMod"] as const).map((k) => <th key={k} className="colhead">{t(k)}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {r.bodies.map((b) => (
+              <tr key={b.id}>
+                <th className="rowlabel">{z(b.name)}{b.kind === "餘" ? ` (${t(b.id === "ziqi" ? "cycle.qzSchool" : "cycle.qzCalc")})` : ""}</th>
+                <td>{dms(b.longitude)}{b.retrograde && b.kind === "政" ? ` ${t("cycle.retro")}` : ""}</td>
+                <td>{z(b.ancient.name)} {dms(b.ancient.degree)}</td>
+                <td>{z(b.mansion.name)} {dms(b.mansion.degree)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="xs-note">{t("cycle.qzNote")}</p>
+      <Steps steps={r.steps} />
+    </>
+  );
+}
+
 export function CycleCard({ chart }: { chart: ChartResult }) {
   const { t } = useLocale();
   const tx = useMemo(() => castTaixuan(chart.input), [chart]);
@@ -291,6 +325,7 @@ export function CycleCard({ chart }: { chart: ChartResult }) {
   const hour = useMemo(() => castPlanetaryHour(chart.input), [chart]);
   const sky = useMemo(() => castEphemeris(chart.input), [chart]);
   const heluo = useMemo(() => castHeluo(chart.input), [chart]);
+  const qizheng = useMemo(() => castQizheng(chart.input), [chart]);
   return (
     <div className="card viz xs">
       <p className="xs-sub">{t("cycle.intro")}</p>
@@ -301,6 +336,7 @@ export function CycleCard({ chart }: { chart: ChartResult }) {
       <Sky r={sky} />
       <Heluo r={heluo} solar={chart.meta.trueSolarTimeApplied} />
       <Liuren chart={chart} solar={chart.meta.trueSolarTimeApplied} />
+      <Qizheng r={qizheng} />
     </div>
   );
 }

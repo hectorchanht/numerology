@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { castChart, castCrossSystem, castTaixuan, castMaya, castHuangji, castPlanetaryHour, castEphemeris, castHeluo, castLiuren } from "@numerology/engine";
+import { castChart, castCrossSystem, castTaixuan, castMaya, castHuangji, castPlanetaryHour, castEphemeris, castHeluo, castQizheng, castLiuren } from "@numerology/engine";
 import { LIUREN_METHODS, SCIENCE_NOTES } from "@numerology/knowledge";
 import {
   SYSTEM_PERSONA,
@@ -151,9 +151,17 @@ test("crossSystemFacts:附河洛理數先後天卦同大運", () => {
   if (ln) assert.ok(f.includes(`流年卦 ${ln.hex.name} 第 ${ln.line} 爻`));
 });
 
+test("crossSystemFacts:附七政四餘宿度同羅計分歧", () => {
+  const qizheng = castQizheng(chart.input);
+  const f = crossSystemFacts(cross, "zht", { taixuan: castTaixuan(chart.input), maya: castMaya(chart.input.year, chart.input.month, chart.input.day), qizheng });
+  assert.ok(f.includes("七政四餘") && f.includes("推步捷例") && f.includes("流派公式"));
+  const sun = qizheng.bodies.find((b) => b.id === "Sun");
+  assert.ok(f.includes(`古宿度 ${sun.ancient.name}宿`));
+});
+
 test("crosssystem 指令:太玄與瑪雅只作週期定位", () => {
   const p = buildReportSectionPrompt([], seg, "both", "zht", facts);
-  for (const must of ["週期定位", "不推五行", "不作吉凶斷語", "贊辭", "皇極經世", "不推治亂興衰", "行星時", "不寫天使職能", "七曜位置", "不推宮位主事吉凶", "河洛理數", "不作富貴壽夭斷語", "大六壬", "不作占斷", "未附上升時不講宮位", "太玄首名、首辭、贊辭原文未附,不得引述或釋義", "Dreamspell"]) {
+  for (const must of ["週期定位", "不推五行", "不作吉凶斷語", "贊辭", "皇極經世", "不推治亂興衰", "行星時", "不寫天使職能", "七曜位置", "不推宮位主事吉凶", "河洛理數", "不作富貴壽夭斷語", "七政四餘", "紫氣為流派公式", "大六壬", "不作占斷", "未附上升時不講宮位", "太玄首名、首辭、贊辭原文未附,不得引述或釋義", "Dreamspell"]) {
     assert.ok(p.includes(must), `缺條款: ${must}`);
   }
 });
