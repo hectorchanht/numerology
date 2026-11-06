@@ -2,7 +2,7 @@
   "meta": {
     "name": "河洛理數起例:天地數、先天卦、元堂、後天卦、元氣、化工、大運、流年、月卦、日卦、卦氣",
     "schema": "stemNumbers ; branchNumbers ; base ; reduce ; luoshuTrigram ; fiveRule ; yuan ; dang ; yuantang:{generic,pure} ; houtian ; zhizun ; yuanqi ; huagong ; dayun ; examples ; xiaoxiang ; monthHex ; dayHex ; guaqi",
-    "source": "題(宋)陳摶、邵雍《河洛理數》卷一,上海文明書局石印本(據明崇禎壬申 1632 陳仁錫刻本;Wikimedia Commons NLC416 掃描,公有領域)。page = PDF 頁(raw_pdf/河洛理數1.pdf,MinerU doc:fd203eb)。只錄起例規則同書中算例,唔錄斷語、詩訣。 校本:日本國立公文書館藏刻本 NAJDA-305-0271 巻1(Wikimedia Commons,公有領域)。",
+    "source": "題(宋)陳摶、邵雍《河洛理數》卷一,上海文明書局石印本(據明崇禎壬申 1632 陳仁錫刻本;Wikimedia Commons NLC416 掃描,公有領域)。page = PDF 頁(raw_pdf/河洛理數1.pdf,MinerU doc:fd203eb)。只錄起例規則同書中算例,唔錄斷語、詩訣。 校本:日本國立公文書館藏刻本 NAJDA-305-0271 巻1(Wikimedia Commons,公有領域)。 第三校本:《故宮珍本叢刊》影印明史應選重訂本 GGZBCK405(Commons,公有領域;MinerU doc:b0a02d7)。",
     "version": "0.1.0",
     "reviewed": false,
     "reviewNote": "地支數、寄宮詩、元堂各式、元氣同化工表都對過頁面圖片(pp. 21, 25, 27, 30–32, 35)。書中七個算例由 test 按規則重算。原書印錯兩處,見 errata。 地支數、元氣、化工表另與 NAJDA 刻本巻1 核對。",
@@ -553,12 +553,12 @@
         {
           "page": 24,
           "hex": "姤",
-          "note": "上九、九五、九四三欄嘅四月同九月卦互調(九三欄無誤),依 p. 39 規則四月應為離、需、解。"
+          "note": "上九、九五、九四三欄嘅四月同九月卦互調(九三欄無誤),依 p. 39 規則四月應為離、需、解。GGZBCK405 明刻本(PDF p. 213)同樣互調,屬傳本共有之誤;引擎依規則。"
         },
         {
           "page": 8,
           "hex": "否",
-          "note": "上九欄十二月印「損」,依規則(十一月泰變上爻之應三爻)應為臨。"
+          "note": "上九欄十二月印「損」,依規則(十一月泰變上爻之應三爻)應為臨。GGZBCK405 明刻本(PDF p. 208)該字似作「臨」(墨跡模糊),即石印本翻刻之誤。"
         }
       ]
     }
@@ -665,7 +665,7 @@
         "臨"
       ]
     },
-    "erratum": "歌末句印「小寒季冬遯與謙」,遯已見於小暑,按六十卦各一應作屯。「恒節同人損否臨」之臨為押韻動詞,非卦(臨屬小寒)。小暑歌作「鼎與渙豐」,候卦定局以渙起大暑,序依候卦作鼎豐渙。"
+    "erratum": "歌末句印「小寒季冬遯與謙」,遯已見於小暑,按六十卦各一應作屯。「恒節同人損否臨」之臨為押韻動詞,非卦(臨屬小寒)。小暑歌作「鼎與渙豐」,候卦定局以渙起大暑,序依候卦作鼎豐渙。 故宮珍本叢刊影明史應選重訂本(GGZBCK405,PDF p. 20)亦作「遯」,屬傳本共有之誤。"
   },
   "examples": [
     {
