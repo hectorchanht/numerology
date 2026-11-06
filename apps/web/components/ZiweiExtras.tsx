@@ -18,7 +18,13 @@ export function ZiweiExtras({
   const { t } = useLocale();
   const { z, zT } = useScript();
   const [star, setStar] = useState<string | null>(null);
-  const fx = useMemo(() => castZiweiFeixing(input), [input]);
+  const fx = useMemo(() => {
+    try {
+      return castZiweiFeixing(input);
+    } catch {
+      return null; // 輸入超出可排範圍:飛星派段落唔顯示,唔好令成頁崩
+    }
+  }, [input]);
   const entry = ZIWEI_STARS.find((s) => s.name === star);
 
   return (
@@ -56,7 +62,7 @@ export function ZiweiExtras({
         </div>
       ) : <p className="note">{t("ziwei.overlap.none")}</p>}
 
-      <details style={{ marginTop: 16 }}>
+      {fx ? <details style={{ marginTop: 16 }}>
         <summary className="group-title">{t("ziwei.feixing.summary")}</summary>
         <h3 className="note"><b>{t("ziwei.feixing.jiaochi")}</b></h3>
         <p className="note">
@@ -78,7 +84,7 @@ export function ZiweiExtras({
             </li>
           ))}
         </ul>
-      </details>
+      </details> : null}
 
       <h2 className="group-title">{t("ziwei.star.title")}</h2>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
