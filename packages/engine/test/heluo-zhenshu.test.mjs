@@ -154,3 +154,26 @@ test("卷下伊川僕例:乾九四,十九歲流年仍乾", () => {
   assert.deepEqual([r.heaven, r.xiantian.name, r.yuantang], [c.heaven, c.xiantian, c.yuantang]);
   assert.equal(r.liunian.find((y) => y.age === c.age).hex.name, c.liunian);
 });
+
+test("易卦釋義宮世月:合京房八宮同世爻月建,萃卦三世為刻誤", () => {
+  const T = { 乾: "111", 兌: "110", 離: "101", 震: "100", 巽: "011", 坎: "010", 艮: "001", 坤: "000" }; // 由下而上
+  const CN = ["", "一", "二", "三", "四", "五", "六"];
+  const PAL = {};
+  for (const [p, t] of Object.entries(T)) {
+    let b = [...t + t].map(Number);
+    PAL[b.join("")] = [p, 6];
+    for (let i = 0; i < 5; i++) (b = b.slice()), (b[i] ^= 1), (PAL[b.join("")] = [p, i + 1]);
+    b = b.slice(); b[3] ^= 1; PAL[b.join("")] = [p, 4]; // 遊魂
+    PAL[[...t].map(Number).concat(b.slice(3)).join("")] = [p, 3]; // 歸魂
+  }
+  const items = D.shiyi.palace.items;
+  assert.equal(items.length, 53);
+  for (const c of items) {
+    const b = bitsOf(c.hex.replace("无", "無"));
+    const [p, s] = PAL[b.join("")];
+    assert.equal(c.palace, p, c.hex);
+    if (!c.erratum) assert.equal(c.shi, CN[s], c.hex);
+    // 陽世由子月(十一月)、陰世由午月(五月)起初爻
+    if (c.month) assert.equal(c.month, b[s - 1] ? ((9 + s) % 12) + 1 : ((3 + s) % 12) + 1, c.hex);
+  }
+});

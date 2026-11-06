@@ -1,8 +1,8 @@
 {
  "meta": {
   "name": "《河洛真數》起例:同《河洛理數》卷一對校、異說同新規則",
-  "schema": "cases[]:{name,page,pillars,date,heaven?,earth?,xiantian,houtian,engine} ; yuantang ; pure ; huagong ; dayHex ; hourHex ; youNian ; wangFei ; siTi ; duiFan ; renYuanqi ; errata",
-  "source": "題(宋)陳摶、邵雍《河洛真數》,北京大學圖書館藏刻本十冊(archive.org 02094383.cn–02094392.cn,公有領域)。第一冊「陳圖南先生河洛真數起例卷之上」,序署萬曆辛卯(1591),潁川後學李學詩校正,早於文明本所據崇禎壬申(1632)陳仁錫本。raw_pdf/河洛真數/河洛真數1.pdf,MinerU doc:9c5c7c7;page = PDF 頁。 第二冊為起例卷之中(raw_pdf/河洛真數/河洛真數2.pdf,MinerU doc:fc0a22d),即文明本卷一論篇(pp. 45–96)嘅另一傳本;volume 2 各條加 vol: 2。 第三冊為起例卷之下(raw_pdf/河洛真數/河洛真數3.pdf,MinerU doc:7a08293),各條加 vol: 3。",
+  "schema": "cases[]:{name,page,pillars,date,heaven?,earth?,xiantian,houtian,engine} ; yuantang ; pure ; huagong ; dayHex ; hourHex ; youNian ; wangFei ; siTi ; duiFan ; renYuanqi ; errata ; shiyi:{volumes,palace:{rule,items[]:{vol,page,hex,palace,shi,month?}}} ; shiduan:{volumes,note}",
+  "source": "題(宋)陳摶、邵雍《河洛真數》,北京大學圖書館藏刻本十冊(archive.org 02094383.cn–02094392.cn,公有領域)。第一冊「陳圖南先生河洛真數起例卷之上」,序署萬曆辛卯(1591),潁川後學李學詩校正,早於文明本所據崇禎壬申(1632)陳仁錫本。raw_pdf/河洛真數/河洛真數1.pdf,MinerU doc:9c5c7c7;page = PDF 頁。 第二冊為起例卷之中(raw_pdf/河洛真數/河洛真數2.pdf,MinerU doc:fc0a22d),即文明本卷一論篇(pp. 45–96)嘅另一傳本;volume 2 各條加 vol: 2。 第三冊為起例卷之下(raw_pdf/河洛真數/河洛真數3.pdf,MinerU doc:7a08293),各條加 vol: 3。 第四至八冊為「陳邵二先生河洛真數易卦釋義」上經上下、下經上中下(MinerU doc:7ec473e、f3e0e8b、3b60d8e、7aab1c1、fd0caa9);第九、十冊為「陳圖南先生河洛真數詩斷秘訣」卷上下(doc:6f03ee1、751bbc1),卷末李學詩序署萬曆壬辰(1592)。",
   "version": "0.1.0",
   "reviewed": false,
   "reviewNote": "只錄規則、表同算例。真數同文明本有幾條真實規則差異(元堂寄位、乾坤純卦元堂、化工時段、化工反、日卦),本站引擎照舊跟《河洛理數》卷一,真數各條作異說記錄,測試以真數自己嘅推法重算書例。date 為四柱相同嘅現代日子,性別按書作男。"
@@ -925,5 +925,493 @@
     "note": "交十九則上九不變:陽爻陽年本爻不變,合 heluoYears"
    }
   ]
+ },
+ "shiyi": {
+  "volumes": [
+   {
+    "vol": 4,
+    "title": "易卦釋義上經卷之上",
+    "range": [
+     "乾",
+     "隨"
+    ]
+   },
+   {
+    "vol": 5,
+    "title": "易卦釋義上經卷之下",
+    "range": [
+     "蠱",
+     "離"
+    ]
+   },
+   {
+    "vol": 6,
+    "title": "易卦釋義下經卷之上",
+    "range": [
+     "咸",
+     "益"
+    ]
+   },
+   {
+    "vol": 7,
+    "title": "易卦釋義下經中卷",
+    "range": [
+     "夬",
+     "漸"
+    ]
+   },
+   {
+    "vol": 8,
+    "title": "易卦釋義下經卷之下",
+    "range": [
+     "歸妹",
+     "未濟"
+    ]
+   }
+  ],
+  "note": "每卦先列卦辭、大象,次釋義,再列京房八宮宮世、卦氣月、納甲、得時,後附「邵曰」;每爻列爻辭、小象、釋義,分「數卦叶吉」「數卦不叶」同「歲運逢之」,即文明本卷二卦註、爻斷所本,文字較詳。本站卷二已入庫(heluo-shiduan.json),此五冊只抽查,未逐字對校。",
+  "palace": {
+   "rule": "「某宮某世卦屬某月」:宮同世按京房八宮;遊魂記作四世、歸魂記作三世(即世爻所在);月按世爻月建,陽世由子月(十一月)起初爻順數,陰世由午月(五月)起初爻順數。乾、坤等本宮卦作「卦氣屬某月」,世在上爻。",
+   "items": [
+    {
+     "vol": 4,
+     "page": 25,
+     "hex": "屯",
+     "palace": "坎",
+     "shi": "二",
+     "note": "OCR 作「仁世」,月份字糊;按卦序取二世。"
+    },
+    {
+     "vol": 4,
+     "page": 33,
+     "hex": "蒙",
+     "palace": "離",
+     "shi": "四",
+     "month": 8
+    },
+    {
+     "vol": 4,
+     "page": 43,
+     "hex": "需",
+     "palace": "坤",
+     "shi": "四",
+     "month": 8
+    },
+    {
+     "vol": 4,
+     "page": 52,
+     "hex": "訟",
+     "palace": "離",
+     "shi": "四",
+     "month": 2
+    },
+    {
+     "vol": 4,
+     "page": 62,
+     "hex": "師",
+     "palace": "坎",
+     "shi": "三",
+     "month": 7
+    },
+    {
+     "vol": 4,
+     "page": 70,
+     "hex": "比",
+     "palace": "坤",
+     "shi": "三",
+     "month": 7
+    },
+    {
+     "vol": 4,
+     "page": 79,
+     "hex": "小畜",
+     "palace": "巽",
+     "shi": "一",
+     "month": 11
+    },
+    {
+     "vol": 4,
+     "page": 87,
+     "hex": "履",
+     "palace": "艮",
+     "shi": "五",
+     "month": 3
+    },
+    {
+     "vol": 4,
+     "page": 104,
+     "hex": "否",
+     "palace": "乾",
+     "shi": "三",
+     "month": 7
+    },
+    {
+     "vol": 4,
+     "page": 113,
+     "hex": "同人",
+     "palace": "離",
+     "shi": "三",
+     "month": 1
+    },
+    {
+     "vol": 4,
+     "page": 122,
+     "hex": "大有",
+     "palace": "乾",
+     "shi": "三",
+     "month": 1
+    },
+    {
+     "vol": 4,
+     "page": 131,
+     "hex": "謙",
+     "palace": "兌",
+     "shi": "五"
+    },
+    {
+     "vol": 4,
+     "page": 150,
+     "hex": "隨",
+     "palace": "震",
+     "shi": "三",
+     "month": 7
+    },
+    {
+     "vol": 5,
+     "page": 3,
+     "hex": "蠱",
+     "palace": "巽",
+     "shi": "三",
+     "month": 1
+    },
+    {
+     "vol": 5,
+     "page": 12,
+     "hex": "臨",
+     "palace": "坤",
+     "shi": "二",
+     "month": 12
+    },
+    {
+     "vol": 5,
+     "page": 21,
+     "hex": "觀",
+     "palace": "乾",
+     "shi": "四",
+     "month": 8
+    },
+    {
+     "vol": 5,
+     "page": 29,
+     "hex": "噬嗑",
+     "palace": "巽",
+     "shi": "五",
+     "month": 9
+    },
+    {
+     "vol": 5,
+     "page": 39,
+     "hex": "賁",
+     "palace": "艮",
+     "shi": "一"
+    },
+    {
+     "vol": 5,
+     "page": 50,
+     "hex": "剝",
+     "palace": "乾",
+     "shi": "五",
+     "note": "OCR 作「斂宮」,按卦序取乾宮。"
+    },
+    {
+     "vol": 5,
+     "page": 61,
+     "hex": "復",
+     "palace": "坤",
+     "shi": "一",
+     "month": 11
+    },
+    {
+     "vol": 5,
+     "page": 72,
+     "hex": "无妄",
+     "palace": "巽",
+     "shi": "四"
+    },
+    {
+     "vol": 5,
+     "page": 82,
+     "hex": "大畜",
+     "palace": "艮",
+     "shi": "二",
+     "month": 12
+    },
+    {
+     "vol": 5,
+     "page": 93,
+     "hex": "頤",
+     "palace": "巽",
+     "shi": "四",
+     "month": 8
+    },
+    {
+     "vol": 6,
+     "page": 3,
+     "hex": "咸",
+     "palace": "兌",
+     "shi": "三",
+     "month": 1
+    },
+    {
+     "vol": 6,
+     "page": 13,
+     "hex": "恆",
+     "palace": "震",
+     "shi": "三"
+    },
+    {
+     "vol": 6,
+     "page": 24,
+     "hex": "遯",
+     "palace": "乾",
+     "shi": "二",
+     "month": 6
+    },
+    {
+     "vol": 6,
+     "page": 35,
+     "hex": "大壯",
+     "palace": "坤",
+     "shi": "四",
+     "month": 2
+    },
+    {
+     "vol": 6,
+     "page": 45,
+     "hex": "晉",
+     "palace": "乾",
+     "shi": "四",
+     "month": 2
+    },
+    {
+     "vol": 6,
+     "page": 57,
+     "hex": "明夷",
+     "palace": "坎",
+     "shi": "四"
+    },
+    {
+     "vol": 6,
+     "page": 69,
+     "hex": "家人",
+     "palace": "巽",
+     "shi": "二",
+     "month": 6
+    },
+    {
+     "vol": 6,
+     "page": 80,
+     "hex": "睽",
+     "palace": "艮",
+     "shi": "四",
+     "month": 2
+    },
+    {
+     "vol": 6,
+     "page": 92,
+     "hex": "蹇",
+     "palace": "兌",
+     "shi": "四",
+     "month": 8
+    },
+    {
+     "vol": 6,
+     "page": 103,
+     "hex": "解",
+     "palace": "震",
+     "shi": "二",
+     "month": 12
+    },
+    {
+     "vol": 6,
+     "page": 127,
+     "hex": "益",
+     "palace": "巽",
+     "shi": "三"
+    },
+    {
+     "vol": 7,
+     "page": 3,
+     "hex": "夬",
+     "palace": "坤",
+     "shi": "五",
+     "month": 3
+    },
+    {
+     "vol": 7,
+     "page": 14,
+     "hex": "姤",
+     "palace": "乾",
+     "shi": "一",
+     "month": 5
+    },
+    {
+     "vol": 7,
+     "page": 26,
+     "hex": "萃",
+     "palace": "兌",
+     "shi": "三",
+     "month": 6,
+     "erratum": "書作三世(已核原圖);萃為兌宮二世,所列六月亦合二世。"
+    },
+    {
+     "vol": 7,
+     "page": 38,
+     "hex": "升",
+     "palace": "震",
+     "shi": "四",
+     "month": 8
+    },
+    {
+     "vol": 7,
+     "page": 49,
+     "hex": "困",
+     "palace": "兌",
+     "shi": "一",
+     "month": 5
+    },
+    {
+     "vol": 7,
+     "page": 60,
+     "hex": "井",
+     "palace": "震",
+     "shi": "五"
+    },
+    {
+     "vol": 7,
+     "page": 70,
+     "hex": "革",
+     "palace": "坎",
+     "shi": "四"
+    },
+    {
+     "vol": 7,
+     "page": 92,
+     "hex": "震",
+     "palace": "震",
+     "shi": "六",
+     "month": 10,
+     "note": "OCR 只見「屬十」。"
+    },
+    {
+     "vol": 7,
+     "page": 103,
+     "hex": "艮",
+     "palace": "艮",
+     "shi": "六",
+     "month": 4
+    },
+    {
+     "vol": 7,
+     "page": 113,
+     "hex": "漸",
+     "palace": "艮",
+     "shi": "三",
+     "month": 1
+    },
+    {
+     "vol": 8,
+     "page": 3,
+     "hex": "歸妹",
+     "palace": "兌",
+     "shi": "三",
+     "month": 7
+    },
+    {
+     "vol": 8,
+     "page": 14,
+     "hex": "豐",
+     "palace": "坎",
+     "shi": "五",
+     "month": 9
+    },
+    {
+     "vol": 8,
+     "page": 25,
+     "hex": "旅",
+     "palace": "離",
+     "shi": "一"
+    },
+    {
+     "vol": 8,
+     "page": 60,
+     "hex": "渙",
+     "palace": "離",
+     "shi": "五",
+     "month": 3
+    },
+    {
+     "vol": 8,
+     "page": 73,
+     "hex": "節",
+     "palace": "坎",
+     "shi": "一",
+     "month": 11
+    },
+    {
+     "vol": 8,
+     "page": 85,
+     "hex": "中孚",
+     "palace": "艮",
+     "shi": "四",
+     "month": 8
+    },
+    {
+     "vol": 8,
+     "page": 98,
+     "hex": "小過",
+     "palace": "兌",
+     "shi": "四",
+     "month": 2
+    },
+    {
+     "vol": 8,
+     "page": 111,
+     "hex": "既濟",
+     "palace": "坎",
+     "shi": "三",
+     "month": 1
+    },
+    {
+     "vol": 8,
+     "page": 124,
+     "hex": "未濟",
+     "palace": "離",
+     "shi": "三",
+     "month": 7
+    }
+   ]
+  }
+ },
+ "shiduan": {
+  "volumes": [
+   {
+    "vol": 9,
+    "title": "詩斷秘訣卷之上",
+    "range": [
+     "乾",
+     "離"
+    ]
+   },
+   {
+    "vol": 10,
+    "title": "詩斷秘訣卷之下",
+    "range": [
+     "咸",
+     "未濟"
+    ]
+   }
+  ],
+  "note": "每卦先列「五陽」「五陰」兩首總詩,再逐爻列詩,間附「詞曰」。抽查乾卦:兩首總詩同文明本卷三乾卦第二、三首相同,初九「陽氣方生」及「玉韞石」兩首亦同,另多一首「紫砂門闌」。即卷三詩訣所本而首數較多;OCR 錯字多,未入庫。"
  }
 }
