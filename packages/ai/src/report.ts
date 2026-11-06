@@ -1,4 +1,4 @@
-import { castBirthLore, castCrossSystem, castEgyptian, castEphemeris, castJyotish, castMetonic, castNumberLore, castHeluo, castQizheng, castHuangji, castLiuren, castMaya, castPlanetaryHour, castTaixuan, type ChartResult, type FortuneAnalysis } from "@numerology/engine";
+import { castBirthLore, castCrossSystem, castEgyptian, castEphemeris, castJyotish, castMetonic, castNumberLore, castHeluo, heluoJinsuoLuck, castQizheng, castHuangji, castLiuren, castMaya, castPlanetaryHour, castTaixuan, type ChartResult, type FortuneAnalysis } from "@numerology/engine";
 import { buildContextPack, crossSystemFacts, type FortuneScope } from "./context.js";
 import {
   buildReportUserPrompt,
@@ -194,6 +194,7 @@ export function streamReportSection(chart: ChartResult, sectionKey: string, opts
   const locale = opts.locale ?? "zht";
   // 多體系事實只進本節 user prompt,system 不變(prompt cache 照常命中)。
   const sky = seg.key === "crosssystem" ? castEphemeris(chart.input) : undefined;
+  const heluo = sky ? castHeluo(chart.input) : undefined;
   const facts = sky
     ? crossSystemFacts(castCrossSystem(chart), locale, {
         taixuan: castTaixuan(chart.input),
@@ -201,7 +202,8 @@ export function streamReportSection(chart: ChartResult, sectionKey: string, opts
         huangji: castHuangji(chart.input),
         planetaryHour: castPlanetaryHour(chart.input),
         ephemeris: sky,
-        heluo: castHeluo(chart.input),
+        heluo,
+        heluoLuck: heluoJinsuoLuck(heluo!, chart.bazi.daYun, new Date().getFullYear()),
         qizheng: castQizheng(chart.input),
         lore: { numbers: castNumberLore(chart), birth: castBirthLore(chart, sky) },
         calendars: { jyotish: castJyotish(sky), egyptian: castEgyptian(chart.input, sky), metonic: castMetonic(chart.input) },

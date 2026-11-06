@@ -4,7 +4,7 @@ import {
   HELUO_STEM_NUMBER, HELUO_UPPER_ANCHOR, HELUO_YUANQI, HELUO_ZHIZUN, JINSUO, TIANGAN, DIZHI,
   type Cite, type TrigramName,
 } from "@numerology/knowledge";
-import type { BirthInput } from "./types.js";
+import type { BirthInput, DaYunStep } from "./types.js";
 import { resolveBirthDateTime } from "./solartime.js";
 
 export interface HeluoHex {
@@ -111,11 +111,52 @@ const up = (line: number, k: number) => ((line - 1 + k) % 6) + 1;
  * 金鎖銀匙(GGZBCK405 卷六 pp. 218–225):二千為基;日支順數至時支(兩頭計,同支作 13)乘百;
  * 加日支、時支序數(子 1);納音水火加 27、土加 50;再加部數。逆數百位以 14 − 順數代。
  */
-export function heluoJinsuo(pillars: readonly string[], nayin: NayinWx): HeluoJinsuo {
-  const d = BRANCH.indexOf(pillars[2]![1]!), h = BRANCH.indexOf(pillars[3]![1]!);
+function jinsuoOf(dayBranch: string, hourBranch: string, nayin: NayinWx): HeluoJinsuo {
+  const d = BRANCH.indexOf(dayBranch), h = BRANCH.indexOf(hourBranch);
   const count = d === h ? 13 : mod(h - d, 12) + 1;
   const rest = JINSUO.base + d + 1 + h + 1 + JINSUO.nayinAdd[nayin] + JINSUO.buNumber[nayin];
   return { nayin, count, forward: rest + count * 100, reverse: rest + (14 - count) * 100 };
+}
+
+export function heluoJinsuo(pillars: readonly string[], nayin: NayinWx): HeluoJinsuo {
+  return jinsuoOf(pillars[2]![1]!, pillars[3]![1]!, nayin);
+}
+
+export interface JinsuoYun extends HeluoJinsuo {
+  ganZhi: string;
+  startYear: number;
+  endYear: number;
+}
+
+export interface JinsuoLuck {
+  /** 大運:運支代時支,日支不變 */
+  yun: JinsuoYun[];
+  /** 流年:運支代日、太歲支代時;未交大運則為 null */
+  year: (HeluoJinsuo & { year: number; taisui: string; yun: string }) | null;
+  steps: string[];
+}
+
+/**
+ * 金鎖銀匙行運(卷六 p. 218 起大運例、起流年例,p. 225 註):大運「將八字時支棄去不用,以大運地支逐運對日地支算」;
+ * 流年「不用日時地支,只將流年太歲地支與大運地支」依法推算。千位、納音、部數同本命。
+ * 流年以運支居日位、太歲居時位,屬本站讀法(註文未明言先後)。
+ */
+export function heluoJinsuoLuck(heluo: HeluoResult, daYun: readonly DaYunStep[], year: number): JinsuoLuck {
+  const nayin = heluo.jinsuo.nayin, day = heluo.pillars[2][1]!;
+  const yun = daYun.filter((d) => d.ganZhi).map((d) => ({
+    ...jinsuoOf(day, d.ganZhi[1]!, nayin),
+    ganZhi: d.ganZhi, startYear: d.startYear, endYear: d.startYear + d.endAge - d.startAge,
+  }));
+  const cur = yun.find((y) => y.startYear <= year && year <= y.endYear);
+  const taisui = DIZHI[mod(year - 4, 12)]!;
+  const flow = cur ? { ...jinsuoOf(cur.ganZhi[1]!, taisui, nayin), year, taisui, yun: cur.ganZhi } : null;
+  const steps = [
+    `大運:棄時支,以各運地支代時支,由日支 ${day} 順數至運支,餘同本命(納音屬${nayin})。`,
+    flow
+      ? `${year} 年流年:不用日時支,以大運 ${flow.yun} 之 ${flow.yun[1]} 居日位、太歲 ${taisui} 居時位,${flow.count === 13 ? "同支作 13" : `兩頭計得 ${flow.count}`},順數 ${flow.forward}、逆數 ${flow.reverse}。`
+      : `${year} 年未交大運,流年無運支可代,不取數。`,
+  ];
+  return { yun, year: flow, steps };
 }
 
 const XIANG = Object.keys(GUANGXIANG.values) as Xiang[];

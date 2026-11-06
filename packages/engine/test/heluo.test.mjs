@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { allHexagrams, GUANGXIANG } from "@numerology/knowledge";
-import { castHeluo, heluoReduce, heluoYears, heluoMonths, heluoDays, heluoJinsuo, heluoGuangxiang } from "../dist/index.js";
+import { castHeluo, heluoReduce, heluoYears, heluoMonths, heluoDays, heluoJinsuo, heluoJinsuoLuck, heluoGuangxiang, castChart } from "../dist/index.js";
 
 // 書中算例(河洛理數卷一 pp. 22–23、31、82–83),揀四柱相同嘅現代日期重算。
 const cast = (year, month, day, hour, gender = "男") => castHeluo({ year, month, day, hour, gender });
@@ -196,4 +196,27 @@ test("castHeluo 帶金鎖銀匙同廣象徹微,年柱納音取自八字", () => 
   assert.equal(r.jinsuo.nayin, "金");
   assert.deepEqual(r.jinsuo, heluoJinsuo(r.pillars, "金"));
   assert.equal(r.guangxiang.branch.product, heluoGuangxiang(r.pillars).branch.product);
+});
+
+test("金鎖銀匙行運:大運以運支代時支,流年以運支、太歲支代日時", () => {
+  const heluo = { pillars: ["乙卯", "戊子", "壬戌", "壬寅"], jinsuo: heluoJinsuo(["乙卯", "戊子", "壬戌", "壬寅"], "水") };
+  const daYun = [
+    { ganZhi: "", startAge: 1, endAge: 2, startYear: 1975 },
+    { ganZhi: "己丑", startAge: 3, endAge: 12, startYear: 1977 },
+    { ganZhi: "庚寅", startAge: 13, endAge: 22, startYear: 1987 },
+  ];
+  const r = heluoJinsuoLuck(heluo, daYun, 1980);
+  assert.equal(r.yun.length, 2);
+  // 戌數至丑 4 位:2000 + 400 + 戌 11 + 丑 2 + 水 27 + 部 1
+  assert.deepEqual([r.yun[0].count, r.yun[0].forward, r.yun[0].reverse, r.yun[0].endYear], [4, 2441, 3041, 1986]);
+  // 1980 庚申:丑數至申 8 位:2000 + 800 + 丑 2 + 申 9 + 27 + 1
+  assert.deepEqual([r.year.taisui, r.year.yun, r.year.count, r.year.forward, r.year.reverse], ["申", "己丑", 8, 2839, 2639]);
+  assert.equal(heluoJinsuoLuck(heluo, daYun, 1975).year, null);
+});
+
+test("金鎖銀匙行運接八字大運", () => {
+  const chart = castChart({ year: 1990, month: 1, day: 15, hour: 10, gender: "女" });
+  const r = heluoJinsuoLuck(castHeluo(chart.input), chart.bazi.daYun, 2026);
+  assert.equal(r.yun.length, chart.bazi.daYun.filter((d) => d.ganZhi).length);
+  assert.ok(r.year && r.year.taisui === "午");
 });
