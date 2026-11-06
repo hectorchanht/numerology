@@ -103,3 +103,21 @@ test("王陽明天 8 地 42", () => {
   assert.deepEqual(r.pillars, w.pillars);
   assert.deepEqual([r.heaven, r.earth], [w.heaven, w.earth]);
 });
+
+test("卷中四例:先天、元堂、後天同書合;屯例只屬陽偏", async () => {
+  const { heluoClasses } = await import("../dist/index.js");
+  for (const c of D.juanZhong.cases.items) {
+    const [y, m, d, h] = c.date;
+    const input = { year: y, month: m, day: d, hour: h, gender: "男" };
+    const r = castHeluo(input);
+    assert.deepEqual(r.pillars, c.pillars, c.name);
+    assert.deepEqual([r.heaven, r.earth, r.xiantian.name, r.yuantang], [c.heaven, c.earth, c.xiantian, c.yuantang], c.name);
+    if (c.houtian) assert.equal(r.houtian.name, c.houtian, c.name);
+    if (c.houtianAge) assert.equal(r.houtianAge, c.houtianAge, c.name);
+    if (c.patterns) assert.deepEqual(heluoClasses(r, input).patterns, c.patterns, c.name);
+  }
+});
+
+test("卷中祿數即四象策數", () => {
+  assert.deepEqual(Object.values(D.juanZhong.luShu.values), [4 * 9, 4 * 7, 4 * 6, 4 * 8]);
+});
