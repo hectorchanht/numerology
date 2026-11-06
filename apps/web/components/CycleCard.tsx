@@ -292,11 +292,12 @@ function Qizheng({ r }: { r: QizhengResult }) {
       <h3 className="xs-h">{t("cycle.qizheng")}</h3>
       <p className="xs-note">{t("cycle.qizhengIntro")}</p>
       <Meta tier={r.tier} basis="cycle.basis.clock" cite={r.cite} />
+      <p className="cy-val">{t("cycle.qzMing", { zhi: z(r.minggong.zhi), ci: z(r.minggong.ci), sun: z(r.minggong.sunZhi), hour: z(r.minggong.hourZhi) })}</p>
       <div className="bazi-detail-wrap">
         <table className="bazi-detail cy-sky">
           <thead>
             <tr>
-              {(["cycle.qzColName", "cycle.qzColLon", "cycle.qzColAnc", "cycle.qzColMod"] as const).map((k) => <th key={k} className="colhead">{t(k)}</th>)}
+              {(["cycle.qzColName", "cycle.qzColLon", "cycle.qzColAnc", "cycle.qzColMod", "cycle.qzColGong"] as const).map((k) => <th key={k} className="colhead">{t(k)}</th>)}
             </tr>
           </thead>
           <tbody>
@@ -306,6 +307,7 @@ function Qizheng({ r }: { r: QizhengResult }) {
                 <td>{dms(b.longitude)}{b.retrograde ? ` ${t(b.kind === "政" ? "cycle.retro" : "cycle.qzAlwaysRetro")}` : ""}</td>
                 <td>{z(b.ancient.name)} {dms(b.ancient.degree)}</td>
                 <td>{z(b.mansion.name)} {dms(b.mansion.degree)}</td>
+                <td>{z(`${b.gong.zhi} ${b.gong.ci}`)} · {z(b.house)}</td>
               </tr>
             ))}
           </tbody>

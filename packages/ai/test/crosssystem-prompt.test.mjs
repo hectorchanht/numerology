@@ -157,6 +157,8 @@ test("crossSystemFacts:附七政四餘宿度同羅計分歧", () => {
   assert.ok(f.includes("七政四餘") && f.includes("推步捷例") && f.includes("流派公式"));
   const sun = qizheng.bodies.find((b) => b.id === "Sun");
   assert.ok(f.includes(`古宿度 ${sun.ancient.name}宿`));
+  assert.ok(f.includes(`${sun.gong.zhi}宮${sun.gong.ci}`));
+  assert.ok(f.includes(`命宮在${qizheng.minggong.zhi}`) && f.includes("曆象考成") && f.includes("恆逆"));
 });
 
 test("crosssystem 指令:太玄與瑪雅只作週期定位", () => {

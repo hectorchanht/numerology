@@ -67,3 +67,9 @@ test("與 YIJING_GLOSSARY 無 term 碰撞(合併時 yijing 優先有定義可循
   const dupes = MINGLI_GLOSSARY.filter((g) => yj.has(g.term)).map((g) => g.term);
   assert.deepEqual(dupes, [], `碰撞: ${dupes.join(",")}`);
 });
+
+test("七政四餘術語齊全(含十二次、安命)", () => {
+  for (const t of ["七政", "四餘", "宿度", "距星", "十二次", "安命"]) {
+    assert.ok(MINGLI_GLOSSARY.some((g) => g.term === t), `缺 ${t}`);
+  }
+});

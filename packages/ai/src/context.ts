@@ -427,9 +427,9 @@ ${step(hl.steps)}`;
     }
     const qz = cycles.qizheng;
     if (qz) {
-      const rows = qz.bodies.map((b) => `${b.name}(${b.kind === "政" ? "七政" : "四餘推算點"}${b.id === "ziqi" ? ",流派公式、無實象" : ""}) 黃經 ${b.longitude.toFixed(2)}° 古宿度 ${b.ancient.name}宿 ${b.ancient.degree.toFixed(1)} 度、現代宿度 ${b.mansion.name}宿 ${b.mansion.degree.toFixed(1)}°${b.retrograde && b.kind === "政" ? "(逆)" : ""}`).join(";");
+      const rows = qz.bodies.map((b) => `${b.name}(${b.kind === "政" ? "七政" : "四餘推算點"}${b.id === "ziqi" ? ",流派公式、無實象" : ""}) 黃經 ${b.longitude.toFixed(2)}° 古宿度 ${b.ancient.name}宿 ${b.ancient.degree.toFixed(1)} 度、現代宿度 ${b.mansion.name}宿 ${b.mansion.degree.toFixed(1)}°、${b.gong.zhi}宮${b.gong.ci}(${b.house})${b.retrograde ? (b.kind === "政" ? "(逆)" : "(恆逆)") : ""}`).join(";");
       cycleBlock += `
-- 七政四餘(回歸黃經;古宿度按《六壬大全》卷十一周天 365 度,現代宿度按距星歲差推算):${rows}。羅睺、計都、月孛、紫氣均為推算點、非實體天體;${qz.variants.join(";")}。層級 ${TIER_ZH[qz.tier]};出處 ${cite(qz.cite)}。
+- 七政四餘(回歸黃經;古宿度按《六壬大全》卷十一周天 365 度,現代宿度按距星歲差推算):${rows}。羅睺、計都、月孛、紫氣均為推算點、非實體天體,羅計恆逆行;${qz.variants.join(";")}。十二宮按《星學大成》卷一過宮度於古宿度上分界;命宮在${qz.minggong.zhi}宮${qz.minggong.ci}(太陽在${qz.minggong.sunZhi}宮加生時${qz.minggong.hourZhi},數至卯;鐘面時支,只定到宮),十二宮由命宮逆排:${qz.houses.map((h) => `${h.name}${h.zhi}`).join("、")}。層級 ${TIER_ZH[qz.tier]};出處 ${cite(qz.cite)}。
 ${step(qz.steps)}`;
     }
   }
