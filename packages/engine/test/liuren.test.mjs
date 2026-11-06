@@ -107,3 +107,37 @@ test("重課去重:甲子日子時戌將,二三課同為戌/子,上剋下只一�
   const s = r.sanChuan;
   assert.deepEqual([s.method, s.sub, s.chu, s.zhong, s.mo], ["zeike", "元首", "戌", "申", "午"]);
 });
+
+test("旬遁:書例遁干、旬空(xun.evidence)逐條推得", async () => {
+  const { liurenXun } = await import("../dist/index.js");
+  assert.ok(json.xun.evidence.length >= 4);
+  for (const e of json.xun.evidence) {
+    const x = liurenXun(e.day[0], e.day[1]);
+    if (e.dun) for (const [zhi, gan] of Object.entries(e.dun)) assert.equal(x.dun[zhi], gan, `${e.day} ${zhi}`);
+    if (e.kong) assert.deepEqual(x.kong, e.kong, e.day);
+  }
+  const x = liurenXun("甲", "子");
+  assert.equal(x.shou, "甲子");
+  assert.equal(x.dun["戌"], null);
+  assert.equal(x.dun["子"], "甲");
+  assert.equal(liurenXun("癸", "亥").shou, "甲寅");
+});
+
+test("三傳遁干同旬空;四課上神標旬空", () => {
+  const r = ke("甲子", "卯", "子"); // 三傳午卯子;甲子旬空戌亥
+  assert.deepEqual(r.xun, { shou: "甲子", kong: ["戌", "亥"] });
+  assert.deepEqual(r.chuan.map((c) => [c.zhi, c.dun, c.kong]), [["午", "庚", false], ["卯", "丁", false], ["子", "甲", false]]);
+  assert.deepEqual(r.keKong, r.ke.map((k) => k.up === "戌" || k.up === "亥"));
+  // 甲子日戌加子(戌時子將…)見書「乃是本旬之空」:戌為初傳時無遁干
+  const G = "甲乙丙丁戊己庚辛壬癸", Z = "子丑寅卯辰巳午未申酉戌亥";
+  let seen = 0;
+  for (let i = 0; i < 60; i++) for (const h of Z) for (const j of Z) {
+    const q = ke(G[i % 10] + Z[i % 12], h, j);
+    for (const c of q.chuan) {
+      assert.equal(c.kong, q.xun.kong.includes(c.zhi));
+      assert.equal(c.dun === null, c.kong);
+      if (c.kong) seen++;
+    }
+  }
+  assert.ok(seen > 0);
+});

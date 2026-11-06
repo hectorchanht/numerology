@@ -20,6 +20,12 @@ export interface LiurenResult {
   guiren: { zhi: string; daytime: boolean; forward: boolean };
   /** 天盤支 → 天將 */
   jiang: Record<string, string>;
+  /** 日干支所在旬:旬首、旬空兩支 */
+  xun: { shou: string; kong: [string, string] };
+  /** 三傳(初中末)逐支:遁干(旬空為 null)、是否旬空 */
+  chuan: { zhi: string; dun: string | null; kong: boolean }[];
+  /** 四課上神是否旬空(一課至四課) */
+  keKong: boolean[];
   steps: string[];
   tier: "classical";
   cite: { work: string; locator: string };
@@ -38,6 +44,14 @@ const yangZhi = (z: string) => zi(z) % 2 === 0;
 const MENG = "寅申巳亥", ZHONG = "子午卯酉";
 /** 井欄射神所在地盤支(卷05「丑日取巳上神、未日取亥上神」);返吟無剋只得丑未日(全表窮舉驗證) */
 const JINGLAN_SHE: Record<string, string> = { 丑: "巳", 未: "亥" };
+
+/** 旬遁(卷09「有遁旬中之干者」):旬首、旬空,及十二支遁干(旬空兩支十干不到,為 null) */
+export function liurenXun(dayGan: string, dayZhi: string): { shou: string; kong: [string, string]; dun: Record<string, string | null> } {
+  const start = zi(dayZhi) - G.indexOf(dayGan);
+  const dun: Record<string, string | null> = {};
+  for (let k = 0; k < 12; k++) dun[at12(start + k)] = k < 10 ? G[k]! : null;
+  return { shou: "甲" + at12(start), kong: [at12(start + 10), at12(start + 11)], dun };
+}
 
 type Cand = { shen: string; on: string };
 type Kind = "下賊上" | "上剋下";
@@ -154,6 +168,10 @@ export function castLiurenKe(p: { dayGan: string; dayZhi: string; hourZhi: strin
     }
   }
   steps.push(`三傳:${sc.chu} → ${sc.zhong} → ${sc.mo}`);
+  const xun = liurenXun(dayGan, dayZhi);
+  const chuan = [sc.chu, sc.zhong, sc.mo].map((z) => ({ zhi: z, dun: xun.dun[z]!, kong: xun.dun[z] === null }));
+  const keKong = kes.map((k) => xun.dun[k.up] === null);
+  steps.push(`旬遁:${dayGan}${dayZhi}在${xun.shou}旬,旬空 ${xun.kong.join("")};三傳遁干 ${chuan.map((c) => `${c.zhi}${c.dun ?? "(空亡)"}`).join("、")}`);
 
   const daytime = LIUREN_DAY_NIGHT.day.includes(hourZhi);
   const gz = LIUREN_GUIREN[dayGan]![daytime ? "day" : "night"];
@@ -168,7 +186,7 @@ export function castLiurenKe(p: { dayGan: string; dayZhi: string; hourZhi: strin
     yueJiang: { zhi: yueJiang, name: LIUREN_SHEN_NAME[yueJiang]! },
     tianPan, ke: kes, sanChuan: sc,
     guiren: { zhi: gz, daytime, forward },
-    jiang, steps, tier: "classical", cite: LIUREN_CITE,
+    jiang, xun: { shou: xun.shou, kong: xun.kong }, chuan, keKong, steps, tier: "classical", cite: LIUREN_CITE,
   };
 }
 

@@ -2,7 +2,7 @@
   "meta": {
     "tier": "classical",
     "name": "大六壬起課規則:月將、天地盤、寄宮、四課、九宗門三傳、天乙貴人、十二天將",
-    "schema": "cite ; yuejiang:{rule,cite,values,book} ; shenName:{cite,values} ; tianDiPan ; jigong:{cite,values} ; sike:{rule,tier,cite} ; guiren:{values:{干:{day,night}},evidence,note} ; dayNight:{day,night,tier} ; direction:{forward,backward,cite} ; jiang:{values,cite} ; methods:[{id,name,sub,cite,rule,modern?:[{tier,item,note}]}] ; xing ; shehai:{rule,steps,modern,workedCounts,cite} ; errata ; examples:[{id,juan,day,hour,jiang,bookName,quote,expected:{method,sub,chu,zhong,mo},bookSanChuan?,bookSource?,note?}]",
+    "schema": "cite ; yuejiang:{rule,cite,values,book} ; shenName:{cite,values} ; tianDiPan ; jigong:{cite,values} ; sike:{rule,tier,cite} ; guiren:{values:{干:{day,night}},evidence,note} ; dayNight:{day,night,tier} ; direction:{forward,backward,cite} ; jiang:{values,cite} ; methods:[{id,name,sub,cite,rule,modern?:[{tier,item,note}]}] ; xing ; xun:{rule,cite,cites,evidence} ; shehai:{rule,steps,modern,workedCounts,cite} ; errata ; examples:[{id,juan,day,hour,jiang,bookName,quote,expected:{method,sub,chu,zhong,mo},bookSanChuan?,bookSource?,note?}]",
     "source": "《六壬大全》十二卷,不著撰人,懷慶府推官郭載騋校,明刊;四庫全書本,維基文庫 https://zh.wikisource.org/wiki/六壬大全_(四庫全書本) 卷01–12 原文逐字核對。只錄起課規則同書中課例日辰、占時、月將,唔錄課體吉凶斷語。",
     "version": "0.1.0",
     "reviewed": false,
@@ -257,6 +257,26 @@
     ],
     "cite": "卷05「渉害俱深則取四孟上神發用」",
     "cites": ["卷05「渉害俱深無孟則取仲上神發用」", "卷05「剛日以日上先見神為用柔日取辰上先見神為用」"]
+  },
+  "xun": {
+    "rule": "旬遁:由日干支逆數至甲,得旬首;旬首甲所臨之支起,十干順配十支,是為各支遁干(如甲子旬丑遁乙、午遁庚)。旬首支前第十一、十二位兩支,十干不到,為旬空(空亡),無遁干。三傳各支取遁干;三傳、四課上神落旬空者標空亡。",
+    "cite": "卷09「有遁旬中之干者」",
+    "cites": [
+      "卷05「午上遁得庚金為官星」",
+      "卷09「戊辰日初傳丁卯」",
+      "卷03「甲子旬中河魁登明是孤辰寡宿」",
+      "卷03「又名空亡神也」",
+      "卷07「葢十干不到之地五行脱空之鄉」"
+    ],
+    "evidence": [
+      { "day": "甲子", "dun": { "午": "庚" }, "kong": ["戌", "亥"], "cite": "卷05「午上遁得庚金為官星」;卷09 甲子日戌加子「乃是本旬之空」" },
+      { "day": "己卯", "dun": { "丑": "丁", "子": "丙", "亥": "乙" }, "cite": "卷09 遁旬中之干:己卯日初傳丁丑、中傳丙子、末傳乙亥" },
+      { "day": "戊辰", "dun": { "卯": "丁", "寅": "丙", "丑": "乙" }, "cite": "卷09「戊辰日初傳丁卯」中傳丙寅末傳乙丑" },
+      { "day": "壬申", "dun": { "丑": "乙", "寅": "丙", "卯": "丁" }, "cite": "卷09 壬申日初傳乙丑、中傳丙寅、末傳丁卯" },
+      { "day": "甲戌", "kong": ["申", "酉"], "cite": "卷07「甲戌旬中用酉申」" },
+      { "day": "甲申", "kong": ["午", "未"], "cite": "卷09 甲子日午加申為末傳「外後旬之空亡」(甲申旬)" }
+    ],
+    "note": "書無逐步算式,只有旬中遁干、旬空之名及上列書例;本表以六十甲子次序推,書例逐條驗合。"
   },
   "errata": [
     { "juan": "卷02", "item": "月將 未", "note": "「夏至後日躔鶉」脫「首」字,未將當作鶉首。" },
