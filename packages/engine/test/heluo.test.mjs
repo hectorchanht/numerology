@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { allHexagrams } from "@numerology/knowledge";
+import { allHexagrams, GUANGXIANG } from "@numerology/knowledge";
 import { castHeluo, heluoReduce, heluoYears, heluoMonths, heluoDays, heluoJinsuo, heluoGuangxiang } from "../dist/index.js";
 
 // 書中算例(河洛理數卷一 pp. 22–23、31、82–83),揀四柱相同嘅現代日期重算。
@@ -188,6 +188,7 @@ test("廣象徹微:甲子年例支積 24、干積 16;256 卦 25 種數", () => {
   assert.deepEqual(r.stem, { xiang: ["元", "世", "元", "世"], product: 16 });
   assert.equal(Object.keys(r.dist).length, 25);
   assert.equal(Object.values(r.dist).reduce((a, b) => a + b, 0), 256);
+  for (const [k, v] of Object.entries(GUANGXIANG.counts.values)) assert.equal(r.dist[k], v, k);
 });
 
 test("castHeluo 帶金鎖銀匙同廣象徹微,年柱納音取自八字", () => {

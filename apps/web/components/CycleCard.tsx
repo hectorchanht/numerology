@@ -253,7 +253,7 @@ function Ggz({ r, solar }: { r: HeluoResult; solar: boolean }) {
             <g key={k}>
               <rect className={on ? "xs-fy-bar" : "xs-fy-track"} x={i * bw + 1} y={base - h} width={bw - 2} height={h} rx={1.5} />
               {on && (
-                <text className="cy-axis" x={i * bw + bw / 2} y={k === bp ? base + 8 : base + 21}>{k}</text>
+                <text className="cy-axis" x={i * bw + bw / 2} y={k === bp ? base + 8 : base + 21} fontSize={9} textAnchor={i === keys.length - 1 ? "end" : i === 0 ? "start" : "middle"}>{k}</text>
               )}
             </g>
           );

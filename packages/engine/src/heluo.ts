@@ -297,6 +297,11 @@ export function castHeluo(input: BirthInput): HeluoResult {
   const hgRev = earthDays ? HELUO_HUAGONG.earth.reverse : [period.reverse];
   const huagong = { trigrams: hg, has: hg.some((x) => both.includes(x)), reversed: hgRev.some((x) => both.includes(x)) };
 
+  const jinsuo = heluoJinsuo(pillars, ec.getYearNaYin().slice(-1) as NayinWx);
+  const guangxiang = heluoGuangxiang(pillars);
+  const [dz, hz] = [pillars[2][1]!, pillars[3][1]!];
+  const nyAdd = JINSUO.nayinAdd[jinsuo.nayin], bu = JINSUO.buNumber[jinsuo.nayin];
+
   const steps = [
     `八字 ${pillars.join(" ")}:天干取洛書數、地支取河圖生成數,單數合為天數 ${heaven},雙數合為地數 ${earth}。`,
     `天數 ${heaven}${heaven > 25 ? " 減 25" : ""}、地數 ${earth}${earth > 30 ? " 減 30" : ""},遇十不用 → 天 ${heavenNumber}、地 ${earthNumber}。`,
@@ -311,11 +316,11 @@ export function castHeluo(input: BirthInput): HeluoResult {
     `大運由元堂起陽爻九年、陰爻六年:先天行至 ${houtianAge - 1} 歲,${houtianAge} 歲換後天。`,
     "流年用小象:陰爻六年逐年由本爻向上各變一爻;陽爻九年,本爻(陽年不變、陰年即變)、應爻、本爻各一年,再向上逐爻變六年。",
     `元氣:年干 ${ys} 屬 ${stem}、年支 ${yb} 屬 ${branch};先後天卦${yuanqi.tian || yuanqi.di ? `有${[yuanqi.tian && "天元氣", yuanqi.di && "地元氣"].filter(Boolean).join("、")}` : "無元氣"}${yuanqi.reversed ? ",且逢元氣相反之卦" : ""}。`,
+    `金鎖銀匙:年柱納音屬${jinsuo.nayin};${dz}日數至${hz}時${jinsuo.count === 13 ? "同支作 13" : `兩頭計得 ${jinsuo.count}`};${JINSUO.base} + ${jinsuo.count}×100 + 日支 ${BRANCH.indexOf(dz) + 1} + 時支 ${BRANCH.indexOf(hz) + 1}${nyAdd ? ` + 納音 ${nyAdd}` : ""} + 部數 ${bu} = ${jinsuo.forward};逆數百位以 ${14 - jinsuo.count} 代,得 ${jinsuo.reverse}。`,
+    `廣象徹微:四柱支序除 4 之餘定 ${guangxiang.branch.xiang.join("")},積 ${guangxiang.branch.product};干序定 ${guangxiang.stem.xiang.join("")},積 ${guangxiang.stem.product}。`,
     `化工:生於${earthDays ? `${next4.name}前十八日土旺` : `${period.from}後${period.to}前`},化工屬 ${hg.join("、")};先後天卦${huagong.has ? "有化工" : "無化工"}${huagong.reversed ? ",且逢化工反" : ""}。`,
   ];
 
-  const jinsuo = heluoJinsuo(pillars, ec.getYearNaYin().slice(-1) as NayinWx);
-  const guangxiang = heluoGuangxiang(pillars);
 
   return {
     pillars, heaven, earth, heavenNumber, earthNumber, heavenTrigram, earthTrigram, yuan,

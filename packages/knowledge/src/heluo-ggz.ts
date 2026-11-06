@@ -15,4 +15,6 @@ export const JINSUO = DATA.jinsuoYinshi as unknown as {
 export const GUANGXIANG = DATA.guangxiang as unknown as {
   page: [number, number];
   values: Record<"元" | "會" | "運" | "世", number>;
+  /** 書中 p. 470 所列部分積數的卦數 */
+  counts: { page: number; values: Record<string, number> };
 };
