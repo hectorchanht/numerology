@@ -1,4 +1,4 @@
-import { castZiweiFeixing, castZiweiHoroscope, favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type GanzhiRelation, type FortuneAnalysis, type HeluoResult, type HuangjiResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult, type NumberLoreResult, type BirthLoreResult, type JyotishResult, type EgyptianResult, type MetonicResult } from "@numerology/engine";
+import { castZiweiFeixing, castZiweiHoroscope, favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type GanzhiRelation, type FortuneAnalysis, type HeluoResult, type HuangjiResult, type LiurenResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult, type NumberLoreResult, type BirthLoreResult, type JyotishResult, type EgyptianResult, type MetonicResult } from "@numerology/engine";
 import { Solar } from "lunar-javascript";
 import { SCIENCE_NOTES } from "@numerology/knowledge";
 import type { AiLocale } from "./prompts.js";
@@ -349,7 +349,7 @@ const VERDICT_ZH: Record<string, string> = { strong: "身強", weak: "身弱", n
 export function crossSystemFacts(
   r: CrossSystemResult,
   locale: AiLocale,
-  cycles?: { taixuan: TaixuanResult; maya: MayaResult; huangji?: HuangjiResult; planetaryHour?: PlanetaryHourResult | null; ephemeris?: EphemerisResult; heluo?: HeluoResult; lore?: { numbers: NumberLoreResult; birth: BirthLoreResult }; calendars?: { jyotish: JyotishResult; egyptian: EgyptianResult; metonic: MetonicResult } },
+  cycles?: { taixuan: TaixuanResult; maya: MayaResult; huangji?: HuangjiResult; planetaryHour?: PlanetaryHourResult | null; ephemeris?: EphemerisResult; heluo?: HeluoResult; lore?: { numbers: NumberLoreResult; birth: BirthLoreResult }; calendars?: { jyotish: JyotishResult; egyptian: EgyptianResult; metonic: MetonicResult }; liuren?: LiurenResult },
 ): string {
   const cite = (c: { work: string; author?: string; year?: number | string; locator?: string }) =>
     [c.author, c.work, c.year, c.locator].filter(Boolean).join(",");
@@ -464,6 +464,16 @@ ${items.join("\n")}
 - 埃及民用曆:Nabonassar 紀元第 ${eg.year} 年 ${eg.month} ${eg.day} 日;太陽在 ${eg.face.sign} 第 ${eg.face.index + 1} 個 face,主星 ${eg.face.ruler}。出處 ${cite(eg.cite)};face ${cite(eg.faceCite)}。
 - 十九年週期:金數 ${me.golden}、Gregorian epact ${me.epact};出生年復活節 ${me.easter.month} 月 ${me.easter.day} 日;農曆 ${me.lunarYear} 年起 19 年現行農曆實有閏月 ${me.leapCount} 個(四分曆章法 7 個)。出處 ${cite(me.cite)};${cite(me.chineseCite)}。
 ${jy.steps.map((x) => `  - ${x}`).join("\n")}`;
+  }
+  const lr = cycles?.liuren;
+  if (lr) {
+    const sc = lr.sanChuan;
+    const ke = lr.ke.map((k) => `${k.up}/${k.down}`).join("、");
+    cycleBlock += `
+
+## 大六壬(確定性計算;只列起課結果,不入五行比對)
+- 大六壬(出生時刻起課;日 ${lr.dayGanZhi}、占時 ${lr.hourZhi}):當令中氣 ${lr.zhongQi},月將 ${lr.yueJiang.zhi}(${lr.yueJiang.name});天地盤(地盤子→亥之天盤支)${lr.tianPan.join("")};四課(上/下)${ke};三傳 ${sc.chu}→${sc.zhong}→${sc.mo},課門 ${sc.method}${sc.sub ? `(${sc.sub})` : ""};天乙貴人 ${lr.guiren.zhi}(${lr.guiren.daytime ? "晝貴" : "夜貴"}、${lr.guiren.forward ? "順布" : "逆布"});天將落三傳:${[sc.chu, sc.zhong, sc.mo].map((z) => `${z}${lr.jiang[z]}`).join("、")}。層級 ${TIER_ZH[lr.tier]};出處 ${cite(lr.cite)}。
+${lr.steps.map((x) => `  - ${x}`).join("\n")}`;
   }
   return `# 多體系事實(確定性計算結果,勿改動數字)
 
