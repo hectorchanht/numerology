@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import {
-  castEphemeris, castHeluo, castHuangji, castLiuren, castMaya, castPlanetaryHour, castTaixuan, MAYA_META, TZOLKIN_DAY_NAMES,
+  castEphemeris, castHeluo, castHuangji, castLiuren, castMaya, castPlanetaryHour, castTaixuan, LIUREN_METHODS, MAYA_META, TZOLKIN_DAY_NAMES,
   type ChartResult, type EphemerisResult, type HeluoResult, type HuangjiResult, type LiurenResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult,
 } from "@numerology/engine";
 import { useLocale, useScript, type TKey } from "@/lib/i18n";
@@ -226,7 +226,7 @@ function Heluo({ r, solar }: { r: HeluoResult; solar: boolean }) {
   );
 }
 
-const LR_METHOD: Record<string, string> = { fuyin: "伏吟", fanyin: "返吟", bazhuan: "八專", zeike: "賊剋", biyong: "比用", shehai: "涉害", yaoke: "遙剋", maoxing: "昴星", biezhe: "別責" };
+const lrMethod = (id: string) => LIUREN_METHODS.find((m) => m.id === id)?.name ?? id;
 const pad = (n: number) => String(n).padStart(2, "0");
 const toLocalInput = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
@@ -235,17 +235,18 @@ function Liuren({ chart, solar }: { chart: ChartResult; solar: boolean }) {
   const { t } = useLocale();
   const { z } = useScript();
   const [val, setVal] = useState("");
-  const r: LiurenResult = useMemo(() => {
+  const { r, custom } = useMemo((): { r: LiurenResult; custom: boolean } => {
     const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(val);
-    if (m) {
+    if (m && +m[1]! >= 1900 && +m[1]! <= 2100) {
       try {
-        return castLiuren(chart.input, { year: +m[1]!, month: +m[2]!, day: +m[3]!, hour: +m[4]!, minute: +m[5]! });
+        return { custom: true, r: castLiuren(chart.input, { year: +m[1]!, month: +m[2]!, day: +m[3]!, hour: +m[4]!, minute: +m[5]! }) };
       } catch { /* 超出範圍或非法:退回出生課 */ }
     }
-    return castLiuren(chart.input);
+    return { custom: false, r: castLiuren(chart.input) };
   }, [chart, val]);
   const sc = r.sanChuan;
   const g = r.guiren;
+  const mName = lrMethod(sc.method);
   return (
     <>
       <h3 className="xs-h">{t("cycle.liuren")}</h3>
@@ -268,14 +269,14 @@ function Liuren({ chart, solar }: { chart: ChartResult; solar: boolean }) {
           </div>
         ))}
       </div>
-      <p className="cy-val">{t("cycle.liurenSan", { method: z(LR_METHOD[sc.method] ?? sc.method), sub: z(sc.sub) })}</p>
+      <p className="cy-val">{t("cycle.liurenSan", { head: z(sc.sub === mName ? mName : `${mName} · ${sc.sub}`) })}</p>
       <ol className="lr-san">
         {([["cycle.liurenChu", sc.chu], ["cycle.liurenZhong", sc.zhong], ["cycle.liurenMo", sc.mo]] as [TKey, string][]).map(([k, zhi]) => (
           <li key={k}>{t(k)} {z(zhi)} · {z(r.jiang[zhi] ?? "")}</li>
         ))}
       </ol>
       <p className="xs-note">{t("cycle.liurenGui", { zhi: z(g.zhi), dn: t(g.daytime ? "cycle.liurenDay" : "cycle.liurenNight"), dir: t(g.forward ? "cycle.liurenFwd" : "cycle.liurenBack") })}</p>
-      <Meta tier={r.tier} basis={solar ? "cross.basis.solar" : "cycle.basis.clock"} cite={r.cite} />
+      <Meta tier={r.tier} basis={solar && !custom ? "cross.basis.solar" : "cycle.basis.clock"} cite={r.cite} />
       <p className="xs-note">{t("cycle.liurenNote")}</p>
       <Steps steps={r.steps} />
     </>

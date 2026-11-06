@@ -128,7 +128,7 @@ export { castPlanetaryHour, type PlanetaryHourResult } from "./planetaryhour.js"
 export { castEphemeris, type EphemerisResult, type PlanetPosition, type AspectHit } from "./ephemeris.js";
 export { castHeluo, heluoReduce, heluoYears, heluoMonths, heluoDays, type HeluoResult, type HeluoHex, type HeluoYun, type HeluoYear } from "./heluo.js";
 // web 不直接依賴 knowledge,瑪雅 tier 與日名表經此轉出。
-export { MAYA_META, TZOLKIN_DAY_NAMES } from "@numerology/knowledge";
+export { MAYA_META, TZOLKIN_DAY_NAMES, LIUREN_METHODS } from "@numerology/knowledge";
 // 學院科學專區的科學筆記亦經此轉出。
 export { SCIENCE_NOTES, type ScienceNote } from "@numerology/knowledge";
 export { castFuyi, type FuyiResult } from "./fuyi.js";
