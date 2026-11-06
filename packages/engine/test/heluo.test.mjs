@@ -86,6 +86,24 @@ test("《天網搜奇錄》周姓命例 壬戌 己酉 癸卯 丙辰 男:遯初�
   assert.equal(r.houtian.name, "大有");
 });
 
+test("卷一 p. 84 丙寅 庚子 丙子 己亥 男:天 18 地 42 → 剝上九,後天坤", () => {
+  const r = cast(1926, 12, 13, 22);
+  assert.deepEqual(r.pillars, ["丙寅", "庚子", "丙子", "己亥"]);
+  assert.deepEqual([r.heaven, r.earth, r.xiantian.name, r.yuantang, r.houtian.name], [18, 42, "剝", 6, "坤"]);
+});
+
+test("卷一 p. 85 戊子 甲子 癸巳 癸亥 男:天 11 地 30(書印三十三,文稱三十原無餘剩)→ 屯九五", () => {
+  const r = cast(2008, 12, 19, 22);
+  assert.deepEqual(r.pillars, ["戊子", "甲子", "癸巳", "癸亥"]);
+  assert.deepEqual([r.heaven, r.earth, r.xiantian.name, r.yuantang], [11, 30, "屯", 5]);
+});
+
+test("《推命術》pp. 6–7 癸巳 甲子 丁酉 甲辰 男:天 29 地 36,陰男天數在下 → 姤上九,後天中孚三爻", () => {
+  const r = cast(1893, 12, 26, 8);
+  assert.deepEqual(r.pillars, ["癸巳", "甲子", "丁酉", "甲辰"]);
+  assert.deepEqual([r.heaven, r.earth, r.xiantian.name, r.yuantang, r.houtian.name, r.houtianYuantang], [29, 36, "姤", 6, "中孚", 3]);
+});
+
 // 卷一 pp. 37–40 小象流年、月卦、日卦算例
 const BITS = Object.fromEntries(allHexagrams().map((h) => [h.name, h.bits]));
 const names = (xs) => xs.map((x) => allHexagrams().find((h) => h.bits.join("") === x.bits.join("")).name);
@@ -117,6 +135,10 @@ test("月卦:流年觀上爻 → 正月益…十二月歸妹", () => {
   const r = heluoMonths(BITS.觀, 6);
   assert.deepEqual(names(r), ["益", "無妄", "中孚", "損", "小畜", "需", "乾", "姤", "大有", "離", "大壯", "歸妹"]);
   assert.deepEqual(r.map((x) => x.line), [1, 4, 2, 5, 3, 6, 4, 1, 5, 2, 6, 3]);
+});
+
+test("《推命術》p. 26 月卦:流年節三爻 → 兌…小過", () => {
+  assert.deepEqual(names(heluoMonths(BITS.節, 3)), ["兌", "困", "歸妹", "震", "睽", "大有", "未濟", "蒙", "晉", "否", "旅", "小過"]);
 });
 
 test("日卦:月卦既濟二爻 → 屯、革、明夷各管六日,共三十日", () => {
