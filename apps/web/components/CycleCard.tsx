@@ -303,7 +303,7 @@ function Qizheng({ r }: { r: QizhengResult }) {
             {r.bodies.map((b) => (
               <tr key={b.id}>
                 <th className="rowlabel">{z(b.name)}{b.kind === "餘" ? ` (${t(b.id === "ziqi" ? "cycle.qzSchool" : "cycle.qzCalc")})` : ""}</th>
-                <td>{dms(b.longitude)}{b.retrograde && b.kind === "政" ? ` ${t("cycle.retro")}` : ""}</td>
+                <td>{dms(b.longitude)}{b.retrograde ? ` ${t(b.kind === "政" ? "cycle.retro" : "cycle.qzAlwaysRetro")}` : ""}</td>
                 <td>{z(b.ancient.name)} {dms(b.ancient.degree)}</td>
                 <td>{z(b.mansion.name)} {dms(b.mansion.degree)}</td>
               </tr>
