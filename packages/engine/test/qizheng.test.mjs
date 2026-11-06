@@ -12,7 +12,7 @@ test("J2000 四餘:羅睺 125.04、計都對衝、月孛 263.35;11 個 body", ()
   assert.ok(Math.abs(by("luohou").longitude - 125.04) < 0.01);
   assert.ok(Math.abs(by("jidu").longitude - 305.04) < 0.01);
   assert.ok(Math.abs(by("yuebei").longitude - 263.35) < 0.01);
-  assert.ok(r.variants.some((v) => v.includes("推步捷例")));
+  assert.ok(r.variants.some((v) => v.includes("推步捷例") && v.includes("曆象考成")));
 });
 
 test("七政黃經同 castEphemeris;無經緯度照算;黃經全在 [0,360)", () => {

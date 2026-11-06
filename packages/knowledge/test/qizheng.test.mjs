@@ -93,3 +93,8 @@ test("十二宮名:命宮起逆排 12 宮;安命規則有出處", async () => {
   assert.ok(QIZHENG_GONG.housesCite.includes("官禄"));
 });
 
+test("羅計:曆象考成以正交(自黄道南過北)為羅睺", () => {
+  const lh = QIZHENG_YU.find((y) => y.id === "luohou");
+  assert.ok(lh.cite.includes("正交曰羅㬋中交曰計都"));
+  assert.ok(lh.cite.includes("自黄道南過黄道北之㸃名曰正交"));
+});
