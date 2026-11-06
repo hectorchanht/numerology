@@ -68,6 +68,11 @@ test("紫微新增事实:斗君/小限/飞星派;current 无流月;无格局不�
   }
   assert.ok(!buildContextPack(chart, undefined, { now, fortuneScope: "current" }).markdown.includes("紫微流月"));
   assert.ok(!buildContextPack(chart, undefined, { now, fortuneScope: "none" }).markdown.includes("斗君:"));
+  // 飛星派屬本命靜態結構:只 full/current 送,運限專節同 none 唔送
+  for (const sc of ["current"]) assert.ok(buildContextPack(chart, undefined, { now, fortuneScope: sc }).markdown.includes("飞星派(流派说法"), sc);
+  for (const sc of ["none", "dayun", "review", "future"]) {
+    assert.ok(!buildContextPack(chart, undefined, { now, fortuneScope: sc }).markdown.includes("飞星派"), `${sc} 唔應有飛星派`);
+  }
   assert.equal(buildContextPack(chart, undefined, { now }).markdown, full, "固定 now 确定性");
   assert.ok(SYSTEM_PERSONA.endsWith("不作主要判断。"), "persona 末句");
 });
@@ -100,4 +105,11 @@ test("流月±1:农历初一/三十都得三個連續不同月", async () => {
     }
   }
   assert.ok(found);
+});
+
+test("立春前(2026-01-20)預設參考年 → 八字流月段仍在,當前月腊己丑", () => {
+  const now = new Date("2026-01-20T12:00:00+08:00");
+  const md = buildContextPack(chart, analyzeFortune(birth, { now }), { now }).markdown;
+  assert.ok(md.includes("### 八字流月(当前月±1)"), "流月段唔應被丟");
+  assert.ok(md.includes("腊月 己丑") && md.includes("【当前月】"));
 });

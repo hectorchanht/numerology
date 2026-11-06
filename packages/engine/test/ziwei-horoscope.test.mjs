@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { castZiweiHoroscope, computeOverlaps } from "../dist/index.js";
+import { castZiwei, castZiweiHoroscope, computeOverlaps } from "../dist/index.js";
 
 const S = { year: 1990, month: 5, day: 15, hour: 14, minute: 30, gender: "男" };
 
@@ -46,4 +46,15 @@ test("三層疊忌", () => {
   assert.equal(o.length, 1);
   assert.equal(o[0].layers.length, 3);
   assert.equal(o[0].tag, "忌叠忌");
+});
+
+test("斗君:UI 以宮支對應本命宮,同 natalPalaceName 一致", () => {
+  for (const g of ["男", "女"]) for (const y of [1950, 1977, 1990, 2005]) {
+    const inp = { year: y, month: (y % 12) + 1, day: (y % 27) + 1, hour: y % 24, minute: 0, gender: g };
+    const palaces = castZiwei(inp).palaces;
+    for (const d of ["2026-1-10", "2026-6-1", "2030-12-30"]) {
+      const { douJun } = castZiweiHoroscope(inp, d);
+      assert.equal(palaces.find((p) => p.earthlyBranch === douJun.branch)?.name, douJun.natalPalaceName, `${y}${g} ${d}`);
+    }
+  }
 });

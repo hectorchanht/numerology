@@ -74,3 +74,12 @@ test("THEME_INIT_SCRIPT:localStorage 被封(私隱模式)都唔會拋錯", () =>
   const { root } = runInit(null, { throwOnRead: true });
   assert.equal(root.dataset.theme, undefined);
 });
+
+test("紫微未起運限 .palace.dim 唔用 opacity(會令字色對比跌穿 WCAG AA)", async () => {
+  const { readFileSync } = await import("node:fs");
+  const css = readFileSync(new URL("../app/globals.css", import.meta.url), "utf-8");
+  const rule = css.match(/\.palace\.dim\s*\{([^}]*)\}/);
+  assert.ok(rule, "應有 .palace.dim 規則");
+  assert.doesNotMatch(rule[1], /opacity/);
+  assert.doesNotMatch(rule[1], /outline/, "outline 會蓋過 :focus-visible 焦點框");
+});

@@ -157,18 +157,22 @@ function ziweiExtra(chart: ChartResult, fortune: FortuneAnalysis | undefined, op
     if (yStar("流禄") && yStar("流羊") && yStar("流陀"))
       out.push(`- 流耀(流年):流禄入${yStar("流禄")}、流羊入${yStar("流羊")}、流陀入${yStar("流陀")}(${refYear}年)`);
   }
-  // 飛星派:標流派,只列四宮化忌落宮 + 自化 + 祿忌交馳
-  const fx = castZiweiFeixing(input);
-  const KEY = ["命宫", "财帛", "官禄", "夫妻"];
-  const ji = KEY.map((n) => fx.flies.find((f) => f.from === n && f.type === "忌"))
-    .filter((f) => f !== undefined)
-    .map((f) => `${f.from}(${f.stem})化忌${f.star}入${f.intoPalace}`);
-  out.push(
-    "### 飞星派(流派说法,非《全书》,仅作参考,不作主要判断)",
-    `- 四宫宫干化忌:${ji.join("、") || "—"}`,
-    `- 自化:${fx.selfMutaged.map((s) => `${s.palace}自化${s.type}(${s.star})`).join("、") || "无"}`,
-    `- 禄忌交驰:${fx.luJiJiaoChi.map((x) => `${x.luPalace}化禄入${x.jiPalace}且${x.jiPalace}化忌入${x.luPalace}`).join("、") || "无"}`,
-  );
+  // 飛星派:標流派,只列四宮化忌落宮 + 自化 + 祿忌交馳。
+  // 屬本命靜態結構,只喺 full(整篇/對話)同 current(靜態報告各節)先送;
+  // dayun/review/future 專講運限、none 唔要附加段,慳 ~數百 token。位置不變(保 prompt cache 前綴次序)。
+  if (scope === "full" || scope === "current") {
+    const fx = castZiweiFeixing(input);
+    const KEY = ["命宫", "财帛", "官禄", "夫妻"];
+    const ji = KEY.map((n) => fx.flies.find((f) => f.from === n && f.type === "忌"))
+      .filter((f) => f !== undefined)
+      .map((f) => `${f.from}(${f.stem})化忌${f.star}入${f.intoPalace}`);
+    out.push(
+      "### 飞星派(流派说法,非《全书》,仅作参考,不作主要判断)",
+      `- 四宫宫干化忌:${ji.join("、") || "—"}`,
+      `- 自化:${fx.selfMutaged.map((s) => `${s.palace}自化${s.type}(${s.star})`).join("、") || "无"}`,
+      `- 禄忌交驰:${fx.luJiJiaoChi.map((x) => `${x.luPalace}化禄入${x.jiPalace}且${x.jiPalace}化忌入${x.luPalace}`).join("、") || "无"}`,
+    );
+  }
   if (scope === "full") {
     // 精確取鄰月:以今日回推當月初一,上月 = 初一前一日,下月 = 初一後 29 日(若仍同月再 +1,即大月 30 日)。
     const now = opts?.now ?? new Date();
