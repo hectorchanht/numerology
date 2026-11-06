@@ -158,6 +158,7 @@ test("crossSystemFacts:附河洛理數先後天卦同大運", () => {
   if (ln) assert.ok(f.includes(`流年卦 ${ln.hex.name} 第 ${ln.line} 爻`));
   assert.ok(!f.includes("河洛天地數分類"));
   const g = crossSystemFacts(cross, "zht", { taixuan: castTaixuan(chart.input), maya: castMaya(chart.input.year, chart.input.month, chart.input.day), heluo, heluoClasses: heluoClasses(heluo, chart.input) });
+  assert.ok(f.includes(`先天元堂 ${heluo.xiantian.name}`) && f.includes("卷二爻斷「此") && f.includes("卷三爻訣「"));
   assert.ok(g.includes("河洛天地數分類") && g.includes(`元堂第 ${heluo.yuantang} 爻,爻位等第`));
 });
 
@@ -173,7 +174,7 @@ test("crossSystemFacts:附七政四餘宿度同羅計分歧", () => {
 
 test("crosssystem 指令:太玄與瑪雅只作週期定位", () => {
   const p = buildReportSectionPrompt([], seg, "both", "zht", facts);
-  for (const must of ["週期定位", "不推五行", "不作吉凶斷語", "贊辭", "皇極經世", "不推治亂興衰", "行星時", "不寫天使職能", "七曜位置", "不推宮位主事吉凶", "河洛理數", "不作富貴壽夭斷語", "詩表未入庫", "256 卦中所佔比例", "七政四餘", "紫氣為流派公式", "命宮與十二宮名的落點", "大六壬", "不作占斷", "未附上升時不講宮位", "太玄首名、首辭、贊辭原文未附,不得引述或釋義", "Dreamspell"]) {
+  for (const must of ["週期定位", "不推五行", "不作吉凶斷語", "贊辭", "皇極經世", "不推治亂興衰", "行星時", "不寫天使職能", "七曜位置", "不推宮位主事吉凶", "河洛理數", "叶者」「不叶者」兩面並列", "不在原文之外自行推申", "詩表未入庫", "256 卦中所佔比例", "七政四餘", "紫氣為流派公式", "命宮與十二宮名的落點", "大六壬", "不作占斷", "未附上升時不講宮位", "太玄首名、首辭、贊辭原文未附,不得引述或釋義", "Dreamspell"]) {
     assert.ok(p.includes(must), `缺條款: ${must}`);
   }
 });

@@ -1,6 +1,6 @@
 import { castZiweiFeixing, castZiweiHoroscope, favorableDirections, MAYA_META, type ChartResult, type CrossSystemResult, type EphemerisResult, type GanzhiRelation, type FortuneAnalysis, type HeluoResult, type HeluoClasses, type QizhengResult, type HuangjiResult, type LiurenResult, type MayaResult, type PlanetaryHourResult, type TaixuanResult, type NumberLoreResult, type BirthLoreResult, type JyotishResult, type EgyptianResult, type MetonicResult } from "@numerology/engine";
 import { Solar } from "lunar-javascript";
-import { LIUREN_METHODS, SCIENCE_NOTES } from "@numerology/knowledge";
+import { heluoText, LIUREN_METHODS, SCIENCE_NOTES } from "@numerology/knowledge";
 import type { AiLocale } from "./prompts.js";
 
 /** 上下文包:命盤事實 + 注意事項,供報告與對話共享同一份"真相"。 */
@@ -431,6 +431,15 @@ ${step(ep.steps)}`;
 - 河洛理數:天數 ${hl.heaven}、地數 ${hl.earth};先天 ${hl.xiantian.name}(元堂第 ${hl.yuantang} 爻),${hl.houtianAge} 歲換後天 ${hl.houtian.name}(元堂第 ${hl.houtianYuantang} 爻);元氣${hl.yuanqi.tian || hl.yuanqi.di ? "有" : "無"}${hl.yuanqi.reversed ? "(逢相反)" : ""},化工${hl.huagong.has ? "有" : "無"}${hl.huagong.reversed ? "(逢反)" : ""}。大運:${yun}。${ln ? `${ln.year} 年(${ln.age} 歲)流年卦 ${ln.hex.name} 第 ${ln.line} 爻(小象)。` : ""}層級 ${TIER_ZH[hl.tier]};出處 ${cite(hl.cite)}。
 - 河洛理數續(金鎖銀匙、廣象徹微):金鎖銀匙年柱納音屬${hl.jinsuo.nayin},順數 ${hl.jinsuo.forward}、逆數 ${hl.jinsuo.reverse}(查詩表編號,詩表未入庫)。廣象徹微:四柱支 ${hl.guangxiang.branch.xiang.join("")} 積 ${gb},256 卦中 ${hl.guangxiang.dist[gb]} 卦同積(${share(gb)});干 ${hl.guangxiang.stem.xiang.join("")} 積 ${gs},${hl.guangxiang.dist[gs]} 卦同積(${share(gs)})。層級 ${TIER_ZH[hl.tier]};出處 ${cite(hl.ggzCite)}。
 ${step(hl.steps)}`;
+      const poems = (ps: { tag?: string; text: string }[]) => ps.map((q) => `「${q.tag ? `(${q.tag})` : ""}${q.text}」`).join("");
+      const yaoText = (label: string, hex: string, line: number, withDuan: boolean) => {
+        const l = heluoText(hex)?.lines[line - 1];
+        if (!l) return "";
+        return `\n  - ${label} ${hex}${l.yao}「${l.ci}」:${withDuan ? `卷二爻斷「${l.duan}」(p. ${l.page2});` : ""}卷三爻訣${poems(l.poems)}(p. ${l.page3})`;
+      };
+      const xt = heluoText(hl.xiantian.name);
+      cycleBlock += `
+- 河洛理數原文(卷二爻斷、卷三詩訣,文明書局石印本;爻斷分叶者、不叶者兩面,本站未判命主屬叶或不叶):${xt ? `\n  - 先天卦註(卷二):「${xt.gua.text}」(p. ${xt.gua.page})` : ""}${yaoText("先天元堂", hl.xiantian.name, hl.yuantang, true)}${yaoText("後天元堂", hl.houtian.name, hl.houtianYuantang, true)}${ln ? yaoText(`${ln.year} 年流年卦`, ln.hex.name, ln.line, false) : ""}`;
       const hc = cycles.heluoClasses;
       if (hc) {
         const RANK = ["", "五爻最佳", "二爻次之", "三、四爻居中", "初、上爻最次"];

@@ -15,6 +15,7 @@ export * from "./heptameron.js";
 export * from "./tetrabiblos.js";
 export * from "./lunar-mansions.js";
 export * from "./heluo-lishu.js";
+export * from "./heluo-shiduan.js";
 export * from "./heluo-ggz.js";
 export * from "./lore.js";
 export * from "./ganzhi-relations.js";

@@ -1,6 +1,6 @@
 # 河洛理數起例
 
-資料:`packages/knowledge/data/heluo-lishu.json`;驗證:`packages/knowledge/test/heluo-lishu.test.mjs`、`packages/engine/test/heluo.test.mjs`;引擎:`castHeluo`。來源:題(宋)陳摶、邵雍《河洛理數》卷一,上海文明書局石印本(據明崇禎壬申 1632 陳仁錫刻本;Wikimedia Commons NLC416 掃描,公有領域)。只錄起例規則同書中算例;斷語、詩訣(卷二、三)未收。
+資料:`packages/knowledge/data/heluo-lishu.json`;驗證:`packages/knowledge/test/heluo-lishu.test.mjs`、`packages/engine/test/heluo.test.mjs`;引擎:`castHeluo`。來源:題(宋)陳摶、邵雍《河洛理數》卷一,上海文明書局石印本(據明崇禎壬申 1632 陳仁錫刻本;Wikimedia Commons NLC416 掃描,公有領域)。只錄起例規則同書中算例;卷二爻斷、卷三詩訣原文另見 `docs/heluo-shiduan.md`。
 
 ## 步驟
 
