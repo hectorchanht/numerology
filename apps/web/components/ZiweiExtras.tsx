@@ -21,8 +21,9 @@ export function ZiweiExtras({
   const fx = useMemo(() => {
     try {
       return castZiweiFeixing(input);
-    } catch {
-      return null; // 輸入超出可排範圍:飛星派段落唔顯示,唔好令成頁崩
+    } catch (e) {
+      console.warn("castZiweiFeixing 失敗,飛星派段落唔顯示", e);
+      return null; // 輸入超出可排範圍:唔好令成頁崩
     }
   }, [input]);
   const entry = ZIWEI_STARS.find((s) => s.name === star);
