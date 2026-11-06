@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { castChart, castCrossSystem, castTaixuan, castMaya, castHuangji, castPlanetaryHour, castEphemeris, castHeluo, castLiuren } from "@numerology/engine";
-import { SCIENCE_NOTES } from "@numerology/knowledge";
+import { LIUREN_METHODS, SCIENCE_NOTES } from "@numerology/knowledge";
 import {
   SYSTEM_PERSONA,
   REPORT_SEGMENTS,
@@ -81,7 +81,10 @@ test("crossSystemFacts:附大六壬出生課", () => {
   const f = crossSystemFacts(cross, "zht", { taixuan: castTaixuan(chart.input), maya: castMaya(chart.input.year, chart.input.month, chart.input.day), liuren });
   const sc = liuren.sanChuan;
   assert.ok(f.includes(`月將 ${liuren.yueJiang.zhi}(${liuren.yueJiang.name})`));
-  assert.ok(f.includes(`三傳 ${sc.chu}→${sc.zhong}→${sc.mo}`) && f.includes(sc.method));
+  assert.ok(f.includes(`三傳 ${sc.chu}→${sc.zhong}→${sc.mo}`));
+  const men = LIUREN_METHODS.find((m) => m.id === sc.method).name;
+  assert.ok(f.includes(`課門 ${men}`) && !f.includes(`課門 ${sc.method}`));
+  assert.ok(f.includes("本站取法"));
   assert.ok(f.includes("四課") && f.includes("六壬大全"));
 });
 

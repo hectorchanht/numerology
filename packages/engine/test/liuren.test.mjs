@@ -100,3 +100,10 @@ test("年底冬至、年初大寒換將(含 1900、2100 邊界)", () => {
   assert.equal(d.zhongQi, "大寒");
   assert.equal(d.yueJiang.zhi, "子");
 });
+
+test("重課去重:甲子日子時戌將,二三課同為戌/子,上剋下只一神 → 元首", () => {
+  const r = castLiurenKe({ dayGan: "甲", dayZhi: "子", hourZhi: "子", yueJiang: "戌" });
+  assert.deepEqual(r.ke.map((k) => k.up + k.down), ["子甲", "戌子", "戌子", "申戌"]);
+  const s = r.sanChuan;
+  assert.deepEqual([s.method, s.sub, s.chu, s.zhong, s.mo], ["zeike", "元首", "戌", "申", "午"]);
+});
