@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { castQizheng, castEphemeris } from "../dist/index.js";
+import { castQizheng, castEphemeris, qizhengMansionAt } from "../dist/index.js";
 import { QIZHENG_MANSIONS } from "@numerology/knowledge";
 
 const j2000 = { year: 2000, month: 1, day: 1, hour: 20, gender: "男" };
@@ -39,4 +39,30 @@ test("黃經 = 某宿距星 → 該宿 0 度;跨零度點宿判定正確", () =>
   assert.ok(Math.abs(d - sun.mansion.degree) < 1e-6);
   // 黃經 0° 附近(奎/婁區)同 359.9° 唔落空:掃描所有出生日四餘宿名非空
   for (const mo of [1, 4, 7, 10]) for (const b of castQizheng({ year: 2024, month: mo, day: 15, hour: 9, gender: "男" }).bodies) assert.ok(b.mansion.name && b.ancient.name);
+});
+
+test("qizhengMansionAt:距星正點 → 該宿 0 度;跨 0° 兩側;古宿無觜、參包觜", () => {
+  const ms = Date.UTC(2000, 0, 1, 12);
+  const norm = (d) => ((d % 360) + 360) % 360;
+  for (const m of QIZHENG_MANSIONS) {
+    const a = qizhengMansionAt(m.lonJ2000, ms);
+    assert.equal(a.modern.name, m.name);
+    assert.ok(a.modern.degree < 1e-9);
+  }
+  // 跨 0°:奎/婁一帶(距星 ~ 0° 附近)兩側都有宿、且度數連續
+  const lo = qizhengMansionAt(359.99, ms), hi = qizhengMansionAt(0.01, ms);
+  assert.ok(lo.modern.name && hi.modern.name);
+  const gap = norm(0.01 - 359.99);
+  const d = lo.modern.name === hi.modern.name ? hi.modern.degree - lo.modern.degree : null;
+  if (d !== null) assert.ok(Math.abs(norm(d) - gap) < 1e-6);
+  else assert.ok(hi.modern.degree < gap + 1e-6);
+  // 古宿:掃全周天無觜;觜距星現代點落參
+  for (let l = 0; l < 360; l += 0.25) assert.notEqual(qizhengMansionAt(l, ms).ancient.name, "觜");
+  // 參古度範圍(10 古度 = 觜附參):起點 = 角距星 + 前面累計古度 × 360/365
+  let acc = 0;
+  for (const m of QIZHENG_MANSIONS) { if (m.name === "參") break; acc += m.ancientDeg; }
+  const lon = (g) => norm(QIZHENG_MANSIONS[0].lonJ2000 + (g * 360) / 365);
+  for (const g of [acc + 0.01, acc + 5, acc + 9.99]) assert.equal(qizhengMansionAt(lon(g), ms).ancient.name, "參");
+  assert.equal(qizhengMansionAt(lon(acc - 0.01), ms).ancient.name, "畢");
+  assert.equal(qizhengMansionAt(lon(acc + 10.01), ms).ancient.name, "井");
 });
