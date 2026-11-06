@@ -34,7 +34,7 @@ export default function DailyTool() {
     const chongDesc: string = lunar.getDayChongDesc(); // 如 "(甲子)鼠"
     const chongSx = chongDesc.replace(/.*\)/, "");
     const sha: string = lunar.getDaySha();
-    const dayGZ: string = (lunar as unknown as { getDayInGanZhiExact(): string }).getDayInGanZhiExact();
+    const dayGZ: string = lunar.getDayInGanZhiExact();
     const times = lunar.getTimes();
     const ranked = times
       .map((tm, i) => ({ i, yi: tm.getYi() as string[], ji: tm.getJi() as string[] }))

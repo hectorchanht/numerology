@@ -1,5 +1,6 @@
 /**
- * lunar-javascript 不自帶 TS 類型,這裡只聲明本引擎用到的方法(最小面)。
+ * lunar-javascript 不自帶 TS 類型,這裡只聲明 monorepo 用到的方法(最小面)。
+ * 唯一來源:packages/ai 與 apps/web 經各自 tsconfig 的 include 共用此檔,唔好另寫一份。
  * 完整 API 見 https://6tail.cn/calendar/api.html
  */
 declare module "lunar-javascript" {
@@ -52,6 +53,20 @@ declare module "lunar-javascript" {
     getYear(): number;
     getMonth(): number;
     getDay(): number;
+    /** 農曆月中文,如 "正" */
+    getMonthInChinese(): string;
+    /** 日宜,如 ["嫁娶","納采",…](簡體輸出,顯示層記得轉字形) */
+    getDayYi(): string[];
+    /** 日忌 */
+    getDayJi(): string[];
+    /** 日沖描述,如 "(甲子)鼠" */
+    getDayChongDesc(): string;
+    /** 日煞,如 "北" */
+    getDaySha(): string;
+    /** 日干支,如 "庚午" */
+    getDayInGanZhiExact(): string;
+    /** 13 個時辰(早子時起) */
+    getTimes(): LunarTime[];
     /** 農曆年地支,如 "辰" */
     getYearZhi(): string;
     /** 生肖,如 "龍" */
@@ -63,6 +78,12 @@ declare module "lunar-javascript" {
      * "冬至" = 上一個冬至(前一公曆年 12 月),"DONG_ZHI" = 本年 12 月冬至。
      */
     getJieQiTable(): Record<string, Solar>;
+  }
+
+  export class LunarTime {
+    toString(): string;
+    getYi(): string[];
+    getJi(): string[];
   }
 
   export class JieQi {

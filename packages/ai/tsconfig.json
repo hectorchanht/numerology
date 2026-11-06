@@ -4,5 +4,5 @@
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "../engine/src/lunar-javascript.d.ts"]
 }
