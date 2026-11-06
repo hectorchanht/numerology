@@ -68,6 +68,11 @@ test("紫微新增事实:斗君/小限/飞星派;current 无流月;无格局不�
   }
   assert.ok(!buildContextPack(chart, undefined, { now, fortuneScope: "current" }).markdown.includes("紫微流月"));
   assert.ok(!buildContextPack(chart, undefined, { now, fortuneScope: "none" }).markdown.includes("斗君:"));
+  // 飛星派屬本命靜態結構:只 full/current 送,運限專節同 none 唔送
+  for (const sc of ["current"]) assert.ok(buildContextPack(chart, undefined, { now, fortuneScope: sc }).markdown.includes("飞星派(流派说法"), sc);
+  for (const sc of ["none", "dayun", "review", "future"]) {
+    assert.ok(!buildContextPack(chart, undefined, { now, fortuneScope: sc }).markdown.includes("飞星派"), `${sc} 唔應有飛星派`);
+  }
   assert.equal(buildContextPack(chart, undefined, { now }).markdown, full, "固定 now 确定性");
   assert.ok(SYSTEM_PERSONA.endsWith("不作主要判断。"), "persona 末句");
 });
