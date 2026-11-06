@@ -47,3 +47,8 @@ test("廣象徹微:四畫積數共 25 種,書中個數吻合;甲子年例得 24�
   assert.equal(prod(G.example.branch.xiang), G.example.branch.product);
   assert.equal(prod(G.example.stem.xiang), G.example.stem.product);
 });
+
+test("內聯模組同 JSON 一致", async () => {
+  const { default: inline } = await import("../dist/heluo-ggz.data.js");
+  assert.deepEqual(JSON.parse(JSON.stringify(inline)), D);
+});

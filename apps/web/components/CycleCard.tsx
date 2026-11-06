@@ -222,6 +222,46 @@ function Heluo({ r, solar }: { r: HeluoResult; solar: boolean }) {
       </details>
       <p className="xs-note">{t("cycle.heluoNote")}</p>
       <Steps steps={r.steps} />
+      <Ggz r={r} solar={solar} />
+    </>
+  );
+}
+
+const pct = (n: number) => `${Math.round((n / 256) * 1000) / 10}%`;
+
+/** 金鎖銀匙數同廣象徹微積數;直條為 256 卦各積數的卦數(基率),本命支積、干積加框。 */
+function Ggz({ r, solar }: { r: HeluoResult; solar: boolean }) {
+  const { t } = useLocale();
+  const { z } = useScript();
+  const j = r.jinsuo, g = r.guangxiang;
+  const bp = g.branch.product, sp = g.stem.product;
+  const keys = Object.keys(g.dist).map(Number).sort((a, b) => a - b);
+  const max = Math.max(...Object.values(g.dist));
+  const W = 343, H = 104, bw = W / keys.length, top = 4, base = H - 28;
+  const aria = t("cycle.gxAria", { bp, sp });
+  return (
+    <>
+      <h3 className="xs-h">{t("cycle.ggz")}</h3>
+      <p className="cy-val">{t("cycle.jinsuoVal", { wx: t(`cycle.wx.${j.nayin}` as TKey), f: j.forward, r: j.reverse })}</p>
+      <p className="xs-note">{z(t("cycle.gxVal", { bx: g.branch.xiang.join(""), bp, sx: g.stem.xiang.join(""), sp }))}</p>
+      <svg className="xs-fy" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={aria}>
+        <title>{aria}</title>
+        {keys.map((k, i) => {
+          const h = ((base - top) * g.dist[k]!) / max;
+          const on = k === bp || k === sp;
+          return (
+            <g key={k}>
+              <rect className={on ? "xs-fy-bar" : "xs-fy-track"} x={i * bw + 1} y={base - h} width={bw - 2} height={h} rx={1.5} />
+              {on && (
+                <text className="cy-axis" x={i * bw + bw / 2} y={k === bp ? base + 8 : base + 21}>{k}</text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+      <p className="xs-note">{t("cycle.gxBase", { bp, bn: g.dist[bp]!, bpct: pct(g.dist[bp]!), sp, sn: g.dist[sp]!, spct: pct(g.dist[sp]!) })}</p>
+      <Meta tier={r.tier} basis={solar ? "cross.basis.solar" : "cycle.basis.clock"} cite={r.ggzCite} />
+      <p className="xs-note">{t("cycle.ggzNote")}</p>
     </>
   );
 }

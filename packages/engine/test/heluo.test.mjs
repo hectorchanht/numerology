@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { allHexagrams } from "@numerology/knowledge";
-import { castHeluo, heluoReduce, heluoYears, heluoMonths, heluoDays } from "../dist/index.js";
+import { castHeluo, heluoReduce, heluoYears, heluoMonths, heluoDays, heluoJinsuo, heluoGuangxiang } from "../dist/index.js";
 
 // 書中算例(河洛理數卷一 pp. 22–23、31、82–83),揀四柱相同嘅現代日期重算。
 const cast = (year, month, day, hour, gender = "男") => castHeluo({ year, month, day, hour, gender });
@@ -162,4 +162,37 @@ test("《河洛理數推命術》p. 25 甲子年例:姤上九,1–24 歲流年�
     "乾", "同人", "無妄", "益", "頤", "復", // 初六陰爻六年
     "遯", "旅", "鼎", "未濟", "蒙", "渙", "坎", "節", "屯", // 九二陽爻,16 歲己卯陰年即變
   ]);
+});
+
+// GGZBCK405 卷六金鎖銀匙五例(木部例書誤印 3313,規則得 2313)、廣象徹微甲子年例。
+test("金鎖銀匙:書中五例", () => {
+  const ex = [
+    [["乙卯", "戊子", "壬戌", "壬寅"], "水", 2542, 2942],
+    [["丙寅", "戊戌", "壬戌", "辛丑"], "火", 2442, 3042],
+    [["壬子", "癸丑", "己卯", "己巳"], "木", 2313],
+    [["壬申", "己酉", "戊申", "庚申"], "金", 3322],
+    [["庚午", "癸未", "癸亥", "乙卯"], "土", 2571, 2971],
+  ];
+  for (const [p, wx, fwd, rev] of ex) {
+    const r = heluoJinsuo(p, wx);
+    assert.equal(r.forward, fwd, p.join(""));
+    if (rev) assert.equal(r.reverse, rev, p.join(""));
+    assert.equal(Math.floor(r.forward / 100) % 100 - 20 + Math.floor(r.reverse / 100) % 100 - 20, 14);
+  }
+  assert.equal(heluoJinsuo(["壬申", "己酉", "戊申", "庚申"], "金").count, 13);
+});
+
+test("廣象徹微:甲子年例支積 24、干積 16;256 卦 25 種數", () => {
+  const r = heluoGuangxiang(["甲子", "丁丑", "壬寅", "辛亥"]);
+  assert.deepEqual(r.branch, { xiang: ["元", "會", "運", "世"], product: 24 });
+  assert.deepEqual(r.stem, { xiang: ["元", "世", "元", "世"], product: 16 });
+  assert.equal(Object.keys(r.dist).length, 25);
+  assert.equal(Object.values(r.dist).reduce((a, b) => a + b, 0), 256);
+});
+
+test("castHeluo 帶金鎖銀匙同廣象徹微,年柱納音取自八字", () => {
+  const r = cast(1984, 3, 27, 8);
+  assert.equal(r.jinsuo.nayin, "金");
+  assert.deepEqual(r.jinsuo, heluoJinsuo(r.pillars, "金"));
+  assert.equal(r.guangxiang.branch.product, heluoGuangxiang(r.pillars).branch.product);
 });

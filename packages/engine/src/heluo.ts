@@ -1,7 +1,7 @@
 import { Solar } from "lunar-javascript";
 import {
-  allHexagrams, HELUO_BRANCH_NUMBER, HELUO_DAYUN, HELUO_FIVE, HELUO_HUAGONG, HELUO_LUOSHU_TRIGRAM, HELUO_PURE_ORDER,
-  HELUO_STEM_NUMBER, HELUO_UPPER_ANCHOR, HELUO_YUANQI, HELUO_ZHIZUN, TIANGAN, DIZHI,
+  allHexagrams, GUANGXIANG, HELUO_BRANCH_NUMBER, HELUO_DAYUN, HELUO_FIVE, HELUO_HUAGONG, HELUO_LUOSHU_TRIGRAM, HELUO_PURE_ORDER,
+  HELUO_STEM_NUMBER, HELUO_UPPER_ANCHOR, HELUO_YUANQI, HELUO_ZHIZUN, JINSUO, TIANGAN, DIZHI,
   type Cite, type TrigramName,
 } from "@numerology/knowledge";
 import type { BirthInput } from "./types.js";
@@ -34,6 +34,26 @@ export interface HeluoYear {
   line: number;
 }
 
+export type NayinWx = "水" | "火" | "土" | "木" | "金";
+
+export interface HeluoJinsuo {
+  nayin: NayinWx;
+  /** 日支順數至時支(兩頭計,同支作 13) */
+  count: number;
+  forward: number;
+  /** 逆數:百位以 14 − count 代 */
+  reverse: number;
+}
+
+export type Xiang = "元" | "會" | "運" | "世";
+
+export interface HeluoGuangxiang {
+  branch: { xiang: Xiang[]; product: number };
+  stem: { xiang: Xiang[]; product: number };
+  /** 256 卦各積數的卦數(基率) */
+  dist: Record<number, number>;
+}
+
 export interface HeluoResult {
   pillars: [string, string, string, string];
   heaven: number;
@@ -57,6 +77,11 @@ export interface HeluoResult {
   steps: string[];
   tier: "classical";
   cite: Cite;
+  /** 金鎖銀匙取數(只算數,詩表未收) */
+  jinsuo: HeluoJinsuo;
+  /** 廣象徹微四象積數 */
+  guangxiang: HeluoGuangxiang;
+  ggzCite: Cite;
 }
 
 const TRI: Record<TrigramName, number[]> = {
@@ -81,6 +106,37 @@ export function heluoReduce(sum: number, base: number): number {
 const flip = (bits: number[], line: number) => bits.map((b, i) => (i + 1 === line ? 1 - b : b));
 /** 由第 line 爻往上數 k 位(循環) */
 const up = (line: number, k: number) => ((line - 1 + k) % 6) + 1;
+
+/**
+ * 金鎖銀匙(GGZBCK405 卷六 pp. 218–225):二千為基;日支順數至時支(兩頭計,同支作 13)乘百;
+ * 加日支、時支序數(子 1);納音水火加 27、土加 50;再加部數。逆數百位以 14 − 順數代。
+ */
+export function heluoJinsuo(pillars: readonly string[], nayin: NayinWx): HeluoJinsuo {
+  const d = BRANCH.indexOf(pillars[2]![1]!), h = BRANCH.indexOf(pillars[3]![1]!);
+  const count = d === h ? 13 : mod(h - d, 12) + 1;
+  const rest = JINSUO.base + d + 1 + h + 1 + JINSUO.nayinAdd[nayin] + JINSUO.buNumber[nayin];
+  return { nayin, count, forward: rest + count * 100, reverse: rest + (14 - count) * 100 };
+}
+
+const XIANG = Object.keys(GUANGXIANG.values) as Xiang[];
+const GX_DIST = (() => {
+  const v = Object.values(GUANGXIANG.values), n: Record<number, number> = {};
+  for (const a of v) for (const b of v) for (const c of v) for (const d of v) n[a * b * c * d] = (n[a * b * c * d] ?? 0) + 1;
+  return n;
+})();
+
+/** 廣象徹微(pp. 459–483):年月日時支序 / 干序除 4 之餘(0 作 4)定四畫,卦數為四畫之積。 */
+export function heluoGuangxiang(pillars: readonly string[]): HeluoGuangxiang {
+  const side = (pick: (gz: string) => number) => {
+    const xiang = pillars.map((gz) => XIANG[(pick(gz) % 4 || 4) - 1]!);
+    return { xiang, product: xiang.reduce((a, x) => a * GUANGXIANG.values[x], 1) };
+  };
+  return {
+    branch: side((gz) => BRANCH.indexOf(gz[1]!) + 1),
+    stem: side((gz) => (TIANGAN as readonly string[]).indexOf(gz[0]!) + 1),
+    dist: GX_DIST,
+  };
+}
 
 /**
  * 小象流年(卷一 pp. 37–38):陰爻六年,由本爻起逐年變一爻向上;
@@ -258,10 +314,15 @@ export function castHeluo(input: BirthInput): HeluoResult {
     `化工:生於${earthDays ? `${next4.name}前十八日土旺` : `${period.from}後${period.to}前`},化工屬 ${hg.join("、")};先後天卦${huagong.has ? "有化工" : "無化工"}${huagong.reversed ? ",且逢化工反" : ""}。`,
   ];
 
+  const jinsuo = heluoJinsuo(pillars, ec.getYearNaYin().slice(-1) as NayinWx);
+  const guangxiang = heluoGuangxiang(pillars);
+
   return {
     pillars, heaven, earth, heavenNumber, earthNumber, heavenTrigram, earthTrigram, yuan,
     xiantian, yuantang, houtian, houtianYuantang, houtianAge, yuanqi, huagong, dayun, liunian, steps,
     tier: "classical",
     cite: { work: "河洛理數", author: "題陳摶、邵雍", year: 1632, locator: "卷一起例(陳仁錫刻本,文明書局石印)" },
+    jinsuo, guangxiang,
+    ggzCite: { work: "河洛理數 範衍 廣象徹微初集", author: "題陳摶、邵雍", year: 1606, locator: `故宮珍本叢刊 GGZBCK405,金鎖銀匙 pp. ${JINSUO.page.join("–")},廣象徹微 pp. ${GUANGXIANG.page.join("–")}` },
   };
 }

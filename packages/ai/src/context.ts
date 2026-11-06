@@ -425,8 +425,11 @@ ${step(ep.steps)}`;
     if (hl) {
       const yun = hl.dayun.map((d) => `${d.phase}第${d.line}爻 ${d.fromAge}–${d.toAge} 歲`).join(";");
       const ln = hl.liunian.find((y) => y.year === new Date().getFullYear());
+      const gb = hl.guangxiang.branch.product, gs = hl.guangxiang.stem.product;
+      const share = (n: number) => `${Math.round((hl.guangxiang.dist[n]! / 256) * 1000) / 10}%`;
       cycleBlock += `
 - 河洛理數:天數 ${hl.heaven}、地數 ${hl.earth};先天 ${hl.xiantian.name}(元堂第 ${hl.yuantang} 爻),${hl.houtianAge} 歲換後天 ${hl.houtian.name}(元堂第 ${hl.houtianYuantang} 爻);元氣${hl.yuanqi.tian || hl.yuanqi.di ? "有" : "無"}${hl.yuanqi.reversed ? "(逢相反)" : ""},化工${hl.huagong.has ? "有" : "無"}${hl.huagong.reversed ? "(逢反)" : ""}。大運:${yun}。${ln ? `${ln.year} 年(${ln.age} 歲)流年卦 ${ln.hex.name} 第 ${ln.line} 爻(小象)。` : ""}層級 ${TIER_ZH[hl.tier]};出處 ${cite(hl.cite)}。
+- 河洛理數續(金鎖銀匙、廣象徹微):金鎖銀匙年柱納音屬${hl.jinsuo.nayin},順數 ${hl.jinsuo.forward}、逆數 ${hl.jinsuo.reverse}(查詩表編號,詩表未入庫)。廣象徹微:四柱支 ${hl.guangxiang.branch.xiang.join("")} 積 ${gb},256 卦中 ${hl.guangxiang.dist[gb]} 卦同積(${share(gb)});干 ${hl.guangxiang.stem.xiang.join("")} 積 ${gs},${hl.guangxiang.dist[gs]} 卦同積(${share(gs)})。層級 ${TIER_ZH[hl.tier]};出處 ${cite(hl.ggzCite)}。
 ${step(hl.steps)}`;
     }
     const qz = cycles.qizheng;
