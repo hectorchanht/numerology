@@ -121,3 +121,36 @@ test("卷中四例:先天、元堂、後天同書合;屯例只屬陽偏", async 
 test("卷中祿數即四象策數", () => {
   assert.deepEqual(Object.values(D.juanZhong.luShu.values), [4 * 9, 4 * 7, 4 * 6, 4 * 8]);
 });
+
+test("卷下七十二候:卦序同 guaqi,冬至頤四;中氣值卿卦四爻、節值侯卦初爻", () => {
+  const G = JSON.parse(readFileSync(new URL("../../knowledge/data/heluo-lishu.json", import.meta.url), "utf8")).guaqi.months;
+  const order = ["大雪", "小寒", "立春", "驚蟄", "清明", "立夏", "芒種", "小暑", "立秋", "白露", "寒露", "立冬"];
+  const flat = order.flatMap((m) => G[m]);
+  const seq = [...flat.slice(2), ...flat.slice(0, 2)];
+  const Q = D.juanXia.qihou;
+  assert.equal(seq[0], Q.start.hex);
+  const at = (n) => ({ hex: seq[Math.floor((n + 3) / 6) % 60], line: ((n + 3) % 6) + 1 });
+  assert.deepEqual(at(0), Q.start);
+  for (let k = 0; k < 12; k++) {
+    assert.deepEqual(at(30 * k), { hex: G[order[k]][2], line: 4 }); // 中氣
+    assert.deepEqual(at(15 + 30 * k), { hex: G[order[(k + 1) % 12]][0], line: 1 }); // 節
+  }
+});
+
+test("卷下先天策數:中孚上九 12685、睽九二 4423", () => {
+  const XT = { 111: 1, 110: 2, 101: 3, 100: 4, "011": 5, "010": 6, "001": 7, "000": 8 };
+  const ce = (bits, k) => {
+    const Z = bits.reduce((s, b) => s + (b ? 36 : 24), 0);
+    const L = XT[bits.slice(0, 3).join("")], U = XT[bits.slice(3).join("")];
+    return k > 3 ? 10 * k * Z + U * Z + Z + U + L + k : 10 * L * Z + k * Z + Z + U + L + k;
+  };
+  for (const e of D.juanXia.ceShu.examples) assert.equal(ce(bitsOf(e.hex), e.line), e.value, e.hex);
+});
+
+test("卷下伊川僕例:乾九四,十九歲流年仍乾", () => {
+  const c = D.juanXia.cases[0];
+  const r = cast(c.date);
+  assert.deepEqual(r.pillars, c.pillars);
+  assert.deepEqual([r.heaven, r.xiantian.name, r.yuantang], [c.heaven, c.xiantian, c.yuantang]);
+  assert.equal(r.liunian.find((y) => y.age === c.age).hex.name, c.liunian);
+});
