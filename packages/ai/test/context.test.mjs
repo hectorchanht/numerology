@@ -106,3 +106,10 @@ test("流月±1:农历初一/三十都得三個連續不同月", async () => {
   }
   assert.ok(found);
 });
+
+test("立春前(2026-01-20)預設參考年 → 八字流月段仍在,當前月腊己丑", () => {
+  const now = new Date("2026-01-20T12:00:00+08:00");
+  const md = buildContextPack(chart, analyzeFortune(birth, { now }), { now }).markdown;
+  assert.ok(md.includes("### 八字流月(当前月±1)"), "流月段唔應被丟");
+  assert.ok(md.includes("腊月 己丑") && md.includes("【当前月】"));
+});

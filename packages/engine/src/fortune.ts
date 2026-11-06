@@ -105,7 +105,8 @@ const SIHUA_ORDER: SihuaType[] = ["禄", "权", "科", "忌"];
  * - 八字:每步大運/窗口內流年的十神 + 是否引動喜用神(補救/受困信號)
  * - 紫微:大限 / 流年四化飛入本命哪個宮
  *
- * @param opts.referenceYear 參考年(默認當前年);用於標記"當前所處運/年"。
+ * @param opts.referenceYear 參考年(默認 now 所屬干支年,以立春分界);用於標記"當前所處運/年"。
+ * @param opts.now           「而家」(默認 new Date());以北京時間比對節氣。
  * @param opts.yearsAhead    向後展開的流年數(默認 8)。
  * @param opts.yearsBack     向前回看的流年數(默認 0;>0 時納入已過年份供"回看驗證")。
  */
@@ -115,7 +116,16 @@ export function analyzeFortune(
 ): FortuneAnalysis {
   validateBirthInput(input);
   const now = opts.now ?? new Date();
-  const referenceYear = opts.referenceYear ?? now.getFullYear();
+  // lunar-javascript 節氣時刻係北京時間:「而家」一律換成 UTC+8 牆鐘時間先比,唔受伺服器時區影響。
+  const bj = new Date(now.getTime() + 8 * 3600_000);
+  const nowYmdHms = Solar.fromYmdHms(
+    bj.getUTCFullYear(), bj.getUTCMonth() + 1, bj.getUTCDate(), bj.getUTCHours(), bj.getUTCMinutes(), bj.getUTCSeconds(),
+  ).toYmdHms();
+  // 預設參考年 = 「而家」所屬干支年(以立春分界),唔係公曆年:1 月至立春前仍屬上一個流年,
+  // 流年 isReference / 大運 isCurrent / 流月當前月 / 紫微參考年先會一致。
+  const bjYear = bj.getUTCFullYear();
+  const referenceYear = opts.referenceYear
+    ?? (nowYmdHms < jieQiTable(bjYear)["立春"]!.toYmdHms() ? bjYear - 1 : bjYear);
   const yearsAhead = opts.yearsAhead ?? 8;
   const yearsBack = opts.yearsBack ?? 0;
   const windowEnd = referenceYear + yearsAhead;
@@ -231,11 +241,10 @@ export function analyzeFortune(
   const refLiuNian = rawDaYun.flatMap((d) => d.getLiuNian()).find((y) => y.getYear() === referenceYear);
   // 流年 referenceYear 嘅流月由立春起、至翌年立春止(子/丑月落喺翌年公曆 1 月)。
   // 以節氣表實際交節時刻判定「而家」落喺邊個月,唔可以用公曆年 + 月支對(立春前會錯位)。
-  const jq = Solar.fromYmd(referenceYear, 6, 1).getLunar().getJieQiTable();
+  const jq = jieQiTable(referenceYear);
   const monthStarts = [
     "立春", "惊蛰", "清明", "立夏", "芒种", "小暑", "立秋", "白露", "寒露", "立冬", "大雪", "XIAO_HAN", "LI_CHUN",
   ].map((k) => jq[k]!.toYmdHms());
-  const nowYmdHms = Solar.fromDate(now).toYmdHms();
   const liuYue: LiuYueAnalysis[] = (refLiuNian?.getLiuYue() ?? []).map((m) => {
     const ganZhi = m.getGanZhi();
     const i = m.getIndex();
@@ -274,6 +283,9 @@ export function analyzeFortune(
     ziwei: { decadal, yearly },
   };
 }
+
+/** 公曆 year 年中所屬農曆年嘅節氣表(含該年立春至翌年立春)。 */
+const jieQiTable = (year: number) => Solar.fromYmd(year, 6, 1).getLunar().getJieQiTable();
 
 interface RawPalace {
   index: number;
