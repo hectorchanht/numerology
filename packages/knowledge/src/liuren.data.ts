@@ -4,7 +4,7 @@ const LIUREN_DATA = {
   "meta": {
     "tier": "classical",
     "name": "大六壬起課規則:月將、天地盤、寄宮、四課、九宗門三傳、天乙貴人、十二天將",
-    "schema": "cite ; yuejiang:{rule,cite,values,book} ; shenName:{cite,values} ; tianDiPan ; jigong:{cite,values} ; sike:{rule,tier,cite} ; guiren:{values:{干:{day,night}},evidence,note} ; dayNight:{day,night,tier} ; direction:{forward,backward,cite} ; jiang:{values,cite} ; methods:[{id,name,sub,cite,rule,modern?:[{tier,item,note}]}] ; xing ; xun:{rule,cite,cites,evidence} ; liuqin:{rule,values,cite,cites,evidence} ; shensha:{rule,items:[{name,by,values,cite,cites?,note?}],rejected} ; shehai:{rule,steps,modern,workedCounts,cite} ; errata ; examples:[{id,juan,day,hour,jiang,bookName,quote,expected:{method,sub,chu,zhong,mo},bookSanChuan?,bookSource?,note?}]",
+    "schema": "cite ; yuejiang:{rule,cite,values,book} ; shenName:{cite,values} ; tianDiPan ; jigong:{cite,values} ; sike:{rule,tier,cite} ; guiren:{values:{干:{day,night}},evidence,note} ; dayNight:{day,night,tier} ; direction:{forward,backward,cite} ; jiang:{values,cite} ; methods:[{id,name,sub,cite,rule,modern?:[{tier,item,note}]}] ; xing ; xun:{rule,cite,cites,evidence,note,modern} ; liuqin:{rule,values,cite,cites,evidence} ; shensha:{rule,items:[{name,by,values,cite,cites?,note?}],rejected} ; shehai:{rule,steps,modern,workedCounts,cite} ; errata ; examples:[{id,juan,day,hour,jiang,bookName,quote,expected:{method,sub,chu,zhong,mo},bookSanChuan?,bookSource?,note?}]",
     "source": "《六壬大全》十二卷,不著撰人,懷慶府推官郭載騋校,明刊;四庫全書本,維基文庫 https://zh.wikisource.org/wiki/六壬大全_(四庫全書本) 卷01–12 原文逐字核對。只錄起課規則同書中課例日辰、占時、月將,唔錄課體吉凶斷語。",
     "version": "0.1.0",
     "reviewed": false,
@@ -583,7 +583,14 @@ const LIUREN_DATA = {
         "cite": "卷09 甲子日午加申為末傳「外後旬之空亡」(甲申旬)"
       }
     ],
-    "note": "書無逐步算式,只有旬中遁干、旬空之名及上列書例;本表以六十甲子次序推,書例逐條驗合。"
+    "note": "書無逐步算式,只有旬中遁干、旬空之名及上列書例;本表以六十甲子次序推,書例逐條驗合。",
+    "modern": [
+      {
+        "tier": "modern",
+        "item": "遁干算式",
+        "note": "書只有遁干、旬空之名及例,算式據例反推(本站取法)。旬空兩支十干不到屬書明文(卷07「十干不到之地」),仍為 classical。"
+      }
+    ]
   },
   "liuqin": {
     "rule": "以日干五行對三傳各支五行:生日干者父母,日干所生者子孫,剋日干者官鬼,日干所剋者妻財,同五行者兄弟。支五行依卷02 十二神(亥子水、寅卯木、巳午火、申酉金、辰戌丑未土)。",

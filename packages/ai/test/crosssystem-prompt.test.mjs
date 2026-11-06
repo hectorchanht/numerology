@@ -90,6 +90,7 @@ test("crossSystemFacts:附大六壬出生課", () => {
   assert.ok(f.includes(`旬首 ${liuren.xun.shou}、旬空 ${liuren.xun.kong.join("")}`));
   assert.ok(f.includes(`${c0.zhi}(${c0.dun ? `遁${c0.dun}` : "空亡"}、${c0.qin})`));
   assert.ok(f.includes("神煞落三傳四課"));
+  assert.ok(f.includes("遁干算式屬本站取法"));
 });
 
 test("crosssystem 指令:幻方落點只稱巧合或象徵,不下統計結論", () => {
