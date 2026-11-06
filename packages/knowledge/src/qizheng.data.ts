@@ -4,7 +4,7 @@ const QIZHENG_DATA = {
   "meta": {
     "tier": "scholarly",
     "name": "七政四餘:二十八宿古宿度、距星現代座標、七政名稱、四餘定義與推算公式",
-    "schema": "mansions:{n,name,star,hip,raJ2000,decJ2000,lonJ2000,ancientDeg,attachedTo?,variants?};seven:{body,name,alias};yu:{id,name,definition,formula,tier,cite,variants?};ziqi:{epochJd,lonAtEpoch,degPerDay,source,note};gong:{boundaries:{zhi,ci,xiu,deg}[],cite,variants,ciCite,note}",
+    "schema": "mansions:{n,name,star,hip,raJ2000,decJ2000,lonJ2000,ancientDeg,attachedTo?,variants?};seven:{body,name,alias};yu:{id,name,definition,formula,tier,cite,variants?};ziqi:{epochJd,lonAtEpoch,degPerDay,source,note};gong:{boundaries:{zhi,ci,xiu,deg}[],cite,variants,ciCite,note,houses,housesCite,mingCite}",
     "source": "古宿度:《六壬大全》卷十一(四庫全書本,維基文庫 六壬大全_(四庫全書本)/卷11)。距星座標:SIMBAD(CDS,經 simbad.harvard.edu 鏡像 TAP 查詢)ICRS J2000 赤經赤緯,HIP 號為 Hipparcos 星表編號;以黃赤交角 23.4392911° 換算 J2000 黃經(換算腳本不入 repo)。四餘:《星學大成》《張果星宗》《推步捷例》《清史稿》卷45、《古今圖書集成·曆法典》第058卷(崇禎曆書)、《御製曆象考成後編》卷8,皆維基文庫公版原文。 十二宮過宮度:《星學大成》卷一〈約二十八宿過宫度數歌〉,對校《張果星宗》卷一〈度数所在〉;次名:《晉書》卷十一〈天文志上〉。",
     "version": "1",
     "reviewed": false,
@@ -554,7 +554,23 @@ const QIZHENG_DATA = {
       "《星學大成》同歌末:「以上度數特其槩耳其詳具於三辰通載」;《三辰通載》詳表未見公版錄文(《張果星宗》卷十二〈三辰通載〉只存序,卷三「钦天监校正授时过宫度图」缺圖)。"
     ],
     "ciCite": "次名只取與辰(地支)之對應:《晉書》卷十一〈天文志上·十二次度數〉「自軫十二度至氐四度爲壽星」至「自張十七度至軫十一度爲鶉尾」,各次下記「於辰在」某支;亥次《晉書》作「自危十六度至奎四度爲諏訾」,《讀史方輿紀要》卷一百三十引《帝王世紀》小注「豕韋亦曰娵訾」,本站用通行寫法娵訾。《晉書》次界度數同星家過宮度不同,不用。",
-    "note": "本站讀法(本站取法,tier modern):「某宿 N 度」= 該宿初度之後第 N 度起,即宿內古度 ≥ N 入下一宮;界度套用《六壬大全》卷十一古宿度表(錨定角宿距星),十二宮闊 28–33 古度,合 365。"
+    "note": "本站讀法(本站取法,tier modern):「某宿 N 度」= 該宿初度之後第 N 度起,即宿內古度 ≥ N 入下一宮;界度套用《六壬大全》卷十一古宿度表(錨定角宿距星),十二宮闊 28–33 古度,合 365。",
+    "houses": [
+      "命宮",
+      "財帛",
+      "兄弟",
+      "田宅",
+      "男女",
+      "奴僕",
+      "妻妾",
+      "疾厄",
+      "遷移",
+      "官祿",
+      "福德",
+      "相貌"
+    ],
+    "housesCite": "《星學大成》卷四〈觀星節要·星盤或問〉:「一命宫二財帛三兄弟四田宅五男女六奴僕」「七妻妾八疾厄九遷移十官禄」「十一福德十二相貌」;排向:《張果星宗》卷二〈天马地驿〉(簡體錄文)「甲生人寅上安命」「从寅上起丙顺数至巳官禄得己巳」,命寅而官祿(第十宮)在巳,即由命宮逆地支次序排十二宮。",
+    "mingCite": "《張果星宗》卷八(簡體錄文):「以生时加在太阳度上，则知安命在何宫」;《星學大成》卷四:「星家既以太陽數至卯為命」;卷一:「天盤轉出地盤上卯上分明是命宫」。即以太陽所在宮加生時地支,順數至卯,卯上之宮為命宮:命宮支序 = 太陽宮支序 + 3 − 生時支序(子 0 … 亥 11,mod 12)。"
   }
 };
 

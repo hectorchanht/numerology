@@ -86,3 +86,10 @@ test("十二宮過宮界:12 支各一、界宿非觜、界度 < 宿闊、宮闊 
   assert.ok(QIZHENG_GONG.variants.some((v) => v.includes("張果星宗")));
 });
 
+test("十二宮名:命宮起逆排 12 宮;安命規則有出處", async () => {
+  const { QIZHENG_GONG } = await import("../dist/index.js");
+  assert.deepEqual(QIZHENG_GONG.houses, ["命宮", "財帛", "兄弟", "田宅", "男女", "奴僕", "妻妾", "疾厄", "遷移", "官祿", "福德", "相貌"]);
+  assert.ok(QIZHENG_GONG.mingCite.includes("卯"));
+  assert.ok(QIZHENG_GONG.housesCite.includes("官禄"));
+});
+

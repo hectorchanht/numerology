@@ -14,12 +14,18 @@ export interface QizhengBody {
   ancient: { name: string; degree: number };
   /** 所落宮(地支 + 十二次名),按《星學大成》過宮度於古宿度上定 */
   gong: { zhi: string; ci: string };
+  /** 所落宮之十二宮名(命宮、財帛…) */
+  house: string;
   retrograde?: boolean;
 }
 
 export interface QizhengResult {
   utc: string;
   bodies: QizhengBody[];
+  /** 命宮:太陽所在宮加生時地支,數至卯 */
+  minggong: { zhi: string; ci: string; hourZhi: string; sunZhi: string };
+  /** 十二宮:由命宮起逆地支次序排 */
+  houses: { name: string; zhi: string; ci: string }[];
   variants: string[];
   steps: string[];
   tier: "classical";
@@ -34,11 +40,13 @@ const DAY = 86400000;
 /** 一般歲差 50.29″/年(黃經)。ponytail: 當全部距星同速,忽略黃緯與黃道移動項(1900–2100 誤差約 0.01° 級);要更準就改用 astronomy-engine Rotation_EQJ_ECT 轉距星赤道座標。 */
 const PRECESSION_DEG_PER_YEAR = 50.29 / 3600;
 
+const ZHI = "子丑寅卯辰巳午未申酉戌亥";
 const ANC_START: Record<string, number> = {};
 { let acc = 0; for (const m of QIZHENG_MANSIONS) { ANC_START[m.name] = acc; acc += m.ancientDeg; } }
 /** 過宮界按周天古度位置排序;位置 < 最小界即屬最末界之宮(辰,跨角宿) */
 const GONG_AT = QIZHENG_GONG.boundaries.map((b) => ({ zhi: b.zhi, ci: b.ci, pos: ANC_START[b.xiu]! + b.deg })).sort((a, b) => a.pos - b.pos);
 const gongOf = (x: number) => { let g = GONG_AT[GONG_AT.length - 1]!; for (const b of GONG_AT) if (x >= b.pos) g = b; return { zhi: g.zhi, ci: g.ci }; };
+const ciOf = (zhi: string) => GONG_AT.find((g) => g.zhi === zhi)!.ci;
 
 /** 某黃經(回歸)於時刻 ms(UTC 毫秒)所落現代宿同古宿;距星歲差後為宿起點 */
 export function qizhengMansionAt(longitude: number, ms: number) {
@@ -80,9 +88,17 @@ export function castQizheng(input: BirthInput): QizhengResult {
   for (const y of QIZHENG_YU) raw.push({ id: y.id, name: y.name, kind: "餘", lon: yuLon[y.id]![0], retro: yuLon[y.id]![1] });
 
   const placed = raw.map((r) => ({ r, at: qizhengMansionAt(r.lon, ms) }));
+  // 命宮:日宮加生時(鐘面時支),數至卯 → 命宮支序 = 日宮 + 卯(3) − 時支
+  const sunZhi = placed[0]!.at.gong.zhi;
+  const hourZhi = ZHI[Math.floor((input.hour + 1) / 2) % 12]!;
+  const mi = (ZHI.indexOf(sunZhi) + 3 - ZHI.indexOf(hourZhi) + 12) % 12;
+  const houses = QIZHENG_GONG.houses.map((name, k) => { const zhi = ZHI[(mi - k + 12) % 12]!; return { name, zhi, ci: ciOf(zhi) }; });
+  const minggong = { zhi: houses[0]!.zhi, ci: houses[0]!.ci, hourZhi, sunZhi };
+
   const bodies = placed.map(({ r, at }): QizhengBody => ({
     id: r.id, name: r.name, kind: r.kind, longitude: r.lon,
-    mansion: at.modern, ancient: at.ancient, gong: at.gong, retrograde: r.retro,
+    mansion: at.modern, ancient: at.ancient, gong: at.gong,
+    house: houses.find((h) => h.zhi === at.gong.zhi)!.name, retrograde: r.retro,
   }));
 
   const steps = [
@@ -92,17 +108,18 @@ export function castQizheng(input: BirthInput): QizhengResult {
     `距星黃經由 J2000 加歲差 ${((PRECESSION_DEG_PER_YEAR * (ms - J2000_MS)) / (DAY * 365.25)).toFixed(4)}°(50.29″/年)推到出生日;某點宿 = 黃經 ≥ 該宿距星而 < 下一宿距星。`,
     "古宿度以角宿距星為起點,現代度 × 365 / 360 化古度,按《六壬大全》卷十一宿度表累計;觜附參,參宿範圍包觜。",
     "十二宮按《星學大成》卷一〈約二十八宿過宫度數歌〉過宮度(氐一過卯…軫九辰)於古宿度上分界;次名取《晉書·天文志》。",
-    ...bodies.map((b) => `${b.name} ${dms(b.longitude)}:現代 ${b.mansion.name}宿 ${dms(b.mansion.degree)},古度 ${b.ancient.name}宿 ${dms(b.ancient.degree)},${b.gong.zhi}宮${b.gong.ci}${b.retrograde ? "(逆行)" : ""}。`),
+    `命宮:太陽在${sunZhi}宮,加生時${hourZhi}(鐘面時),數至卯 → 命宮在${minggong.zhi}(${minggong.ci});十二宮由命宮逆排(《張果星宗》《星學大成》)。`,
+    ...bodies.map((b) => `${b.name} ${dms(b.longitude)}:現代 ${b.mansion.name}宿 ${dms(b.mansion.degree)},古度 ${b.ancient.name}宿 ${dms(b.ancient.degree)},${b.gong.zhi}宮${b.gong.ci}(${b.house})${b.retrograde ? "(逆行)" : ""}。`),
   ];
 
   return {
-    utc: eph.utc, bodies,
+    utc: eph.utc, bodies, minggong, houses,
     variants: [
       "羅計分歧:《張果星宗》《清史稿》以升交為羅睺、降交為計都;《推步捷例》以正交為計都,與此對調。",
       "古宿度表(《六壬大全》卷十一)各曆初度取 1 度為概數;《星學大成》度歌讀法見知識表 variants。",
-      "過宮度:《張果星宗》卷一〈度数所在〉斗、女、張、軫四界比《星學大成》各晚 1 度。",
+      "過宮度:《張果星宗》卷一〈度数所在〉斗、女、張、軫四界比《星學大成》各晚 1 度;命宮用鐘面時支,未計真太陽時,只定到宮。",
     ],
     steps, tier: "classical",
-    cite: { work: "六壬大全(四庫全書本)/星學大成/張果星宗/推步捷例/清史稿", locator: "六壬大全卷十一;星學大成卷一;清史稿卷四十五〈時憲志一〉" },
+    cite: { work: "六壬大全(四庫全書本)/星學大成/張果星宗/推步捷例/清史稿", locator: "六壬大全卷十一;星學大成卷一、卷四;張果星宗卷一、卷二、卷八;清史稿卷四十五〈時憲志一〉" },
   };
 }

@@ -117,6 +117,27 @@ test("十二宮:過宮界(星學大成)兩側分屬兩宮;軫九→角→氐一�
   }
   for (const [x, d] of [["軫", 9.5], ["角", 0], ["角", 12], ["亢", 3], ["氐", 0.9]]) assert.equal(qizhengMansionAt(lonOfAnc(x, d), ms0).gong.zhi, "辰", `${x}${d}`);
   assert.equal(qizhengMansionAt(lonOfAnc("危", 12.5), ms0).gong.ci, "娵訾");
-  for (const b of r.bodies) assert.ok(b.gong.zhi && b.gong.ci, b.id);
+  for (const b of r.bodies) assert.ok(b.gong.zhi && b.gong.ci && b.house, b.id);
 });
 
+test("命宮:日宮加生時數至卯;卯時命宮 = 日宮,午時逆退三宮;十二宮由命宮逆排", () => {
+  const Z = "子丑寅卯辰巳午未申酉戌亥";
+  const base = { year: 2024, month: 6, day: 15, minute: 0, gender: "男" };
+  const sunZ = (h) => castQizheng({ ...base, hour: h }).bodies.find((b) => b.id === "Sun").gong.zhi;
+  const at6 = castQizheng({ ...base, hour: 6 });
+  assert.equal(at6.minggong.hourZhi, "卯");
+  assert.equal(at6.minggong.zhi, sunZ(6));
+  const at12 = castQizheng({ ...base, hour: 12 });
+  assert.equal(at12.minggong.hourZhi, "午");
+  assert.equal(Z.indexOf(at12.minggong.zhi), (Z.indexOf(sunZ(12)) + 3 - 6 + 12) % 12);
+  assert.equal(castQizheng({ ...base, hour: 23 }).minggong.hourZhi, "子");
+  // 十二宮:命宮起逆地支次序;第十宮官祿 = 命宮支 − 9
+  const h = at12.houses;
+  assert.equal(h.length, 12);
+  assert.equal(h[0].name, "命宮");
+  assert.equal(h[0].zhi, at12.minggong.zhi);
+  assert.equal(h[9].name, "官祿");
+  assert.equal(Z.indexOf(h[9].zhi), (Z.indexOf(h[0].zhi) + 12 - 9) % 12);
+  // 各曜宮名 = 所落宮之十二宮名
+  for (const b of at12.bodies) assert.equal(b.house, h.find((x) => x.zhi === b.gong.zhi).name);
+});
