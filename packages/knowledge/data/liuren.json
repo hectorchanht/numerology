@@ -2,7 +2,7 @@
   "meta": {
     "tier": "classical",
     "name": "大六壬起課規則:月將、天地盤、寄宮、四課、九宗門三傳、天乙貴人、十二天將",
-    "schema": "cite ; yuejiang:{rule,cite,values,book} ; shenName:{cite,values} ; tianDiPan ; jigong:{cite,values} ; sike:{rule,tier,cite} ; guiren:{values:{干:{day,night}},evidence,note} ; dayNight:{day,night,tier} ; direction:{forward,backward,cite} ; jiang:{values,cite} ; methods:[{id,name,sub,cite,rule,modern?:[{tier,item,note}]}] ; xing ; xun:{rule,cite,cites,evidence} ; liuqin:{rule,values,cite,cites,evidence} ; shehai:{rule,steps,modern,workedCounts,cite} ; errata ; examples:[{id,juan,day,hour,jiang,bookName,quote,expected:{method,sub,chu,zhong,mo},bookSanChuan?,bookSource?,note?}]",
+    "schema": "cite ; yuejiang:{rule,cite,values,book} ; shenName:{cite,values} ; tianDiPan ; jigong:{cite,values} ; sike:{rule,tier,cite} ; guiren:{values:{干:{day,night}},evidence,note} ; dayNight:{day,night,tier} ; direction:{forward,backward,cite} ; jiang:{values,cite} ; methods:[{id,name,sub,cite,rule,modern?:[{tier,item,note}]}] ; xing ; xun:{rule,cite,cites,evidence} ; liuqin:{rule,values,cite,cites,evidence} ; shensha:{rule,items:[{name,by,values,cite,cites?,note?}],rejected} ; shehai:{rule,steps,modern,workedCounts,cite} ; errata ; examples:[{id,juan,day,hour,jiang,bookName,quote,expected:{method,sub,chu,zhong,mo},bookSanChuan?,bookSource?,note?}]",
     "source": "《六壬大全》十二卷,不著撰人,懷慶府推官郭載騋校,明刊;四庫全書本,維基文庫 https://zh.wikisource.org/wiki/六壬大全_(四庫全書本) 卷01–12 原文逐字核對。只錄起課規則同書中課例日辰、占時、月將,唔錄課體吉凶斷語。",
     "version": "0.1.0",
     "reviewed": false,
@@ -298,6 +298,25 @@
       { "gan": "戊", "zhi": "丑", "qin": "兄弟", "cite": "卷10「生起干上之丑為兄弟爻」(戊午日)" }
     ],
     "note": "只按單支五行論。卷10 另有三傳合局整體論六親(如戊寅日「三傳戌午寅火局皆作父母爻」),未收;合局時單支所標(戌為兄弟)與書異。卷10 亦稱子孫為「子息爻」、妻財為「財爻」。"
+  },
+  "shensha": {
+    "rule": "神煞按日干、日支或日之旬取支;凡落三傳(初中末)或四課上神者標出所在。只收書中有明表或明文取法者。",
+    "items": [
+      { "name": "日德", "by": "日干", "values": { "甲": "寅", "乙": "申", "丙": "巳", "丁": "亥", "戊": "巳", "己": "寅", "庚": "申", "辛": "巳", "壬": "亥", "癸": "巳" }, "cite": "卷01「日徳　寅申巳亥巳寅申己亥已」", "cites": ["卷06「乙徳在庚訪好人辛居丙上丁壬位」", "卷06「癸向戊中求」"], "note": "卷01 十天干神煞表,依甲至癸次序;表中「己」「已」當作「巳」(地支無己)。卷06 心鏡陰干之德附合干之寄宮,與表合。" },
+      { "name": "日祿", "by": "日干", "values": { "甲": "寅", "乙": "卯", "丙": "巳", "丁": "午", "戊": "巳", "己": "午", "庚": "申", "辛": "酉", "壬": "亥", "癸": "子" }, "cite": "卷01「日禄　寅夘己午己午申酉亥子」", "note": "卷01 十天干神煞表;「己」當作「巳」。" },
+      { "name": "驛馬", "by": "日支", "values": { "子": "寅", "丑": "亥", "寅": "申", "卯": "巳", "辰": "寅", "巳": "亥", "午": "申", "未": "巳", "申": "寅", "酉": "亥", "戌": "申", "亥": "巳" }, "cite": "卷01「支馬　寅亥申己寅亥申己寅亥申己」", "cites": ["卷06「記年驛馬月驛馬日驛馬時驛馬」"], "note": "卷01 十二地支神煞表名「支馬」,依子至亥次序;「己」當作「巳」。本站只取日支驛馬。" },
+      { "name": "干奇", "by": "日干", "values": { "甲": "午", "乙": "巳", "丙": "辰", "丁": "卯", "戊": "寅", "己": "丑", "庚": "未", "辛": "申", "壬": "酉", "癸": "戌" }, "cite": "卷05「甲日午乙日己丙日辰丁日卯戊日寅」", "cites": ["卷05「己日丑庚日未辛日申壬日酉癸日戌」", "卷05「甲日用午丙竒辰乙巳丁卯」"], "note": "卷05 三奇課訂訛稱「干竒」,課文稱「日竒」;「乙日己」當作巳,同篇課文作「乙巳」。" },
+      { "name": "旬奇", "by": "旬", "values": { "甲子": "丑", "甲戌": "丑", "甲申": "子", "甲午": "子", "甲辰": "亥", "甲寅": "亥" }, "cite": "卷05「甲子甲戌旬用丑甲申甲午旬用子」", "cites": ["卷05「甲辰甲寅旬用亥此為旬三竒」", "卷05「甲申與甲午神后鎮相隨」"] },
+      { "name": "旬儀", "by": "旬", "values": { "甲子": "子", "甲戌": "戌", "甲申": "申", "甲午": "午", "甲辰": "辰", "甲寅": "寅" }, "cite": "卷05「甲子旬用子甲戌旬用戌」", "cites": ["卷05「此為旬六儀」"], "note": "旬儀即旬首之支。同篇「支儀」一表文字錯亂,未收。" },
+      { "name": "旬丁", "by": "旬", "values": { "甲子": "卯", "甲戌": "丑", "甲申": "亥", "甲午": "酉", "甲辰": "未", "甲寅": "巳" }, "cite": "卷06「旬丁者每旬丁干所值之神」", "note": "即旬遁丁干所臨之支(見 xun)。" }
+    ],
+    "rejected": [
+      { "name": "天馬", "reason": "卷06「天馬者正月起午順行六陽位也」按月起,書未明言月以節氣抑或月將分界;本站起課不立月建,未收。" },
+      { "name": "天喜", "reason": "卷01 月神表「天喜〔春戌夏丑秋辰…冬未」與他煞排印交錯,且按季,須立月建;未收。" },
+      { "name": "支儀", "reason": "卷05「此為支儀」一表文字錯亂,不能逐支還原;卷01「支儀」表與卷01 十干「儀神」表同序而所屬不明;未收。" },
+      { "name": "丁馬", "reason": "書多處言「丁馬」(卷06、卷07、卷09、卷10),未見獨立取法;旬丁、驛馬已分列。" },
+      { "name": "支德、日醫、福星、羊刃等卷01 表內其餘神煞", "reason": "本次只收題目所列及三奇六儀;卷01 表內其餘項未逐一校對,暫不收。" }
+    ]
   },
   "errata": [
     { "juan": "卷02", "item": "月將 未", "note": "「夏至後日躔鶉」脫「首」字,未將當作鶉首。" },

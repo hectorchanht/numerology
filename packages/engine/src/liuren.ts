@@ -1,7 +1,7 @@
 import { Solar } from "lunar-javascript";
 import {
   DIZHI, LIUREN_CITE, LIUREN_DAY_NIGHT, LIUREN_DIRECTION, LIUREN_GUIREN, LIUREN_JIANG, LIUREN_JIGONG, LIUREN_LIUQIN,
-  LIUREN_SHEN_NAME, LIUREN_XING, LIUREN_YUEJIANG, TIANGAN,
+  LIUREN_SHEN_NAME, LIUREN_SHENSHA, LIUREN_XING, LIUREN_YUEJIANG, TIANGAN,
 } from "@numerology/knowledge";
 import type { BirthInput } from "./types.js";
 import { resolveBirthDateTime } from "./solartime.js";
@@ -26,6 +26,8 @@ export interface LiurenResult {
   chuan: { zhi: string; dun: string | null; kong: boolean; qin: string }[];
   /** 四課上神是否旬空(一課至四課) */
   keKong: boolean[];
+  /** 神煞(LIUREN_SHENSHA 次序):所值之支、落於三傳 / 四課上神之位(未落則空) */
+  shenSha: { name: string; zhi: string; at: string[] }[];
   steps: string[];
   tier: "classical";
   cite: { work: string; locator: string };
@@ -178,6 +180,13 @@ export function castLiurenKe(p: { dayGan: string; dayZhi: string; hourZhi: strin
   const chuan = [sc.chu, sc.zhong, sc.mo].map((z) => ({ zhi: z, dun: xun.dun[z] ?? null, kong: xun.dun[z] === null, qin: liurenLiuqin(dayGan, z) }));
   const keKong = kes.map((k) => xun.dun[k.up] === null);
   steps.push(`旬遁:${dayGan}${dayZhi}在${xun.shou}旬,旬空 ${xun.kong.join("")};三傳遁干 ${chuan.map((c) => `${c.zhi}${c.dun ?? "(空亡)"}`).join("、")};六親 ${chuan.map((c) => `${c.zhi}${c.qin}`).join("、")}`);
+  const pos: [string, string][] = [["初傳", sc.chu], ["中傳", sc.zhong], ["末傳", sc.mo], ...kes.map((k, i): [string, string] => [`${"一二三四"[i]}課`, k.up])];
+  const shenSha = LIUREN_SHENSHA.map((s) => {
+    const zhi = s.values[s.by === "日干" ? dayGan : s.by === "日支" ? dayZhi : xun.shou]!;
+    return { name: s.name, zhi, at: pos.filter(([, z]) => z === zhi).map(([p]) => p) };
+  });
+  const hit = shenSha.filter((s) => s.at.length);
+  steps.push(`神煞:${hit.length ? hit.map((s) => `${s.name}${s.zhi}(${s.at.join("、")})`).join("、") : "所收神煞不落三傳四課"}`);
 
   const daytime = LIUREN_DAY_NIGHT.day.includes(hourZhi);
   const gz = LIUREN_GUIREN[dayGan]![daytime ? "day" : "night"];
@@ -192,7 +201,7 @@ export function castLiurenKe(p: { dayGan: string; dayZhi: string; hourZhi: strin
     yueJiang: { zhi: yueJiang, name: LIUREN_SHEN_NAME[yueJiang]! },
     tianPan, ke: kes, sanChuan: sc,
     guiren: { zhi: gz, daytime, forward },
-    jiang, xun: { shou: xun.shou, kong: xun.kong }, chuan, keKong, steps, tier: "classical", cite: LIUREN_CITE,
+    jiang, xun: { shou: xun.shou, kong: xun.kong }, chuan, keKong, shenSha, steps, tier: "classical", cite: LIUREN_CITE,
   };
 }
 

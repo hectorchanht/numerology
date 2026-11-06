@@ -150,3 +150,27 @@ test("六親:書例(liuqin.evidence)逐條推得;三傳逐支標六親", async (
   assert.deepEqual(r.chuan.map((c) => c.qin), ["子孫", "兄弟", "父母"]);
   assert.equal(liurenLiuqin("戊", "戌"), "兄弟"); // 辰戌丑未屬土
 });
+
+test("神煞:甲子日卯時子將逐項落位(三傳午卯子,四課上神亥申酉午)", () => {
+  const r = ke("甲子", "卯", "子");
+  const by = Object.fromEntries(r.shenSha.map((s) => [s.name, s]));
+  assert.deepEqual(by["日德"], { name: "日德", zhi: "寅", at: [] });
+  assert.deepEqual(by["干奇"].at, ["初傳", "四課"]);
+  assert.deepEqual(by["旬儀"].at, ["末傳"]);
+  assert.deepEqual(by["旬丁"].at, ["中傳"]);
+  assert.equal(by["驛馬"].zhi, "寅");
+  assert.equal(by["旬奇"].zhi, "丑");
+  assert.equal(r.shenSha.length, json.shensha.items.length);
+});
+
+test("神煞:卷05 乙酉日未時申將三傳亥子丑,旬奇子入傳", () => {
+  const r = ke("乙酉", "未", "申");
+  assert.deepEqual([r.sanChuan.chu, r.sanChuan.zhong, r.sanChuan.mo], ["亥", "子", "丑"]);
+  assert.deepEqual(r.shenSha.find((s) => s.name === "旬奇").at, ["中傳"]);
+});
+
+test("神煞:旬丁表同旬遁丁干所臨之支一致", async () => {
+  const { liurenXun } = await import("../dist/index.js");
+  const xd = json.shensha.items.find((s) => s.name === "旬丁");
+  for (const [shou, zhi] of Object.entries(xd.values)) assert.equal(liurenXun(shou[0], shou[1]).dun[zhi], "丁", shou);
+});

@@ -71,3 +71,15 @@ test("meta 未校對、classical;JSON 同內聯 data.ts 一致", async () => {
   const { default: inline } = await import("../dist/liuren.data.js");
   assert.deepEqual(inline, json);
 });
+
+test("神煞表:每項有卷次引文、鍵齊全、值俱為地支;rejected 有理由", async () => {
+  const { LIUREN_SHENSHA } = await import("../dist/index.js");
+  const keys = { 日干: TIANGAN, 日支: DIZHI, 旬: ["甲子", "甲戌", "甲申", "甲午", "甲辰", "甲寅"] };
+  assert.equal(LIUREN_SHENSHA.length, json.shensha.items.length);
+  for (const s of LIUREN_SHENSHA) {
+    assert.match(s.cite, /^卷\d\d「.{1,20}」/, s.name);
+    assert.deepEqual(Object.keys(s.values).sort(), [...keys[s.by]].sort(), s.name);
+    for (const v of Object.values(s.values)) assert.ok(DIZHI.includes(v), `${s.name} ${v}`);
+  }
+  for (const r of json.shensha.rejected) assert.ok(r.name && r.reason, r.name);
+});
