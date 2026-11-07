@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { allHexagrams } from "@numerology/knowledge";
-import { castHeluo, heluoMonths } from "../dist/index.js";
+import { castHeluo, heluoMonths, heluoYuantangZhen } from "../dist/index.js";
 
 // 《河洛真數》卷上同本站(《河洛理數》卷一)對校:本站規則合者用引擎驗,異說用真數自己嘅推法重算書例。
 const D = JSON.parse(readFileSync(new URL("../../knowledge/data/heluo-zhenshu.json", import.meta.url), "utf8"));
@@ -16,24 +16,8 @@ const houtian = (bits, line) => {
   return name([...f.slice(3), ...f.slice(0, 3)]);
 };
 
-/** 真數元堂:同性爻(一二重數、三不重、四五不重)數完,由最後一個同性爻向上循環寄異性爻。 */
-function yuantangZhen(bits, hour) {
-  const b = BR.indexOf(hour), yang = b < 6 ? 1 : 0, k = b % 6;
-  const same = [1, 2, 3, 4, 5, 6].filter((l) => bits[l - 1] === yang);
-  let seq = same.length <= 2 ? [...same, ...same] : [...same];
-  for (let l = seq[seq.length - 1]; seq.length < 6; ) {
-    l = (l % 6) + 1;
-    if (bits[l - 1] !== yang) seq.push(l);
-  }
-  return seq[k];
-}
-
-/** 真數乾坤純卦:數足六爻;男乾女坤由下而上;女乾、男坤冬至後夏至前由上而下。 */
-function pureZhen(hexName, hour, male, yangSeason) {
-  const k = (BR.indexOf(hour) % 6) + 1;
-  const down = (hexName === "乾" ? !male : male) && yangSeason;
-  return down ? 7 - k : k;
-}
+const yuantangZhen = (bits, hour) => heluoYuantangZhen(bits, BR.indexOf(hour), true, true);
+const pureZhen = (hexName, hour, male, yangSeason) => heluoYuantangZhen(bitsOf(hexName), BR.indexOf(hour), male, yangSeason);
 
 test("先賢十局:非純卦七局,本站引擎先後天同書合", () => {
   for (const c of D.cases.items.filter((c) => c.engine === true)) {
@@ -176,4 +160,13 @@ test("易卦釋義宮世月:合京房八宮同世爻月建,萃卦三世為刻誤
     // 陽世由子月(十一月)、陰世由午月(五月)起初爻
     if (c.month) assert.equal(c.month, b[s - 1] ? ((9 + s) % 12) + 1 : ((3 + s) % 12) + 1, c.hex);
   }
+});
+
+test("castHeluo 附真數寄位:三個純卦局真數元堂所得後天同書合", () => {
+  for (const c of D.cases.items.filter((c) => c.engine === false)) {
+    const z = cast(c.date).zhenshu;
+    assert.equal(z.same, false, c.name);
+    assert.equal(z.houtian.name, c.houtian, c.name);
+  }
+  for (const c of D.cases.items.filter((c) => c.engine === true)) assert.equal(cast(c.date).zhenshu.houtian.name, c.houtian, c.name);
 });

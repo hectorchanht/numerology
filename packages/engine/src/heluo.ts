@@ -82,6 +82,17 @@ export interface HeluoResult {
   /** 廣象徹微四象積數 */
   guangxiang: HeluoGuangxiang;
   ggzCite: Cite;
+  /** 《河洛真數》異本寄位法(元堂循環寄、純卦數足六爻);大運、流年仍按本站 */
+  zhenshu: HeluoZhenshu;
+}
+
+export interface HeluoZhenshu {
+  yuantang: number;
+  houtian: HeluoHex;
+  houtianYuantang: number;
+  /** 同本站元堂一致 */
+  same: boolean;
+  cite: Cite;
 }
 
 const TRI: Record<TrigramName, number[]> = {
@@ -238,6 +249,32 @@ function yuantangOf(bits: number[], branchIdx: number, pure: "順" | "逆"): num
   return seq[k]!;
 }
 
+/**
+ * 《河洛真數》元堂(起例卷上 pp. 46–55):同性爻(一二重數、三不重、四五不重)數完,
+ * 由最後一個同性爻向上循環寄異性爻;乾坤純卦數足六爻,男乾女坤由下而上,
+ * 女乾、男坤冬至後夏至前由上而下。
+ */
+export function heluoYuantangZhen(bits: number[], branchIdx: number, male: boolean, yangSeason: boolean): number {
+  const k = branchIdx % 6;
+  if (bits.every((b) => b === bits[0])) return ((bits[0] ? !male : male) && yangSeason) ? 6 - k : k + 1;
+  const yang = branchIdx < 6 ? 1 : 0;
+  const same = [1, 2, 3, 4, 5, 6].filter((l) => bits[l - 1] === yang);
+  const seq = same.length <= 2 ? [...same, ...same] : [...same];
+  for (let l = seq[seq.length - 1]!; seq.length < 6; ) {
+    l = (l % 6) + 1;
+    if (bits[l - 1] !== yang) seq.push(l);
+  }
+  return seq[k]!;
+}
+
+/** 換後天:變元堂爻、內外互換;三至尊卦九五陰令 / 上六陽月只變不換。 */
+function toHoutian(bits: number[], yuantang: number, xiantian: string, yangSeason: boolean) {
+  const flipped = bits.map((b, i) => (i + 1 === yuantang ? 1 - b : b));
+  const noSwap = HELUO_ZHIZUN.includes(xiantian) && ((yuantang === 5 && !yangSeason) || (yuantang === 6 && yangSeason));
+  const houBits = noSwap ? flipped : [...flipped.slice(3), ...flipped.slice(0, 3)];
+  return { noSwap, houBits, houtian: hexOf(houBits), houtianYuantang: noSwap ? yuantang : yuantang > 3 ? yuantang - 3 : yuantang + 3 };
+}
+
 /** 收集前後三年嘅節氣(簡體鍵,lunar-javascript 原樣)。 */
 function terms(year: number): { name: string; ms: number }[] {
   const out = new Map<number, string>();
@@ -295,12 +332,9 @@ export function castHeluo(input: BirthInput): HeluoResult {
   const branchIdx = BRANCH.indexOf(pillars[3][1]!);
   const yuantang = yuantangOf(bits, branchIdx, pure);
 
-  // 換後天:變元堂爻、內外互換;三至尊卦九五陰令 / 上六陽月只變不換
-  const flipped = bits.map((b, i) => (i + 1 === yuantang ? 1 - b : b));
-  const noSwap = HELUO_ZHIZUN.includes(xiantian.name) && ((yuantang === 5 && !yangSeason) || (yuantang === 6 && yangSeason));
-  const houBits = noSwap ? flipped : [...flipped.slice(3), ...flipped.slice(0, 3)];
-  const houtian = hexOf(houBits);
-  const houtianYuantang = noSwap ? yuantang : yuantang > 3 ? yuantang - 3 : yuantang + 3;
+  const { noSwap, houBits, houtian, houtianYuantang } = toHoutian(bits, yuantang, xiantian.name, yangSeason);
+  const zyt = heluoYuantangZhen(bits, branchIdx, male, yangSeason);
+  const zh = toHoutian(bits, zyt, xiantian.name, yangSeason);
 
   const dayun: HeluoYun[] = [];
   let age = 1;
@@ -354,6 +388,9 @@ export function castHeluo(input: BirthInput): HeluoResult {
     noSwap
       ? `${xiantian.name}為三至尊卦,元堂在${yuantang === 5 ? "九五、生於陰令" : "上六、生於陽月"},只變爻不換內外,後天 ${houtian.name},元堂仍在第 ${houtianYuantang} 爻。`
       : `元堂爻變、內外互換,後天 ${houtian.name},元堂移至第 ${houtianYuantang} 爻。`,
+    zyt === yuantang
+      ? "《河洛真數》寄位法(循環寄、純卦數足六爻)所得元堂相同。"
+      : `《河洛真數》寄位法(循環寄、純卦數足六爻)元堂在第 ${zyt} 爻,後天 ${zh.houtian.name}(元堂第 ${zh.houtianYuantang} 爻);本站大運、流年仍按卷一。`,
     `大運由元堂起陽爻九年、陰爻六年:先天行至 ${houtianAge - 1} 歲,${houtianAge} 歲換後天。`,
     "流年用小象:陰爻六年逐年由本爻向上各變一爻;陽爻九年,本爻(陽年不變、陰年即變)、應爻、本爻各一年,再向上逐爻變六年。",
     `元氣:年干 ${ys} 屬 ${stem}、年支 ${yb} 屬 ${branch};先後天卦${yuanqi.tian || yuanqi.di ? `有${[yuanqi.tian && "天元氣", yuanqi.di && "地元氣"].filter(Boolean).join("、")}` : "無元氣"}${yuanqi.reversed ? ",且逢元氣相反之卦" : ""}。`,
@@ -369,6 +406,10 @@ export function castHeluo(input: BirthInput): HeluoResult {
     tier: "classical",
     cite: { work: "河洛理數", author: "題陳摶、邵雍", year: 1632, locator: "卷一起例(陳仁錫刻本,文明書局石印)" },
     jinsuo, guangxiang,
+    zhenshu: {
+      yuantang: zyt, houtian: zh.houtian, houtianYuantang: zh.houtianYuantang, same: zyt === yuantang,
+      cite: { work: "河洛真數", author: "題陳摶、邵雍", year: 1591, locator: "起例卷之上 pp. 46–55(北京大學圖書館藏刻本,archive.org 02094383.cn,PDF 頁)" },
+    },
     ggzCite: { work: "河洛理數 範衍 廣象徹微初集", author: "題陳摶、邵雍", year: 1606, locator: `故宮珍本叢刊 GGZBCK405,金鎖銀匙 pp. ${JINSUO.page.join("–")},廣象徹微 pp. ${GUANGXIANG.page.join("–")}` },
   };
 }

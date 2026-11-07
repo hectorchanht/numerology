@@ -217,6 +217,12 @@ function Heluo({ r, c, luck, solar }: { r: HeluoResult; c: HeluoClasses; luck: J
       <p className="cy-val">
         {t("cycle.heluoVal", { xt: z(r.xiantian.name), yt: r.yuantang, age: r.houtianAge, ht: z(r.houtian.name), hyt: r.houtianYuantang })}
       </p>
+      <p className="xs-note">
+        {r.zhenshu.same
+          ? t("cycle.heluoZhenSame")
+          : t("cycle.heluoZhen", { yt: r.zhenshu.yuantang, ht: z(r.zhenshu.houtian.name), hyt: r.zhenshu.houtianYuantang })}{" "}
+        <CitePop cite={r.zhenshu.cite} />
+      </p>
       <p className="xs-note">{t("cycle.heluoNums", { h: r.heaven, e: r.earth, yq: has(r.yuanqi.tian || r.yuanqi.di), hg: has(r.huagong.has) })}</p>
       <p className="xs-note">
         {t("cycle.heluoClass", {
