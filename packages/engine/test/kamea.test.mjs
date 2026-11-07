@@ -30,3 +30,15 @@ test("幻方附 Agrippa 名數:Sun 方 Nachiel 111、Sorath 666", () => {
   const by = Object.fromEntries(r.names.map((x) => [x.name, x]));
   assert.deepEqual([by.Nachiel.value, by.Nachiel.ref, by.Sorath.value, by.Sorath.ref], [111, "line", 666, "total"]);
 });
+
+test("幻方名數不列 unresolved 條目,值全部等於所標幻方數", () => {
+  for (const [y, m, d] of [[2024, 1, 1], [2024, 1, 3], [2024, 1, 5]]) {
+    const r = castKamea(y, m, d, []);
+    const want = { order: r.order, cells: r.order ** 2, line: r.lineSum, total: r.total };
+    for (const x of r.names) {
+      assert.ok(["divine name", "intelligence", "spirit"].includes(x.role), x.role);
+      if (x.ref) assert.equal(x.value, want[x.ref]);
+      assert.ok(!x.unresolved);
+    }
+  }
+});

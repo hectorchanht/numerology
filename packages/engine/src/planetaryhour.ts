@@ -60,7 +60,7 @@ export function castPlanetaryHour(input: BirthInput): PlanetaryHourResult | null
   const steps = [`取用出生時刻 ${hm(T)}(${timeBasis}),緯度 ${lat}°,當日太陽赤緯 ${(dec / rad).toFixed(2)}°。`];
   const base = {
     latitude: lat, tier: "classical" as const,
-    olympicCite: { work: "Arbatel of Magick (Fourth Book of Occult Philosophy)", year: 1655, locator: `tr. R. Turner, p. ${ARBATEL_PAGE}` },
+    olympicCite: { work: "Arbatel of Magick (Fourth Book of Occult Philosophy)", year: 1655, locator: `tr. R. Turner, 1978 Askin 影印本 PDF p. ${ARBATEL_PAGE}` },
     cite: { work: "Heptameron (Fourth Book of Occult Philosophy)", author: "pseudo-Peter of Abano", year: 1655, locator: "tr. R. Turner, planetary hours" },
   };
 

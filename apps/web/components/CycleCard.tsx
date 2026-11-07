@@ -190,7 +190,7 @@ function Sky({ r }: { r: EphemerisResult }) {
                 <td>{p.house ?? "—"}</td>
                 <td>{p.dignities.map((d) => t(`cycle.dig.${d}` as TKey)).join("、") || "—"}</td>
                 <td>{p.termRuler}</td>
-                <td>{t(`cycle.nature.${p.nature}` as TKey)}{p.inSect === null ? "" : ` · ${t(p.inSect ? "cycle.inSect" : "cycle.outSect")}`}</td>
+                <td>{t(`cycle.nature.${p.nature}` as TKey)}{r.sect ? <><br />{t(p.inSect === null ? "cycle.bothSect" : p.inSect ? "cycle.inSect" : "cycle.outSect")}</> : null}</td>
               </tr>
             ))}
           </tbody>

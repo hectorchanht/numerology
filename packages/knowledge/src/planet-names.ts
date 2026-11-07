@@ -7,11 +7,15 @@ export const ARBATEL_META = DATA.fourthMeta as unknown as KnowledgeMeta;
 
 /** 幻方數所對應的神名、Intelligence、Spirit;ref 指該數是幻方的階(order)、格數(cells)、行和(line)或總和(total)。 */
 export interface PlanetName {
-  role: "divine name" | "intelligence" | "spirit";
+  /** unresolved 條目另有 "intelligences"、"spirit of spirits" 等稱 */
+  role: string;
   name: string;
   hebrew: string;
   value: number;
   ref: "order" | "cells" | "line" | "total" | null;
+  /** 原書數值與希伯來字母和對不上,未能校正 */
+  unresolved?: boolean;
+  erratum?: string;
 }
 
 /** Agrippa 卷二第 22 章各行星幻方之名。 */

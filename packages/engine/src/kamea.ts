@@ -40,9 +40,10 @@ export function castKamea(
     `${year}-${month}-${day} 為星期${"日一二三四五六"[weekday]},主管行星 ${planet}。`,
     `${planet} 幻方為 ${order} 階,每行和 ${lineSum},全部數字和 ${total}。`,
   ];
-  const names = PLANET_NAMES[planet];
+  // 字母和對不上幻方數(unresolved)的名不列,免得當成相等
+  const names = PLANET_NAMES[planet].filter((x) => !x.unresolved);
   return {
     weekday, planet, order, rows, lineSum, total, marks: placed, names, steps,
-    namesCite: { work: "Three Books of Occult Philosophy", author: "Agrippa", year: 1651, locator: "Book II ch. 22, pp. 264–277" },
+    namesCite: { work: "Three Books of Occult Philosophy", author: "Agrippa", year: 1651, locator: "Book II ch. 22(Wikisource djvu pp. 264–277)" },
   };
 }

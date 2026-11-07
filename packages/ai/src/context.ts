@@ -407,7 +407,7 @@ ${step(hj.steps)}`;
         : "當日極晝或極夜,無行星時";
       cycleBlock += `
 - 行星時(Heptameron):行星日 ${ph.dayPlanet}(天使 ${ph.dayAngel});${where}。層級 ${TIER_ZH[ph.tier]};出處 ${cite(ph.cite)}。
-- Arbatel 奧林匹亞靈(按行星對照,Arbatel 未言其主管行星日時):行星日 ${ph.dayOlympic}${ph.hourOlympic ? `、時主 ${ph.hourOlympic}` : ""}。出處 ${cite(ph.olympicCite)}。
+- Arbatel 奧林匹亞靈(按行星對照,Arbatel 未言其主管行星日時):行星日 ${ph.dayOlympic}${ph.hourOlympic ? `、時主 ${ph.hourOlympic}` : ""}。層級 ${TIER_ZH[ph.tier]};出處 ${cite(ph.olympicCite)}。
 ${step(ph.steps)}`;
     }
     const ep = cycles.ephemeris;
@@ -416,7 +416,7 @@ ${step(ph.steps)}`;
       const DIG = { domicile: "入廟", exaltation: "入旺", fall: "落陷" } as const;
       const NAT = { benefic: "吉星", malefic: "凶星", common: "兩可" } as const;
       const pos = ep.planets.map((p) =>
-        `${p.planet} ${p.sign} ${p.degree.toFixed(1)}°${p.retrograde ? "(逆)" : ""}${p.house ? ` 第${p.house}宮` : ""} 宮主 ${p.ruler}${p.dignities.map((d) => ` ${DIG[d]}`).join("")} 界主 ${p.termRuler} ${NAT[p.nature]}${p.inSect === null ? "" : p.inSect ? "合時" : "不合時"}`).join(";");
+        `${p.planet} ${p.sign} ${p.degree.toFixed(1)}°${p.retrograde ? "(逆)" : ""}${p.house ? ` 第${p.house}宮` : ""} 宮主 ${p.ruler}${p.dignities.map((d) => ` ${DIG[d]}`).join("")} 界主 ${p.termRuler} ${NAT[p.nature]}${ep.sect ? `、${p.inSect === null ? "晝夜兩屬" : p.inSect ? "合時" : "不合時"}` : ""}`).join(";");
       const asp = ep.aspects.map((a) => `${a.a}–${a.b} ${a.type}`).join("、") || "無";
       const mm = ep.moonMansion;
       cycleBlock += `
@@ -527,7 +527,7 @@ ${fuyiLines.join("\n")}
 ## 宇宙幾何(本節可用的數)
 - 洛書(即 Saturn 3 階幻方):每行和 15,總和 45。
 - 出生星期:星期${"日一二三四五六"[k.weekday]} → 守護行星 ${k.planet} → ${k.order} 階幻方:每行和 ${k.lineSum},總和 ${k.total}。
-- Agrippa 以本方之數立名(${cite(k.namesCite)};字母數值依幻方數取定,相等出於造名之法):${k.names.map((x) => `${x.name}(${x.hebrew})= ${x.value}${x.ref ? `,${REF[x.ref]}` : ""}`).join(";")}。
+- Agrippa 以本方之數立名(層級 原典;出處 ${cite(k.namesCite)};字母數值依幻方數取定,相等出於造名之法):${k.names.map((x) => `${x.name}(${x.hebrew})= ${x.value}${x.ref ? `,${REF[x.ref]}` : ""}`).join(";")}。
 ${marks.length ? `- 落點:${marks.join(";")}。` : "- 落點:無(數值超出方陣範圍)。"}
 
 ## 科學研究條目(science-notes,本站唯一可引用的研究)
