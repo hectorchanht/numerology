@@ -127,7 +127,7 @@ export { castHuangji, type HuangjiResult } from "./huangji.js";
 export { castPlanetaryHour, type PlanetaryHourResult } from "./planetaryhour.js";
 export { castEphemeris, type EphemerisResult, type PlanetPosition, type AspectHit } from "./ephemeris.js";
 export { castQizheng, qizhengMansionAt, type QizhengResult, type QizhengBody } from "./qizheng.js";
-export { castHeluo, heluoReduce, heluoYears, heluoMonths, heluoDays, heluoJinsuo, heluoGuangxiang, type HeluoResult, type HeluoJinsuo, type HeluoGuangxiang, type HeluoHex, type HeluoYun, type HeluoYear } from "./heluo.js";
+export { castHeluo, heluoReduce, heluoYears, heluoMonths, heluoDays, heluoJinsuo, heluoJinsuoLuck, heluoGuangxiang, type HeluoResult, type HeluoJinsuo, type JinsuoLuck, type JinsuoYun, type HeluoGuangxiang, type HeluoHex, type HeluoYun, type HeluoYear } from "./heluo.js";
 export { heluoClasses, type HeluoClasses } from "./heluo-classes.js";
 // web 不直接依賴 knowledge,瑪雅 tier 與日名表經此轉出。
 export { MAYA_META, TZOLKIN_DAY_NAMES, LIUREN_METHODS } from "@numerology/knowledge";

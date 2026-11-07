@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { castChart, castCrossSystem, castTaixuan, castMaya, castHuangji, castPlanetaryHour, castEphemeris, castHeluo, heluoClasses, castQizheng, castLiuren } from "@numerology/engine";
+import { castChart, castCrossSystem, castTaixuan, castMaya, castHuangji, castPlanetaryHour, castEphemeris, castHeluo, heluoClasses, heluoJinsuoLuck, castQizheng, castLiuren } from "@numerology/engine";
 import { LIUREN_METHODS, SCIENCE_NOTES } from "@numerology/knowledge";
 import {
   SYSTEM_PERSONA,
@@ -153,6 +153,11 @@ test("crossSystemFacts:附河洛理數先後天卦同大運", () => {
   assert.ok(f.includes(`${heluo.houtianAge} 歲換後天 ${heluo.houtian.name}`));
   assert.ok(f.includes("陳摶") && f.includes("遇十不用"));
   assert.ok(f.includes(`順數 ${heluo.jinsuo.forward}、逆數 ${heluo.jinsuo.reverse}`));
+  const heluoLuck = heluoJinsuoLuck(heluo, chart.bazi.daYun, new Date().getFullYear());
+  const f2 = crossSystemFacts(cross, "zht", { taixuan: castTaixuan(chart.input), maya: castMaya(chart.input.year, chart.input.month, chart.input.day), heluo, heluoLuck });
+  assert.ok(f2.includes("金鎖銀匙行運"));
+  assert.ok(f2.includes(`${heluoLuck.yun[0].ganZhi}(${heluoLuck.yun[0].startYear}–`));
+  assert.ok(!f.includes("金鎖銀匙行運"));
   assert.ok(f.includes(`積 ${heluo.guangxiang.branch.product},256 卦中 ${heluo.guangxiang.dist[heluo.guangxiang.branch.product]} 卦同積`));
   const ln = heluo.liunian.find((y) => y.year === new Date().getFullYear());
   if (ln) assert.ok(f.includes(`流年卦 ${ln.hex.name} 第 ${ln.line} 爻`));
@@ -174,7 +179,7 @@ test("crossSystemFacts:附七政四餘宿度同羅計分歧", () => {
 
 test("crosssystem 指令:太玄與瑪雅只作週期定位", () => {
   const p = buildReportSectionPrompt([], seg, "both", "zht", facts);
-  for (const must of ["週期定位", "不推五行", "不作吉凶斷語", "贊辭", "皇極經世", "不推治亂興衰", "行星時", "不寫天使職能", "七曜位置", "不推宮位主事吉凶", "河洛理數", "叶者」「不叶者」兩面並列", "不在原文之外自行推申", "詩表未入庫", "256 卦中所佔比例", "七政四餘", "紫氣為流派公式", "命宮與十二宮名的落點", "大六壬", "不作占斷", "未附上升時不講宮位", "太玄首名、首辭、贊辭原文未附,不得引述或釋義", "Dreamspell"]) {
+  for (const must of ["週期定位", "不推五行", "不作吉凶斷語", "贊辭", "皇極經世", "不推治亂興衰", "行星時", "不寫天使職能", "七曜位置", "不推宮位主事吉凶", "河洛理數", "叶者」「不叶者」兩面並列", "不在原文之外自行推申", "詩表未入庫", "各步大運、當年流年", "256 卦中所佔比例", "七政四餘", "紫氣為流派公式", "命宮與十二宮名的落點", "大六壬", "不作占斷", "未附上升時不講宮位", "太玄首名、首辭、贊辭原文未附,不得引述或釋義", "Dreamspell"]) {
     assert.ok(p.includes(must), `缺條款: ${must}`);
   }
 });
