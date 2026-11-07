@@ -193,6 +193,23 @@ function Kamea({ k }: { k: KameaResult }) {
           );
         }))}
       </svg>
+      <h3 className="xs-h">{t("cross.kameaNames")}</h3>
+      <ul className="xs-matrix">
+        {k.names.map((x, i) => (
+          <li key={i} className="xs-row">
+            <div className="xs-head">
+              <span className="xs-sys">{t(`cross.role.${x.role}` as TKey)}</span>
+              <span className="xs-val">{x.name} <span lang="he" dir="rtl">{x.hebrew}</span></span>
+              <span className="xs-note">{x.value}{x.ref ? ` ${t(`cross.ref.${x.ref}` as TKey)}` : ""}</span>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <div className="xs-meta">
+        <span className="xs-tier tier-classical">{t("cross.tier.classical")}</span>
+        <CitePop cite={k.namesCite} />
+      </div>
+      <p className="xs-note">{t("cross.kameaNamesNote")}</p>
       <details className="xs-steps">
         <summary>{t("cross.steps")}</summary>
         <ol>{k.steps.map((s, i) => <li key={i}>{z(s)}</li>)}</ol>

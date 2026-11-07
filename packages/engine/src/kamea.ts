@@ -1,4 +1,4 @@
-import { planetarySquare, type Planet } from "@numerology/knowledge";
+import { PLANET_NAMES, planetarySquare, type Cite, type Planet, type PlanetName } from "@numerology/knowledge";
 
 export interface KameaMark { value: number; system: "lifepath" | "ninestar"; row: number; col: number }
 export interface KameaResult {
@@ -9,6 +9,9 @@ export interface KameaResult {
   lineSum: number;
   total: number;
   marks: KameaMark[];
+  /** Agrippa 卷二第 22 章:以幻方數立名的神名、Intelligence、Spirit */
+  names: PlanetName[];
+  namesCite: Cite;
   steps: string[];
 }
 
@@ -37,5 +40,9 @@ export function castKamea(
     `${year}-${month}-${day} 為星期${"日一二三四五六"[weekday]},主管行星 ${planet}。`,
     `${planet} 幻方為 ${order} 階,每行和 ${lineSum},全部數字和 ${total}。`,
   ];
-  return { weekday, planet, order, rows, lineSum, total, marks: placed, steps };
+  const names = PLANET_NAMES[planet];
+  return {
+    weekday, planet, order, rows, lineSum, total, marks: placed, names, steps,
+    namesCite: { work: "Three Books of Occult Philosophy", author: "Agrippa", year: 1651, locator: "Book II ch. 22, pp. 264–277" },
+  };
 }

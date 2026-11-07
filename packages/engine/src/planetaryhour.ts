@@ -1,4 +1,4 @@
-import { CHALDEAN_ORDER, HOUR_NAMES, PLANET_ANGEL, type Cite, type Planet } from "@numerology/knowledge";
+import { ARBATEL_PAGE, CHALDEAN_ORDER, HOUR_NAMES, OLYMPIC_SPIRITS, PLANET_ANGEL, type Cite, type Planet } from "@numerology/knowledge";
 import type { BirthInput } from "./types.js";
 import { resolveBirthDateTime } from "./solartime.js";
 
@@ -16,11 +16,16 @@ export interface PlanetaryHourResult {
   hourName: string | null;
   hourPlanet: Planet | null;
   hourAngel: string | null;
+  /** Arbatel 奧林匹亞靈:按行星對應(只係對照,Arbatel 未講行星日時由佢哋管) */
+  dayOlympic: string;
+  hourOlympic: string | null;
   steps: string[];
   tier: "classical";
   cite: Cite;
+  olympicCite: Cite;
 }
 
+const olympic = (p: Planet) => OLYMPIC_SPIRITS.find((s) => s.planet === p)!.name;
 const RULERS: Planet[] = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"];
 const WEEK = "日一二三四五六";
 const rad = Math.PI / 180;
@@ -55,13 +60,14 @@ export function castPlanetaryHour(input: BirthInput): PlanetaryHourResult | null
   const steps = [`取用出生時刻 ${hm(T)}(${timeBasis}),緯度 ${lat}°,當日太陽赤緯 ${(dec / rad).toFixed(2)}°。`];
   const base = {
     latitude: lat, tier: "classical" as const,
+    olympicCite: { work: "Arbatel of Magick (Fourth Book of Occult Philosophy)", year: 1655, locator: `tr. R. Turner, p. ${ARBATEL_PAGE}` },
     cite: { work: "Heptameron (Fourth Book of Occult Philosophy)", author: "pseudo-Peter of Abano", year: 1655, locator: "tr. R. Turner, planetary hours" },
   };
 
   if (Math.abs(cosH) > 1) {
     const dayPlanet = RULERS[weekday]!;
     steps.push(cosH < -1 ? "當日極晝,太陽不落,無法劃分行星時。" : "當日極夜,太陽不升,無法劃分行星時。", `只取星期${WEEK[weekday]}的行星 ${dayPlanet}。`);
-    return { ...base, sunrise: null, sunset: null, dayPlanet, dayAngel: PLANET_ANGEL[dayPlanet], half: null, hour: null, hourName: null, hourPlanet: null, hourAngel: null, steps };
+    return { ...base, sunrise: null, sunset: null, dayPlanet, dayAngel: PLANET_ANGEL[dayPlanet], half: null, hour: null, hourName: null, hourPlanet: null, hourAngel: null, dayOlympic: olympic(dayPlanet), hourOlympic: null, steps };
   }
 
   const H = Math.acos(cosH) / rad / 15; // 半晝弧(小時)
@@ -87,6 +93,6 @@ export function castPlanetaryHour(input: BirthInput): PlanetaryHourResult | null
   );
   return {
     ...base, sunrise, sunset, dayPlanet, dayAngel: PLANET_ANGEL[dayPlanet], half, hour: idx + 1, hourName,
-    hourPlanet, hourAngel: PLANET_ANGEL[hourPlanet], steps,
+    hourPlanet, hourAngel: PLANET_ANGEL[hourPlanet], dayOlympic: olympic(dayPlanet), hourOlympic: olympic(hourPlanet), steps,
   };
 }

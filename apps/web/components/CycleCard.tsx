@@ -151,6 +151,9 @@ function PlanetaryHour({ r, solar }: { r: PlanetaryHourResult | null; solar: boo
           : t("cycle.hourPolar", { day: r.dayPlanet, angel: r.dayAngel })}
       </p>
       <Meta tier={r.tier} basis={solar ? "cross.basis.solar" : "cycle.basis.clock"} cite={r.cite} />
+      <p className="xs-note">{t("cycle.olympic", { day: r.dayOlympic, hour: r.hourOlympic ? t("cycle.olympicHour", { hour: r.hourOlympic }) : "" })}</p>
+      <Meta tier={r.tier} basis={solar ? "cross.basis.solar" : "cycle.basis.clock"} cite={r.olympicCite} />
+      <p className="xs-note">{t("cycle.olympicNote")}</p>
       <Steps steps={r.steps} />
     </>
   );
@@ -176,7 +179,7 @@ function Sky({ r }: { r: EphemerisResult }) {
         <table className="bazi-detail cy-sky">
           <thead>
             <tr>
-              {(["cycle.colPlanet", "cycle.colPos", "cycle.colHouse", "cycle.colDig", "cycle.colTerm"] as const).map((k) => <th key={k} className="colhead">{t(k)}</th>)}
+              {(["cycle.colPlanet", "cycle.colPos", "cycle.colHouse", "cycle.colDig", "cycle.colTerm", "cycle.colNature"] as const).map((k) => <th key={k} className="colhead">{t(k)}</th>)}
             </tr>
           </thead>
           <tbody>
@@ -187,6 +190,7 @@ function Sky({ r }: { r: EphemerisResult }) {
                 <td>{p.house ?? "—"}</td>
                 <td>{p.dignities.map((d) => t(`cycle.dig.${d}` as TKey)).join("、") || "—"}</td>
                 <td>{p.termRuler}</td>
+                <td>{t(`cycle.nature.${p.nature}` as TKey)}{p.inSect === null ? "" : ` · ${t(p.inSect ? "cycle.inSect" : "cycle.outSect")}`}</td>
               </tr>
             ))}
           </tbody>

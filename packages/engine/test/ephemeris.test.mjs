@@ -77,3 +77,15 @@ test("整宮制:上升所在宮為第 1 宮;冇經緯度就冇宮位", () => {
   assert.equal(r.angles, null);
   assert.ok(r.planets.every((p) => p.house === null));
 });
+
+test("Tetrabiblos 吉凶同合時:晝生時日、木、土合時,水星不判", () => {
+  const r = castEphemeris({ year: 1990, month: 6, day: 15, hour: 12, gender: "男", latitude: 22.3, longitude: 114.2 });
+  assert.equal(r.sect, "day");
+  const by = Object.fromEntries(r.planets.map((p) => [p.planet, p]));
+  assert.deepEqual(["Sun", "Jupiter", "Saturn"].map((p) => by[p].inSect), [true, true, true]);
+  assert.deepEqual(["Moon", "Venus", "Mars"].map((p) => by[p].inSect), [false, false, false]);
+  assert.equal(by.Mercury.inSect, null);
+  assert.deepEqual([by.Jupiter.nature, by.Mars.nature, by.Sun.nature], ["benefic", "malefic", "common"]);
+  const n = castEphemeris({ year: 1990, month: 6, day: 15, hour: 12, gender: "男" });
+  assert.ok(n.planets.every((p) => p.inSect === null));
+});

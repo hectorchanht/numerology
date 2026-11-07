@@ -44,3 +44,11 @@ test("高緯度夏至極晝:冇行星時,只有行星日", () => {
   assert.equal(r.sunrise, null);
   assert.equal(r.dayPlanet, "Venus");
 });
+
+test("Arbatel 奧林匹亞靈按行星對應", () => {
+  const r = castPlanetaryHour({ year: 2024, month: 1, day: 6, hour: 12, gender: "男", latitude: 22.3, longitude: 114.2 });
+  assert.equal(r.dayPlanet, "Saturn");
+  assert.equal(r.dayOlympic, "Aratron");
+  const map = { Saturn: "Aratron", Jupiter: "Bethor", Mars: "Phaleg", Sun: "Och", Venus: "Hagith", Mercury: "Ophiel", Moon: "Phul" };
+  assert.equal(r.hourOlympic, map[r.hourPlanet]);
+});

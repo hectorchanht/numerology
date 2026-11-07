@@ -1,6 +1,6 @@
 import * as Astro from "astronomy-engine";
 import {
-  ASPECTS, DOMICILE, EGYPTIAN_TERMS, EXALTATION, LUNAR_MANSIONS, SIGNS, TRIPLICITY,
+  ASPECTS, DOMICILE, EGYPTIAN_TERMS, EXALTATION, LUNAR_MANSIONS, NATURES, SIGNS, TRIPLICITY,
   type Cite, type Planet, type Sign,
 } from "@numerology/knowledge";
 import type { BirthInput } from "./types.js";
@@ -23,6 +23,10 @@ export interface PlanetPosition {
   termRuler: Planet;
   /** 整宮制宮位(上升所在宮 = 第 1 宮);缺經緯度 → null */
   house: number | null;
+  /** Tetrabiblos I.5:吉星 / 凶星 / 兩可 */
+  nature: "benefic" | "malefic" | "common";
+  /** Tetrabiblos I.7:晝星生於晝、夜星生於夜為合時;水星兩屬;晝夜未知 → null */
+  inSect: boolean | null;
 }
 
 export interface AspectHit {
@@ -110,6 +114,8 @@ export function castEphemeris(input: BirthInput): EphemerisResult {
       triplicityRulers: sect ? [tri[sect]] : [tri.day, tri.night],
       termRuler: term.planet,
       house: angles ? ((SIGNS.indexOf(sign) - ascIdx + 12) % 12) + 1 : null,
+      nature: NATURES.benefic.includes(planet) ? "benefic" : NATURES.malefic.includes(planet) ? "malefic" : "common",
+      inSect: sect && !NATURES.bothSects.includes(planet) ? NATURES[sect === "day" ? "diurnal" : "nocturnal"].includes(planet) : null,
     };
   });
 
@@ -133,6 +139,7 @@ export function castEphemeris(input: BirthInput): EphemerisResult {
     angles
       ? `地方恆星時與黃赤交角求得上升 ${angles.ascSign} ${dms(angles.ascendant % 30)}、天頂 ${angles.mcSign} ${dms(angles.mc % 30)};宮位用整宮制,上升所在宮為第 1 宮。`
       : "未填經緯度,不計上升點與宮位。",
+    `吉凶(卷一第 5 章):吉星 ${NATURES.benefic.join("、")},凶星 ${NATURES.malefic.join("、")},${NATURES.common.join("、")} 兩可;晝星 ${NATURES.diurnal.join("、")}、夜星 ${NATURES.nocturnal.join("、")}(第 7 章)${sect ? `,${sect === "day" ? "晝" : "夜"}生合時者 ${planets.filter((p) => p.inSect).map((p) => p.planet).join("、")}` : ""}。`,
     `月亮黃經 ${dms(moon.longitude)} ÷ ${MANSION.toFixed(4)}° → 第 ${mi + 1} 宿 ${m.names[0]}。`,
   ];
 

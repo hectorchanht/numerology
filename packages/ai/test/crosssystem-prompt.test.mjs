@@ -131,6 +131,8 @@ test("crossSystemFacts:附皇極經世會運世同行星時;冇緯度就唔附�
   assert.ok(f.includes(`${huangji.huiName}會第 ${huangji.yun} 運`) && f.includes(`第 ${huangji.shi} 世`));
   assert.ok(f.includes("邵雍") && f.includes("唐堯"), "出處與錨點步驟");
   assert.ok(f.includes(`行星日 ${planetaryHour.dayPlanet}`) && f.includes(`時主 ${planetaryHour.hourPlanet}`));
+  assert.ok(f.includes(`奧林匹亞靈`) && f.includes(`行星日 ${planetaryHour.dayOlympic}`));
+  assert.ok(f.includes("Agrippa 以本方之數立名") && f.includes(`${cross.kamea.names.at(-1).name}(`));
   assert.ok(f.includes("Heptameron") && f.includes("日出"));
   const noLat = crossSystemFacts(cross, "zht", { taixuan, maya, huangji, planetaryHour: castPlanetaryHour(chart.input) });
   assert.ok(!noLat.includes("行星時(Heptameron)"));
@@ -143,6 +145,7 @@ test("crossSystemFacts:附七曜位置同月宿", () => {
   assert.ok(f.includes(`Sun ${sun.sign} ${sun.degree.toFixed(1)}°`));
   assert.ok(f.includes(`第 ${ephemeris.moonMansion.n} 宿 ${ephemeris.moonMansion.names[0]}`));
   assert.ok(f.includes("Tetrabiblos") && f.includes("Agrippa") && /[晝夜]生/.test(f));
+  assert.ok(/吉星|凶星/.test(f) && /合時/.test(f));
   assert.ok(f.includes(`上升 ${ephemeris.angles.ascSign}`) && f.includes(`第${sun.house}宮`));
 });
 
@@ -179,7 +182,7 @@ test("crossSystemFacts:附七政四餘宿度同羅計分歧", () => {
 
 test("crosssystem 指令:太玄與瑪雅只作週期定位", () => {
   const p = buildReportSectionPrompt([], seg, "both", "zht", facts);
-  for (const must of ["週期定位", "不推五行", "不作吉凶斷語", "贊辭", "皇極經世", "不推治亂興衰", "行星時", "不寫天使職能", "七曜位置", "不推宮位主事吉凶", "河洛理數", "叶者」「不叶者」兩面並列", "不在原文之外自行推申", "詩表未入庫", "各步大運、當年流年", "256 卦中所佔比例", "七政四餘", "紫氣為流派公式", "命宮與十二宮名的落點", "大六壬", "不作占斷", "未附上升時不講宮位", "太玄首名、首辭、贊辭原文未附,不得引述或釋義", "Dreamspell"]) {
+  for (const must of ["週期定位", "不推五行", "不作吉凶斷語", "贊辭", "皇極經世", "不推治亂興衰", "行星時", "不寫天使或奧林匹亞靈的職能", "不推人事吉凶", "七曜位置", "不推宮位主事吉凶", "河洛理數", "叶者」「不叶者」兩面並列", "不在原文之外自行推申", "詩表未入庫", "各步大運、當年流年", "256 卦中所佔比例", "七政四餘", "紫氣為流派公式", "命宮與十二宮名的落點", "大六壬", "不作占斷", "未附上升時不講宮位", "太玄首名、首辭、贊辭原文未附,不得引述或釋義", "Dreamspell"]) {
     assert.ok(p.includes(must), `缺條款: ${must}`);
   }
 });

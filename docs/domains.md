@@ -15,8 +15,8 @@
 | 生命靈數 | 已入庫 | 畢氏數秘(現代算法)`pythagorean-numbers.json` | 是 | 經河圖數橋接五行(標 `bridge: 河圖`);數 1–9 落洛書格 |
 | 行星幻方 | 已入庫 | Agrippa, De occulta philosophia II.22(1533 版核對,Moon 誤印已記)`planetary-squares.json` | 是 | Saturn 方陣即洛書;其餘方陣為洛書的高階推廣 |
 | Greek gematria | 已入庫 | Fideler 等事實 + 頁碼`greek-gematria.json` | 是 | 365、729 等數的希臘字母值,與九宮 / 365 日對看 |
-| Agrippa correspondences / cabala / scales | 已入庫 | Agrippa 卷 I 對應表、卷 II–III 行星神名 / 28 月宿 / 十 Sephiroth、卷 II 數字刻度表 1–12、卷 III 七十二天使(`agrippa-correspondences.json`、`agrippa-cabala.json`、`agrippa-scales.json`) | 是(查表) | 行星神名值與幻方行和 / 總和相扣;七十二天使由出埃及記 14:19–21 推算 |
-| 第四本(Fourth Book) | 已入庫(行星時:引擎 `castPlanetaryHour`,需出生地緯度;週期卡 + AI 多體系事實) | 1655 Turner 英譯:地占 16 圖、Heptameron 行星時、Arbatel 七靈(`fourth-book.json`) | 是 | 行星時用迦勒底次序,與幻方行星序相同 |
+| Agrippa correspondences / cabala / scales | 已入庫;行星神名、Intelligence、Spirit 已接幻方段(`castKamea`)同 AI | Agrippa 卷 I 對應表、卷 II–III 行星神名 / 28 月宿 / 十 Sephiroth、卷 II 數字刻度表 1–12、卷 III 七十二天使(`agrippa-correspondences.json`、`agrippa-cabala.json`、`agrippa-scales.json`) | 是(查表) | 行星神名值與幻方行和 / 總和相扣;七十二天使由出埃及記 14:19–21 推算 |
+| 第四本(Fourth Book) | 已入庫(行星時:引擎 `castPlanetaryHour`,需出生地緯度;週期卡 + AI 多體系事實;Arbatel 七靈按行星對照附行星時段;地占未接) | 1655 Turner 英譯:地占 16 圖、Heptameron 行星時、Arbatel 七靈(`fourth-book.json`) | 是 | 行星時用迦勒底次序,與幻方行星序相同 |
 | 皇極經世 | 已入庫(待校對;引擎 `castHuangji`,週期卡 + AI 多體系事實) | 邵雍《皇極經世書》:元會運世紀年、開物 / 閉物、外篇數(`huangji-jingshi.json`) | 是 | 元 = 12 × 30 × 12 × 30 = 129600 年 |
 | 律呂三分損益 | 已入庫(待校對);已接引擎(`castBirthLore` 出生月律)同學院 `/harmony` | 《管子·地員》《呂氏春秋·音律》《淮南子·天文訓》(`lulu.json`) | 是 | 黃鐘 81 = 3⁴ = 九九,與九宮 3 進位相通 |
 | 蒂邁歐篇數理 | 已入庫(待校對);已接學院 `/harmony` | Plato,Jowett 1871 英譯:世界靈魂音階、七重天、五正多面體、元素轉換(`timaeus.json`) | 是 | 9/8、256/243 同律呂三分損益同源 |
@@ -31,7 +31,7 @@
 | 卡巴拉(Sefer Yetzirah) | 已入庫(待校對);已接引擎(字母分類、Westcott 補表配星座 / 星期) | Sefer Yetzirah,Westcott 1893 英譯(`sefer-yetzirah.json`) | 是(查表) | 22 字母 = 3 + 7 + 12;七雙字母配七行星,與幻方行星序對看 |
 | Behenian 十五恆星 | 已入庫(待校對);已接引擎(`castBirthLore` 合相 + 基率) | Agrippa I.32 名稱;J2000 座標 Hipparcos(van Leeuwen 2007,經維基百科);容許度 6°(維基百科,近代)(`behenian-stars.json`) | 是(歲差換算黃經) | 第 8 顆 Alkaid / Polaris 兩讀並列 |
 | 數之學(Agrippa 數階、希伯來字母值、gematria 同值) | 已接引擎(`castNumberLore`)、首頁「數之學」卡同 AI 多體系一節 | `agrippa-scales.json`、`agrippa-correspondences.json`、`greek-gematria.json` | 是(查表) | 盤中各數(生命靈數、幻方行和 / 總和、瑪雅 Kin、河洛天地數)逐個查,附 gematria 基率 |
-| 西洋占星(Tetrabiblos 卷一) | 已入庫(待校對);已接引擎(`castEphemeris`)同 AI 多體系一節 | Ptolemy,Ashmand 1822 英譯:宮位、三方、廟旺、埃及 / 托勒密 / 迦勒底界、相位(`tetrabiblos.json`);七曜位置用 astronomy-engine(對 JPL Horizons 誤差 < 0.01°) | 是(七曜宮度、尊貴、界主、整宮相位、晝夜生;有經緯度時加上升、天頂、整宮宮位) | 星期守護行星已經幻方接上;月亮位置另配 Agrippa 二十八月宿 |
+| 西洋占星(Tetrabiblos 卷一) | 已入庫(待校對);已接引擎(`castEphemeris`,含吉凶星分類同合時)同 AI 多體系一節 | Ptolemy,Ashmand 1822 英譯:宮位、三方、廟旺、埃及 / 托勒密 / 迦勒底界、相位(`tetrabiblos.json`);七曜位置用 astronomy-engine(對 JPL Horizons 誤差 < 0.01°) | 是(七曜宮度、尊貴、界主、整宮相位、晝夜生;有經緯度時加上升、天頂、整宮宮位) | 星期守護行星已經幻方接上;月亮位置另配 Agrippa 二十八月宿 |
 | 康熙筆畫 | 已入庫 | 康熙字典筆畫(`kangxi-strokes.json`) | 是 | 姓名筆畫數化簡後可落九宮 |
 | 科學筆記 | 已入庫(待校對,reviewed: false) | `science-notes.json`(同行評審條目) | 否(文獻) | 無直接連結;供報告「現代科學角度」 |
 | 太玄經 729 贊 | 已入庫(首名對照維基文庫、待校對) | 揚雄《太玄經》(約 4 BCE–AD 2;`taixuan.json`) | 是(首 / 贊由數起) | 三分九天 × 81 首 × 9 贊 = 729,九宮自相乘三次 |

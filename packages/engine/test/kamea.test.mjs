@@ -23,3 +23,10 @@ test("週六 Saturn", () => {
 test("超出略去", () => {
   assert.equal(castKamea(1990, 3, 18, [{ value: 50, system: "lifepath" }]).marks.length, 0);
 });
+
+test("幻方附 Agrippa 名數:Sun 方 Nachiel 111、Sorath 666", () => {
+  const r = castKamea(2024, 1, 7, []);
+  assert.equal(r.planet, "Sun");
+  const by = Object.fromEntries(r.names.map((x) => [x.name, x]));
+  assert.deepEqual([by.Nachiel.value, by.Nachiel.ref, by.Sorath.value, by.Sorath.ref], [111, "line", 666, "total"]);
+});
