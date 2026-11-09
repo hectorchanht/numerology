@@ -3,7 +3,7 @@ import { castBazi } from "./bazi.js";
 import { castZiwei } from "./ziwei.js";
 import { castFuyi } from "./fuyi.js";
 import { validateBirthInput } from "./time.js";
-import { resolveBirthDateTime } from "./solartime.js";
+import { resolveBirthDateTime, isChinaDST } from "./solartime.js";
 import type { ChartResult, BirthInput } from "./types.js";
 
 export * from "./types.js";
@@ -16,6 +16,7 @@ export { changSheng, changShengOf, CHANGSHENG_STAGES, type ChangSheng } from "./
 export { shenShaForPillar, type ShenShaContext } from "./shensha.js";
 export {
   resolveBirthDateTime,
+  isChinaDST,
   favorableDirections,
   type SolarTimeCorrection,
   type ResolvedDateTime,
@@ -67,6 +68,7 @@ export function castChart(input: BirthInput): ChartResult {
     meta: {
       trueSolarTimeApplied: correction.applied,
       correction,
+      chinaDST: isChinaDST(input),
       engine: {
         iztro: depVersion("iztro"),
         lunar: depVersion("lunar-javascript"),

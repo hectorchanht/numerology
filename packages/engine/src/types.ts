@@ -152,6 +152,8 @@ export interface ChartMeta {
   trueSolarTimeApplied: boolean;
   /** 真太陽時校正詳情 */
   correction?: import("./solartime.js").SolarTimeCorrection;
+  /** 若喺中國大陸出生,該鐘錶時間處於夏令時(只提示,未自動減 1 小時) */
+  chinaDST?: boolean;
   engine: { iztro: string; lunar: string };
 }
 

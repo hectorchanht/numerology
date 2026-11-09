@@ -48,3 +48,15 @@ test("非法输入快速失败", () => {
   assert.throws(() => castChart({ ...SAMPLE, hour: 25 }), /非法/);
   assert.throws(() => castChart({ ...SAMPLE, gender: "x" }), /非法/);
 });
+
+test("中國夏令時:1986–1991 夏季鐘錶時間標記,邊界跟 tzdata", async () => {
+  const { isChinaDST, castChart } = await import("../dist/index.js");
+  const at = (year, month, day, hour) => isChinaDST({ year, month, day, hour, gender: "男" });
+  assert.equal(at(1990, 7, 1, 12), true);
+  assert.equal(at(1986, 5, 3, 12), false);
+  assert.equal(at(1986, 5, 4, 12), true);
+  assert.equal(at(1991, 9, 15, 12), false); // 9/15 02:00 撥返
+  assert.equal(at(1992, 7, 1, 12), false);
+  assert.equal(at(2000, 7, 1, 12), false);
+  assert.equal(castChart({ year: 1990, month: 7, day: 1, hour: 12, gender: "女" }).meta.chinaDST, true);
+});

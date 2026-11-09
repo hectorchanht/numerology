@@ -82,6 +82,19 @@ export function resolveBirthDateTime(input: BirthInput): ResolvedDateTime {
   };
 }
 
+/**
+ * 呢個鐘錶時間喺中國大陸係咪處於夏令時(鐘錶快 1 小時)。
+ * 用 IANA tzdata(Asia/Shanghai,經 Intl)判,唔自備日期表:1986–1991 同 1940 年代。
+ * 1988 起始日 tzdata 作 4/17,部分排盤軟件作 4/10,以 tzdata 為準。
+ * 只作提示:用戶報嘅可能已係標準時,引擎從不自動減 1 小時。
+ */
+export function isChinaDST(input: BirthInput): boolean {
+  const ms = Date.UTC(input.year, input.month - 1, input.day, input.hour - 8, input.minute ?? 0);
+  const tz = new Intl.DateTimeFormat("en", { timeZone: "Asia/Shanghai", timeZoneName: "longOffset" })
+    .formatToParts(ms).find((x) => x.type === "timeZoneName")?.value;
+  return tz === "GMT+09:00";
+}
+
 /** 五行 → 方位 / 顏色 / 季節(開運參考)。 */
 const WUXING_DIR: Record<string, { direction: string; color: string }> = {
   木: { direction: "东方", color: "青、绿" },

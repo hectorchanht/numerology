@@ -408,6 +408,7 @@ export default function Home() {
                     {ready.chart.meta.trueSolarTimeApplied
                       ? t("chart.corrected", { lon: ready.chart.meta.correction?.longitude ?? "", off: ready.chart.meta.correction?.offsetMinutes ?? "" })
                       : t("chart.notCorrected")}
+                    {ready.chart.meta.chinaDST && <> · {t("chart.chinaDST")}</>}
                   </div>
                 </div>
               </div>

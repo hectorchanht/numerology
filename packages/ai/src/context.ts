@@ -44,6 +44,12 @@ export function buildContextPack(chart: ChartResult, fortune?: FortuneAnalysis, 
     );
   }
 
+  if (meta.chinaDST) {
+    caveats.push(
+      "出生时刻落在中国大陆夏令时期间(钟表快 1 小时);若用户在大陆出生且填的是钟表时间,真实时辰应早 1 小时,时辰相关结论请提醒用户核对。",
+    );
+  }
+
   const favDirs = favorableDirections(b.tiaohou.useGods);
   const favLine = favDirs
     .map((d) => `${d.wuxing}(${d.gans.join("")})→${d.direction}・宜${d.color}`)
