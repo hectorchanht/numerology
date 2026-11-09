@@ -33,3 +33,18 @@ test("DSL 擴充:亮度限定、空 stars 限地支", () => {
   assert.equal(g("ming-wu-zhengyao").verdict, "中");
   assert.deepEqual(g("matou-daijian").all[0].stars, ["天同", "擎羊"]);
 });
+
+test("v2:定富貴貧賤局新格、DSL flank / mutagens / any", () => {
+  const g = (id) => G.find((x) => x.id === id);
+  assert.equal(G.length, 32);
+  assert.equal(M.version, "2");
+  assert.deepEqual(g("riyue-jiaming").all, [{ op: "flank", stars: ["太阳", "太阴"], palace: "命宫" }]);
+  assert.deepEqual(g("kequanlu-gong").all[0].mutagens, ["禄", "权", "科"]);
+  assert.equal(g("fubi-gongzhu").any.length, 2);
+  for (const r of G) for (const c of [...r.all, ...(r.any ?? [])]) {
+    if (c.op === "flank") assert.equal(c.stars.length, 2, r.id);
+    for (const m of c.mutagens ?? []) assert.ok(["禄", "权", "科", "忌"].includes(m), r.id);
+  }
+  // 排唔出嘅原文定義唔收
+  for (const id of ["caiyin-jiayin", "caiyin-jialu", "jinyu-fujia", "caiyu-qiuchou"]) assert.equal(g(id), undefined);
+});

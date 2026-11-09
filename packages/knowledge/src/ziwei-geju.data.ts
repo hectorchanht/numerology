@@ -4,11 +4,11 @@ const ZIWEI_GEJU_DATA = {
   "meta": {
     "tier": "classical",
     "name": "紫微斗數格局規則表(命宮條件 DSL,供引擎判格)",
-    "schema": "rules[]:{id,name,all:[{op,stars,palace?,branches?,brightness?}],verdict,cite} ; op=samePalace|inSanFang|inPalace|noMajor ; 星名用 iztro 簡體名 ; brightness?:string[]=所列每顆星嘅 iztro 亮度須屬其中(例 [\"庙\",\"旺\"]),可用於 samePalace/inPalace/inSanFang ; inPalace 容許 stars:[] 配 branches 只限制命宮地支",
-    "source": "明・羅洪先(傳)《紫微斗數全書》(維基文庫 zh.wikisource:紫微斗數全書/卷一、卷二、卷三)之〈斗數骨髓賦〉〈定貴局〉〈命宮〉。",
-    "version": "1",
+    "schema": "rules[]:{id,name,all:[cond],any?:[cond],verdict,cite} ; cond={op,stars,palace?,branches?,brightness?,mutagens?} ; op=samePalace|inSanFang|inPalace|flank|noMajor ; 星名用 iztro 簡體名 ; brightness?:string[]=所列每顆星嘅 iztro 亮度須屬其中(例 [\"庙\",\"旺\"]),可用於 samePalace/inPalace/inSanFang ; inPalace 容許 stars:[] 配 branches 只限制命宮地支 ; mutagens?:string[]=池中須有帶該四化(禄/权/科/忌)嘅星 ; flank=stars 兩顆分居命宮左右兩鄰(夾命) ; any=其中一條成立",
+    "source": "明・羅洪先(傳)《紫微斗數全書》(維基文庫 zh.wikisource:紫微斗數全書/卷一、卷二、卷三)之〈斗數骨髓賦〉〈論石中隱玉格〉〈定富局〉〈定貴局〉〈定貧賤局〉〈命宮〉〈論諸星同垣各司所宜分別富貴貧賤夭壽〉。",
+    "version": "2",
     "reviewed": false,
-    "reviewNote": "只收《全書》有原文者,原文已對照維基文庫;條件為本站機械化簡寫,未經人工逐條校對。DSL 擴充:brightness(亮度限定)、inPalace 空 stars 配 branches(限命宮地支)。日月並明 / 火貪 / 鈴貪用庙旺限定(原文「日月反背」「居陷地則喪命夭折」之反面)。機月同梁以 inPalace 空 stars 限寅申(卷三骨髓賦注「命在寅申方論」)。馬頭帶箭:〈定貴局〉注云「馬頭帶劍 謂馬有刃是也不是居午格」,與卷三〈天同〉條「天同貪羊陀居午位丙戌…為馬頭帶箭富且貴」相左;本站取卷三說(天同+擎羊居午命宮),「丙戌生人」條件 DSL 未能表達,骨髓賦「馬頭帶劍非夭折則主刑傷」為另一說,故註於此。命無正曜:原文有「夭折孤貧」(骨髓賦)同「富貴全美」(卷三)兩說,故判「中」。"
+    "reviewNote": "只收《全書》有原文者,原文已對照維基文庫;條件為本站機械化簡寫,未經人工逐條校對。DSL 擴充:brightness(亮度限定)、inPalace 空 stars 配 branches(限命宮地支)。日月並明 / 火貪 / 鈴貪用庙旺限定(原文「日月反背」「居陷地則喪命夭折」之反面)。機月同梁以 inPalace 空 stars 限寅申(卷三骨髓賦注「命在寅申方論」)。馬頭帶箭:〈定貴局〉注云「馬頭帶劍 謂馬有刃是也不是居午格」,與卷三〈天同〉條「天同貪羊陀居午位丙戌…為馬頭帶箭富且貴」相左;本站取卷三說(天同+擎羊居午命宮),「丙戌生人」條件 DSL 未能表達,骨髓賦「馬頭帶劍非夭折則主刑傷」為另一說,故註於此。命無正曜:原文有「夭折孤貧」(骨髓賦)同「富貴全美」(卷三)兩說,故判「中」。 v2(2026-11-08):參考 Renhuai123/ziwei-doushu 格局清單,但只收《全書》原文有定義者,逐條對照維基文庫卷一〈定富局〉〈定貴局〉〈定貧賤局〉同卷三;上游「陽梁昌祿」「三奇加會」「雙祿朝垣」等《全書》無此名,不收。不能成立嘅原文定義:〈定貴局〉「財印夾祿 祿守命梁相來夾」天相天梁恆相鄰,不能夾宮;「金輿扶駕 紫微守命前後有日月來夾」太陽恆在紫微後三位,不能夾紫微;〈定貧賤局〉「財與囚仇 武貞同守身命」武曲廉貞恆隔四宮,不能同宮;〈定富局〉「財蔭夾印 相守命武梁來夾」天梁恆在天相後一位、武曲恆不在天相前一位,亦不能夾;四格均不收。可行性已用引擎掃 1980–1989 年 5760 盤驗證,收錄各格均有命中。「見前批注」而無可機械化定義者(明珠出海、日月同臨、文星暗拱、紫府朝垣、明祿暗祿、科明暗祿)不收。夾格只判命宮,原文「財帛宮/田宅宮亦然」未判。"
   },
   "rules": [
     {
@@ -190,6 +190,461 @@ const ZIWEI_GEJU_DATA = {
       ],
       "verdict": "中",
       "cite": "《紫微斗數全書》卷三〈談星要論〉:財官二宮有吉星拱照富貴全美;卷一〈斗數骨髓賦〉另有「夭折孤貧」之說"
+    },
+    {
+      "id": "riyue-jiacai",
+      "name": "日月夹财",
+      "all": [
+        {
+          "op": "inPalace",
+          "stars": [
+            "武曲"
+          ],
+          "palace": "命宫"
+        },
+        {
+          "op": "flank",
+          "stars": [
+            "太阳",
+            "太阴"
+          ],
+          "palace": "命宫"
+        }
+      ],
+      "verdict": "吉",
+      "cite": "《紫微斗數全書》卷一〈定富局〉:日月夾財 武守命日月來夾是也,財帛宮亦然(本站只判命宮)"
+    },
+    {
+      "id": "cailu-jiama",
+      "name": "财禄夹马",
+      "all": [
+        {
+          "op": "inPalace",
+          "stars": [
+            "天马"
+          ],
+          "palace": "命宫"
+        },
+        {
+          "op": "flank",
+          "stars": [
+            "武曲",
+            "禄存"
+          ],
+          "palace": "命宫"
+        }
+      ],
+      "verdict": "吉",
+      "cite": "《紫微斗數全書》卷一〈定富局〉:財祿夾馬 馬守命武祿來夾是也,逢生旺尤妙"
+    },
+    {
+      "id": "jincan-guanghui",
+      "name": "金灿光辉",
+      "all": [
+        {
+          "op": "inPalace",
+          "stars": [
+            "太阳"
+          ],
+          "palace": "命宫",
+          "branches": [
+            "午"
+          ]
+        }
+      ],
+      "verdict": "吉",
+      "cite": "《紫微斗數全書》卷一〈定富局〉:金燦光輝 太陽單守,命在午宮是也"
+    },
+    {
+      "id": "riyue-jiaming",
+      "name": "日月夹命",
+      "all": [
+        {
+          "op": "flank",
+          "stars": [
+            "太阳",
+            "太阴"
+          ],
+          "palace": "命宫"
+        }
+      ],
+      "verdict": "吉",
+      "cite": "《紫微斗數全書》卷一〈定貴局〉:日月夾命 不坐空亡遇逢本宮有吉星是也(「不坐空亡、本宮有吉星」未判)"
+    },
+    {
+      "id": "richu-fusang",
+      "name": "日出扶桑",
+      "all": [
+        {
+          "op": "inPalace",
+          "stars": [
+            "太阳"
+          ],
+          "palace": "命宫",
+          "branches": [
+            "卯"
+          ]
+        }
+      ],
+      "verdict": "吉",
+      "cite": "《紫微斗數全書》卷一〈定貴局〉:日出扶桑 日在卯守命是也,守官祿宮亦然(本站只判命宮)"
+    },
+    {
+      "id": "yuelang-tianmen",
+      "name": "月朗天门",
+      "all": [
+        {
+          "op": "inPalace",
+          "stars": [
+            "太阴"
+          ],
+          "palace": "命宫",
+          "branches": [
+            "亥"
+          ]
+        }
+      ],
+      "verdict": "吉",
+      "cite": "《紫微斗數全書》卷一〈定貴局〉:月落亥宮 月在亥守命是也,又名月朗天門"
+    },
+    {
+      "id": "fubi-gongzhu",
+      "name": "辅弼拱主",
+      "all": [
+        {
+          "op": "inPalace",
+          "stars": [
+            "紫微"
+          ],
+          "palace": "命宫"
+        }
+      ],
+      "any": [
+        {
+          "op": "inSanFang",
+          "stars": [
+            "左辅",
+            "右弼"
+          ]
+        },
+        {
+          "op": "flank",
+          "stars": [
+            "左辅",
+            "右弼"
+          ],
+          "palace": "命宫"
+        }
+      ],
+      "verdict": "吉",
+      "cite": "《紫微斗數全書》卷一〈定貴局〉:輔弼拱主 紫微守命二星來拱是也,夾之亦然"
+    },
+    {
+      "id": "zuogui-xianggui",
+      "name": "坐贵向贵",
+      "all": [
+        {
+          "op": "inSanFang",
+          "stars": [
+            "天魁",
+            "天钺"
+          ]
+        }
+      ],
+      "any": [
+        {
+          "op": "inPalace",
+          "stars": [
+            "天魁"
+          ],
+          "palace": "命宫"
+        },
+        {
+          "op": "inPalace",
+          "stars": [
+            "天钺"
+          ],
+          "palace": "命宫"
+        }
+      ],
+      "verdict": "吉",
+      "cite": "《紫微斗數全書》卷一〈定貴局〉:坐貴向貴 謂魁鉞在命迭相坐拱是也"
+    },
+    {
+      "id": "qisha-chaodou",
+      "name": "七杀朝斗",
+      "all": [
+        {
+          "op": "inPalace",
+          "stars": [
+            "七杀"
+          ],
+          "palace": "命宫",
+          "branches": [
+            "寅",
+            "申",
+            "子",
+            "午"
+          ]
+        }
+      ],
+      "verdict": "吉",
+      "cite": "《紫微斗數全書》卷三〈論諸星同垣各司所宜分別富貴貧賤夭壽〉:七殺寅申子午一生爵祿榮昌 為七殺朝斗格"
+    },
+    {
+      "id": "xingqiu-jiayin",
+      "name": "刑囚夹印",
+      "all": [
+        {
+          "op": "inPalace",
+          "stars": [
+            "天刑",
+            "廉贞"
+          ],
+          "palace": "命宫"
+        }
+      ],
+      "verdict": "中",
+      "cite": "《紫微斗數全書》卷一〈定貴局〉:刑囚夾印 天刑廉貞同臨身命主武勇之人;卷一〈斗數骨髓賦〉則云「刑囚夾印,刑杖惟司」,兩說並存故判中"
+    },
+    {
+      "id": "kequanlu-gong",
+      "name": "科权禄拱",
+      "all": [
+        {
+          "op": "inSanFang",
+          "stars": [],
+          "mutagens": [
+            "禄",
+            "权",
+            "科"
+          ]
+        }
+      ],
+      "verdict": "吉",
+      "cite": "《紫微斗數全書》卷一〈定貴局〉:科權祿拱(注「見前批注」);卷一〈斗數骨髓賦〉:科權祿拱名譽昭彰"
+    },
+    {
+      "id": "wuqu-shouyuan",
+      "name": "武曲守垣",
+      "all": [
+        {
+          "op": "inPalace",
+          "stars": [
+            "武曲"
+          ],
+          "palace": "命宫",
+          "branches": [
+            "卯"
+          ]
+        }
+      ],
+      "verdict": "吉",
+      "cite": "《紫微斗數全書》卷一〈定貴局〉:武曲守垣 武守命卯宮是也,餘不是"
+    },
+    {
+      "id": "quanlu-shengfeng",
+      "name": "权禄生逢",
+      "all": [
+        {
+          "op": "inPalace",
+          "stars": [],
+          "palace": "命宫",
+          "mutagens": [
+            "禄",
+            "权"
+          ],
+          "brightness": [
+            "庙",
+            "旺"
+          ]
+        }
+      ],
+      "verdict": "吉",
+      "cite": "《紫微斗數全書》卷一〈定貴局〉:權祿生逢 二星守命廟旺是也,陷不是"
+    },
+    {
+      "id": "yangren-rumiao",
+      "name": "羊刃入庙",
+      "all": [
+        {
+          "op": "inPalace",
+          "stars": [
+            "擎羊"
+          ],
+          "palace": "命宫",
+          "branches": [
+            "辰",
+            "戌",
+            "丑",
+            "未"
+          ]
+        }
+      ],
+      "verdict": "中",
+      "cite": "《紫微斗數全書》卷一〈定貴局〉:羊刃入廟 辰戌丑未守命遇吉是也(「遇吉」未判,故判中)"
+    },
+    {
+      "id": "juji-jumao",
+      "name": "巨机居卯",
+      "all": [
+        {
+          "op": "inPalace",
+          "stars": [
+            "巨门",
+            "天机"
+          ],
+          "palace": "命宫",
+          "branches": [
+            "卯"
+          ]
+        }
+      ],
+      "verdict": "吉",
+      "cite": "《紫微斗數全書》卷一〈定貴局〉:巨機居卯(注「見前批注」,取格名字面);卷一〈斗數骨髓賦〉:巨機同宮公卿之位"
+    },
+    {
+      "id": "shizhong-yinyu",
+      "name": "石中隐玉",
+      "all": [
+        {
+          "op": "inPalace",
+          "stars": [
+            "巨门"
+          ],
+          "palace": "命宫",
+          "branches": [
+            "子",
+            "午"
+          ]
+        }
+      ],
+      "verdict": "吉",
+      "cite": "《紫微斗數全書》卷一〈論石中隱玉格〉:命在子午逢巨門是也"
+    },
+    {
+      "id": "zifu-jiaming",
+      "name": "紫府夹命",
+      "all": [
+        {
+          "op": "flank",
+          "stars": [
+            "紫微",
+            "天府"
+          ],
+          "palace": "命宫"
+        }
+      ],
+      "verdict": "吉",
+      "cite": "《紫微斗數全書》卷三〈論諸星同垣各司所宜分別富貴貧賤夭壽〉:紫府夾命為貴格"
+    },
+    {
+      "id": "changqu-jiaming",
+      "name": "昌曲夹命",
+      "all": [
+        {
+          "op": "flank",
+          "stars": [
+            "文昌",
+            "文曲"
+          ],
+          "palace": "命宫"
+        }
+      ],
+      "verdict": "吉",
+      "cite": "《紫微斗數全書》卷一〈斗數骨髓賦〉:夾昌夾曲主貴兮"
+    },
+    {
+      "id": "kongjie-jiaming",
+      "name": "空劫夹命",
+      "all": [
+        {
+          "op": "flank",
+          "stars": [
+            "地空",
+            "地劫"
+          ],
+          "palace": "命宫"
+        }
+      ],
+      "verdict": "凶",
+      "cite": "《紫微斗數全書》卷一〈斗數骨髓賦〉:夾空夾劫主貧賤"
+    },
+    {
+      "id": "yangtuo-jiaji",
+      "name": "羊陀夹忌",
+      "all": [
+        {
+          "op": "inPalace",
+          "stars": [],
+          "palace": "命宫",
+          "mutagens": [
+            "忌"
+          ]
+        },
+        {
+          "op": "flank",
+          "stars": [
+            "擎羊",
+            "陀罗"
+          ],
+          "palace": "命宫"
+        }
+      ],
+      "verdict": "凶",
+      "cite": "《紫微斗數全書》卷三〈論諸星同垣各司所宜分別富貴貧賤夭壽〉:羊陀夾忌為敗局 假如安命在申宮,又逢忌星,羊在酉陀在未夾之"
+    },
+    {
+      "id": "yisheng-gupin",
+      "name": "一生孤贫",
+      "all": [
+        {
+          "op": "inPalace",
+          "stars": [
+            "破军"
+          ],
+          "palace": "命宫",
+          "brightness": [
+            "陷"
+          ]
+        }
+      ],
+      "verdict": "凶",
+      "cite": "《紫微斗數全書》卷一〈定貧賤局〉:一生孤貧 謂破守命星陷地是也"
+    },
+    {
+      "id": "lianghong-huagai",
+      "name": "两重华盖",
+      "all": [
+        {
+          "op": "inPalace",
+          "stars": [
+            "禄存"
+          ],
+          "palace": "命宫",
+          "mutagens": [
+            "禄"
+          ]
+        }
+      ],
+      "any": [
+        {
+          "op": "inPalace",
+          "stars": [
+            "地空"
+          ],
+          "palace": "命宫"
+        },
+        {
+          "op": "inPalace",
+          "stars": [
+            "地劫"
+          ],
+          "palace": "命宫"
+        }
+      ],
+      "verdict": "凶",
+      "cite": "《紫微斗數全書》卷一〈定貧賤局〉:兩重華蓋 謂祿存化祿坐命遇空劫是也"
     }
   ]
 };

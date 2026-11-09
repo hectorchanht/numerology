@@ -82,3 +82,24 @@ test("实盘 1990-05-15 14:30 男", () => {
   // 命宫有主星故非命无正曜;铃星庙但命宫无贪狼,非铃贪。
   assert.deepEqual(z.geju.map((h) => h.id), ["fuxiang-chaoyuan"]);
 });
+
+test("flank:日月分居命宫两邻命中,同在一邻唔中", () => {
+  assert.ok(ids(mk("子", { 亥: { major: ["太阳"] }, 丑: { major: ["太阴"] } })).includes("riyue-jiaming"));
+  assert.ok(ids(mk("子", { 丑: { major: ["太阴"] }, 亥: { major: ["太阳"] } })).includes("riyue-jiaming"));
+  assert.ok(!ids(mk("子", { 丑: { major: ["太阳", "太阴"] } })).includes("riyue-jiaming"));
+});
+
+test("mutagens:命宫化忌 + 羊陀夹 = 羊陀夹忌;冇化忌唔中", () => {
+  const spec = (mut) => ({ 申: { major: [["巨门"]] }, 酉: { minor: ["擎羊"] }, 未: { minor: ["陀罗"] } , ...mut });
+  const m = mk("申", spec({}));
+  m.palaces.find((p) => p.earthlyBranch === "申").majorStars[0].mutagen = "忌";
+  assert.ok(ids(m).includes("yangtuo-jiaji"));
+  assert.ok(!ids(mk("申", spec({}))).includes("yangtuo-jiaji"));
+});
+
+test("any:辅弼拱主 三方拱或夹命其一即中,steps 多一条证据", () => {
+  const gong = detectZiweiGeju(...Object.values(mk("子", { 子: { major: ["紫微"] }, 辰: { minor: ["左辅"] }, 申: { minor: ["右弼"] } })));
+  assert.equal(gong.find((h) => h.id === "fubi-gongzhu").steps.length, 2);
+  assert.ok(ids(mk("子", { 子: { major: ["紫微"] }, 亥: { minor: ["左辅"] }, 丑: { minor: ["右弼"] } })).includes("fubi-gongzhu"));
+  assert.ok(!ids(mk("子", { 子: { major: ["紫微"] }, 卯: { minor: ["左辅"] }, 丑: { minor: ["右弼"] } })).includes("fubi-gongzhu"));
+});
