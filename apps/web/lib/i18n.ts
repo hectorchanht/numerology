@@ -206,7 +206,7 @@ const zht = {
   "chart.ziweiTitle": "斗數命盤 · 中宮納四柱",
   "chart.corrected": "已按經度 {lon}° 做真太陽時校正(偏移 {off} 分)",
   "chart.notCorrected": "未做真太陽時校正",
-  "chart.chinaDST": "如喺中國大陸出生:當日行夏令時,鐘錶快 1 小時;若填嘅係鐘錶時間,請減 1 小時再排",
+  "chart.chinaDST": "如在中國大陸出生:當日實行夏令時,鐘錶快 1 小時;若填的是鐘錶時間,請減 1 小時再排",
   "chart.palaceNote": "每宮底部:宮名 · 大限歲數;命宮宮名金色、身宮標「身」。點選宮位可看全部星曜與十二神。",
   "chart.readingTitle": "命理解讀 · 八字 / 紫微 / 合參",
   "chart.readingSub": "可純八字、純紫微,或兩者對照",
