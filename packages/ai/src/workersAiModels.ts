@@ -26,7 +26,7 @@ export interface WorkersAiModelInfo {
 }
 
 /** 最後一次成功核驗的時間(UTC)。 */
-export const WORKERS_AI_VERIFIED_AT = "2026-10-22";
+export const WORKERS_AI_VERIFIED_AT = "2026-11-11";
 
 export const WORKERS_AI_MODELS: WorkersAiModelInfo[] = [
   {
@@ -40,21 +40,6 @@ export const WORKERS_AI_MODELS: WorkersAiModelInfo[] = [
     contextWindow: 128000,
     priceInPerM: 0.351,
     priceOutPerM: 0.555,
-  },
-  {
-    // 備選:中文流暢、便宜,但長簡體 prompt 下會無視繁體指令出簡體。
-    id: "@cf/meta/llama-3.1-8b-instruct-fp8",
-    label: "Llama 3.1 8B(便宜·繁體不穩)",
-    contextWindow: 32000,
-    priceInPerM: 0.152,
-    priceOutPerM: 0.287,
-  },
-  {
-    id: "@cf/meta/llama-3.2-3b-instruct",
-    label: "Llama 3.2 3B(最快·最便宜)",
-    contextWindow: 80000,
-    priceInPerM: 0.0509,
-    priceOutPerM: 0.335,
   },
   {
     // 2026-10-23 新增:AI Singapore 的東南亞特化模型,27B,與 mistral-small 同價

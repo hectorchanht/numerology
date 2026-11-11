@@ -178,8 +178,6 @@ export function filterRetired<T extends { id: string }>(models: T[]): T[] {
 export const STATIC_MODELS: Record<string, string[]> = {
   "workers-ai": [
     "@cf/mistralai/mistral-small-3.1-24b-instruct",
-    "@cf/meta/llama-3.1-8b-instruct-fp8",
-    "@cf/meta/llama-3.2-3b-instruct",
   ],
   pollinations: ["openai"],
   // Mac 只行 Ollama(MLX 已停用):靜態表就是 Ollama 的 7 個(與服務端一致)。
