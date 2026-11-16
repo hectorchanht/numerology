@@ -52,4 +52,5 @@
 - B 工作紙公開下載：過渡版兩份成品（hetu-luoshu-notes.pdf 605,634B + apple-notes-template.txt）搬入 apps/web/public/worksheets/（改名 hetu-luoshu-notes.txt）；lessons.ts 加選配 worksheet 欄位（淨係 hetu-luoshu 有），LessonView 喺課文卡之後、小測之前 render 下載卡（PDF + 純文字兩條真連結，冇工作紙嘅課唔 render）。PDF 經 Git Data API base64 blob 入同一 commit，唔經文字 helper 防損壞。
 - C 筆記套用學習模板：notes.ts 加純函數 buildNoteTemplate（課名 → 逐節「註解：」位 → 小測默答 Q&A 位 → 一句總結/仲未明的一點），資料驅動、每課適用；LessonNotepad 文字 tab 加「套用學習模板」掣 —— 空筆記直接入，有文字 confirm 後 append，永不覆蓋；i18n 經 yjT keys（notesTemplate/notesTpl*/worksheet*）。
 - Icon rule（Hector standing，2026-11-16）：本 iteration 掂過嘅 actionable elements 全部 icon + label —— 摺疊掣（panel)、下載 links(download)、套用模板（plus)、文字/手寫 tabs(file/edit)、復原（rewind)、九宮格底（grid)、清除（trash)、筆記掣同面板標題（edit，取代 ✎ 文字符號）；側欄項目摺疊前後都保留圖示。
-- Commit: this push（execute 證據：tests/build/截圖/Impeccable 喺 push 後補錄 verify）。
+- Commit: cf32602f（parent d2447f33，13 files）。
+- VERIFY + SHIP（2026-11-16，Muse 主 session 獨立核實）：live 課頁 200，含 PDF + txt 工作紙連結各一；live PDF = 200 / application/pdf / 605,634B，MD5 與本地原檔完全一致（e943c95a…）；basics 課頁 0 條 worksheet 連結（冇死連結）；本地重跑 tests 274/274 pass；親閱截圖 —— 03 開筆記自動摺欄（icon rail）＋兩欄各 491px、05 模板插入（六節連 sibling 新加「古籍裡的數」＋註解位＋319 字計數）、02/06 手動摺疊與還原證據齊。Iteration 4 正式上線。
