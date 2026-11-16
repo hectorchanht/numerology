@@ -13,7 +13,8 @@ import { BaxingPan } from "../BaxingPan";
 import { ShoujiBaxing } from "../ShoujiBaxing";
 import { AbcdeSteps } from "../AbcdeSteps";
 import { LessonNotepad } from "../LessonNotepad";
-import { hasNote } from "../notes";
+import { buildNoteTemplate, hasNote } from "../notes";
+import { Icon } from "@/components/Icon";
 import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { withTermHighlights } from "@/lib/highlightTerms";
@@ -35,6 +36,12 @@ export function LessonView({ lessonId }: { lessonId: string }) {
     if (!notesOpen) setNoteExists(hasNote(lessonId));
   }, [lessonId, notesOpen]);
 
+  /* 筆記開著(闊面板佔位)→ 左側欄收起淨圖示(body class,CSS ≥1024 先有效);閂/離頁還原 */
+  useEffect(() => {
+    document.body.classList.toggle("wide-panel-open", notesOpen);
+    return () => document.body.classList.remove("wide-panel-open");
+  }, [notesOpen]);
+
   if (!lesson) {
     return (
       <div className="card">
@@ -47,6 +54,22 @@ export function LessonView({ lessonId }: { lessonId: string }) {
   const idx = ACADEMY_LESSONS.findIndex((l) => l.id === lesson.id);
   const prev = ACADEMY_LESSONS[idx - 1];
   const next = ACADEMY_LESSONS[idx + 1];
+
+  /* 學習模板:課文標題/節題/測驗題先本地化,再交純函數砌版 */
+  const noteTemplate = buildNoteTemplate(
+    {
+      title: zT(lesson.title),
+      sections: lesson.sections.map((s) => ({ heading: zT(s.heading) })),
+      quiz: lesson.quiz.map((q) => ({ q: zT(q.q) })),
+    },
+    {
+      annotate: yjT("academy.notesTplAnnotate", loc),
+      quiz: yjT("academy.notesTplQuiz", loc),
+      answer: yjT("academy.notesTplAnswer", loc),
+      summary: yjT("academy.notesTplSummary", loc),
+      unclear: yjT("academy.notesTplUnclear", loc),
+    },
+  );
 
   const widgetAt = (si: number) => (
     <>
@@ -72,7 +95,7 @@ export function LessonView({ lessonId }: { lessonId: string }) {
         <div className="sub">{zT(lesson.sub)}</div>
         <div style={{ marginTop: "0.8rem" }}>
           <button type="button" className="btn ghost small" onClick={() => setNotesOpen(true)}>
-            ✎ {yjT("academy.notes", loc)}
+            <Icon name="edit" small /> {yjT("academy.notes", loc)}
             {noteExists && (
               <span
                 aria-hidden
@@ -108,6 +131,23 @@ export function LessonView({ lessonId }: { lessonId: string }) {
           </Fragment>
         ))}
       </div>
+
+      {lesson.worksheet && (
+        <div className="card" style={{ marginTop: "1.2rem" }}>
+          <h2 className="section-title">{yjT("academy.worksheet", loc)}</h2>
+          <p className="muted" style={{ fontSize: "13px", marginBottom: "0.8rem" }}>
+            {yjT("academy.worksheetNote", loc)}
+          </p>
+          <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+            <a className="btn ghost" href={lesson.worksheet.pdf} download>
+              <Icon name="download" small /> {yjT("academy.worksheetPdf", loc)}
+            </a>
+            <a className="btn ghost" href={lesson.worksheet.txt} download>
+              <Icon name="download" small /> {yjT("academy.worksheetTxt", loc)}
+            </a>
+          </div>
+        </div>
+      )}
 
       <Quiz lesson={lesson} onDone={() => setRefresh((r) => r + 1)} />
 
@@ -164,6 +204,7 @@ export function LessonView({ lessonId }: { lessonId: string }) {
       <LessonNotepad
         lessonId={lesson.id}
         title={zT(lesson.title)}
+        template={noteTemplate}
         open={notesOpen}
         onClose={closeNotes}
       />

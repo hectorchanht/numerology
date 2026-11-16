@@ -98,3 +98,33 @@ export function hasNote(lessonId: string): boolean {
   const n = loadNote(lessonId);
   return n.text.trim() !== "" || n.strokes.length > 0;
 }
+
+/** 學習模板需要嘅固定標籤(由 UI 層按 locale 傳入,保持呢度純函數)。 */
+export interface NoteTemplateLabels {
+  annotate: string;
+  quiz: string;
+  answer: string;
+  summary: string;
+  unclear: string;
+}
+
+/** 由課文資料砌學習模板:課名 → 逐節註解位 → 小測默答 → 總結/未明。字串全部由 UI 層本地化後傳入。 */
+export function buildNoteTemplate(
+  lesson: { title: string; sections: { heading: string }[]; quiz: { q: string }[] },
+  labels: NoteTemplateLabels,
+): string {
+  const lines: string[] = [lesson.title, ""];
+  lesson.sections.forEach((s, i) => {
+    lines.push(`${i + 1}. ${s.heading}`);
+    lines.push(`${labels.annotate}：`, "", "");
+  });
+  if (lesson.quiz.length > 0) {
+    lines.push(`【${labels.quiz}】`);
+    lesson.quiz.forEach((q, i) => {
+      lines.push(`Q${i + 1} ${q.q}`);
+      lines.push(`${labels.answer}：`, "");
+    });
+  }
+  lines.push(`${labels.summary}：`, "", `${labels.unclear}：`, "");
+  return lines.join("\n");
+}

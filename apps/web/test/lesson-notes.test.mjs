@@ -17,7 +17,7 @@ const outDir = path.join(here, "../test-dist");
 fs.mkdirSync(outDir, { recursive: true });
 const outPath = path.join(outDir, "lesson-notes.mjs");
 fs.writeFileSync(outPath, js);
-const { noteKey, emptyNote, serializeNote, parseNote, loadNote, saveNote, hasNote } =
+const { noteKey, emptyNote, serializeNote, parseNote, loadNote, saveNote, hasNote, buildNoteTemplate } =
   await import(pathToFileURL(outPath).href);
 
 test("notes:noteKey —— 每課一條獨立鍵", () => {
@@ -101,4 +101,34 @@ test("notes:load/save/has —— localStorage stub 往返 + 無儲存時安全�
   // 無 localStorage(SSR/私密模式)唔拋錯
   assert.deepEqual(loadNote("hetu-luoshu"), emptyNote());
   assert.equal(hasNote("hetu-luoshu"), false);
+});
+
+test("notes:buildNoteTemplate —— 課名、每節標題、每條測驗題、總結位齊全", () => {
+  const labels = { annotate: "註解", quiz: "小測默答", answer: "答", summary: "一句總結", unclear: "仲未明的一點" };
+  const tpl = buildNoteTemplate(
+    {
+      title: "河圖洛書",
+      sections: [{ heading: "兩幅天書" }, { heading: "河圖生成數" }, { heading: "洛書九宮" }],
+      quiz: [{ q: "河出圖出自邊部經典？" }, { q: "九宮三數和係幾多？" }],
+    },
+    labels,
+  );
+  assert.ok(tpl.startsWith("河圖洛書"));
+  for (const h of ["兩幅天書", "河圖生成數", "洛書九宮"]) assert.ok(tpl.includes(h), h);
+  for (const q of ["河出圖出自邊部經典？", "九宮三數和係幾多？"]) assert.ok(tpl.includes(q), q);
+  assert.ok(tpl.includes("註解："));
+  assert.ok(tpl.includes("小測默答"));
+  assert.ok(tpl.includes("答："));
+  assert.ok(tpl.includes("一句總結："));
+  assert.ok(tpl.includes("仲未明的一點："));
+  // 節次序跟課文,測驗喺節之後
+  assert.ok(tpl.indexOf("洛書九宮") < tpl.indexOf("小測默答"));
+});
+
+test("notes:buildNoteTemplate —— 無測驗/無節都唔爆,淨返骨架", () => {
+  const labels = { annotate: "註解", quiz: "小測默答", answer: "答", summary: "一句總結", unclear: "仲未明的一點" };
+  const tpl = buildNoteTemplate({ title: "空課", sections: [], quiz: [] }, labels);
+  assert.ok(tpl.includes("空課"));
+  assert.ok(!tpl.includes("小測默答"));
+  assert.ok(tpl.includes("一句總結："));
 });

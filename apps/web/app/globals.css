@@ -1046,6 +1046,25 @@ h1.large + .seg { margin-bottom: 12px; }
     height: calc(100dvh - 24px); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: none; }
 }
 
+/* 側欄摺疊(≥1024):手動偏好 body.sidenav-collapsed 或闊面板開啟 body.wide-panel-open → 淨圖示,闊度還俾內容 */
+@media (min-width: 1024px) {
+  .side { transition: width 0.2s ease; }
+  .app { transition: margin 0.2s ease; }
+  body.sidenav-collapsed, body.wide-panel-open { --side-w: 64px; }
+  body.sidenav-collapsed .side, body.wide-panel-open .side { padding-left: 6px; padding-right: 6px; }
+  body.sidenav-collapsed .side-brand, body.wide-panel-open .side-brand { justify-content: center; padding-left: 0; padding-right: 0; }
+  body.sidenav-collapsed .side-brand > div, body.wide-panel-open .side-brand > div { display: none; }
+  body.sidenav-collapsed .side-item, body.wide-panel-open .side-item { justify-content: center; gap: 0; padding: 0; font-size: 0; }
+  body.sidenav-collapsed .side-group, body.wide-panel-open .side-group { display: none; }
+  body.sidenav-collapsed .side-sep, body.wide-panel-open .side-sep { margin-left: 6px; margin-right: 6px; }
+  body.sidenav-collapsed .side-foot, body.wide-panel-open .side-foot { flex-direction: column; align-items: center; padding: 0; }
+  body.sidenav-collapsed .side-foot .seg, body.wide-panel-open .side-foot .seg { flex-direction: column; width: 100%; }
+  body.sidenav-collapsed .side-foot .seg button, body.wide-panel-open .side-foot .seg button { padding: 0 2px; }
+}
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+  .side, .app { transition: none; }
+}
+
 /* ── 結論先行,證據收納 ─────────────────────────────────────── */
 
 /* TL;DR 摘要卡:每節第一眼見到嘅結論 */

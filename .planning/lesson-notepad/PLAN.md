@@ -46,3 +46,10 @@
 - 改動（2 files）：globals.css 筆記分欄 media query `min-width: 900px` → `768px`；LessonNotepad.tsx 窄屏判斷 matchMedia `899.98px` → `767.98px`（含註解同步）。其餘邏輯、儲存、行為不變。
 - Commit: 5f8c4f03（parent afa7a200）。
 - VERIFY + SHIP（2026-11-16，Muse 主 session 親核）：build 成功、tests 272/272；本地 production 三視口量度 —— 834 直屏：課文欄 x114–407、筆記欄 x427–720（各 293px、sticky、無遮罩、零重疊）＋親閱截圖確認；390 手機：fixed 抽屜 367px + 遮罩（不變）；1194 橫屏：分欄同 Iteration 2 一致。Pages deploy on 5f8c4f03 = completed success；live 課頁 200；live CSS 含 `@media (min-width:768px){.notepad-backdrop…` 分欄規則。直屏半半分屏正式上線。
+
+## Iteration 4（2026-11-16，Hector 三點 feedback）
+- A 側欄摺疊：開筆記（或日後任何闊面板）嗰陣，左側欄自動收起淨圖示（body.wide-panel-open，≥1024）；另加 iOS 式手動摺疊掣（SideNav panel 圖示掣），偏好存 localStorage `numerology-sidenav-collapsed`（body.sidenav-collapsed）—— 臨時強制摺疊唔覆寫手動偏好，閂面板後還原。CSS 共用規則：--side-w 64px、label 字隱藏（font-size:0，圖示 22px 不變）、群組標題隱藏、頂部工具列改直排；width/margin 200ms transition，prefers-reduced-motion 時取消。
+- B 工作紙公開下載：過渡版兩份成品（hetu-luoshu-notes.pdf 605,634B + apple-notes-template.txt）搬入 apps/web/public/worksheets/（改名 hetu-luoshu-notes.txt）；lessons.ts 加選配 worksheet 欄位（淨係 hetu-luoshu 有），LessonView 喺課文卡之後、小測之前 render 下載卡（PDF + 純文字兩條真連結，冇工作紙嘅課唔 render）。PDF 經 Git Data API base64 blob 入同一 commit，唔經文字 helper 防損壞。
+- C 筆記套用學習模板：notes.ts 加純函數 buildNoteTemplate（課名 → 逐節「註解：」位 → 小測默答 Q&A 位 → 一句總結/仲未明的一點），資料驅動、每課適用；LessonNotepad 文字 tab 加「套用學習模板」掣 —— 空筆記直接入，有文字 confirm 後 append，永不覆蓋；i18n 經 yjT keys（notesTemplate/notesTpl*/worksheet*）。
+- Icon rule（Hector standing，2026-11-16）：本 iteration 掂過嘅 actionable elements 全部 icon + label —— 摺疊掣（panel)、下載 links(download)、套用模板（plus)、文字/手寫 tabs(file/edit)、復原（rewind)、九宮格底（grid)、清除（trash)、筆記掣同面板標題（edit，取代 ✎ 文字符號）；側欄項目摺疊前後都保留圖示。
+- Commit: this push（execute 證據：tests/build/截圖/Impeccable 喺 push 後補錄 verify）。

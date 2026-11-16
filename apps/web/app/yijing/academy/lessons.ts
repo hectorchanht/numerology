@@ -226,6 +226,8 @@ export interface AcademyLesson {
   quiz: AcademyQuizQ[];
   /** 延伸出處:每課 2–4 個已核實的公有領域原文鏈接。 */
   sources: AcademySource[];
+  /** 本課工作紙(選配):public 資產路徑;冇就唔好 render 下載卡(唔留空連結)。 */
+  worksheet?: { pdf: string; txt: string };
   /** 互動組件:在 widgetAfter 指定的 section 之後渲染;-1 = 放在第一節之前(圖先行,先看圖再讀字)。 */
   widget?: "palm" | "bagua" | "jiugong" | "baxing" | "shouji" | "abcde";
   widgetAfter?: number;
@@ -359,6 +361,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
       { label: "《尚書·洪範》:天乃錫禹洪范九疇", url: "https://zh.wikisource.org/wiki/尚書/洪範" },
       { label: "《古今圖書集成·經籍典》第 51 卷 河圖洛書部:天地之數、大衍、劉牧圖書互易", url: "https://zh.wikisource.org/wiki/欽定古今圖書集成/理學彙編/經籍典/第051卷" },
     ],
+    worksheet: { pdf: "/worksheets/hetu-luoshu-notes.pdf", txt: "/worksheets/hetu-luoshu-notes.txt" },
   },
   {
     id: "basics",

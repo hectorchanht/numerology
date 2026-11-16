@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, LocaleSwitch } from "@/lib/i18n";
 import { go, useNav, type Screen } from "@/lib/nav";
@@ -15,12 +16,38 @@ import { ThemeToggle } from "@/components/ThemeToggle";
  * 學院已升上主導航,下層 SUB_GROUPS 渲染時濾走學院連結避免重複(資料仍以 navGroups 為單一來源)。
  * 手機/平板由 CSS 隱藏(仍用底部 tab bar),所以兩邊共用同一套 nav store 同 i18n。
  */
+/** 手動摺疊側欄嘅持久偏好(只存此裝置;臨時嘅 wide-panel-open 強制摺疊唔會覆寫佢)。 */
+const SIDENAV_KEY = "numerology-sidenav-collapsed";
+
 export function SideNav() {
   const { t, locale } = useLocale();
   const { screen, tab } = useNav();
   const pathname = usePathname();
   const router = useRouter();
   const onHome = pathname === "/";
+
+  /* iOS 式手動摺疊:body class 觸發 icon-only 模式(CSS ≥1024 先有效),偏好存 localStorage */
+  const [collapsed, setCollapsed] = useState(false);
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    try {
+      setCollapsed(localStorage.getItem(SIDENAV_KEY) === "1");
+    } catch {
+      /* 私密模式:靜默用預設 */
+    }
+    hydratedRef.current = true;
+  }, []);
+  useEffect(() => {
+    document.body.classList.toggle("sidenav-collapsed", collapsed);
+    if (hydratedRef.current) {
+      try {
+        localStorage.setItem(SIDENAV_KEY, collapsed ? "1" : "0");
+      } catch {
+        /* 靜默忽略 */
+      }
+    }
+    return () => document.body.classList.remove("sidenav-collapsed");
+  }, [collapsed]);
 
   const open = (s: Screen) => {
     go(s);
@@ -30,6 +57,15 @@ export function SideNav() {
   return (
     <aside className="side">
       <div className="side-foot">
+        <button
+          type="button"
+          className="icon-btn"
+          aria-label={t("nav.sidenav")}
+          aria-pressed={collapsed}
+          onClick={() => setCollapsed((c) => !c)}
+        >
+          <Icon name="panel" />
+        </button>
         <button
           type="button"
           className="icon-btn"

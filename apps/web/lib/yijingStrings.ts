@@ -135,6 +135,17 @@ export const YIJING_STRINGS: Record<string, Dict> = {
   "academy.notesClose": S("關閉", "关闭", "Close"),
   "academy.notesHasNote": S("有筆記", "有笔记", "Has notes"),
   "academy.notesConfirmClear": S("清除後不能復原，確定？", "清除后不能恢复，确定？", "This cannot be undone. Clear it?"),
+  "academy.notesTemplate": S("套用學習模板", "套用学习模板", "Use study template"),
+  "academy.notesTplConfirmAppend": S("筆記已有文字，將學習模板加喺後面（唔會覆蓋）？", "笔记已有文字，将学习模板加在后面（不会覆盖）？", "Your note has text. Append the study template after it (nothing is overwritten)?"),
+  "academy.notesTplAnnotate": S("註解", "注解", "Note"),
+  "academy.notesTplQuiz": S("小測默答", "小测默答", "Quiz — answer from memory"),
+  "academy.notesTplAnswer": S("答", "答", "A"),
+  "academy.notesTplSummary": S("一句總結", "一句总结", "One-line summary"),
+  "academy.notesTplUnclear": S("仲未明的一點", "还没想通的一点", "One thing still unclear"),
+  "academy.worksheet": S("本課工作紙", "本课工作纸", "Lesson worksheet"),
+  "academy.worksheetNote": S("印出嚟用 Pencil 跟住寫，或者下載純文字版貼入 Notes app —— 同筆記面板同一套學習流程。", "印出来用 Pencil 跟着写，或者下载纯文字版贴入 Notes app —— 和笔记面板同一套学习流程。", "Print it and write along with your Pencil, or paste the text version into your notes app — the same study flow as the notes panel."),
+  "academy.worksheetPdf": S("下載工作紙 PDF", "下载工作纸 PDF", "Download worksheet PDF"),
+  "academy.worksheetTxt": S("下載純文字模板", "下载纯文字模板", "Download text template"),
 
   /* —— 六爻納甲 —— */
   "liuyao.title": S("六爻納甲", "六爻纳甲", "Six Lines Najia"),

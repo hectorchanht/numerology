@@ -11,6 +11,7 @@ import {
 } from "./notes";
 import { useLocale } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
+import { Icon } from "@/components/Icon";
 
 /**
  * 單課筆記面板(受控:開關狀態由 LessonView 持有,方便同課文並排分欄)。
@@ -21,11 +22,14 @@ import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 export function LessonNotepad({
   lessonId,
   title,
+  template,
   open,
   onClose,
 }: {
   lessonId: string;
   title: string;
+  /** 學習模板(由 LessonView 按課文資料 + locale 砌好);文字 tab 一撳套用。 */
+  template: string;
   open: boolean;
   onClose: () => void;
 }) {
@@ -235,6 +239,17 @@ export function LessonNotepad({
     update({ ...noteRef.current, text: "" });
   };
 
+  /* 套用學習模板:空筆記直接入;有文字就 confirm 後 append,永不覆蓋 */
+  const applyTemplate = () => {
+    const cur = noteRef.current.text;
+    if (cur.trim() === "") {
+      update({ ...noteRef.current, text: template });
+      return;
+    }
+    if (!window.confirm(yjT("academy.notesTplConfirmAppend", loc))) return;
+    update({ ...noteRef.current, text: `${cur.replace(/\s+$/, "")}\n\n${template}` });
+  };
+
   const clearDraw = () => {
     if (!window.confirm(yjT("academy.notesConfirmClear", loc))) return;
     update({ ...noteRef.current, strokes: [] });
@@ -261,7 +276,7 @@ export function LessonNotepad({
       {narrow && <div className="notepad-backdrop" aria-hidden onClick={onClose} />}
       <div className="notepad-panel" role="dialog" aria-label={yjT("academy.notes", loc)}>
         <div className="notepad-head">
-          <span className="np-name">✎ {yjT("academy.notes", loc)}</span>
+          <span className="np-name"><Icon name="edit" small /> {yjT("academy.notes", loc)}</span>
           <span className="np-lesson">{title}</span>
           <div className="seg compact" role="tablist">
             <button
@@ -271,7 +286,7 @@ export function LessonNotepad({
               className={tab === "text" ? "on" : ""}
               onClick={() => setTab("text")}
             >
-              {yjT("academy.notesText", loc)}
+              <Icon name="file" small /> {yjT("academy.notesText", loc)}
             </button>
             <button
               type="button"
@@ -280,7 +295,7 @@ export function LessonNotepad({
               className={tab === "draw" ? "on" : ""}
               onClick={() => setTab("draw")}
             >
-              {yjT("academy.notesDraw", loc)}
+              <Icon name="edit" small /> {yjT("academy.notesDraw", loc)}
             </button>
           </div>
           <button
@@ -308,14 +323,19 @@ export function LessonNotepad({
                 <span className="muted">
                   {yjT("academy.notesChars", loc).replace("{n}", String(note.text.length))}
                 </span>
-                <button
-                  type="button"
-                  className="btn ghost small"
-                  onClick={clearText}
-                  disabled={note.text === ""}
-                >
-                  {yjT("academy.notesClear", loc)}
-                </button>
+                <span style={{ display: "flex", gap: "6px" }}>
+                  <button type="button" className="btn ghost small" onClick={applyTemplate}>
+                    <Icon name="plus" small /> {yjT("academy.notesTemplate", loc)}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn ghost small"
+                    onClick={clearText}
+                    disabled={note.text === ""}
+                  >
+                    <Icon name="trash" small /> {yjT("academy.notesClear", loc)}
+                  </button>
+                </span>
               </div>
             </div>
           ) : (
@@ -353,7 +373,7 @@ export function LessonNotepad({
                   onClick={undoStroke}
                   disabled={note.strokes.length === 0}
                 >
-                  {yjT("academy.notesUndo", loc)}
+                  <Icon name="rewind" small /> {yjT("academy.notesUndo", loc)}
                 </button>
                 <button
                   type="button"
@@ -361,7 +381,7 @@ export function LessonNotepad({
                   aria-pressed={grid}
                   onClick={() => setGrid((g) => !g)}
                 >
-                  {yjT("academy.notesGrid", loc)}
+                  <Icon name="grid" small /> {yjT("academy.notesGrid", loc)}
                 </button>
                 <button
                   type="button"
@@ -369,7 +389,7 @@ export function LessonNotepad({
                   onClick={clearDraw}
                   disabled={note.strokes.length === 0}
                 >
-                  {yjT("academy.notesClearDraw", loc)}
+                  <Icon name="trash" small /> {yjT("academy.notesClearDraw", loc)}
                 </button>
               </div>
             </div>
