@@ -1018,6 +1018,34 @@ h1.large + .seg { margin-bottom: 12px; }
   button.row:hover, a.row:hover, .hist-main:hover, .tool:hover { background: var(--card-2); }
 }
 
+/* ── 學院課堂筆記:窄屏抽屜;<900 遮罩蓋面,≥900 開啟時同課文並排分欄 ── */
+.lesson-main { min-width: 0; }
+.notepad-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 79; }
+.notepad-panel { position: fixed; top: 0; right: 0; height: 100dvh; width: 94vw; z-index: 80;
+  display: flex; flex-direction: column; background: var(--card);
+  border-left: 1px solid var(--line); box-shadow: -12px 0 32px rgba(0,0,0,0.18); }
+.notepad-head { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-bottom: 1px solid var(--line); }
+.notepad-head .np-name { font-weight: 700; font-size: 13px; white-space: nowrap; }
+.notepad-head .np-lesson { flex: 1; min-width: 0; font-size: 13px; color: var(--label-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.notepad-head .seg { flex: none; }
+.notepad-body { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 8px 10px; }
+.np-tab { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.np-textarea { flex: 1; min-height: 0; width: 100%; padding: 10px; font-size: 16px; line-height: 1.8;
+  color: inherit; background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius);
+  resize: none; font-family: inherit; box-sizing: border-box; }
+.np-canvas-wrap { flex: 1; min-height: 0; }
+.np-tools { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.notepad-foot { display: flex; justify-content: space-between; gap: 8px; padding: 5px 12px;
+  border-top: 1px solid var(--line); font-size: 13px; color: var(--label-2); line-height: 1.45; }
+@media (min-width: 900px) {
+  .notepad-backdrop { display: none; }
+  .lesson-cols.has-notes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0 20px; align-items: start; }
+  .lesson-cols.has-notes .notepad-panel { position: sticky; top: 12px; width: auto; z-index: auto;
+    height: calc(100dvh - 24px); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: none; }
+}
+
 /* ── 結論先行,證據收納 ─────────────────────────────────────── */
 
 /* TL;DR 摘要卡:每節第一眼見到嘅結論 */

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { GroupTabs } from "@/components/GroupTabs";
 import { STUDY_TABS } from "@/lib/navGroups";
-import { Fragment, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { ACADEMY_LESSONS, ACADEMY_QUOTE_REFS, getLesson, getTrack } from "../lessons";
 import { Quiz } from "../Quiz";
 import { PalmDiagram } from "../PalmDiagram";
@@ -13,6 +13,7 @@ import { BaxingPan } from "../BaxingPan";
 import { ShoujiBaxing } from "../ShoujiBaxing";
 import { AbcdeSteps } from "../AbcdeSteps";
 import { LessonNotepad } from "../LessonNotepad";
+import { hasNote } from "../notes";
 import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { withTermHighlights } from "@/lib/highlightTerms";
@@ -26,6 +27,13 @@ export function LessonView({ lessonId }: { lessonId: string }) {
   const loc = locale as YijingLocale;
   const lesson = getLesson(lessonId);
   const [refresh, setRefresh] = useState(0);
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [noteExists, setNoteExists] = useState(false);
+  const closeNotes = useCallback(() => setNotesOpen(false), []);
+  /* 筆記掣紅點:入頁 + 關面板嗰陣重查一次有冇筆記 */
+  useEffect(() => {
+    if (!notesOpen) setNoteExists(hasNote(lessonId));
+  }, [lessonId, notesOpen]);
 
   if (!lesson) {
     return (
@@ -63,10 +71,26 @@ export function LessonView({ lessonId }: { lessonId: string }) {
         <h1 style={{ letterSpacing: "0.2em" }}>{zT(lesson.title)}</h1>
         <div className="sub">{zT(lesson.sub)}</div>
         <div style={{ marginTop: "0.8rem" }}>
-          <LessonNotepad lessonId={lesson.id} title={zT(lesson.title)} />
+          <button type="button" className="btn ghost small" onClick={() => setNotesOpen(true)}>
+            ✎ {yjT("academy.notes", loc)}
+            {noteExists && (
+              <span
+                aria-hidden
+                style={{
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  background: "var(--cinnabar)",
+                  flex: "0 0 auto",
+                }}
+              />
+            )}
+          </button>
         </div>
       </div>
 
+      <div className={notesOpen ? "lesson-cols has-notes" : "lesson-cols"}>
+      <div className="lesson-main">
       <div className="card" key={refresh}>
         {/* widgetAfter: -1 = 圖先行,組件放在第一節之前,先看圖再讀字 */}
         {lesson.widgetAfter === -1 && <div style={{ marginBottom: "1.2rem" }}>{widgetAt(-1)}</div>}
@@ -135,6 +159,14 @@ export function LessonView({ lessonId }: { lessonId: string }) {
         <Link href="/yijing/academy" className="muted">
           {yjT("academy.back", loc)}
         </Link>
+      </div>
+      </div>
+      <LessonNotepad
+        lessonId={lesson.id}
+        title={zT(lesson.title)}
+        open={notesOpen}
+        onClose={closeNotes}
+      />
       </div>
     </>
   );
