@@ -12,6 +12,7 @@ import { JiugongMnemonic } from "../JiugongMnemonic";
 import { BaxingPan } from "../BaxingPan";
 import { ShoujiBaxing } from "../ShoujiBaxing";
 import { AbcdeSteps } from "../AbcdeSteps";
+import { LessonNotepad } from "../LessonNotepad";
 import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { withTermHighlights } from "@/lib/highlightTerms";
@@ -61,6 +62,9 @@ export function LessonView({ lessonId }: { lessonId: string }) {
         </div>
         <h1 style={{ letterSpacing: "0.2em" }}>{zT(lesson.title)}</h1>
         <div className="sub">{zT(lesson.sub)}</div>
+        <div style={{ marginTop: "0.8rem" }}>
+          <LessonNotepad lessonId={lesson.id} title={zT(lesson.title)} />
+        </div>
       </div>
 
       <div className="card" key={refresh}>

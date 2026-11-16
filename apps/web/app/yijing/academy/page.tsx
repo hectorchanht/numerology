@@ -5,6 +5,7 @@ import { GroupTabs } from "@/components/GroupTabs";
 import { STUDY_TABS } from "@/lib/navGroups";
 import { useEffect, useState } from "react";
 import { ACADEMY_LESSONS, ACADEMY_TRACKS, loadProgress, type AcademyProgress } from "./lessons";
+import { hasNote } from "./notes";
 import { useLocale, useScript } from "@/lib/i18n";
 import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 import { withTermHighlights } from "@/lib/highlightTerms";
@@ -15,12 +16,16 @@ export default function AcademyIndexPage() {
   const { zT } = useScript();
   const loc = locale as YijingLocale;
   const [progress, setProgress] = useState<AcademyProgress>({});
+  const [noteMap, setNoteMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    setProgress(loadProgress());
-    const onFocus = () => setProgress(loadProgress());
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
+    const refresh = () => {
+      setProgress(loadProgress());
+      setNoteMap(Object.fromEntries(ACADEMY_LESSONS.map((l) => [l.id, hasNote(l.id)])));
+    };
+    refresh();
+    window.addEventListener("focus", refresh);
+    return () => window.removeEventListener("focus", refresh);
   }, []);
 
   const doneCount = ACADEMY_LESSONS.filter((l) => progress[l.id]?.done).length;
@@ -173,7 +178,14 @@ export default function AcademyIndexPage() {
                       >
                         <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>{zT(l.title)}</div>
+                            <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>
+                              {zT(l.title)}
+                              {noteMap[l.id] && (
+                                <span className="badge" style={{ marginLeft: "0.5rem", verticalAlign: "middle" }}>
+                                  {yjT("academy.notesHasNote", loc)}
+                                </span>
+                              )}
+                            </div>
                             <div className="muted" style={{ marginTop: "0.25rem" }}>
                               {zT(l.sub)} · {yjT("academy.minutes", loc).replace("{n}", String(l.minutes))}
                               {p?.done &&
