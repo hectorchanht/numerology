@@ -38,4 +38,5 @@
 - Build：`npm run build` 成功（93/93 static pages）。
 - 本地 production + Playwright 三視口量度（截圖存 ~/workspace/ipad-hetu-notes/iter2/）：1194×834 課文欄 x 304–707、筆記欄 x 727–1130，各 403px，零重疊，panel position=sticky、高 810；834×1194 同 390×844 為 fixed 抽屜 94vw（預期覆蓋）。畫布於分欄模式填滿欄高（381×645 CSS px，backing store 同步）。
 - Impeccable（source mode）：新 code 3 處 off-ramp 字級（12px/11px）已改返 13px ramp；LessonNotepad.tsx + notes.ts = 0 findings，globals.css 新增區塊 = 0 findings；其餘為既有 sibling advisories，無郁。
-- Commit: this push。
+- Commit: this push（5cd27625，parent 672d9a11）。
+- VERIFY（2026-11-16，Muse 主 session 獨立核實）：live 課頁 200；live CSS 含 `lesson-cols.has-notes`；本地重跑 tests 272/272 pass；親閱 1194×834 截圖 —— 左右兩欄並排零重疊、header 單行 compact、textarea 填滿欄高，全部符合。SHIP：Iteration 2 上線。已知取捨：834px 直屏 <900 斷點，仍行抽屜；若 Hector 要直屏都分欄，將斷點降至 ~768 即可（待佢拍板）。
