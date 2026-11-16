@@ -14,7 +14,7 @@ import { yjT, type YijingLocale } from "@/lib/yijingStrings";
 
 /**
  * 單課筆記面板(受控:開關狀態由 LessonView 持有,方便同課文並排分欄)。
- * 窄屏(<900px)= 右邊抽屜 + 遮罩 + 鎖背景捲動;≥900px = 版面右欄 sticky,同課文各佔一半。
+ * 窄屏(<768px)= 右邊抽屜 + 遮罩 + 鎖背景捲動;≥768px = 版面右欄 sticky,同課文各佔一半。
  * 內容經 notes.ts 存 localStorage(只喺此裝置),寫入 debounce 400ms。
  * 手寫用 Pointer Events 食 Apple Pencil 筆壓;座標歸一化 0–1,ResizeObserver 跟實畫布尺寸重畫。
  */
@@ -51,9 +51,9 @@ export function LessonNotepad({
     setSavedAt(n.updatedAt);
   }, [lessonId]);
 
-  /* 窄屏判斷(<900px 先係抽屜模式:遮罩 + 鎖捲動) */
+  /* 窄屏判斷(<768px 先係抽屜模式:遮罩 + 鎖捲動) */
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 899.98px)");
+    const mq = window.matchMedia("(max-width: 767.98px)");
     const apply = () => setNarrow(mq.matches);
     apply();
     mq.addEventListener("change", apply);

@@ -1038,7 +1038,7 @@ h1.large + .seg { margin-bottom: 12px; }
 .np-tools { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
 .notepad-foot { display: flex; justify-content: space-between; gap: 8px; padding: 5px 12px;
   border-top: 1px solid var(--line); font-size: 13px; color: var(--label-2); line-height: 1.45; }
-@media (min-width: 900px) {
+@media (min-width: 768px) {
   .notepad-backdrop { display: none; }
   .lesson-cols.has-notes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 0 20px; align-items: start; }

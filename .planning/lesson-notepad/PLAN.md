@@ -40,3 +40,8 @@
 - Impeccable（source mode）：新 code 3 處 off-ramp 字級（12px/11px）已改返 13px ramp；LessonNotepad.tsx + notes.ts = 0 findings，globals.css 新增區塊 = 0 findings；其餘為既有 sibling advisories，無郁。
 - Commit: this push（5cd27625，parent 672d9a11）。
 - VERIFY（2026-11-16，Muse 主 session 獨立核實）：live 課頁 200；live CSS 含 `lesson-cols.has-notes`；本地重跑 tests 272/272 pass；親閱 1194×834 截圖 —— 左右兩欄並排零重疊、header 單行 compact、textarea 填滿欄高，全部符合。SHIP：Iteration 2 上線。已知取捨：834px 直屏 <900 斷點，仍行抽屜；若 Hector 要直屏都分欄，將斷點降至 ~768 即可（待佢拍板）。
+
+## Iteration 3（2026-11-16，Hector 拍板：直屏都要分欄）
+- 決定：分欄斷點由 900px 降至 768px —— iPad 直屏 834px 都行半半分屏；<768（手機）保留抽屜。
+- 改動（2 files）：globals.css 筆記分欄 media query `min-width: 900px` → `768px`；LessonNotepad.tsx 窄屏判斷 matchMedia `899.98px` → `767.98px`（含註解同步）。其餘邏輯、儲存、行為不變。
+- Commit: this push（verify 結果喺跟住嘅 docs 更新補錄）。
