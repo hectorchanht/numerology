@@ -44,4 +44,5 @@
 ## Iteration 3（2026-11-16，Hector 拍板：直屏都要分欄）
 - 決定：分欄斷點由 900px 降至 768px —— iPad 直屏 834px 都行半半分屏；<768（手機）保留抽屜。
 - 改動（2 files）：globals.css 筆記分欄 media query `min-width: 900px` → `768px`；LessonNotepad.tsx 窄屏判斷 matchMedia `899.98px` → `767.98px`（含註解同步）。其餘邏輯、儲存、行為不變。
-- Commit: this push（verify 結果喺跟住嘅 docs 更新補錄）。
+- Commit: 5f8c4f03（parent afa7a200）。
+- VERIFY + SHIP（2026-11-16，Muse 主 session 親核）：build 成功、tests 272/272；本地 production 三視口量度 —— 834 直屏：課文欄 x114–407、筆記欄 x427–720（各 293px、sticky、無遮罩、零重疊）＋親閱截圖確認；390 手機：fixed 抽屜 367px + 遮罩（不變）；1194 橫屏：分欄同 Iteration 2 一致。Pages deploy on 5f8c4f03 = completed success；live 課頁 200；live CSS 含 `@media (min-width:768px){.notepad-backdrop…` 分欄規則。直屏半半分屏正式上線。
