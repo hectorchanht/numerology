@@ -375,6 +375,15 @@ export default function Home() {
             <li>{t("creed.b4")}</li>
           </ol>
           <p className="creed-signoff">{t("creed.evidence")}</p>
+          {locale === "zhs" ? null : (
+            <p className="creed-signoff">
+              <a href="https://dawnstudio.app/#manifesto">
+                {locale === "en"
+                  ? "Dawn's apps are built by one creator, for himself first and for everyone, free — no ads, no data selling, basics free forever."
+                  : "Dawn 嘅軟件由一位 creator 為自己而起、畀全世界免費用 — 冇廣告、唔賣數據、基本功能永遠免費。代天而行，願你離苦得樂。"}
+              </a>
+            </p>
+          )}
         </div>
       </section>
 
