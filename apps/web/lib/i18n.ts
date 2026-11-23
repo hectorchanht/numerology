@@ -16,7 +16,7 @@ const LS_KEY = "numerology-locale";
  */
 const zht = {
   "app.seal": "命",
-  "app.title": "洛 書 命 理",
+  "app.title": "知 命",
   "app.subtitle": "八 字 · 紫 微 · 合 參",
   "app.disclaimer1": "本工具為傳統文化與自我反思用途,所有結論均為傾向性參考,非宿命預測,決策權始終在你自己手中。",
   "app.disclaimer2": "涉及健康請以專業醫療意見為準;涉及財務請自行評估,不構成投資建議。",
@@ -343,7 +343,7 @@ const zht = {
   "intro.f2d": "三錢起卦，得本卦、變卦、互卦與動爻爻辭；遇事未決，可占一卦。",
   "intro.f3t": "命理學院",
   "intro.f4t": "河圖洛書",
-  "intro.f4d": "兩幅天書的故事:龍馬負圖、神龜洛書,以及本站為何名為洛書命理。",
+  "intro.f4d": "兩幅天書的故事:龍馬負圖、神龜洛書——知命的根源。",
   "intro.f3d": "五課入門，由淺入深學會起卦解卦；每個關鍵詞點開都有釋義。",
   "intro.stepsTitle": "使用方法",
   "intro.s1": "輸入出生年月日時辰 — 不知時辰可以推斷。",
@@ -929,7 +929,7 @@ export type TKey = keyof typeof zht;
 /** 簡體中文:沿用原有文案。 */
 const zhs: Record<TKey, string> = {
   "app.seal": "命",
-  "app.title": "洛 书 命 理",
+  "app.title": "知 命",
   "app.subtitle": "八 字 · 紫 微 · 合 参",
   "app.disclaimer1": "本工具为传统文化与自我反思用途,所有结论均为倾向性参考,非宿命预测,决策权始终在你自己手中。",
   "app.disclaimer2": "涉及健康请以专业医疗意见为准;涉及财务请自行评估,不构成投资建议。",
@@ -1256,7 +1256,7 @@ const zhs: Record<TKey, string> = {
   "intro.f2d": "三钱起卦，得本卦、变卦、互卦与动爻爻辞；有事拿不定就占一卦。",
   "intro.f3t": "命理学院",
   "intro.f4t": "河图洛书",
-  "intro.f4d": "两幅天书的故事:龙马负图、神龟洛书,还有为什么这个 app 叫洛书命理。",
+  "intro.f4d": "两幅天书的故事:龙马负图、神龟洛书——知命的根源。",
   "intro.f3d": "五课入门，由浅入深学会起卦解卦；每个关键词点进去都有释义。",
   "intro.stepsTitle": "使用方法",
   "intro.s1": "输入出生年月日时辰 — 不知道时辰可以推断。",
@@ -1840,7 +1840,7 @@ const zhs: Record<TKey, string> = {
 /** 英文:自然英文翻譯。 */
 const en: Record<TKey, string> = {
   "app.seal": "命",
-  "app.title": "Luo Shu",
+  "app.title": "FateLearner",
   "app.subtitle": "BaZi · Zi Wei · Combined",
   "app.disclaimer1": "This tool is for traditional-culture learning and self-reflection. All readings are tendencies for reference, not fate predictions — the decisions are always yours.",
   "app.disclaimer2": "For health matters, consult professionals; for finances, assess yourself — nothing here is investment advice.",
@@ -2167,7 +2167,7 @@ const en: Record<TKey, string> = {
   "intro.f2d": "Cast with three coins: original, changing and nuclear hexagrams plus moving-line texts. Undecided? Cast a hexagram.",
   "intro.f3t": "Academy",
   "intro.f4t": "Hetu & Luoshu",
-  "intro.f4d": "The story of the two river charts — and why this app is named after the Luo River Writing.",
+  "intro.f4d": "The story of the two river charts — the roots of FateLearner.",
   "intro.f3d": "Five starter lessons that take you from zero to reading hexagrams; every key term is tap-to-define.",
   "intro.stepsTitle": "How to use",
   "intro.s1": "Enter birth year, month, day and hour — an unknown hour can be inferred.",

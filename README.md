@@ -1,8 +1,10 @@
-# 命理 · Numerology
+# 知命 FateLearner
+
+輸入生辰，即排**八字＋紫微雙命盤**，AI 合參解讀性格格局、大運流年 — 另有易經占卦、合盤、姓名學、奇門遁甲與命理學院——知命，而後改命。
 
 **[繁體中文](README.md) | [简体中文](README.zh-Hans.md) | [English](README.en.md)**
 
-> 🔗 **線上體驗（免安裝，預設免費模型）：** https://numerology-7v4.pages.dev/
+> 🔗 **線上體驗（免安裝，預設免費模型）：** https://numerology.dawnstudio.app/
 > 排盤即時出；AI 解讀預設走免費的 Cloudflare Workers AI（每月 $2 預算上限，用完即停），亦可喺「設定」入面揀其他 provider、填自己嘅 API key 換更強模型。
 
 AI 輔助的中國命理工具：**八字四柱 + 紫微斗數**。幫助人們了解自己的性格傾向與人生格局，定位為**傳統文化 + 自我反思工具**，而非宿命論預測。
@@ -43,7 +45,7 @@ AI 輔助的中國命理工具：**八字四柱 + 紫微斗數**。幫助人們�
 
 ## 線上版本
 
-- **網址**：https://numerology-7v4.pages.dev/（Cloudflare Pages，GitHub 自動部署）
+- **網址**：https://numerology.dawnstudio.app/（Cloudflare Pages，GitHub 自動部署）
 - **AI 預設**：Cloudflare Workers AI（`@cf/mistralai/mistral-small-3.1-24b-instruct`），免 key
 - **預算上限**：每月 $2 硬上限（KV 計量，超額回 429），$0 成本營運
 - **無付費牆**：全部功能免費

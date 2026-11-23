@@ -1,4 +1,4 @@
-// 洛書命理 service worker — 導航 network-first、靜態資產 stale-while-revalidate。
+// 知命 FateLearner service worker — 導航 network-first、靜態資產 stale-while-revalidate。
 // /api/ 永不經 SW（AI 串流/即時數據唔可以 cache）。
 const CACHE = "numerology-v1";
 self.addEventListener("install", () => self.skipWaiting());

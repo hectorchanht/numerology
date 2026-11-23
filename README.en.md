@@ -1,8 +1,10 @@
-# Numerology · 命理
+# FateLearner · 知命
+
+Enter a birth date, time and place — get **BaZi + Zi Wei Dou Shu dual charts** instantly, with AI interpretation of personality patterns, life cycles and annual fortunes, plus Yijing divination, compatibility charts, name analysis and a metaphysics academy. Know your fate — then reshape it.
 
 **[繁體中文](README.md) | [简体中文](README.zh-Hans.md) | [English](README.en.md)**
 
-> 🔗 **Live demo (no install, free model by default):** https://numerology-7v4.pages.dev/
+> 🔗 **Live demo (no install, free model by default):** https://numerology.dawnstudio.app/
 > Charts cast instantly; AI interpretation defaults to free Cloudflare Workers AI (hard $2/month budget cap — it stops when the budget is spent). You can also pick another provider in Settings and paste your own API key for a stronger model.
 
 An AI-assisted Chinese metaphysics tool combining **BaZi (Four Pillars of Destiny)** and **Zi Wei Dou Shu (Purple Star Astrology)**. It helps people understand their personality tendencies and life patterns — positioned as a **cultural & self-reflection tool, not fortune-telling determinism**.
@@ -43,7 +45,7 @@ People drawn to the I Ching and Chinese metaphysics usually lack knowledge and j
 
 ## Live Version
 
-- **URL**: https://numerology-7v4.pages.dev/ (Cloudflare Pages, auto-deploys from GitHub)
+- **URL**: https://numerology.dawnstudio.app/ (Cloudflare Pages, auto-deploys from GitHub)
 - **Default AI**: Cloudflare Workers AI (`@cf/mistralai/mistral-small-3.1-24b-instruct`), no key needed
 - **Budget cap**: hard $2/month limit (metered via KV, returns 429 when exceeded) — $0 operating cost
 - **No paywall**: everything is free
