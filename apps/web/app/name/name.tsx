@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useScript } from "@/lib/i18n";
+import { Icon } from "@/components/Icon";
 import { lockScript, warmScriptFor } from "@/lib/script";
 import { analyzeName, type WugeResult, type WugeGe, type WugeLuck } from "@numerology/engine";
 import { renderShareCardPng, savePosterPng } from "@/lib/posterExport";
@@ -225,12 +226,12 @@ export default function NameTool() {
           <p className="muted" style={{ margin: "14px 2px" }}>{t("name.disclaimer")}</p>
 
           <div className="btn-row" style={{ marginBottom: 24 }}>
-            <button type="button" className="btn" disabled={busy} onClick={onDownload}>
-              {busy ? t("name.downloading") : t("name.download")}
-            </button>
-            <button type="button" className="btn secondary" onClick={onCopyLink}>
-              {copied ? t("name.copied") : t("name.copyLink")}
-            </button>
+            <button type="button" className="btn" disabled={busy} onClick={onDownload} aria-label={busy ? t("name.downloading") : t("name.download")} title={busy ? t("name.downloading") : t("name.download")} aria-busy={busy}>
+          <Icon name="download" />
+        </button>
+            <button type="button" className="btn secondary" onClick={onCopyLink} aria-label={copied ? t("name.copied") : t("name.copyLink")} title={copied ? t("name.copied") : t("name.copyLink")}>
+          <Icon name={copied ? "check" : "link"} />
+        </button>
           </div>
           <span className="sr-only" role="status" aria-live="polite">{copied ? t("name.copied") : ""}</span>
         </div>

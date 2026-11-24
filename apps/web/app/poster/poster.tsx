@@ -292,9 +292,16 @@ export default function ChartPoster() {
               </div>
 
               <div className="poster-actions">
-                <button type="button" className="btn block" onClick={onDownload} disabled={busy} aria-busy={busy}>
+                <button
+                  type="button"
+                  className="btn block"
+                  onClick={onDownload}
+                  disabled={busy}
+                  aria-busy={busy}
+                  aria-label={busy ? yjT("poster.exporting", loc) : yjT("poster.download", loc)}
+                  title={busy ? yjT("poster.exporting", loc) : yjT("poster.download", loc)}
+                >
                   <Icon name="download" />
-                  {busy ? yjT("poster.exporting", loc) : yjT("poster.download", loc)}
                 </button>
                 <p className="muted" role={failed ? "alert" : undefined}>
                   {failed ? yjT("poster.exportFail", loc) : yjT("poster.exportNote", loc)}

@@ -98,9 +98,10 @@ export function SideNav() {
                 href={it.href}
                 className={`side-item${on ? " on" : ""}`}
                 aria-current={on ? "page" : undefined}
+                aria-label={t(it.labelKey)}
+                title={t(it.labelKey)}
               >
                 <Icon name={it.icon} />
-                {t(it.labelKey)}
               </Link>
             );
           }
@@ -111,10 +112,11 @@ export function SideNav() {
               type="button"
               className={`side-item${on ? " on" : ""}`}
               aria-current={on ? "page" : undefined}
+              aria-label={t(it.labelKey)}
+              title={t(it.labelKey)}
               onClick={() => open(it.tab)}
             >
               <Icon name={it.icon} />
-              {t(it.labelKey)}
             </button>
           );
         })}
@@ -132,9 +134,10 @@ export function SideNav() {
                   href={l.href}
                   className={`side-item${on ? " on" : ""}`}
                   aria-current={on ? "page" : undefined}
+                  aria-label={yjT(l.id, locale)}
+                  title={yjT(l.id, locale)}
                 >
                   <Icon name={l.icon} />
-                  {yjT(l.id, locale)}
                 </Link>
               );
             })}

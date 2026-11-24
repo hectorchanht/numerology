@@ -283,19 +283,23 @@ export function LessonNotepad({
               type="button"
               role="tab"
               aria-selected={tab === "text"}
+              aria-label={yjT("academy.notesText", loc)}
+              title={yjT("academy.notesText", loc)}
               className={tab === "text" ? "on" : ""}
               onClick={() => setTab("text")}
             >
-              <Icon name="file" small /> {yjT("academy.notesText", loc)}
+              <Icon name="file" small />
             </button>
             <button
               type="button"
               role="tab"
               aria-selected={tab === "draw"}
+              aria-label={yjT("academy.notesDraw", loc)}
+              title={yjT("academy.notesDraw", loc)}
               className={tab === "draw" ? "on" : ""}
               onClick={() => setTab("draw")}
             >
-              <Icon name="edit" small /> {yjT("academy.notesDraw", loc)}
+              <Icon name="edit" small />
             </button>
           </div>
           <button
@@ -303,9 +307,10 @@ export function LessonNotepad({
             className="btn ghost small"
             style={{ padding: "0 10px" }}
             aria-label={yjT("academy.notesClose", loc)}
+            title={yjT("academy.notesClose", loc)}
             onClick={onClose}
           >
-            ✕
+            <Icon name="close" small />
           </button>
         </div>
 
@@ -324,16 +329,24 @@ export function LessonNotepad({
                   {yjT("academy.notesChars", loc).replace("{n}", String(note.text.length))}
                 </span>
                 <span style={{ display: "flex", gap: "6px" }}>
-                  <button type="button" className="btn ghost small" onClick={applyTemplate}>
-                    <Icon name="plus" small /> {yjT("academy.notesTemplate", loc)}
+                  <button
+                    type="button"
+                    className="btn ghost small"
+                    onClick={applyTemplate}
+                    aria-label={yjT("academy.notesTemplate", loc)}
+                    title={yjT("academy.notesTemplate", loc)}
+                  >
+                    <Icon name="plus" small />
                   </button>
                   <button
                     type="button"
                     className="btn ghost small"
                     onClick={clearText}
                     disabled={note.text === ""}
+                    aria-label={yjT("academy.notesClear", loc)}
+                    title={yjT("academy.notesClear", loc)}
                   >
-                    <Icon name="trash" small /> {yjT("academy.notesClear", loc)}
+                    <Icon name="trash" small />
                   </button>
                 </span>
               </div>
@@ -372,24 +385,30 @@ export function LessonNotepad({
                   className="btn ghost small"
                   onClick={undoStroke}
                   disabled={note.strokes.length === 0}
+                  aria-label={yjT("academy.notesUndo", loc)}
+                  title={yjT("academy.notesUndo", loc)}
                 >
-                  <Icon name="rewind" small /> {yjT("academy.notesUndo", loc)}
+                  <Icon name="rewind" small />
                 </button>
                 <button
                   type="button"
                   className={grid ? "btn small" : "btn ghost small"}
                   aria-pressed={grid}
+                  aria-label={yjT("academy.notesGrid", loc)}
+                  title={yjT("academy.notesGrid", loc)}
                   onClick={() => setGrid((g) => !g)}
                 >
-                  <Icon name="grid" small /> {yjT("academy.notesGrid", loc)}
+                  <Icon name="grid" small />
                 </button>
                 <button
                   type="button"
                   className="btn ghost small"
                   onClick={clearDraw}
                   disabled={note.strokes.length === 0}
+                  aria-label={yjT("academy.notesClearDraw", loc)}
+                  title={yjT("academy.notesClearDraw", loc)}
                 >
-                  <Icon name="trash" small /> {yjT("academy.notesClearDraw", loc)}
+                  <Icon name="trash" small />
                 </button>
               </div>
             </div>

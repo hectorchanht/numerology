@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Solar } from "lunar-javascript";
 import { useLocale, useScript } from "@/lib/i18n";
+import { Icon } from "@/components/Icon";
 import { renderShareCardPng, savePosterPng } from "@/lib/posterExport";
 import { type ShareCardModel } from "@/lib/shareCard";
 import { SITE_BASE } from "@/lib/yijingSite";
@@ -170,11 +171,11 @@ export default function DailyTool() {
       <p className="muted" style={{ margin: "4px 2px 14px" }}>{t("daily.disclaimer")}</p>
 
       <div className="btn-row" style={{ marginBottom: 24 }}>
-        <button type="button" className="btn" disabled={busy} onClick={onDownload}>
-          {busy ? t("name.downloading") : t("daily.download")}
+        <button type="button" className="btn" disabled={busy} onClick={onDownload} aria-label={busy ? t("name.downloading") : t("daily.download")} title={busy ? t("name.downloading") : t("daily.download")} aria-busy={busy}>
+          <Icon name="download" />
         </button>
-        <button type="button" className="btn secondary" onClick={onCopyLink}>
-          {copied ? t("daily.copied") : t("daily.copyLink")}
+        <button type="button" className="btn secondary" onClick={onCopyLink} aria-label={copied ? t("daily.copied") : t("daily.copyLink")} title={copied ? t("daily.copied") : t("daily.copyLink")}>
+          <Icon name={copied ? "check" : "link"} />
         </button>
       </div>
       <span className="sr-only" role="status" aria-live="polite">{copied ? t("daily.copied") : ""}</span>

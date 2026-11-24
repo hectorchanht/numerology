@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useLocale, useScript } from "@/lib/i18n";
+import { Icon } from "@/components/Icon";
 import { castFeixing, type FeixingGua, type FeixingResult, type StarState } from "@numerology/engine";
 import { renderShareCardPng, savePosterPng } from "@/lib/posterExport";
 import { type ShareCardModel } from "@/lib/shareCard";
@@ -163,12 +164,12 @@ export default function FengshuiTool() {
           <p className="muted" style={{ margin: "4px 2px 14px" }}>{t("fengshui.disclaimer")}</p>
 
           <div className="btn-row" style={{ marginBottom: 24 }}>
-            <button type="button" className="btn" disabled={busy} onClick={onDownload}>
-              {busy ? t("name.downloading") : t("name.download")}
-            </button>
-            <button type="button" className="btn secondary" onClick={onCopyLink}>
-              {copied ? t("name.copied") : t("name.copyLink")}
-            </button>
+            <button type="button" className="btn" disabled={busy} onClick={onDownload} aria-label={busy ? t("name.downloading") : t("name.download")} title={busy ? t("name.downloading") : t("name.download")} aria-busy={busy}>
+          <Icon name="download" />
+        </button>
+            <button type="button" className="btn secondary" onClick={onCopyLink} aria-label={copied ? t("name.copied") : t("name.copyLink")} title={copied ? t("name.copied") : t("name.copyLink")}>
+          <Icon name={copied ? "check" : "link"} />
+        </button>
           </div>
           <span className="sr-only" role="status" aria-live="polite">{copied ? t("name.copied") : ""}</span>
         </div>

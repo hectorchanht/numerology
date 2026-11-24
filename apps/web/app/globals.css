@@ -879,7 +879,7 @@ h1.large + .seg { margin-bottom: 12px; }
 .more-head { display: flex; align-items: center; justify-content: space-between;
   font-weight: 800; font-size: 1.02rem; padding: 0.5rem 0 0.3rem; }
 .more-rows { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0.4rem 0 0.2rem; }
-.more-row { display: flex; align-items: center; gap: 8px; padding: 0.65rem 0.7rem; border-radius: 12px;
+.more-row { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0.65rem 0.7rem; border-radius: 12px;
   border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 0.94rem; font-weight: 600; cursor: pointer; }
 .more-row.on { color: var(--accent-text); border-color: var(--accent); }
 .more-group { margin-top: 0.7rem; }

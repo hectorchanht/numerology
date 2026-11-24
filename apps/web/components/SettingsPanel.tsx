@@ -282,8 +282,14 @@ export function SettingsPanel() {
       {/* 自定義 AI 人設 / 系統提示:空 = 用默認;非空則追加為 system 末塊,優先級最高 */}
       <div className="group-head">
         <h2 className="group-title"><label htmlFor="persona">{t("settings.personaLabel")}</label></h2>
-        <button type="button" className="text-btn" onClick={() => set({ systemPrompt: "" })}>
-          {t("settings.personaReset")}
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={() => set({ systemPrompt: "" })}
+          aria-label={t("settings.personaReset")}
+          title={t("settings.personaReset")}
+        >
+          <Icon name="refresh" small />
         </button>
       </div>
       <textarea

@@ -186,11 +186,23 @@ export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void })
                         autoFocus
                         style={{ flex: 1, minWidth: 0 }}
                       />
-                      <button type="button" className="btn" onClick={() => void saveRename(r.id)}>
-                        {t("history.save")}
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={() => void saveRename(r.id)}
+                        aria-label={t("history.save")}
+                        title={t("history.save")}
+                      >
+                        <Icon name="check" small />
                       </button>
-                      <button type="button" className="btn secondary" onClick={() => setEditingId(null)}>
-                        {t("history.cancel")}
+                      <button
+                        type="button"
+                        className="btn secondary"
+                        onClick={() => setEditingId(null)}
+                        aria-label={t("history.cancel")}
+                        title={t("history.cancel")}
+                      >
+                        <Icon name="close" small />
                       </button>
                     </>
                   ) : (
@@ -266,16 +278,20 @@ export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void })
                                           type="button"
                                           className="hist-ver-btn"
                                           aria-expanded={viewing}
+                                          aria-label={viewing ? t("history.hideVersion") : t("history.viewVersion")}
+                                          title={viewing ? t("history.hideVersion") : t("history.viewVersion")}
                                           onClick={() => setViewId(viewing ? null : vid)}
                                         >
-                                          {viewing ? t("history.hideVersion") : t("history.viewVersion")}
+                                          <Icon name="eye" small />
                                         </button>
                                         <button
                                           type="button"
                                           className="hist-ver-btn danger"
+                                          aria-label={t("history.deleteVersion")}
+                                          title={t("history.deleteVersion")}
                                           onClick={() => void handleDeleteVersion(r, g.key, v.at)}
                                         >
-                                          {t("history.deleteVersion")}
+                                          <Icon name="trash" small />
                                         </button>
                                       </span>
                                     </div>
@@ -306,9 +322,14 @@ export function HistoryPanel({ onRestore }: { onRestore: (r: Reading) => void })
         <p className="note">{t("history.restoreNote")}</p>
 
         {items.length > 0 ? (
-          <button type="button" className="btn secondary block danger-text" onClick={handleClear}>
+          <button
+            type="button"
+            className="btn secondary block danger-text"
+            onClick={handleClear}
+            aria-label={t("history.clear")}
+            title={t("history.clear")}
+          >
             <Icon name="trash" />
-            {t("history.clear")}
           </button>
         ) : null}
       </div>

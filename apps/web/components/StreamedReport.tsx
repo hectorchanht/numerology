@@ -347,9 +347,15 @@ export function StreamedReport({
         />
       </div>
       {slots ? (
-        <button type="button" className="btn secondary small" onClick={() => generate(lens, true)} disabled={running}>
+        <button
+          type="button"
+          className="btn secondary small"
+          onClick={() => generate(lens, true)}
+          disabled={running}
+          aria-label={t("report.regenThis")}
+          title={t("report.regenThis")}
+        >
           <Icon name="refresh" />
-          {t("report.regenThis")}
         </button>
       ) : null}
     </div>
@@ -414,14 +420,24 @@ export function StreamedReport({
               <div className="empty-t">{t("report.budgetTitle")}</div>
               <p className="note">{t("report.budgetBody")}</p>
               {onShowChart ? (
-                <button type="button" className="btn block" onClick={onShowChart}>
+                <button
+                  type="button"
+                  className="btn block"
+                  onClick={onShowChart}
+                  aria-label={t("report.budgetBack")}
+                  title={t("report.budgetBack")}
+                >
                   <Icon name="grid" />
-                  {t("report.budgetBack")}
                 </button>
               ) : null}
-              <button type="button" className="btn secondary block" onClick={() => go("settings")}>
+              <button
+                type="button"
+                className="btn secondary block"
+                onClick={() => go("settings")}
+                aria-label={t("report.budgetSettings")}
+                title={t("report.budgetSettings")}
+              >
                 <Icon name="gear" />
-                {t("report.budgetSettings")}
               </button>
               {/* REAL-ERROR RULE:服務端原文照樣顯示(標明係技術細節) */}
               <p className="note budget-tech">{t("report.budgetTech")}{budget.err}</p>
@@ -521,18 +537,28 @@ export function StreamedReport({
                       ) : s.status === "error" ? (
                         <div className="sec-error">
                           <p className="notice" role="alert">{t("report.segFail", { err: s.err })}</p>
-                          <button type="button" className="btn secondary small" onClick={() => retrySection(i)}>
+                          <button
+                            type="button"
+                            className="btn secondary small"
+                            onClick={() => retrySection(i)}
+                            aria-label={t("report.retrySection")}
+                            title={t("report.retrySection")}
+                          >
                             <Icon name="refresh" />
-                            {t("report.retrySection")}
                           </button>
                         </div>
                       ) : (
                         // 空節(含舊紀錄新增的章節)亦可單節生成。
                         <div className="sec-error">
                           <p className="note">{t("report.segEmpty")}</p>
-                          <button type="button" className="btn secondary small" onClick={() => retrySection(i)}>
+                          <button
+                            type="button"
+                            className="btn secondary small"
+                            onClick={() => retrySection(i)}
+                            aria-label={t("report.retrySection")}
+                            title={t("report.retrySection")}
+                          >
                             <Icon name="refresh" />
-                            {t("report.retrySection")}
                           </button>
                         </div>
                       )}
@@ -557,14 +583,25 @@ export function StreamedReport({
 
           <div className="btn-row" hidden={!!budget}>
             {onAsk ? (
-              <button type="button" className="btn secondary" onClick={onAsk}>
+              <button
+                type="button"
+                className="btn secondary"
+                onClick={onAsk}
+                aria-label={t("report.ask")}
+                title={t("report.ask")}
+              >
                 <Icon name="msg" />
-                {t("report.ask")}
               </button>
             ) : null}
-            <button type="button" className="btn secondary" onClick={exportPdf} disabled={running}>
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={exportPdf}
+              disabled={running}
+              aria-label={t("report.exportPdf")}
+              title={t("report.exportPdf")}
+            >
               <Icon name="download" />
-              {t("report.exportPdf")}
             </button>
           </div>
 

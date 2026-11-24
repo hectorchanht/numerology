@@ -135,14 +135,20 @@ function NavSheet({ kind, onClose }: { kind: SheetKind; onClose: () => void }) {
               <button
                 type="button"
                 className={`more-row${onHome && tab === "history" ? " on" : ""}`}
+                aria-label={t("tab.history")}
+                title={t("tab.history")}
                 onClick={() => goTab("history")}
               >
                 <Icon name="history" />
-                {t("tab.history")}
               </button>
-              <button type="button" className="more-row" onClick={() => goTab("settings")}>
+              <button
+                type="button"
+                className="more-row"
+                aria-label={t("nav.settings")}
+                title={t("nav.settings")}
+                onClick={() => goTab("settings")}
+              >
                 <Icon name="gear" />
-                {t("nav.settings")}
               </button>
             </div>
 
@@ -209,13 +215,14 @@ export function TabBar() {
                   type="button"
                   className={on ? "on" : ""}
                   aria-current={on ? "page" : undefined}
+                  aria-label={t(it.labelKey)}
+                  title={t(it.labelKey)}
                   onClick={() => {
                     go(it.tab);
                     if (!onHome) router.push("/");
                   }}
                 >
                   <Icon name={it.icon} />
-                  {t(it.labelKey)}
                 </button>
               );
             }
@@ -226,10 +233,11 @@ export function TabBar() {
                 type="button"
                 className={on ? "on" : ""}
                 aria-expanded={sheet === it.sheet}
+                aria-label={t(it.labelKey)}
+                title={t(it.labelKey)}
                 onClick={() => setSheet((v) => (v === it.sheet ? null : it.sheet))}
               >
                 <Icon name={it.icon} />
-                {t(it.labelKey)}
               </button>
             );
           })}

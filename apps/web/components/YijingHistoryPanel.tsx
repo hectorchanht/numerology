@@ -41,6 +41,7 @@ function fmtDate(at: number): string {
 }
 
 function CastRow({ rec, loc, zT }: { rec: YijingCast; loc: YijingLocale; zT: (s: string) => string }) {
+  const { t } = useLocale();
   const sum = useMemo(() => summarizeYijingCast(rec), [rec]);
   const ben = sum ? getHexagram(sum.hexagram) : undefined;
   const bian = sum?.changed ? getHexagram(sum.changed) : undefined;
@@ -77,9 +78,11 @@ function CastRow({ rec, loc, zT }: { rec: YijingCast; loc: YijingLocale; zT: (s:
               type="button"
               className="btn ghost"
               onClick={() => setConfirming(false)}
+              aria-label={t("history.cancel")}
+              title={t("history.cancel")}
               style={{ padding: "0.3rem 0.7rem", fontSize: "0.85rem" }}
             >
-              ✕
+              <Icon name="close" small />
             </button>
           </>
         ) : (

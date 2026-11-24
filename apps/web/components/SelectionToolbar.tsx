@@ -18,6 +18,7 @@ import {
   useFloating,
 } from "@floating-ui/react";
 import { useSpeech, type SpeechLang } from "@dawn-studio/pronounce";
+import { Icon } from "@/components/Icon";
 import { useLocale } from "@/lib/i18n";
 import { lookupTerm, markdownTermComponents } from "@/lib/highlightTerms";
 import { requestChatAsk, isChatAvailable } from "@/lib/chatJump";
@@ -25,7 +26,7 @@ import { go } from "@/lib/nav";
 
 /* ── 選詞浮動工具列 ─────────────────────────────────────────────
  * 全域監聽文字選取(≥2 字):在選區上方彈出工具列 —
- * [🔊 廣東話] [🔊 普通話] [💬 AI 解釋] [📖 釋義(術語才有)]。
+ * [朗讀 廣東話] [朗讀 普通話] [AI 解釋 icon] [釋義 icon(術語才有)]。
  * - 朗讀:零成本裝置端 TTS(@dawn-studio/pronounce)。
  * - AI 解釋:POST /api/explain(走 $2 預算守衛 + KV 緩存),原地 popover 顯示答案,
  *   可一鍵跳去 AI Chat 深入問(主 app 有命盤時才顯示)。
@@ -298,7 +299,7 @@ export function SelectionToolbar() {
           fontWeight: active ? 600 : 400,
         }}
       >
-        <span aria-hidden="true">{active ? "⏹" : "🔊"}</span>
+        <Icon name={active ? "stop" : "volume"} small />
         {label}
       </button>
     );
@@ -318,14 +319,12 @@ export function SelectionToolbar() {
       >
         {speakBtn("zh-HK", t("select.speakCanto"))}
         {speakBtn("zh-CN", t("select.speakMando"))}
-        <button type="button" onClick={openExplain} style={BTN_STYLE}>
-          <span aria-hidden="true">💬</span>
-          {t("select.explain")}
+        <button type="button" onClick={openExplain} style={BTN_STYLE} aria-label={t("select.explain")} title={t("select.explain")}>
+          <Icon name="msg" small />
         </button>
         {termHit ? (
-          <button type="button" onClick={openGlossary} style={BTN_STYLE}>
-            <span aria-hidden="true">📖</span>
-            {t("select.glossary")}
+          <button type="button" onClick={openGlossary} style={BTN_STYLE} aria-label={t("select.glossary")} title={t("select.glossary")}>
+            <Icon name="book" small />
           </button>
         ) : null}
       </div>
@@ -356,8 +355,9 @@ export function SelectionToolbar() {
           borderBottom: "1px solid var(--sep)",
         }}
       >
-        <strong style={{ fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {isExplain ? `💬 ${title}` : `📖 ${title}`}
+        <strong style={{ fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 6 }}>
+          <Icon name={isExplain ? "msg" : "book"} small />
+          {title}
         </strong>
         <button
           type="button"
@@ -369,7 +369,7 @@ export function SelectionToolbar() {
             color: "var(--label-2)",
           }}
         >
-          ✕
+          <Icon name="close" small />
         </button>
       </div>
       <div style={{ padding: "10px 12px", maxHeight: 260, overflowY: "auto" }}>
@@ -415,17 +415,20 @@ export function SelectionToolbar() {
           <button
             type="button"
             onClick={copyAnswer}
+            aria-label={copied ? t("select.copied") : t("select.copy")}
+            title={copied ? t("select.copied") : t("select.copy")}
             style={{ ...BTN_STYLE, color: "var(--label-2)" }}
           >
-            {copied ? `✓ ${t("select.copied")}` : t("select.copy")}
+            <Icon name={copied ? "check" : "copy"} small />
           </button>
           <button
             type="button"
             onClick={() => setRegen((n) => n + 1)}
+            aria-label={t("report.regenShort")}
             title={t("report.regenModel")}
             style={{ ...BTN_STYLE, color: "var(--label-2)" }}
           >
-            {t("report.regenShort")}
+            <Icon name="refresh" small />
           </button>
         </div>
       ) : null}
